@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Let">
+  <title>Quadratic-reciprocity barrier for character-to-companion routing — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/character-routing-reciprocity-barrier.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/character-routing-reciprocity-barrier.html">
+  <meta property="og:title" content="Quadratic-reciprocity barrier for character-to-companion routing — Free Computation Foundation">
+  <meta property="og:description" content="Let">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Quadratic-reciprocity barrier for character-to-companion routing</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">Let</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CHARACTER-ROUTING-RECIPROCITY-BARRIER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved arithmetic theorem</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>K11-CHARACTER-COMPANION-ROUTING.md</code>, fixed-shift companion identity <code>C_k=(p+k)/4</code></p>
+<p><strong>Verifier:</strong> <code>verify_character_routing_reciprocity_barrier.py</code></p>
+<p><strong>Claim boundary:</strong> this theorem explains a limitation of quadratic/Jacobi character routing. It is not a coverage theorem and does not prove Erdős-Straus.</p>
+<h2>1. Setup</h2>
+<p>Let</p>
+<ul><li>p and q be distinct odd primes;</li><li>p be congruent to 1 modulo 4;</li><li>k be a positive odd integer congruent to 3 modulo 4;</li><li>q divide the companion <code>C_k=(p+k)/4</code>;</li><li><code>(q/p)=+1</code>.</li></ul>
+<p>Because q divides C_k,</p>
+<p><code>p = -k mod q</code>.</p>
+<p>Because p is 1 modulo 4, quadratic reciprocity gives</p>
+<p><code>(q/p) = (p/q)</code>.</p>
+<p>Hence</p>
+<p><code>+1 = (p/q) = (-k/q)</code>.</p>
+<p>Now apply Jacobi reciprocity to k and q. Since k is 3 modulo 4,</p>
+<p><code>(k/q) = (q/k) * (-1)^((q-1)/2)</code>.</p>
+<p>Also</p>
+<p><code>(-1/q) = (-1)^((q-1)/2)</code>.</p>
+<p>Therefore</p>
+<p><code>(-k/q) = (-1/q)(k/q) = (q/k)</code>.</p>
+<p>Combining the identities yields the central result.</p>
+<h2>2. Reciprocity-protected routing theorem</h2>
+<blockquote><p>If a positive quadratic character <code>(q/p)=+1</code> routes the prime q into an admissible companion <code>C_k</code> with k congruent to 3 modulo 4, then <code>(q/k)=+1</code>.</p></blockquote>
+<p>Here <code>(q/k)</code> is the Jacobi symbol when k is composite and the Legendre symbol when k is prime.</p>
+<p>The result is range-free and elementary.</p>
+<h2>3. Why this matters for the current support theorems</h2>
+<p>Several exact fixed-shift miss theorems in CBX have the form</p>
+<blockquote><p>fixed k misses if and only if every prime factor of C_k lies in the positive quadratic or Jacobi character subgroup modulo k.</p></blockquote>
+<p>Examples now include:</p>
+<ul><li>k=7 - quadratic-residue support modulo 7;</li><li>k=11 on the rigid hard classes - quadratic-residue support modulo 11;</li><li>k=15 on routed branches - Jacobi-plus support modulo 15;</li><li>k=19 on the rigid h=121 branch and strengthened routed branches - quadratic-residue support modulo 19;</li><li>k=23 on ten rigid residue branches - quadratic-residue support modulo 23;</li><li>k=35 on the routed p mod11=9 branch - Jacobi-plus support modulo 35;</li><li>k=31 and k=47 on their rigid class-conditioned branches - quadratic-residue support modulo the prime shift.</li></ul>
+<p>Suppose a positive-character source at q routes q into one of these receiving companions. The theorem says the routed factor q automatically has positive Jacobi character modulo the receiving k.</p>
+<p>Therefore the newly routed factor cannot, by itself, violate a receiving miss condition whose only requirement is positive quadratic/Jacobi support.</p>
+<p>This explains several previously observed compatible routes:</p>
+<ul><li>q=19 routed into k=15 gives 19 mod15=4, in the Jacobi-plus subgroup modulo15;</li><li>q=23 routed into k=15 gives 23 mod15=8, Jacobi-plus modulo15;</li><li>q=31 routed into k=15 gives 31 mod15=1, Jacobi-plus modulo15;</li><li>q=47 routed into k=15 gives 47 mod15=2, Jacobi-plus modulo15;</li><li>q=11 routed into k=35 gives 11 a positive Jacobi character modulo35;</li><li>q=47 routed into k=35 gives 47 mod35=12, again positive Jacobi character modulo35;</li><li>q=23 routed into prime k=19 is automatically a quadratic residue modulo19 on the compatible route;</li><li>q=23 routed into prime k=7 is automatically a quadratic residue modulo7 on the compatible route.</li></ul>
+<p>These are not accidental finite coincidences. They are forced by reciprocity.</p>
+<h2>4. Method-boundary corollary</h2>
+<p>Consider a route graph whose nodes are exact fixed-shift miss conditions of the form</p>
+<p><code>every prime factor of C_k has positive Jacobi character modulo k</code>,</p>
+<p>and whose directed edges are generated only by</p>
+<p><code>(q/p)=+1 -&gt; q divides C_k</code>.</p>
+<p>Then every routed source factor q is automatically admitted by the quadratic/Jacobi support condition at the destination.</p>
+<p>Consequently:</p>
+<blockquote><p>A contradiction cannot be obtained merely by arguing that a positive-character routed factor lands outside the destination&#x27;s positive quadratic/Jacobi support subgroup.</p></blockquote>
+<p>Any successful cross-shift contradiction must use information not erased by this reciprocity compatibility. Candidate sources include:</p>
+<ul><li>an exact miss mask strictly smaller than the full positive-character subgroup;</li><li>a higher-order multiplicative character rather than a quadratic/Jacobi sign;</li><li>simultaneous routing of multiple factors into companions whose residual supports are pairwise coprime or nearly coprime;</li><li>valuation constraints, not merely support signs;</li><li>exact center restrictions coupled across shifts;</li><li>non-character divisor geometry from the complete square-divisor state.</li></ul>
+<h2>5. Relation to the current route graph</h2>
+<p>The theorem changes how the route graph should be mined.</p>
+<p>A route into a quadratic-support node is not useful merely because it forces an additional prime factor. If that factor was produced from a positive quadratic character, reciprocity has already certified that the factor belongs to the destination&#x27;s allowed character kernel.</p>
+<p>The useful edges are instead those where routing does at least one of the following:</p>
+<ul><li>shrinks the destination to a unique exact miss state;</li><li>forces an additional center residue;</li><li>creates an exact affine relation between seed-stripped residuals;</li><li>places two or more routed primes in distinct residuals of the six-companion wheel;</li><li>enters a destination whose exact miss mask is a proper subset of the positive-character subgroup.</li></ul>
+<p>This prunes a large family of seductive but structurally incapable proof attempts.</p>
+<h2>6. Strategic consequence</h2>
+<p>The repeated survival of quadratic character routes is now explained by theorem rather than by census.</p>
+<p>The next theorem search should therefore move one level above Legendre/Jacobi signs. In particular, the highest-value objects are the exceptional exact miss masks already visible at k=23 residues 1,5,14 and the non-character masks at composite shifts, together with multi-route support allocation across coprime residual companions.</p>
+<p>Erdős-Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

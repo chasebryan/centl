@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="For an admissible odd shift k, write">
+  <title>Universal signed-box trivial-divisor selectors — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/signed-box-trivial-divisor-selectors.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/signed-box-trivial-divisor-selectors.html">
+  <meta property="og:title" content="Universal signed-box trivial-divisor selectors — Free Computation Foundation">
+  <meta property="og:description" content="For an admissible odd shift k, write">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Universal signed-box trivial-divisor selectors</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">For an admissible odd shift k, write</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SIGNED-BOX-TRIVIAL-DIVISOR-SELECTORS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact algebraic module inside the candidate decomposition framework</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Verifier:</strong> <code>verify_signed_box_trivial_divisor_selectors.py</code></p>
+<p><strong>Claim boundary:</strong> universal selector identities inside the exact signed box. This is not a complete signed-box criterion and not an Erdős–Straus proof.</p>
+<h2>1. Setup</h2>
+<p>For an admissible odd shift k, write</p>
+<p><code>C=(p+k)/4</code>.</p>
+<p>The exact signed-box targets are:</p>
+<pre><code class="language-text">Type I : d | C^2 and 4d = -1 mod k
+Type II: d | C^2 and d  = -C mod k.</code></pre>
+<p>Three divisors require no factorization at all:</p>
+<p><code>1</code>, <code>C</code>, and <code>C^2</code>.</p>
+<p>They form a universal selector shell.</p>
+<h2>2. Type-II selectors</h2>
+<h3>d=1</h3>
+<p>The condition is</p>
+<p><code>1 = -C mod k</code>,</p>
+<p>so</p>
+<p><code>C = -1 mod k</code>.</p>
+<h3>d=C</h3>
+<p>The condition is</p>
+<p><code>C = -C mod k</code>,</p>
+<p>or</p>
+<p><code>2C = 0 mod k</code>.</p>
+<p>Since k is odd, 2 is invertible, hence</p>
+<p><code>C = 0 mod k</code>.</p>
+<h3>d=C^2</h3>
+<p>The condition is</p>
+<p><code>C^2 = -C mod k</code>,</p>
+<p>or</p>
+<p><code>C(C+1) = 0 mod k</code>.</p>
+<p>For prime k this adds nothing beyond <code>C=0</code> and <code>C=-1</code>, but for composite k it can create additional CRT-root phases.</p>
+<h2>3. Type-I selectors</h2>
+<h3>d=1</h3>
+<p>The condition is</p>
+<p><code>4 = -1 mod k</code>,</p>
+<p>so k divides5. This is irrelevant to the post-k23 ladder but belongs to the exact shell.</p>
+<h3>d=C</h3>
+<p>The condition is</p>
+<p><code>4C = -1 mod k</code>,</p>
+<p>so</p>
+<p><code>C = -4^{-1} mod k</code>.</p>
+<h3>d=C^2</h3>
+<p>The condition is</p>
+<p><code>4C^2 = -1 mod k</code>.</p>
+<p>Equivalently</p>
+<p><code>(2C)^2 = -1 mod k</code>.</p>
+<p>This can produce extra phases only when -1 is a quadratic residue modulo the relevant modulus components.</p>
+<h2>4. Prime k = 3 mod4</h2>
+<p>Let k&gt;3 be prime with</p>
+<p><code>k = 3 mod4</code>.</p>
+<p>Then -1 is a quadratic nonresidue modulo k, so</p>
+<p><code>4C^2 = -1 mod k</code></p>
+<p>has no solution.</p>
+<p>The trivial shell therefore reduces to exactly three center conditions:</p>
+<pre><code class="language-text">C = -1       mod k -&gt; Type II via d=1
+C =  0       mod k -&gt; Type II via d=C
+C = -4^{-1}  mod k -&gt; Type I  via d=C.</code></pre>
+<p>These are factorization-free exits.</p>
+<h2>5. k43 example</h2>
+<p>For h169,</p>
+<p><code>C43 = 53 + 210t = 10 - 5t mod43</code>.</p>
+<p>Since43 is prime and <code>43=3 mod4</code>, the shell gives:</p>
+<pre><code class="language-text">C43=0        -&gt; t=2  mod43
+C43=-1       -&gt; t=28 mod43
+C43=-4^{-1}  -&gt; t=30 mod43.</code></pre>
+<p>Thus</p>
+<p><code>t mod43 in {2,28,30}</code></p>
+<p>forces an exact k43 decomposition without factoring C43.</p>
+<p>The explicit selectors are:</p>
+<pre><code class="language-text">t=2  : Type II, d=C43
+t=28 : Type II, d=1
+t=30 : Type I,  d=C43.</code></pre>
+<h2>6. Type-II root geometry of the shell</h2>
+<p>The Type-II members of the shell are entirely López-boundary geometry.</p>
+<h3>d=1</h3>
+<p><code>d=1</code>, <code>C^2/d=C^2</code> gives</p>
+<p><code>(s,b,c)=(1,1,C)</code>,</p>
+<p>so <code>b|c</code>: López Type A.</p>
+<h3>d=C</h3>
+<p>Write</p>
+<p><code>C=s u^2</code></p>
+<p>with s squarefree. Then</p>
+<p><code>d=s u^2</code></p>
+<p>and</p>
+<p><code>C^2/d=s u^2</code>,</p>
+<p>so</p>
+<p><code>b=c=u</code>.</p>
+<p>This is the diagonal intersection of the two comparable-root sectors.</p>
+<h3>d=C^2</h3>
+<p><code>(s,b,c)=(1,C,1)</code>,</p>
+<p>so <code>c|b</code>: López Type B.</p>
+<p>Therefore this universal selector shell is a <strong>boundary mechanism</strong> inside the larger exact Type-II geometry. It is useful as an early deterministic exit, but it is not the source of the incomparable-root certificates already observed elsewhere in the live ancestry.</p>
+<h2>7. Framework role</h2>
+<p>The candidate machine can test this shell before any factorization-dependent signed-box logic:</p>
+<pre><code class="language-text">state (p,k,C)
+   |
+   +-- C=-1       -&gt; Type II d=1
+   +-- C=0        -&gt; Type II d=C
+   +-- C=-4^{-1}  -&gt; Type I  d=C
+   +-- composite-only C(C+1)=0 -&gt; Type II d=C^2
+   +-- 4C^2=-1    -&gt; Type I  d=C^2
+   `-- otherwise  -&gt; factor-support / full signed-box geometry</code></pre>
+<p>This is a genuine selector component: deterministic, exact, factorization-free, and compatible with the hierarchy in which López A/B remains a boundary family rather than the governing search space.</p>
+<p>Erdős–Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

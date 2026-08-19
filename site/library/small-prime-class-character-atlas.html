@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The class-conditioned seed theorem shows that a Mordell-hard residue class can force substantially more arithmetic into a fixed companion">
+  <title>Small-prime class-conditioned character and factor-support atlas — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/small-prime-class-character-atlas.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/small-prime-class-character-atlas.html">
+  <meta property="og:title" content="Small-prime class-conditioned character and factor-support atlas — Free Computation Foundation">
+  <meta property="og:description" content="The class-conditioned seed theorem shows that a Mordell-hard residue class can force substantially more arithmetic into a fixed companion">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Small-prime class-conditioned character and factor-support atlas</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">The class-conditioned seed theorem shows that a Mordell-hard residue class can force substantially more arithmetic into a fixed companion</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SMALL-PRIME-CLASS-CHARACTER-ATLAS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact fixed-shift finite-group theorems</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>MORDELL-HARD-CLASS-CONDITIONED-SEED-LAW.md</code>; fixed-shift Lane-I divisor-square equivalence</p>
+<p><strong>Primary classifier:</strong> <code>classify_small_prime_class_character_states.py</code></p>
+<p><strong>Independent realization regression:</strong> <code>verify_small_prime_class_character_states.py</code></p>
+<p><strong>Claim boundary:</strong> these are range-free statements at individual fixed shifts. They do not give a universal shift ceiling and do not prove Erdős-Straus.</p>
+<h2>1. Purpose</h2>
+<p>The class-conditioned seed theorem shows that a Mordell-hard residue class can force substantially more arithmetic into a fixed companion</p>
+<pre><code class="language-text">C_k = (p+k)/4</code></pre>
+<p>than the universal six-class seed alone.</p>
+<p>The k=59 atlas already showed that this can annihilate an entire quadratic-character miss branch. The present atlas asks the same exact question at the smaller prime shifts</p>
+<pre><code class="language-text">k = 11, 19, 31, 47.</code></pre>
+<p>The answer is stronger than a Legendre-symbol restriction. On the rigid branches below, every exact miss state has divisor support entirely inside the quadratic-residue subgroup modulo k. Thus a single nonresidue prime factor of C_k forces a fixed-shift hit.</p>
+<h2>2. Exact state model</h2>
+<p>For prime k, write</p>
+<pre><code class="language-text">G = (Z/kZ)^x</code></pre>
+<p>and choose a primitive root so that G is represented by exponent logs modulo k-1.</p>
+<p>For a factor residue with log a, one valuation unit in C_k contributes divisor-square exponents</p>
+<pre><code class="language-text">0, a, 2a.</code></pre>
+<p>Hence the exact transition is</p>
+<pre><code class="language-text">D -&gt; D union (D+a) union (D+2a)
+center -&gt; center+a.</code></pre>
+<p>The two Lane-I targets are the exact divisor-square targets</p>
+<pre><code class="language-text">-1/4 mod k
+-C_k mod k.</code></pre>
+<p>Closing from the complete class-conditioned forced seed under all factor directions therefore gives a finite superset state space containing every actual companion factorization in that hard class.</p>
+<h2>3. Exact closure counts</h2>
+<h3>k = 11</h3>
+<pre><code class="language-text">seed 3   - 25 states - 9 misses - Legendre split +7 / -2
+seed 15  - 15 states - 5 misses - Legendre split +5 / -0</code></pre>
+<p>The hard classes with seed 15 are</p>
+<pre><code class="language-text">h = 169, 289, 529 mod 840.</code></pre>
+<h3>k = 19</h3>
+<pre><code class="language-text">seed 1   - 439 states - 136 misses - Legendre split +81 / -55
+seed 5   - 132 states - 44 misses  - Legendre split +28 / -16
+seed 7   - 51 states  - 18 misses  - Legendre split +15 / -3
+seed 35  - 27 states  - 9 misses   - Legendre split +9 / -0</code></pre>
+<p>The hard class with seed 35 is</p>
+<pre><code class="language-text">h = 121 mod 840.</code></pre>
+<h3>k = 31</h3>
+<pre><code class="language-text">seed 2   - 760 states - 118 misses - Legendre split +88 / -30
+seed 10  - 75 states  - 18 misses  - Legendre split +18 / -0
+seed 14  - 153 states - 23 misses  - Legendre split +22 / -1
+seed 70  - 45 states  - 15 misses  - Legendre split +15 / -0</code></pre>
+<p>The seed-10 classes are</p>
+<pre><code class="language-text">h = 169, 289 mod 840,</code></pre>
+<p>and the seed-70 class is</p>
+<pre><code class="language-text">h = 529 mod 840.</code></pre>
+<h3>k = 47</h3>
+<pre><code class="language-text">seed 6   - 1,079 states - 196 misses - Legendre split +116 / -80
+seed 42  - 97 states    - 24 misses  - Legendre split +24 / -0</code></pre>
+<p>The seed-42 classes are</p>
+<pre><code class="language-text">h = 121, 289 mod 840.</code></pre>
+<p>The k=47 result corrects the earlier temptation to extrapolate from the universal forced-6 closure. The universal seed leaves 80 negative-character abstract misses. The exact hard classes h=121 and h=289 force the additional factor 7, replacing seed 6 by seed 42 and eliminating that branch exactly.</p>
+<h2>4. Range-free character corollaries</h2>
+<p>The exact closures give the following fixed-shift theorems.</p>
+<p>For every Mordell-hard prime p:</p>
+<pre><code class="language-text">p = 169, 289, or 529 mod 840
+and (11/p) = -1
+=&gt; k=11 hits.</code></pre>
+<pre><code class="language-text">p = 121 mod 840
+and (19/p) = -1
+=&gt; k=19 hits.</code></pre>
+<pre><code class="language-text">p = 169, 289, or 529 mod 840
+and (31/p) = -1
+=&gt; k=31 hits.</code></pre>
+<pre><code class="language-text">p = 121 or 289 mod 840
+and (47/p) = -1
+=&gt; k=47 hits.</code></pre>
+<p>Together with the already-landed k=59 class theorem,</p>
+<pre><code class="language-text">p = 361 mod 840
+and (59/p) = -1
+=&gt; k=59 hits.</code></pre>
+<p>These are not finite-census extrapolations. Each follows from an exact finite-group closure after consuming a divisor forced for every integer in the specified congruence class.</p>
+<h2>5. Stronger QR-only factor-support theorem</h2>
+<p>The character statement is only the projection of the exact result.</p>
+<p>Let Q_k be the quadratic-residue subgroup of <code>(Z/kZ)^x</code>. For every annihilated branch listed above, the classifier verifies both of the following:</p>
+<ol><li>every miss-state center lies in Q_k, and the center projection covers the complete QR set;</li><li>every residue represented in every miss-state divisor mask lies in Q_k.</li></ol>
+<p>The second fact has an immediate arithmetic meaning.</p>
+<p>Every prime factor q of C_k appears as the exponent-one divisor residue q mod k inside the exact divisor-square box. Therefore, if an actual companion contained a prime factor satisfying</p>
+<pre><code class="language-text">(q/k) = -1,</code></pre>
+<p>the realized divisor mask would contain a nonresidue and could not equal any exact miss state in the rigid closure.</p>
+<p>Hence, on each rigid branch,</p>
+<pre><code class="language-text">fixed k misses
+=&gt; every prime factor q of C_k satisfies (q/k)=+1.</code></pre>
+<p>Conversely, if every prime factor of C_k is a quadratic residue modulo a prime k congruent to 3 mod 4, then every divisor of C_k^2 is a quadratic residue, while both fixed-shift targets are nonresidues:</p>
+<pre><code class="language-text">-1/4 is a nonresidue because -1 is a nonresidue,
+-C_k is a nonresidue because C_k is a residue.</code></pre>
+<p>Thus the rigid branches admit the exact support formulation</p>
+<pre><code class="language-text">fixed k misses
+&lt;=&gt; C_k has only quadratic-residue prime support modulo k.</code></pre>
+<p>This support form is the useful one for cross-shift work.</p>
+<h2>6. Survivor decision tree</h2>
+<p>A prime surviving all currently relevant rigid shifts must satisfy the following necessary support conditions.</p>
+<pre><code class="language-text">h = 1
+  no condition from this small-prime atlas yet
+
+h = 121
+  (19/p) = +1
+  (47/p) = +1
+  C_19 has QR-only prime support mod 19 if k=19 misses
+  C_47 has QR-only prime support mod 47 if k=47 misses
+
+h = 169
+  (11/p) = +1
+  (31/p) = +1
+  C_11 has QR-only prime support mod 11 if k=11 misses
+  C_31 has QR-only prime support mod 31 if k=31 misses
+
+h = 289
+  (11/p) = +1
+  (31/p) = +1
+  (47/p) = +1
+  C_11, C_31, C_47 carry the corresponding QR-only support conditions
+
+h = 361
+  existing k=59 theorem forces (59/p) = +1 after a k=59 miss
+
+h = 529
+  (11/p) = +1
+  (31/p) = +1
+  C_11 and C_31 carry the corresponding QR-only support conditions</code></pre>
+<p>The h=289 branch is currently the most character-constrained small-prime branch.</p>
+<h2>7. Why this matters for the six-companion wheel</h2>
+<p>The six-companion theorem proves that, after stripping the universal seeds, prime supports in one six-shift wheel are almost completely disjoint: every rational prime other than 2 and 5 can occur in at most one residual layer.</p>
+<p>The present atlas now supplies a different kind of information: on selected miss branches, the complete prime support of a companion is restricted to an index-two residue subgroup.</p>
+<p>The theorem-mining target is therefore no longer merely</p>
+<pre><code class="language-text">force incompatible Legendre signs for p.</code></pre>
+<p>It is the stronger support-allocation problem</p>
+<pre><code class="language-text">can six nearly coprime residuals simultaneously allocate all of their prime factors
+inside the subgroup required by every fixed-shift miss state?</code></pre>
+<p>This is the natural point at which the class-conditioned character atlas and the six-companion support theorem meet.</p>
+<h2>8. Independent finite realization check</h2>
+<p>The independent verifier does not use the abstract state masks to decide a finite target. It factors C_k directly, constructs the divisor-square residue box, and checks the two exact targets.</p>
+<p>At p &lt;= 100,000 the rigid branches give:</p>
+<pre><code class="language-text">k=11, h=169 - 43 primes - 21 negative-character primes - 0 negative misses
+k=11, h=289 - 45 primes - 25 negative-character primes - 0 negative misses
+k=11, h=529 - 50 primes - 26 negative-character primes - 0 negative misses
+k=19, h=121 - 50 primes - 29 negative-character primes - 0 negative misses
+k=31, h=169 - 43 primes - 25 negative-character primes - 0 negative misses
+k=31, h=289 - 45 primes - 27 negative-character primes - 0 negative misses
+k=31, h=529 - 50 primes - 29 negative-character primes - 0 negative misses
+k=47, h=121 - 50 primes - 28 negative-character primes - 0 negative misses
+k=47, h=289 - 45 primes - 24 negative-character primes - 0 negative misses</code></pre>
+<p>Every directly realized miss in the same regression has QR-only prime factor support for its modulus.</p>
+<p>The finite counts are regression anchors only. The range-free theorem comes from the complete finite-group closure.</p>
+<h2>9. Reproduction</h2>
+<p>Run the exact atlas with</p>
+<pre><code class="language-sh">python3 research/erdos-straus/classify_small_prime_class_character_states.py --json</code></pre>
+<p>and the independent finite realization regression with</p>
+<pre><code class="language-sh">python3 research/erdos-straus/verify_small_prime_class_character_states.py --limit 100000 --json</code></pre>
+<p>Erdős-Straus remains open. The next theorem target is to combine these QR-only support constraints with the six-companion residual-support disjointness rather than treating the fixed shifts independently.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

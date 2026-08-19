@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Let">
+  <title>Exact two-target filter at the prime shift `k=59` — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k59-two-target-filter.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k59-two-target-filter.html">
+  <meta property="og:title" content="Exact two-target filter at the prime shift `k=59` — Free Computation Foundation">
+  <meta property="og:description" content="Let">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact two-target filter at the prime shift `k=59`</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Let</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K59-TWO-TARGET-FILTER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact computer-assisted finite-group classification</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>FIXED-SHIFT-JACOBI-PARITY.md</code>, <code>ES-TWO-TARGET-DIVISOR-SQUARE.md</code>, <code>ES-BINARY-LANE-I-EQUIVALENCE.md</code></p>
+<p><strong>Machine certificate:</strong> <code>classify_k59_states.py</code></p>
+<p><strong>Independent finite regression:</strong> <code>verify_k59_structure.py</code></p>
+<p><strong>Claim boundary:</strong> this closes the fixed Lane-I shift <code>k=59</code>. It does not prove a universal finite shift ceiling and does not prove Erdős–Straus.</p>
+<h2>1. Exact cyclic model</h2>
+<p>Let</p>
+<div class="math" role="math">C=\frac{p+59}{4}.</div>
+<p>Since 59 is prime,</p>
+<div class="math" role="math">(\mathbb Z/59\mathbb Z)^\times\cong C_{58}.</div>
+<p>Use primitive root <code>2</code> and write <code>lambda(x)=log_2(x) mod 58</code>.</p>
+<p>The Type-I divisor-square target is</p>
+<div class="math" role="math">-4^{-1}\equiv44\pmod{59},</div>
+<p>with log</p>
+<div class="math" role="math">\boxed{27}.</div>
+<p>Also <code>lambda(-1)=29</code>, so for center log <code>c</code>, Type II has log <code>c+29 mod 58</code>.</p>
+<p>A valuation occurrence of log <code>a</code> gives the exact transition</p>
+<div class="math" role="math">T_a(D,c)=\left(D+\{0,a,2a\},c+a\right).</div>
+<h2>2. Exact finite closure</h2>
+<p>Closing the empty state under all 58 transition directions gives exactly</p>
+<div class="math" role="math">\boxed{291,907}</div>
+<p>states.</p>
+<p>The two exact target tests split them into</p>
+<div class="math" role="math">\boxed{230,692\text{ hit states}}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{61,215\text{ combined-miss states}.}</div>
+<p>This is a range-free finite-group exhaustion theorem for fixed <code>k=59</code>.</p>
+<h2>3. Pure quadratic support</h2>
+<p>Even logs are quadratic residues. Closing only even directions gives</p>
+<div class="math" role="math">\boxed{4,671}</div>
+<p>states, and every one misses because the Type-I target log <code>27</code> is odd while <code>c+29</code> is odd whenever the center is even.</p>
+<p>Thus</p>
+<div class="math" role="math">\boxed{4,671/4,671}</div>
+<p>pure-QR states are exact misses.</p>
+<h2>4. The four-packet ceiling breaks here</h2>
+<p>For each miss state, minimize the number of odd-log valuation units in a state-equivalent representative. The exact histogram is</p>
+<pre><code class="language-text">minimum NR units   miss states
+0                   4,671
+1                  19,014
+2                  24,783
+3                   9,808
+4                   2,656
+5                     283</code></pre>
+<p>Hence</p>
+<div class="math" role="math">\boxed{\text{every fixed-59 miss state has a representative with at most five NR units}.}</div>
+<p>This is the first classified shift in the current 35,39,43,47,51,55,59 run where the minimum-core ceiling exceeds four. Therefore the earlier <code>&lt;=4</code> phenomenon must not be promoted to a universal fixed-shift principle.</p>
+<h2>5. Character split</h2>
+<p>Center parity is the quadratic character modulo 59. Since Mordell-hard primes satisfy <code>p=1 mod 4</code>, reciprocity introduces no sign change, giving</p>
+<div class="math" role="math">(-1)^c=\left(\frac{59}{p}\right).</div>
+<p>The exact miss table splits as</p>
+<pre><code class="language-text">(59/p)=+1   32,110
+(59/p)=-1   29,105</code></pre>
+<p>Both character branches contain genuine fixed-shift misses.</p>
+<h2>6. No nontrivial scalar target symmetry</h2>
+<p>A scalar log automorphism <code>a -&gt; ma mod 58</code> must fix both target log 27 and the <code>-1</code> translation 29. Because <code>gcd(27,58)=1</code>, fixing 27 forces</p>
+<div class="math" role="math">m\equiv1\pmod{58}.</div>
+<p>Thus the scalar target-preserving automorphism group is trivial at <code>k=59</code>. The symmetry compression available at 43, 51, and 55 does not recur here in this form.</p>
+<h2>7. Independent regression</h2>
+<p>Through <code>100,000</code>, the independent divisor-box verifier gives</p>
+<pre><code class="language-text">hard primes     273
+k=59 hits       117
+k=59 misses     156
+mismatches        0</code></pre>
+<p>During derivation, a separate direct signed-box census through <code>100,000,000</code> gave</p>
+<pre><code class="language-text">hard primes     179,468
+k=59 hits       100,760
+k=59 misses      78,708
+mismatches            0</code></pre>
+<p>These are finite population checks. The theorem is the exact 291,907-state closure.</p>
+<h2>8. Corrected 100M corridor</h2>
+<p>Exactly 12 hard primes through 100M survive every classified shift through <code>k=55</code>.</p>
+<p>At <code>k=59</code>:</p>
+<pre><code class="language-text">hits      10
+misses     2</code></pre>
+<p>The two finite survivors are</p>
+<div class="math" role="math">\boxed{8,803,369}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{90,108,841}.</div>
+<p>The first is captured at <code>k=63</code>; the second persists until <code>k=107</code> in the current finite corridor. These are theorem-mining facts only, not a universal shift bound.</p>
+<h2>9. Reproduction</h2>
+<pre><code class="language-sh">python3 research/erdos-straus/classify_k59_states.py --json
+python3 research/erdos-straus/verify_k59_structure.py --limit 100000 --json</code></pre>
+<p>The full miss table is emitted with <code>--table</code>.</p>
+<p>Hard regression constants:</p>
+<pre><code class="language-text">total states             291,907
+hit states               230,692
+miss states               61,215
+pure-QR states             4,671
+pure-QR misses             4,671
+Legendre split       {+1:32110, -1:29105}
+minimum NR units     {0:4671, 1:19014, 2:24783, 3:9808, 4:2656, 5:283}</code></pre>
+<p>Erdős–Straus remains open. Fixed <code>k=59</code> is now completely classified; the corrected finite corridor has only two survivors beyond it through 100M.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact k31 survivor normal form on h169 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k31-survivor-normal-form.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k31-survivor-normal-form.html">
+  <meta property="og:title" content="Exact k31 survivor normal form on h169 — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact k31 survivor normal form on h169</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K31-SURVIVOR-NORMAL-FORM.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact fixed-shift module inside the candidate decomposition framework</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Verifier:</strong> <code>verify_k31_survivor_normal_form.py</code></p>
+<p><strong>Depends on:</strong> <code>POST-K23-COMPANION-LADDER.md</code>, exact signed-box Type-I/II semantics</p>
+<p><strong>Claim boundary:</strong> exact theorem for the h169 k31 companion state. It is not a universal decomposition theorem and not an Erdős–Straus proof.</p>
+<hr>
+<h2>1. h169 normalizes k31 to 10D</h2>
+<p>Write</p>
+<p><code>p = 169 + 840t</code>.</p>
+<p>Then</p>
+<p><code>C31 = (p+31)/4 = 50 + 210t</code>.</p>
+<p>Therefore</p>
+<p><code>C31 = 10D</code></p>
+<p>with</p>
+<p><code>D = 5 + 21t</code>.</p>
+<p>The mandatory seed at k31 is exactly <code>2*5</code>.</p>
+<p>The post-k23 coordinate is</p>
+<p><code>C23 = 6B</code>,</p>
+<p><code>B = 8 + 35t</code>.</p>
+<p>These cofactors satisfy the exact affine identity</p>
+<p><code>5D - 3B = 1</code>.</p>
+<p>Hence</p>
+<p><code>gcd(B,D)=1</code>.</p>
+<p>So a simultaneous k23/k31 survivor automatically carries two disjoint dynamic prime supports connected by a Bézout relation.</p>
+<hr>
+<h2>2. Exact seed mask modulo31</h2>
+<p>The divisors of the mandatory seed square</p>
+<p><code>10^2 = 2^2*5^2</code></p>
+<p>produce the residue mask</p>
+<p><code>M0 = {1,2,4,5,7,10,19,20,25} mod31</code>.</p>
+<p>Its size is9.</p>
+<p>The seed center is</p>
+<p><code>10 mod31</code>.</p>
+<p>Every element of <code>M0</code> is a quadratic residue modulo31.</p>
+<p>The complete nonzero quadratic-residue set is</p>
+<p><code>QR31 = {1,2,4,5,7,8,9,10,14,16,18,19,20,25,28}</code>.</p>
+<p>Its size is15.</p>
+<p>The Type-I target at k31 is</p>
+<p><code>-4^{-1} = 23 mod31</code>,</p>
+<p>which is a quadratic nonresidue.</p>
+<p>Because <code>31 = 3 mod4</code>, <code>-1</code> is also a quadratic nonresidue. Thus whenever the companion center is a quadratic residue, the Type-II target <code>-C31</code> is a nonresidue.</p>
+<p>This makes a QR-only divisor mask a natural miss state.</p>
+<hr>
+<h2>3. Exact 75-state closure</h2>
+<p>Start from <code>(M0,10)</code>.</p>
+<p>For an additional prime factor with nonzero residue <code>r mod31</code>, the exact state transition is</p>
+<p><code>(M,c) -&gt; (M*{1,r,r^2}, c*r)</code>.</p>
+<p>Repeated transitions also represent higher prime exponents exactly.</p>
+<p>The complete closure under all 30 nonzero residues modulo31 contains</p>
+<pre><code class="language-text">75 states
+18 misses
+57 hits</code></pre>
+<p>The 18 misses have a strict two-mode normal form.</p>
+<p>There are <strong>no intermediate miss masks</strong>.</p>
+<hr>
+<h2>4. FULL_QR mode</h2>
+<p>Fifteen miss states have mask exactly</p>
+<p><code>QR31</code>.</p>
+<p>There is one such miss at each quadratic-residue center:</p>
+<p><code>1,2,4,5,7,8,9,10,14,16,18,19,20,25,28</code>.</p>
+<p>For every one of them:</p>
+<ul><li>the Type-I target23 is absent because it is a nonresidue;</li><li>the Type-II target is <code>-center</code>, also a nonresidue;</li><li>the full QR31 mask therefore misses both targets.</li></ul>
+<p>This is the k31 <code>FULL_QR</code> survivor mode.</p>
+<hr>
+<h2>5. BARE mode</h2>
+<p>Exactly three misses retain the original nine-element seed mask <code>M0</code>.</p>
+<p>Their centers are</p>
+<p><code>{2,10,19}</code>.</p>
+<p>The stabilizer of <code>M0</code> among nonzero residues modulo31 is exactly</p>
+<p><code>H31 = {1,5,25}</code>.</p>
+<p>Indeed, for a quadratic-residue incoming factor residue r:</p>
+<ul><li>if <code>r in {1,5,25}</code>, then <code>M0*{1,r,r^2}=M0</code>;</li><li>for every other <code>r in QR31</code>, the mask jumps immediately to all of <code>QR31</code>.</li></ul>
+<p>Multiplication by5 cycles the three BARE centers:</p>
+<p><code>10 -&gt; 19 -&gt; 2 -&gt; 10</code>.</p>
+<p>Therefore the k31 companion is in BARE mode iff every prime factor of D lies in the residue subgroup</p>
+<p><code>{1,5,25} mod31</code>.</p>
+<hr>
+<h2>6. Exact k31 miss criterion</h2>
+<p>The closure gives a sharper theorem.</p>
+<h3>Theorem</h3>
+<p>For h169, with</p>
+<p><code>C31=10D</code>,</p>
+<p>the exact k31 signed box misses <strong>iff every rational prime factor q of D is a nonzero quadratic residue modulo31</strong>.</p>
+<p>Equivalently:</p>
+<p><code>k31 miss &lt;=&gt; q mod31 in QR31 for every prime q|D</code>.</p>
+<p>A factor q=31 is excluded automatically: if <code>31|D</code>, then <code>31|C31</code>, and the Type-II target is0 modulo31 with a divisor multiple of31 available, so k31 hits.</p>
+<h3>Proof, QR direction</h3>
+<p>If every prime factor of D is QR31, every divisor of <code>C31^2</code> is QR31 because the mandatory seed factors2 and5 are also quadratic residues.</p>
+<p>The center <code>C31</code> is QR31.</p>
+<p>Both exact targets are nonresidues:</p>
+<ul><li>Type I:23;</li><li>Type II:<code>-C31</code>.</li></ul>
+<p>Hence neither target lies in the divisor mask.</p>
+<h3>Proof, converse</h3>
+<p>The exact 75-state closure exhausts every possible sequence of nonzero prime-factor residues modulo31 beginning from the mandatory seed state.</p>
+<p>Every miss state has mask either <code>M0</code> or <code>QR31</code>; both are contained in QR31.</p>
+<p>Therefore a state containing any nonresidue factor residue cannot be a miss.</p>
+<p>So any k31 miss forces every prime factor of D to be a quadratic residue modulo31.</p>
+<p>This is an exact finite residue-state theorem, not a census inference.</p>
+<hr>
+<h2>7. Lossless miss compression</h2>
+<p>For propagation inside the candidate decomposition framework, the full 75-state closure compresses losslessly to</p>
+<pre><code class="language-text">k31_mode = BARE | FULL_QR</code></pre>
+<p>with</p>
+<pre><code class="language-text">BARE:
+    divisor mask = M0
+    center in {2,10,19}
+    every q|D has q mod31 in {1,5,25}
+
+FULL_QR:
+    divisor mask = QR31
+    center in QR31
+    every q|D is QR mod31
+    at least one factor residue lies outside {1,5,25}</code></pre>
+<p>The last FULL_QR line is conditional on k31 being a miss. If a nonresidue factor occurs, k31 hits and there is no survivor mode.</p>
+<hr>
+<h2>8. Coupling to the k23 survivor</h2>
+<p>The adjacent h169 companions are</p>
+<p><code>C23=6B</code>,</p>
+<p><code>C31=10D</code>,</p>
+<p>with</p>
+<p><code>5D-3B=1</code>.</p>
+<p>Thus</p>
+<p><code>gcd(B,D)=1</code>.</p>
+<p>If k23 and k31 both miss, then:</p>
+<ul><li>every prime factor of B is QR modulo23;</li><li>every prime factor of D is QR modulo31;</li><li>B and D have disjoint rational-prime support;</li><li>the two cofactors obey the exact Bézout relation <code>5D-3B=1</code>.</li></ul>
+<p>This gives a compact simultaneous-survivor state:</p>
+<pre><code class="language-text">B_support = QR23
+D_support = QR31
+k31_mode = BARE | FULL_QR
+gcd(B,D) = 1
+5D - 3B = 1</code></pre>
+<p>The BARE refinement upgrades <code>D_support</code> further to the order-three subgroup <code>{1,5,25} mod31</code>.</p>
+<hr>
+<h2>9. Coupling to k27</h2>
+<p>The previous companion is</p>
+<p><code>C27 = 6B+1</code>.</p>
+<p>Because h169 forces <code>C27</code> to be divisible by7, write</p>
+<p><code>C27 = 7E</code>,</p>
+<p>with</p>
+<p><code>E = 7 + 30t</code>.</p>
+<p>Then the consecutive-companion ladder gives</p>
+<p><code>7E - 6B = 1</code>,</p>
+<p><code>10D - 7E = 1</code>.</p>
+<p>Hence</p>
+<p><code>B, E, D</code></p>
+<p>are pairwise coprime.</p>
+<p>This is the next structural target: characterize the larger k27 miss automaton on E, then intersect it with the very rigid k31 QR31 condition on D and the existing k23 QR23 condition on B.</p>
+<p>The candidate machine is beginning to carry a chain of pairwise-coprime, affinely coupled survivor cofactors rather than isolated divisibility tests.</p>
+<hr>
+<h2>10. Next theorem target</h2>
+<p>The k31 side is now compressed exactly.</p>
+<p>The next attack is k27:</p>
+<p><code>C27=7E</code>,</p>
+<p>with the simultaneous identities</p>
+<p><code>7E-6B=1</code>,</p>
+<p><code>10D-7E=1</code>.</p>
+<p>The k27 seed closure is richer than k31, so the goal is not to force it into a one-character description prematurely. The correct target is a minimal exact survivor automaton for E that can be coupled to</p>
+<p><code>B_support=QR23</code></p>
+<p>and</p>
+<p><code>D_support=QR31</code>.</p>
+<p>If that intersection collapses the simultaneous k23/k27/k31 survivor states to a small finite family, we will have a genuine local transition engine for the candidate decomposition framework.</p>
+<p>Erdős–Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

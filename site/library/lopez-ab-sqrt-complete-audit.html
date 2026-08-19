@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="LOPEZ-AB-FINITE-DECISION-BOUND.md proves that the Type A/B question is finite for every fixed prime. A literal scan of all layers K=dn up to a linear ceiling is exact but computationally wasteful.">
+  <title>Square-root-width complete López Type A/B audit — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/lopez-ab-sqrt-complete-audit.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/lopez-ab-sqrt-complete-audit.html">
+  <meta property="og:title" content="Square-root-width complete López Type A/B audit — Free Computation Foundation">
+  <meta property="og:description" content="LOPEZ-AB-FINITE-DECISION-BOUND.md proves that the Type A/B question is finite for every fixed prime. A literal scan of all layers K=dn up to a linear ceiling is exact but computationally wasteful.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Square-root-width complete López Type A/B audit</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">LOPEZ-AB-FINITE-DECISION-BOUND.md proves that the Type A/B question is finite for every fixed prime. A literal scan of all layers K=dn up to a linear ceiling is exact but computationally wasteful.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/LOPEZ-AB-SQRT-COMPLETE-AUDIT.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact reparameterization</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>LOPEZ-AB-FINITE-DECISION-BOUND.md</code>; López Type A/B congruence characterizations</p>
+<p><strong>Claim boundary:</strong> this is a complete decision algorithm for Type A/B existence for a fixed odd prime. It does not prove López, disprove López, or prove Erdős–Straus.</p>
+<h2>1. Motivation</h2>
+<p><code>LOPEZ-AB-FINITE-DECISION-BOUND.md</code> proves that the Type A/B question is finite for every fixed prime. A literal scan of all layers <code>K=dn</code> up to a linear ceiling is exact but computationally wasteful.</p>
+<p>Both López families contain a hidden symmetry that collapses the complete search to a factor search over only a square-root-width interval of offsets <code>p+a</code>.</p>
+<p>The result is useful for two distinct jobs:</p>
+<ol><li>deciding whether a fixed prime has any Type A/B witness at all;</li><li>recovering the true first Type A/B depth <code>C_AB(p)</code> without assuming a finite empirical cutoff.</li></ol>
+<h2>2. Type A as a symmetric product equation</h2>
+<p>López Type A is</p>
+<pre><code class="language-text">p == -4d  (mod 4dn-1).</code></pre>
+<p>Let the positive quotient be <code>s</code>:</p>
+<pre><code class="language-text">p+4d = s(4dn-1).</code></pre>
+<p>Put</p>
+<pre><code class="language-text">u = 4d.</code></pre>
+<p>Then</p>
+<pre><code class="language-text">p = n u s - u - s.</code></pre>
+<p>For an odd prime <code>p</code>, reduction modulo 4 gives</p>
+<pre><code class="language-text">s == -p (mod 4).</code></pre>
+<p>Thus one of the two positive integers <code>(u,s)</code> is divisible by 4 and the other is congruent to <code>-p mod 4</code>.</p>
+<p>Now define</p>
+<pre><code class="language-text">a = min(u,s)
+b = max(u,s).</code></pre>
+<p>The equation is symmetric in <code>u,s</code>, so</p>
+<pre><code class="language-text">p+a = b(na-1).</code></pre>
+<p>Therefore</p>
+<pre><code class="language-text">r = na-1</code></pre>
+<p>is a divisor of <code>p+a</code>, with</p>
+<pre><code class="language-text">r == -1 (mod a),
+n = (r+1)/a,
+b = (p+a)/r.</code></pre>
+<p>Conversely, every divisor <code>r</code> of <code>p+a</code> satisfying these relations, together with the residue-pair condition</p>
+<pre><code class="language-text">{a,b} contains one value == 0 (mod 4)
+and the other == -p (mod 4),</code></pre>
+<p>reconstructs an exact Type A witness.</p>
+<h3>Finite offset bound</h3>
+<p>Because <code>a&lt;=b</code> and <code>n&gt;=1</code>,</p>
+<pre><code class="language-text">p = nab-a-b &gt;= a^2-2a.</code></pre>
+<p>Hence</p>
+<pre><code class="language-text">(a-1)^2 &lt;= p+1</code></pre>
+<p>and therefore</p>
+<pre><code class="language-text">A_A(p) = 1 + floor(sqrt(p+1))</code></pre>
+<p>is a complete Type A offset ceiling.</p>
+<p>So Type A requires factoring only</p>
+<pre><code class="language-text">p+1, p+2, ..., p+A_A(p).</code></pre>
+<h2>3. Type B as a symmetric product equation</h2>
+<p>López Type B is</p>
+<pre><code class="language-text">p == -n  (mod 4dn-1).</code></pre>
+<p>Let the positive quotient be <code>s</code>:</p>
+<pre><code class="language-text">p+n = s(4dn-1).</code></pre>
+<p>Then</p>
+<pre><code class="language-text">p = 4dns - n - s.</code></pre>
+<p>This equation is exactly symmetric in <code>n</code> and <code>s</code>.</p>
+<p>Choose the canonical orientation</p>
+<pre><code class="language-text">a = min(n,s)
+b = max(n,s).</code></pre>
+<p>Then</p>
+<pre><code class="language-text">p+a = b(4da-1).</code></pre>
+<p>Therefore</p>
+<pre><code class="language-text">r = 4da-1</code></pre>
+<p>is a divisor of <code>p+a</code> satisfying</p>
+<pre><code class="language-text">r == -1 (mod 4a),
+d = (r+1)/(4a),
+b = (p+a)/r.</code></pre>
+<p>Conversely every such divisor reconstructs a Type B witness.</p>
+<p>The <code>n &lt;-&gt; s</code> symmetry means that choosing the smaller member as <code>n=a</code> loses no existence information. It also cannot increase the Type B layer <code>K=dn</code>, so this canonical orientation is sufficient when computing the first Type B depth.</p>
+<h3>Finite offset bound</h3>
+<p>Since <code>a&lt;=b</code> and <code>d&gt;=1</code>,</p>
+<pre><code class="language-text">p = 4dab-a-b &gt;= 4a^2-2a.</code></pre>
+<p>Thus</p>
+<pre><code class="language-text">4a^2-2a &lt;= p.</code></pre>
+<p>The complete Type B offset ceiling is</p>
+<pre><code class="language-text">A_B(p) = floor((1 + sqrt(1+4p))/4).</code></pre>
+<p>So the Type B search is even narrower than Type A.</p>
+<h2>4. Complete algorithm</h2>
+<p>For a fixed odd prime <code>p</code>:</p>
+<ol><li>compute <code>A_A = 1 + floor(sqrt(p+1))</code>;</li><li>factor every integer in the contiguous interval <code>p+1</code> through <code>p+A_A</code>;</li><li>for each offset <code>a</code>, enumerate divisors of <code>p+a</code>;</li><li>apply the exact Type A divisor condition <code>r == -1 mod a</code> and residue-pair orientation;</li><li>for <code>a&lt;=A_B</code>, apply the exact Type B divisor condition <code>r == -1 mod 4a</code>;</li><li>reconstruct every certificate with exact integer arithmetic;</li><li>choose the smallest reconstructed <code>K=dn</code> across Type A and canonical Type B certificates.</li></ol>
+<p>If neither search produces a certificate, then the fixed prime has no Type A or Type B solution.</p>
+<p>No empirical <code>K</code> cutoff is involved.</p>
+<h2>5. Why the interval can be factored efficiently</h2>
+<p>The numbers requiring factorization are consecutive:</p>
+<pre><code class="language-text">p+1, p+2, ..., p+A_A.</code></pre>
+<p>The accompanying implementation uses segmented interval factorization:</p>
+<ul><li>sieve ordinary primes only through <code>sqrt(p+A_A)</code>;</li><li>for each small prime, visit the offsets divisible by that prime;</li><li>divide out complete valuations in place;</li><li>any residual value greater than one is the final prime factor.</li></ul>
+<p>This avoids separately trial-dividing every offset from scratch.</p>
+<p>The search width is <code>O(sqrt(p))</code>; the factorization work is performed over that single interval rather than over a linear number of Type A/B layers.</p>
+<h2>6. Canonical regression: p = 9,658,489</h2>
+<p>For</p>
+<pre><code class="language-text">p = 9,658,489</code></pre>
+<p>we have</p>
+<pre><code class="language-text">A_A = 3108
+A_B = 1554.</code></pre>
+<p>The complete square-root auditor recovers the known first Type B witness</p>
+<pre><code class="language-text">d = 69
+n = 38
+quotient = 921
+K = dn = 2622
+m = 4K-1 = 10487.</code></pre>
+<p>Indeed</p>
+<pre><code class="language-text">p+n = 9,658,527 = 921 * 10,487.</code></pre>
+<p>Thus the exact first Type A/B depth is recovered while factoring only the first 3,108 offsets above <code>p</code>.</p>
+<p>The same complete audit also finds Type A certificates for this prime, but the earliest Type A layer lies deeper than the Type B record.</p>
+<h2>7. López&#x27;s classical exceptional Type A examples</h2>
+<p>The square-root audit also reproduces the structural distinction in López&#x27;s paper:</p>
+<h3>p = 193</h3>
+<pre><code class="language-text">Type A certificates: none
+first Type B K: 4</code></pre>
+<h3>p = 2521</h3>
+<pre><code class="language-text">Type A certificates: none
+first Type B K: 22</code></pre>
+<p>Thus the complete algorithm does not silently force Type A where López records its absence; it recovers Type B as the complementary family.</p>
+<h2>8. Relation to the finite linear ceiling</h2>
+<p>The linear theorem and the square-root theorem answer different questions.</p>
+<p><code>LOPEZ-AB-FINITE-DECISION-BOUND.md</code> proves an explicit upper ceiling on every possible parameter layer in the hard domain. It is a useful mathematical certificate that the search cannot continue forever.</p>
+<p>The present theorem gives a much better computational coordinate. It does not scan those layers. It reconstructs every possible certificate from divisors of a square-root-width offset interval.</p>
+<p>Therefore the preferred complete audit is now:</p>
+<pre><code class="language-text">finite-decision theorem for epistemic completeness
++
+square-root factor search for execution.</code></pre>
+<h2>9. Consequence for model-escape research</h2>
+<p>A bounded result such as</p>
+<pre><code class="language-text">AB_UNSEEN_THROUGH_K</code></pre>
+<p>remains useful for comparing model depth against the general Erdős–Straus coordinate.</p>
+<p>But when the research target is specifically the López conjecture, the complete square-root auditor should be used instead.</p>
+<p>A prime for which this complete audit returns no Type A and no Type B certificate would be a genuine López counterexample candidate immediately, subject to independent reproduction and certificate review.</p>
+<p>The general Lane-I/first-denominator observer remains independent. Such a prime could still satisfy Erdős–Straus outside Type A/B.</p>
+<h2>10. Reproduction</h2>
+<p>Run a complete audit with</p>
+<pre><code class="language-sh">python3 research/erdos-straus/lopez_ab_complete_sqrt_audit.py 9658489 --json</code></pre>
+<p>The verifier cross-checks the square-root reconstruction against the older direct layer scan on a finite prime corpus and pins the known examples above.</p>
+<p>Erdős–Straus remains open. López Type A/B remains unrefuted until an actual prime completes this exact audit with an empty certificate set.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

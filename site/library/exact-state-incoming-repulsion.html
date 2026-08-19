@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The source-independent repulsion theorem in PRIME-DIVISOR-MASK-REPULSION.md uses a strong sufficient condition.">
+  <title>Exact-state incoming-source repulsion beyond QR saturation — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/exact-state-incoming-repulsion.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/exact-state-incoming-repulsion.html">
+  <meta property="og:title" content="Exact-state incoming-source repulsion beyond QR saturation — Free Computation Foundation">
+  <meta property="og:description" content="The source-independent repulsion theorem in PRIME-DIVISOR-MASK-REPULSION.md uses a strong sufficient condition.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact-state incoming-source repulsion beyond QR saturation</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">The source-independent repulsion theorem in PRIME-DIVISOR-MASK-REPULSION.md uses a strong sufficient condition.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/EXACT-STATE-INCOMING-REPULSION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite-state theorem and small-prime atlas</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Primary classifier:</strong> <code>classify_exact_state_incoming_repulsion.py</code></p>
+<p><strong>Independent verifier:</strong> <code>verify_exact_state_incoming_repulsion.py</code></p>
+<p><strong>Depends on:</strong> exact divisor-square fixed-shift state model, reciprocity-route barrier, source-independent QR-saturation repulsion, product-aware character closure</p>
+<p><strong>Claim boundary:</strong> this theorem scans prime destinations <code>k in {7,11,19,23,31,47}</code>. It proves conditional character promotion on exact incoming-source routes; the route residue must still be realized on the same branch and positive-character miss states may remain. It is not a universal shift ceiling and does not prove Erdős-Straus.</p>
+<h2>1. Why full QR saturation is sufficient but not necessary</h2>
+<p>The source-independent repulsion theorem in <code>PRIME-DIVISOR-MASK-REPULSION.md</code> uses a strong sufficient condition.</p>
+<p>Let S be the mandatory seed at prime destination k and let q be a positive-character source routed into C_k. If divisors of</p>
+<p><code>(S q)^2</code></p>
+<p>fill all of QR(k), then every negative-character miss center disappears.</p>
+<p>That criterion deliberately forgets the exact relation between the divisor mask and the Type-II center.</p>
+<p>The exact fixed-shift state is finer.</p>
+<p>Write a state as</p>
+<p><code>(M,c)</code>,</p>
+<p>where M is the set of divisor-square residues currently available modulo k and c is the multiplicative center representing C_k modulo k.</p>
+<p>Adjoining one prime factor with residue a applies</p>
+<p><code>T_a(M,c) = ( M * {1,a,a^2}, c a )</code>.</p>
+<p>A state hits if either</p>
+<ul><li>the fixed Type-I target <code>-1/4</code> lies in M; or</li><li>the moving Type-II target <code>-c</code> lies in M.</li></ul>
+<p>Thus a route can eliminate every negative miss center even when the augmented mask is still a proper subset of QR(k). The reason is that the mask and the moving center are correlated.</p>
+<p>This is invisible to character-only saturation.</p>
+<h2>2. Exact incoming-state repeller definition</h2>
+<p>Fix prime k, hard class h, and class seed</p>
+<p><code>S = gcd(210,(h+k)/4)</code>.</p>
+<p>Let C(S,k) be the complete exact state closure generated from the seed under all unit-factor transitions, and let M(S,k) be its miss states.</p>
+<p>Now let a positive source q route into C_k and put</p>
+<p><code>r = q mod k</code>.</p>
+<p>The mandatory routed seed state is obtained by one exact transition T_r applied to the ordinary seed state. Close that augmented state under all remaining unit factors.</p>
+<p>Call r an <strong>exact-state repeller</strong> if</p>
+<ul><li>the ordinary closure has at least one negative-character miss center; and</li><li>the augmented closure has no negative-character miss center.</li></ul>
+<p>If, additionally, the augmented seed divisor mask is not all of QR(k), call r a <strong>state-only repeller</strong>.</p>
+<p>On a state-only repeller route, a k miss still forces</p>
+<p><code>p mod k in QR(k)</code>,</p>
+<p>hence for the Mordell-hard prime skeleton p=1 mod4,</p>
+<p><code>(k/p)=+1</code>,</p>
+<p>but this conclusion was obtained without QR-saturating the augmented seed.</p>
+<h2>3. Exact atlas through k=47</h2>
+<p>The classifier scans</p>
+<p><code>k = 7,11,19,23,31,47</code></p>
+<p>across all six Mordell-hard classes.</p>
+<p>The exact result is:</p>
+<ul><li>21 class/destination branches have ordinary negative-character miss centers;</li><li>19 of those admit at least one exact incoming repeller;</li><li>156 hard-class/source-residue repeller pairs occur in total;</li><li>92 are already explained by full QR saturation;</li><li>64 are genuinely state-only repeller pairs;</li><li>those 64 occur on exactly 9 class/destination branches.</li></ul>
+<p>The only negative-center branches in this range with no exact positive incoming repeller are</p>
+<ul><li>h=169, k19, seed1;</li><li>h=529, k19, seed1.</li></ul>
+<h2>4. k=19, seed5: two extra repellers</h2>
+<p>For h=1 and h=361 at k=19, the ordinary seed is</p>
+<p><code>S=5</code>.</p>
+<p>The exact ordinary closure has</p>
+<ul><li>132 states;</li><li>44 miss states;</li><li>negative centers</li></ul>
+<p><code>{2,3,8,10,12,13}</code>.</p>
+<p>Full QR saturation explains incoming source residues</p>
+<p><code>7,11</code>.</p>
+<p>Exact-state analysis adds two more:</p>
+<p><code>6,16</code>.</p>
+<p>For either r=6 or16, the routed seed does not QR-saturate. Nevertheless the exact augmented closure has only</p>
+<ul><li>10 miss states;</li><li>9 distinct centers;</li><li>zero negative centers.</li></ul>
+<p>So a miss on either route forces <code>(19/p)=+1</code> by exact mask-center geometry.</p>
+<h2>5. k=31, seed2: repulsion with no saturation at all</h2>
+<p>For h=1 and h=121 at k=31,</p>
+<p><code>S=2</code>.</p>
+<p>The ordinary closure has</p>
+<ul><li>760 states;</li><li>118 misses;</li><li>ten negative centers</li></ul>
+<p><code>{3,6,11,12,13,17,21,22,24,26}</code>.</p>
+<p>No incoming residue in the new four-element set below QR-saturates the seed:</p>
+<p><code>{5,9,14,25}</code>.</p>
+<p>Yet every one eliminates all ten negative centers.</p>
+<ul><li>r=5 or25 leaves 18 miss states;</li><li>r=9 or14 leaves 21 miss states;</li><li>every surviving miss center is one of the 15 quadratic residues modulo31.</li></ul>
+<p>This is a pure exact-state promotion mechanism with no full-QR saturation explanation.</p>
+<h2>6. h=361, k=31: four more residues beyond saturation</h2>
+<p>On h=361 the k31 seed is</p>
+<p><code>S=14</code>.</p>
+<p>The ordinary closure has 23 misses and one negative center:</p>
+<p><code>p mod31 = 26</code>.</p>
+<p>Ten source residues were already known to repel that center by QR saturation.</p>
+<p>Exact-state analysis adds</p>
+<p><code>7,9,18,19</code>.</p>
+<p>None QR-saturates the augmented seed.</p>
+<ul><li>r=7 or9 leaves 18 positive-center misses;</li><li>r=18 or19 leaves 16 positive-center misses.</li></ul>
+<p>So the exact repeller set is strictly larger than the saturation repeller set even on a destination where a saturation theorem already exists.</p>
+<h2>7. k=47, seed6: the large collapse</h2>
+<p>The strongest new geometry occurs at k=47 on hard classes</p>
+<p><code>h in {1,169,361,529}</code>.</p>
+<p>The ordinary class seed is</p>
+<p><code>S=6</code>.</p>
+<p>Its exact closure has</p>
+<ul><li>1,079 states;</li><li>196 miss states;</li><li>eleven negative centers</li></ul>
+<p><code>{5,10,13,19,20,26,29,30,33,38,40}</code>.</p>
+<p>No incoming source residue listed below QR-saturates the augmented seed.</p>
+<p>Nevertheless all twelve residues</p>
+<p><code>{7,9,14,17,18,21,25,27,28,34,37,42}</code></p>
+<p>eliminate every negative center.</p>
+<p>For residues</p>
+<p><code>7,14,17,18,25,27,34,37</code>,</p>
+<p>the augmented closure has only 24 miss states.</p>
+<p>For</p>
+<p><code>9,21,28,42</code>,</p>
+<p>it has 26 miss states.</p>
+<p>In every case there are exactly 23 surviving centers, all quadratic residues modulo47.</p>
+<p>Thus an incoming positive source can collapse 196 ordinary misses to roughly two dozen positive-center states without filling QR(47).</p>
+<p>That is the cleanest current example of information carried by the exact mask-center pair and lost by character saturation.</p>
+<h2>8. Intersection with the landed product-aware character graph</h2>
+<p>The landed class-global product-aware character closure has 260 canonical states.</p>
+<p>Intersecting those states with the 64 state-only repeller cases gives exactly</p>
+<ul><li>27 ancestry-compatible state/source/destination opportunities;</li><li>3 distinct repeller triples;</li><li>0 character contradictions.</li></ul>
+<p>The three promotion triples are</p>
+<ul><li>h=169, q17 -&gt; k47;</li><li>h=169, q37 -&gt; k47;</li><li>h=529, q17 -&gt; k47.</li></ul>
+<p>The h=169 q37 -&gt; k47 triple also occurs on later states where q47 has already become positive through other character-saturation ancestry; those occurrences are compatible rather than new promotions.</p>
+<p>The exact route residues are:</p>
+<ul><li>q17 -&gt; k47 requires <code>p mod17=4</code>, with <code>17 mod47=17</code>;</li><li>q37 -&gt; k47 requires <code>p mod37=27</code>, with <code>37 mod47=37</code>.</li></ul>
+<p>Both 17 and37 are state-only repeller residues at the k47 seed6 geometry.</p>
+<p>Therefore, on the named branches, if k47 still misses, the exact state theorem forces</p>
+<p><code>(47/p)=+1</code>.</p>
+<p>This creates q47 as a conditional positive source on h=169 and h=529 without invoking QR saturation at k47.</p>
+<h2>9. Why this changes the recursive program</h2>
+<p>The previous character grammar could create a new source only after a seed filled a complete quadratic/Jacobi plus kernel.</p>
+<p>That is no longer the complete promotion rule.</p>
+<p>CBX now has a second source generator:</p>
+<p><code>positive routed source</code></p>
+<p><code>-&gt; exact mandatory mask-center state</code></p>
+<p><code>-&gt; all negative centers eliminated</code></p>
+<p><code>-&gt; destination miss implies positive destination character</code></p>
+<p><code>-&gt; new source</code></p>
+<p>without requiring full kernel saturation.</p>
+<p>The immediate next experiment is therefore to feed the newly available h=169/h=529 q47 source back into the recursive route graph and ask whether exact-state promotion creates additional sources or terminal branches that the 260-state character closure could not reach.</p>
+<p>That follow-on must preserve the distinction between class-global and branch-local source provenance.</p>
+<h2>10. Method boundary</h2>
+<p>This theorem does not yet use the entire exact miss-state identity as recursive state data. It uses one exact consequence: whether negative centers remain after a mandatory incoming source.</p>
+<p>The next stronger survivor engine should preserve the surviving exact mask-center state itself, not only the promoted character sign.</p>
+<p>That is where residual gcd allocation, periodic valuations, and exact Type-II target formation can finally operate on the same branch state.</p>
+<p>Erdős-Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

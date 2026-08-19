@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Bryan Entanglement Cross k27/k31 transition theorem — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/bec-k27-k31-transition-theorem.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/bec-k27-k31-transition-theorem.html">
+  <meta property="og:title" content="Bryan Entanglement Cross k27/k31 transition theorem — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Bryan Entanglement Cross k27/k31 transition theorem</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/BEC-K27-K31-TRANSITION-THEOREM.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact transition theorem inside the candidate decomposition framework</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Verifier:</strong> <code>verify_bec_k27_k31_transition.py</code></p>
+<p><strong>Depends on:</strong> <code>BRYAN-ENTANGLEMENT-CROSS.md</code>, <code>K27-SURVIVOR-GRAMMAR.md</code>, <code>K31-SURVIVOR-NORMAL-FORM.md</code>, <code>POST-K23-COMPANION-LADDER.md</code></p>
+<p><strong>Claim boundary:</strong> this theorem selects the first two live post-k23 transitions on the h169 state using exact factor-support predicates. It is not yet a factorization-free selector, a universal shift ceiling, a termination theorem, or an Erdős–Straus proof.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let</p>
+<p><code>p = 169 + 840t</code></p>
+<p>and assume the branch is live after k23, so the exact signed box has already missed at k23.</p>
+<p>Use the normalized consecutive companions</p>
+<pre><code class="language-text">C23 = 6B,   B = 8 + 35t
+C27 = 7E,   E = 7 + 30t
+C31 = 10D,  D = 5 + 21t.</code></pre>
+<p>They satisfy</p>
+<pre><code class="language-text">7E - 6B = 1
+10D - 7E = 1
+5D - 3B = 1</code></pre>
+<p>and therefore</p>
+<pre><code class="language-text">gcd(B,E)=gcd(E,D)=gcd(B,D)=1.</code></pre>
+<p>The post-k23 live BEC path begins at the k27 test.</p>
+<hr>
+<h2>2. Exact k27 predicate G27(E)</h2>
+<p><code>K27-SURVIVOR-GRAMMAR.md</code> gives an exact iff description of k27 misses from the prime-factor residues of E modulo27.</p>
+<p>Define</p>
+<div class="math" role="math">\boxed{G_{27}(E)}</div>
+<p>to mean that the factorization of E belongs to that exact survivor grammar.</p>
+<p>Concretely:</p>
+<ol><li>form the multiset of nonresidue prime-factor occurrences modulo27, with multiplicity;</li><li>it must be one of the seventeen permitted NR skeletons;</li><li>the quadratic-residue occurrences must satisfy the exact completion rule of the corresponding mode <code>Q,A,B,C,D,E,F</code>.</li></ol>
+<p>Then the landed theorem is exactly</p>
+<div class="math" role="math">\boxed{ k27\text{ misses}\iff G_{27}(E). }</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ k27\text{ hits}\iff \neg G_{27}(E). }</div>
+<hr>
+<h2>3. Exact k31 predicate Q31(D)</h2>
+<p><code>K31-SURVIVOR-NORMAL-FORM.md</code> proves</p>
+<blockquote><p>k31 misses iff every rational prime factor of D is a nonzero quadratic residue modulo31.</p></blockquote>
+<p>Define</p>
+<div class="math" role="math">\boxed{Q_{31}(D)}</div>
+<p>to mean</p>
+<pre><code class="language-text">for every prime q|D:
+    q != 31
+    and q mod31 is in QR31.</code></pre>
+<p>Then</p>
+<div class="math" role="math">\boxed{ k31\text{ misses}\iff Q_{31}(D), }</div>
+<p>and therefore</p>
+<div class="math" role="math">\boxed{ k31\text{ hits}\iff \neg Q_{31}(D). }</div>
+<hr>
+<h2>4. Exact BEC selector theorem</h2>
+<p>The first two live BEC transitions are now selected exactly.</p>
+<h3>Theorem</h3>
+<p>For an h169 branch that is live after k23:</p>
+<div class="math" role="math">\boxed{ \mathcal P_B=R \iff \neg G_{27}(E). }</div>
+<p>That is, the branch propagates immediately right at k27 exactly when E violates the k27 survivor grammar.</p>
+<p>If <code>G27(E)</code> holds, k27 is an exact miss and contributes one leftward transition. Then</p>
+<div class="math" role="math">\boxed{ \mathcal P_B=LR \iff G_{27}(E)\land\neg Q_{31}(D). }</div>
+<p>Finally,</p>
+<div class="math" role="math">\boxed{ \mathcal P_B\text{ has prefix }LL \iff G_{27}(E)\land Q_{31}(D). }</div>
+<p>So the first live selector is</p>
+<pre><code class="language-text">if not G27(E):
+    R at k27
+else:
+    L at k27
+    if not Q31(D):
+        R at k31
+    else:
+        L at k31
+        enter the deeper coupled residual</code></pre>
+<p>This is an exact theorem, not a learned scheduler rule.</p>
+<hr>
+<h2>5. Residual after the LL prefix</h2>
+<p>If both exact survivor predicates hold, the live state has survived k23, k27, and k31.</p>
+<p>It therefore carries the simultaneous exact support system</p>
+<pre><code class="language-text">B_support   QR23
+E_state     one of the exact k27 live modes Q,A,B,C,D,E,F
+D_support   QR31</code></pre>
+<p>with the affine and coprimality constraints</p>
+<pre><code class="language-text">7E - 6B = 1
+10D - 7E = 1
+5D - 3B = 1
+
+gcd(B,E)=gcd(E,D)=gcd(B,D)=1.</code></pre>
+<p>This is the exact arithmetic state represented by the BEC prefix</p>
+<pre><code class="language-text">LL</code></pre>
+<p>before the machine tests k35.</p>
+<p>The BEC word is only the directional summary. The support modes and affine relations are the mathematical payload.</p>
+<hr>
+<h2>6. Finite ancestry regression</h2>
+<p>The q23 full-ancestry specimen contains 148 simultaneous k19/k23 survivors.</p>
+<p>The independent verifier replays those exact prefixes and checks the factor-support selectors directly.</p>
+<p>It recovers</p>
+<pre><code class="language-text">R       64
+LR      64
+LL...   20</code></pre>
+<p>exactly.</p>
+<p>Equivalently:</p>
+<pre><code class="language-text">not G27(E)                         64
+G27(E) and not Q31(D)              64
+G27(E) and Q31(D)                  20</code></pre>
+<p>The first two predicates therefore explain the dominant 128/148 live exits in that finite specimen without consulting the later first-hit label when making the classification.</p>
+<p>The finite counts are regression evidence for the range-free transition theorem, not its proof source.</p>
+<hr>
+<h2>7. Why this is stronger than BEC telemetry</h2>
+<p>The earlier ancestry pilot attached <code>R</code>, <code>LR</code>, or a deeper <code>L^jR</code> word <strong>after</strong> the exact first hit was known.</p>
+<p>This theorem reverses that relationship for the first two transitions:</p>
+<pre><code class="language-text">exact arithmetic state
+    -&gt; exact factor-support predicate
+        -&gt; forced next BEC transition</code></pre>
+<p>The direction is now predictable from proved arithmetic conditions.</p>
+<p>That does not make BEC itself a proof rule. The proof rule is <code>G27</code> or <code>Q31</code>; BEC is the compact transition name emitted by those theorems.</p>
+<hr>
+<h2>8. Current limitation</h2>
+<p>The selector still inspects exact factor-support information.</p>
+<p>It is therefore not yet the stronger object ultimately wanted by the decomposition framework:</p>
+<pre><code class="language-text">small compressed survivor state
+    -&gt; choose next shift and certificate</code></pre>
+<p>without factor enumeration.</p>
+<p>The next compression target is to derive <code>G27(E)</code> and <code>Q31(D)</code> consequences directly from the coupled state</p>
+<pre><code class="language-text">B_support=QR23
+7E-6B=1
+10D-7E=1
+pairwise coprimality
+route ancestry</code></pre>
+<p>or from a still smaller residue/support signature.</p>
+<hr>
+<h2>9. Next theorem target</h2>
+<p>Only the <code>LL</code> residual remains after the first two exact selectors.</p>
+<p>The natural next question is:</p>
+<blockquote><p>Which exact k27 survivor modes can coexist with <code>D_support=QR31</code> and <code>B_support=QR23</code> under the affine chain?</p></blockquote>
+<p>The seven k27 modes are already finite. The k31 condition is already a single exact support law. Their intersection is therefore the correct object to attack before adding another broad search dimension.</p>
+<p>In BEC language:</p>
+<pre><code class="language-text">R   is completely selected by not G27(E)
+LR  is completely selected by G27(E) and not Q31(D)
+LL  is the new exact residual state</code></pre>
+<p>The next job is to fracture <code>LL</code>, not to search blindly past it.</p>
+<p>Erdős–Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

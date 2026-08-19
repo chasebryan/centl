@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Post-k23 companion ladder and support renewal — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/post-k23-companion-ladder.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/post-k23-companion-ladder.html">
+  <meta property="og:title" content="Post-k23 companion ladder and support renewal — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Post-k23 companion ladder and support renewal</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/POST-K23-COMPANION-LADDER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact algebraic module inside the candidate decomposition framework</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Verifier:</strong> <code>verify_post_k23_companion_ladder.py</code></p>
+<p><strong>Depends on:</strong> <code>K19-K23-REALIZED-SURVIVOR-COUPLING.md</code>, <code>Q23-BLOCKED-PHASE-ANCESTRY-AUDIT.md</code></p>
+<p><strong>Claim boundary:</strong> exact identities and support-overlap laws on h169 and the two realized k19 routes. This is not yet a universal shift selector or a closed decomposition method.</p>
+<hr>
+<h2>1. The coordinate hidden under the ancestry audit</h2>
+<p>On the hard class</p>
+<p><code>p = 169 + 840t</code>,</p>
+<p>the fixed-shift companions at k19 and k23 are</p>
+<p><code>C19 = (p+19)/4 = 47 + 210t</code>,</p>
+<p><code>C23 = (p+23)/4 = 48 + 210t</code>.</p>
+<p>Hence</p>
+<p><code>C23 = C19 + 1</code>.</p>
+<p>Moreover</p>
+<p><code>C23 = 6B</code></p>
+<p>with the exact integer coordinate</p>
+<p><code>B = 8 + 35t</code>.</p>
+<p>Now enumerate every later admissible shift by</p>
+<p><code>k_j = 23 + 4j</code>,  j &gt;= 0.</p>
+<p>Then the companion is simply</p>
+<p><code>C_j := C_{k_j} = (p+k_j)/4 = C23 + j</code>.</p>
+<p>Therefore</p>
+<p><code>C_j = 6B + j = C19 + j + 1</code>.</p>
+<p>This is the post-k23 <strong>companion ladder</strong>.</p>
+<p>The first-hit support found in the ancestry audit</p>
+<p><code>{27,31,35,39,43,47,55}</code></p>
+<p>is exactly</p>
+<p><code>j in {1,2,3,4,5,6,8}</code>.</p>
+<p>The observed k&lt;=55 collapse is thus a statement about the first eight consecutive integers after <code>6B</code>.</p>
+<hr>
+<h2>2. Exact Euclidean support laws</h2>
+<p>Because</p>
+<p><code>C_j = C23 + j</code>,</p>
+<p>Euclid gives</p>
+<p><code>gcd(C_j, C23) = gcd(j, C23)</code>.</p>
+<p>Likewise, because</p>
+<p><code>C_j = C19 + j + 1</code>,</p>
+<p>we have</p>
+<p><code>gcd(C_j, C19) = gcd(j+1, C19)</code>.</p>
+<p>Since <code>C23=C19+1</code>,</p>
+<p><code>gcd(C19,C23)=1</code>.</p>
+<p>Therefore every prime shared by a later companion <code>C_j</code> and the already-surviving pair <code>C19*C23</code> must divide the tiny integer</p>
+<p><code>j(j+1)</code>.</p>
+<p>Equivalently:</p>
+<blockquote><p>if a prime q divides <code>C_j</code> and q does not divide <code>j(j+1)</code>, then q is absent from both <code>C19</code> and <code>C23</code>.</p></blockquote>
+<p>This is an exact support-renewal theorem. It is independent of search range and independent of the factorization size of <code>C_j</code>.</p>
+<hr>
+<h2>3. Hard-class seed structure through k55</h2>
+<p>For h169,</p>
+<p><code>C_j = 48 + j + 210t</code>.</p>
+<p>Hence</p>
+<p><code>gcd(C_j,210) = gcd(48+j,210)</code>.</p>
+<p>For the first eight post-k23 shifts:</p>
+<table class="directory"><thead><tr><th>j</th><th>k</th><th>C_j mod210</th><th>mandatory gcd with210</th></tr></thead><tbody><tr><td>1</td><td>27</td><td>49</td><td>7</td></tr><tr><td>2</td><td>31</td><td>50</td><td>10</td></tr><tr><td>3</td><td>35</td><td>51</td><td>3</td></tr><tr><td>4</td><td>39</td><td>52</td><td>2</td></tr><tr><td>5</td><td>43</td><td>53</td><td>1</td></tr><tr><td>6</td><td>47</td><td>54</td><td>6</td></tr><tr><td>7</td><td>51</td><td>55</td><td>5</td></tr><tr><td>8</td><td>55</td><td>56</td><td>14</td></tr></tbody></table>
+<p>This gives each early shift a deterministic seed before any nontrivial factorization is examined.</p>
+<p>The same window can be read directly as</p>
+<p><code>49,50,51,52,53,54,55,56 mod210</code>.</p>
+<hr>
+<h2>4. Exact overlap table with the live k19/k23 state</h2>
+<p>Because</p>
+<p><code>C19 = 47 mod210</code>,</p>
+<p>we have</p>
+<p><code>gcd(C19,210)=1</code>.</p>
+<p>And because</p>
+<p><code>C23 = 48 + 210t = 6B</code>,</p>
+<p>with <code>B=8 mod35</code>, the overlap with the previous two companions is sharply controlled.</p>
+<p>For j=1 through8:</p>
+<h3>j=1, k27</h3>
+<p><code>gcd(C27,C19)=gcd(2,C19)=1</code>,</p>
+<p><code>gcd(C27,C23)=gcd(1,C23)=1</code>.</p>
+<p>So <strong>all prime support of C27 is new</strong> relative to both C19 and C23.</p>
+<h3>j=2, k31</h3>
+<p><code>gcd(C31,C19)=gcd(3,C19)=1</code>,</p>
+<p><code>gcd(C31,C23)=gcd(2,C23)=2</code>.</p>
+<p>Thus the only inherited rational prime is 2. Every odd prime factor of C31 is new.</p>
+<h3>j=3, k35</h3>
+<p><code>gcd(C35,C19)=gcd(4,C19)=1</code>,</p>
+<p><code>gcd(C35,C23)=gcd(3,C23)=3</code>.</p>
+<p>Thus the only inherited rational prime is 3.</p>
+<h3>j=4, k39</h3>
+<p><code>gcd(C39,C19)=gcd(5,C19)=1</code>,</p>
+<p><code>gcd(C39,C23)=gcd(4,C23)</code>.</p>
+<p>Only 2-power support can be inherited.</p>
+<h3>j=5, k43</h3>
+<p><code>gcd(C43,C19)=gcd(6,C19)=1</code>,</p>
+<p><code>gcd(C43,C23)=gcd(5,C23)=1</code>.</p>
+<p>So <strong>all prime support of C43 is new</strong>.</p>
+<h3>j=6, k47</h3>
+<p><code>gcd(C47,C19)=gcd(7,C19)=1</code>,</p>
+<p><code>gcd(C47,C23)=gcd(6,C23)=6</code>.</p>
+<p>Only the old primes 2 and3 can be inherited.</p>
+<h3>j=7, k51</h3>
+<p><code>gcd(C51,C19)=gcd(8,C19)=1</code>,</p>
+<p><code>gcd(C51,C23)=gcd(7,C23)=1</code>.</p>
+<p>So <strong>all prime support of C51 is new</strong>.</p>
+<p>The finite ancestry audit found no first hit at k51 despite this total support renewal. Fresh support is therefore not, by itself, a sufficient transition rule.</p>
+<h3>j=8, k55</h3>
+<p><code>gcd(C55,C19)=gcd(9,C19)=1</code>,</p>
+<p><code>gcd(C55,C23)=gcd(8,C23)</code>.</p>
+<p>Only 2-power support can be inherited.</p>
+<hr>
+<h2>5. Route-specific B/R support renewal</h2>
+<p>The two realized h169 k19 routes have</p>
+<h3>Route A</h3>
+<p><code>C19 = 391R = 17*23*R</code>,</p>
+<p><code>C23 = 6B</code>,</p>
+<p><code>6B - 391R = 1</code>.</p>
+<h3>Route B</h3>
+<p><code>C19 = 1081R = 23*47*R</code>,</p>
+<p><code>C23 = 6B</code>,</p>
+<p><code>6B - 1081R = 1</code>.</p>
+<p>In both cases</p>
+<p><code>gcd(B,R)=1</code>.</p>
+<p>For either route the companion ladder gives</p>
+<p><code>C_j = 6B+j</code>,</p>
+<p>so</p>
+<p><code>gcd(C_j,B)=gcd(j,B)</code>.</p>
+<p>Using <code>6B=SR+1</code>, where S is391 or1081,</p>
+<p><code>C_j = SR + j + 1</code>,</p>
+<p>hence</p>
+<p><code>gcd(C_j,R)=gcd(j+1,R)</code>.</p>
+<p>Therefore:</p>
+<ul><li>any prime shared with B must divide j;</li><li>any prime shared with R must divide j+1;</li><li>every prime factor of C_j outside the support of <code>j(j+1)</code> is genuinely new relative to both dynamic survivor cofactors B and R.</li></ul>
+<p>This is the support-renewal law in the compressed framework coordinates.</p>
+<hr>
+<h2>6. Why this matters for a decomposition machine</h2>
+<p>The full-ancestry audit showed that all 148 simultaneous k19/k23 survivors in the audited prefixes terminate by k55, with 128 already terminating at k27 or k31.</p>
+<p>The companion ladder now explains why the next theorem should be local rather than q-adically distant:</p>
+<pre><code class="language-text">live survivor state
+    C19 = SR
+    C23 = 6B
+    6B-SR = 1
+        |
+        v
+C27 = 6B+1
+C31 = 6B+2
+C35 = 6B+3
+C39 = 6B+4
+C43 = 6B+5
+C47 = 6B+6
+C51 = 6B+7
+C55 = 6B+8</code></pre>
+<p>Each step has:</p>
+<ol><li>a fixed hard-class seed modulo210;</li><li>an exact bound on inherited prime support;</li><li>a mostly fresh cofactor whose root geometry can be tested in the full Type-II signed box.</li></ol>
+<p>That is a much more natural candidate transition engine than jumping directly from k23 to the distant q23 square-lift destination.</p>
+<hr>
+<h2>7. Relation to López</h2>
+<p>Nothing in the companion-ladder identities assumes López Type A/B.</p>
+<p>The live exit is always evaluated in the full exact signed box. The ancestry audit already shows that many actual first exits are mixed or interior-only in Type-II root coordinates.</p>
+<p>So the ladder is compatible with the governing hierarchy:</p>
+<pre><code class="language-text">exact survivor state
+      -&gt; companion ladder
+      -&gt; full signed-box test
+      -&gt; Type I / boundary Type II / incomparable Type II / mixed</code></pre>
+<p>López A/B remains a boundary certificate family, not the transition grammar.</p>
+<hr>
+<h2>8. Next theorem target</h2>
+<p>The highest-value target is now the two-step absorber</p>
+<p><code>C27 = 6B+1</code>,</p>
+<p><code>C31 = 6B+2</code>,</p>
+<p>because k27 and k31 absorb 128 of 148 audited simultaneous survivors.</p>
+<p>The desired statement is not a census frequency. It is an implication of the form</p>
+<p><code>compressed k19/k23 survivor state  =&gt;  k27 hit OR k31 hit</code></p>
+<p>for a mathematically specified subdomain, with exact fallback conditions for the residual cases.</p>
+<p>The support-renewal theorem gives the right variables for that proof attempt: the new prime residues entering <code>6B+1</code> and <code>6B+2</code>, together with the existing QR23 support on B, the FULL_QR/BARE state on R, and the affine equation <code>6B-SR=1</code>.</p>
+<p>If such implications can be chained with a well-founded residual state, the candidate framework begins to look like an actual decomposition method.</p>
+<p>Erdős–Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

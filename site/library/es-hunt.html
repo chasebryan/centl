@@ -24,7 +24,7 @@
     <div class="title"><h1>Public Erdős–Straus hunt</h1><p>Synthesis · hosted from the CENTL repository</p></div>
   </header>
   <div class="layout">
-            <nav aria-label="Primary">
+    <nav aria-label="Primary">
       <h2>CENTL &amp; Hub</h2>
       <ul>
         <li><a href="../index.html#top">CENTL Work Area</a></li>
@@ -93,7 +93,7 @@
 <hr>
 <h2>2. Two kernels</h2>
 <p>The work is split so a mathematician can read one stack and a long hunt can run the other.</p>
-<table class="directory"><thead><tr><th>name</th><th>job</th></tr></thead><tbody><tr><td><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/B-BervigES.kernel"><code>bb.kernel</code></a> (also <code>B-BervigES.kernel</code>)</td><td>Python reference. Full construction menu, exact integer check \(4xyz = n(yz+xz+xy)\), findings librarian, seed, live menu.</td></tr><tr><td><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CC.kernel"><code>CC.kernel</code></a></td><td>C attack engine. Theorem layer, \(a,b\le 11\) window, then the two-target corridor. Emits an explicit witness or reports a miss.</td></tr></tbody></table>
+<table class="directory"><thead><tr><th>name</th><th>job</th></tr></thead><tbody><tr><td><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/bb.kernel"><code>bb.kernel</code></a> (also <code>B-BervigES.kernel</code>)</td><td>Python reference. Full construction menu, exact integer check \(4xyz = n(yz+xz+xy)\), findings librarian, seed, live menu.</td></tr><tr><td><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CC.kernel"><code>CC.kernel</code></a></td><td>C attack engine. Theorem layer, \(a,b\le 11\) window, then the two-target corridor. Emits an explicit witness or reports a miss.</td></tr></tbody></table>
 <p>CC.kernel is the theorem/attack provider. bb.kernel is the coupled reference. Either can be invoked from <code>centl es</code>. Neither uses CENTL-SCi. <code>strike</code> in the CC ledger stays false until a universal certificate is deposited in <a href="cc-kernel-proof.html"><code>CC.kernel/PROOF.md</code></a>.</p>
 <hr>
 <h2>3. The infinite equation</h2>

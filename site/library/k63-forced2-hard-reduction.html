@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Every Mordell-hard prime has">
+  <title>Hard-prime forced-2 reduction at `k=63` — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k63-forced2-hard-reduction.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k63-forced2-hard-reduction.html">
+  <meta property="og:title" content="Hard-prime forced-2 reduction at `k=63` — Free Computation Foundation">
+  <meta property="og:description" content="Every Mordell-hard prime has">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Hard-prime forced-2 reduction at `k=63`</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Every Mordell-hard prime has</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K63-FORCED2-HARD-REDUCTION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact computer-assisted hard-prime state reduction</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>K63-TWO-TARGET-FILTER.md</code></p>
+<p><strong>Machine certificate:</strong> <code>classify_k63_forced2_states.py</code></p>
+<p><strong>Independent finite regression:</strong> <code>verify_k63_forced2_structure.py</code></p>
+<p><strong>Claim boundary:</strong> every Mordell-hard prime state at fixed <code>k=63</code> lies in the reduced closure proved here. The closure is a hard-prime superset, not a prime-realization theorem. Erdős–Straus remains open.</p>
+<h2>1. Universal factor 2</h2>
+<p>Every Mordell-hard prime has</p>
+<div class="math" role="math">p=24m+1.</div>
+<p>At shift <code>k=63</code>,</p>
+<div class="math" role="math">C_{63}=\frac{p+63}{4} =\frac{24m+64}{4} =6m+16 =2(3m+8).</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{2\mid C_{63}}</div>
+<p>for every Mordell-hard prime.</p>
+<p>This is a range-free arithmetic restriction.</p>
+<h2>2. The forced factor lies outside the hard center subgroup</h2>
+<p>The fixed-63 unit group is</p>
+<div class="math" role="math">(\mathbb Z/63\mathbb Z)^\times\cong C_6\times C_6,</div>
+<p>with coordinates</p>
+<div class="math" role="math">x=29^a10^b\pmod{63}.</div>
+<p><code>K63-TWO-TARGET-FILTER.md</code> proves that every hard-prime center lies in</p>
+<div class="math" role="math">H=\{(a,b):a,b\text{ even}\}\cong C_3\times C_3.</div>
+<p>The forced factor <code>2</code> has coordinate</p>
+<div class="math" role="math">\boxed{2\leftrightarrow(1,2).}</div>
+<p>Its first coordinate is odd, so</p>
+<div class="math" role="math">\boxed{2\notin H.}</div>
+<p>This differs qualitatively from the k=59 forced factor 3, which lies inside the quadratic-residue subgroup there.</p>
+<p>One mandatory occurrence of factor 2 therefore seeds the exact state at</p>
+<div class="math" role="math">S_2=T_{(1,2)}(\{(0,0)\},(0,0)).</div>
+<p>Every actual hard-prime factorization is obtained from this state by applying the ordinary exact transitions for the remaining valuation occurrences.</p>
+<h2>3. Exact reduced closure</h2>
+<p>The generic fixed-63 closure contains</p>
+<div class="math" role="math">6,389</div>
+<p>total states, of which 1,844 have an admissible hard center and 684 are misses.</p>
+<p>Starting after the mandatory factor 2 gives only</p>
+<div class="math" role="math">\boxed{1,740\text{ total states}.}</div>
+<p>Among these,</p>
+<div class="math" role="math">\boxed{421\text{ have an admissible hard center},}</div>
+<p>split into</p>
+<div class="math" role="math">\boxed{334\text{ hits}}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{87\text{ misses}.}</div>
+<p>Thus the hard-prime obstruction table contracts from</p>
+<div class="math" role="math">684\longrightarrow87.</div>
+<h3>Theorem — forced-2 hard containment</h3>
+<p>For every Mordell-hard prime <code>p</code>, the exact fixed-63 state of <code>C63</code> belongs to the 1,740-state forced-2 closure, and every actual fixed-63 miss belongs to its 87-state admissible miss table.</p>
+<p>No converse realization claim is made.</p>
+<h2>4. Added outside-subgroup complexity falls to three</h2>
+<p>The forced factor already contributes one direction outside <code>H</code>. Starting from that mandatory seed, minimize the number of <strong>additional</strong> valuation units outside <code>H</code> required to reach each admissible miss state.</p>
+<p>The exact histogram is</p>
+<pre><code class="language-text">minimum added outside-H units   miss states
+1                                   38
+2                                   18
+3                                   31</code></pre>
+<p>Hence</p>
+<div class="math" role="math">\boxed{\text{every hard-prime k=63 miss state has a forced-2 representative needing at most three additional outside-H units}.}</div>
+<p>There is no zero-cost row because the seed center begins outside <code>H</code>: additional quotient support is mandatory to return the final center to the hard subgroup.</p>
+<p>The quotient</p>
+<div class="math" role="math">G/H\cong C_2\times C_2</div>
+<p>explains why one, two, or three added outside classes can compensate the seeded quotient class.</p>
+<h2>5. Exact reduced center distribution</h2>
+<p>The 87 reduced miss states occupy all nine possible hard centers in <code>H</code>, with counts</p>
+<pre><code class="language-text">center (0,0)   23
+center (0,2)    5
+center (0,4)    5
+center (2,0)    5
+center (2,2)    5
+center (2,4)   23
+center (4,0)    5
+center (4,2)   11
+center (4,4)    5</code></pre>
+<p>So the reduction does not collapse the problem to a single hard center. It compresses the factorization-state geometry inside every center class.</p>
+<h2>6. Independent finite regression</h2>
+<p><code>verify_k63_forced2_structure.py</code> independently generates Mordell-hard primes, verifies <code>2|C63</code>, consumes one mandatory factor 2, reconstructs the remaining state from the actual factorization, and compares the reduced classifier with the direct divisor-square targets.</p>
+<p>Through <code>100,000</code>:</p>
+<pre><code class="language-text">hard primes     273
+k=63 hits        54
+k=63 misses     219
+mismatches        0</code></pre>
+<p>These finite counts check realization. The hard-state containment theorem comes from the universal identity <code>C63=2(3m+8)</code> plus exact closure from the forced seed.</p>
+<h2>7. Reproduction</h2>
+<pre><code class="language-sh">python3 research/erdos-straus/classify_k63_forced2_states.py --json
+python3 research/erdos-straus/verify_k63_forced2_structure.py --limit 100000 --json</code></pre>
+<p>The complete 87-state reduced miss table is emitted with <code>--table</code>.</p>
+<p>Hard regression constants:</p>
+<pre><code class="language-text">forced factor                         2
+forced coordinate                 (1,2)
+forced seed divisor-set size          3
+reduced total states               1,740
+reduced admissible states            421
+reduced hits                         334
+reduced misses                        87
+minimum added outside-H     {1:38, 2:18, 3:31}</code></pre>
+<p>Erdős–Straus remains open. The forced factor removes most of the generic fixed-63 obstruction geometry before any finite prime bound is used.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

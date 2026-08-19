@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact two-branch k35 survivor theorem on h169 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k35-two-branch-survivor-theorem.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k35-two-branch-survivor-theorem.html">
+  <meta property="og:title" content="Exact two-branch k35 survivor theorem on h169 — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact two-branch k35 survivor theorem on h169</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K35-TWO-BRANCH-SURVIVOR-THEOREM.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact fixed-shift module inside the candidate decomposition framework</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Verifier:</strong> <code>verify_k35_two_branch_survivor_theorem.py</code></p>
+<p><strong>Depends on:</strong> <code>POST-K23-COMPANION-LADDER.md</code>, <code>K27-SURVIVOR-GRAMMAR.md</code>, <code>K31-SURVIVOR-NORMAL-FORM.md</code></p>
+<p><strong>Claim boundary:</strong> exact h169 theorem at k35. It is not a universal depth bound, a closed decomposition method, or an Erdős–Straus proof.</p>
+<hr>
+<h2>1. Normalize k35</h2>
+<p>Write</p>
+<p><code>p = 169 + 840t</code>.</p>
+<p>Then</p>
+<p><code>C35 = (p+35)/4 = 51 + 210t = 3F</code>,</p>
+<p>where</p>
+<p><code>F = 17 + 70t</code>.</p>
+<p>Therefore</p>
+<p><code>F = 17 mod35</code></p>
+<p>for every t.</p>
+<p>In particular F is coprime to35, so every rational prime factor of F is a unit modulo35.</p>
+<p>The final signed-box center is fixed:</p>
+<p><code>C35 = 16 mod35</code>.</p>
+<p>The two exact targets are also fixed:</p>
+<pre><code class="language-text">Type I target  = -4^{-1} = 26 mod35
+Type II target = -C35     = 19 mod35.</code></pre>
+<p>Both targets reduce to</p>
+<p><code>5 mod7</code>.</p>
+<p>This fixed-center feature is what makes k35 collapse sharply.</p>
+<hr>
+<h2>2. Exact raw endpoint closure</h2>
+<p>Start from the mandatory factor3, whose square-divisor mask is</p>
+<p><code>{1,3,9} mod35</code>.</p>
+<p>Adjoining one prime-factor residue r of F applies the exact transition</p>
+<p><code>(M,c) -&gt; (M*{1,r,r^2}, c*r)</code>.</p>
+<p>The complete closure under all24 units modulo35 contains</p>
+<pre><code class="language-text">394 raw states.</code></pre>
+<p>Exactly14 states have the h169 final center</p>
+<p><code>c=16 mod35</code>.</p>
+<p>Among those14 exact endpoints:</p>
+<pre><code class="language-text">8 hit
+6 miss.</code></pre>
+<p>The six misses split into only two structural branches.</p>
+<hr>
+<h2>3. The mod7 safe branch</h2>
+<p>Reduce the divisor state modulo7.</p>
+<p>The mandatory seed is</p>
+<p><code>M7={1,2,3}</code></p>
+<p>with center3.</p>
+<p>Because</p>
+<p><code>F=3 mod7</code>,</p>
+<p>the final k35 center modulo7 is2.</p>
+<p>There are exactly two reachable endpoint masks with center2:</p>
+<pre><code class="language-text">{1,2,3,4,6}
+{1,2,3,4,5,6}.</code></pre>
+<p>The first omits5. The second is the full unit group.</p>
+<p>Since <strong>both exact k35 targets are5 modulo7</strong>, the five-element mask is automatically a miss before modulo5 is even consulted.</p>
+<p>The residue transition is completely rigid:</p>
+<ul><li>from the seed, residue1 preserves the seed;</li><li>residue3 is the unique transition into the five-element safe mask;</li><li>from the safe mask, residue1 is the only residue that preserves omission of5;</li><li>every other unit residue introduces5.</li></ul>
+<p>Because factor insertion commutes, the mod7 safe branch has an exact factorization description.</p>
+<h3>S7 condition</h3>
+<p><code>F = q R</code>,</p>
+<p>where</p>
+<ul><li>q is prime;</li><li><code>q = 3 mod7</code>;</li><li>q occurs to exponent exactly1 in F;</li><li>every rational prime factor of R is <code>1 mod7</code>.</li></ul>
+<p>R may equal1.</p>
+<p>Equivalently, among prime-factor occurrences of F, exactly one is3 modulo7 and every other occurrence is1 modulo7.</p>
+<p>Whenever S7 holds, k35 misses.</p>
+<hr>
+<h2>4. The character branch</h2>
+<p>Let</p>
+<p><code>H35 = {r in (Z/35Z)^* : (r/5)(r/7)=+1}</code>,</p>
+<p>where <code>(r/5)</code> and <code>(r/7)</code> are Legendre symbols.</p>
+<p>Equivalently, H35 consists of unit residues whose quadratic characters modulo5 and modulo7 have the same sign.</p>
+<p>Explicitly,</p>
+<p><code>H35 = {1,3,4,9,11,12,13,16,17,27,29,33}</code>.</p>
+<p>H35 is an index-two subgroup of the24 units modulo35.</p>
+<p>The mandatory seed residue3 belongs to H35.</p>
+<p>The two exact targets do not:</p>
+<pre><code class="language-text">19 notin H35
+26 notin H35.</code></pre>
+<p>Therefore, if every rational prime factor of F lies in H35, every divisor residue of <code>C35^2</code> lies in H35 and both exact targets are excluded.</p>
+<h3>J35 condition</h3>
+<p>For every rational prime q dividing F,</p>
+<p><code>(q/5)(q/7)=+1</code>.</p>
+<p>Whenever J35 holds, k35 misses.</p>
+<hr>
+<h2>5. The unique exceptional endpoint</h2>
+<p>Of the six exact h169 miss endpoints, five have mod7 projection</p>
+<p><code>{1,2,3,4,6}</code></p>
+<p>and therefore lie in the S7 branch.</p>
+<p>The remaining miss has full mod7 projection but exact modulo35 mask</p>
+<p><code>{1,3,4,9,11,12,13,16,17,27,29,33}</code>.</p>
+<p>That mask is exactly H35.</p>
+<p>Because every prime factor q of F is itself a divisor of <code>C35^2</code>, its residue appears in the final divisor mask. Hence if the final mask is H35, every q dividing F lies in H35.</p>
+<p>So the full-projection exception is not a third branch. It is exactly the J35 branch.</p>
+<hr>
+<h2>6. Exact iff theorem</h2>
+<h3>Theorem</h3>
+<p>For</p>
+<p><code>p = 169 mod840</code></p>
+<p>and</p>
+<p><code>F=(p+35)/12 = 17+70t</code>,</p>
+<p>the exact k35 signed box misses <strong>if and only if</strong> at least one of the following holds:</p>
+<h3>J35</h3>
+<p>Every rational prime factor q of F satisfies</p>
+<p><code>(q/5)(q/7)=+1</code>.</p>
+<h3>S7</h3>
+<p><code>F=qR</code> with q prime, <code>q=3 mod7</code>, q occurring to exponent1, and every rational prime factor of R congruent to1 modulo7.</p>
+<p>Symbolically,</p>
+<p><code>k35 miss &lt;=&gt; J35(F) OR S7(F)</code>.</p>
+<p>The two branches may overlap.</p>
+<h3>Proof of sufficiency</h3>
+<ul><li>J35: every divisor residue stays inside subgroup H35 while both exact targets lie outside H35.</li><li>S7: the complete divisor mask modulo7 omits5 while both exact targets equal5 modulo7.</li></ul>
+<h3>Proof of necessity</h3>
+<p>The complete exact center16 closure has only six misses.</p>
+<ul><li>If the mod7 projection omits5, the exact two-state endpoint analysis forces the S7 factor pattern.</li><li>If the mod7 projection contains5, the only miss endpoint is H35 itself. Every prime factor residue of F occurs in the divisor mask, so every prime factor lies in H35, giving J35.</li></ul>
+<p>No census or size bound enters the theorem.</p>
+<hr>
+<h2>7. Coupling to the local companion chain</h2>
+<p>The first four post-k23 dynamic cofactors can now be written</p>
+<pre><code class="language-text">C23 =  6B
+C27 =  7E
+C31 = 10D
+C35 =  3F</code></pre>
+<p>with</p>
+<pre><code class="language-text">B = 8 + 35t
+E = 7 + 30t
+D = 5 + 21t
+F = 17 + 70t.</code></pre>
+<p>They satisfy</p>
+<pre><code class="language-text">7E - 6B  = 1
+10D - 7E = 1
+5D - 3B  = 1
+F - 2B   = 1
+3F - 7E  = 2
+3F - 10D = 1.</code></pre>
+<p>B, E, D, and F are pairwise coprime.</p>
+<p>The last statement follows from the identities above, with E and F both odd in the one relation whose gcd can divide2.</p>
+<p>Thus a branch surviving k23, k27, k31, and k35 carries four disjoint dynamic supports constrained simultaneously by</p>
+<pre><code class="language-text">B : QR23 support
+E : exact k27 seven-mode grammar
+D : QR31 support
+F : J35 OR S7</code></pre>
+<p>plus the affine companion identities.</p>
+<p>This is a substantially more rigid residual state than the original signed-box search.</p>
+<hr>
+<h2>8. Framework consequence</h2>
+<p>The local candidate machine now has exact decision rules at three consecutive post-k23 rungs:</p>
+<pre><code class="language-text">k27 : finite 17-skeleton + seven-mode survivor grammar
+k31 : all prime factors of D must be QR mod31
+k35 : J35(F) OR S7(F)</code></pre>
+<p>A survivor must satisfy all three simultaneously while B,E,D,F remain pairwise coprime and affinely coupled.</p>
+<p>The next theorem target is the <strong>intersection</strong>, not another blind shift census:</p>
+<p><code>QR23(B) ∩ G27(E) ∩ QR31(D) ∩ (J35(F) union S7(F))</code>.</p>
+<p>If that residual product state can be split into finitely many forced exits at k39, k43, k47, and beyond, the candidate framework gains a genuine chained transition mechanism.</p>
+<p>Erdős–Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

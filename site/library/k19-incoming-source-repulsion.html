@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="On hard class">
+  <title>Incoming positive-source repulsion at h=289, k=19 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k19-incoming-source-repulsion.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k19-incoming-source-repulsion.html">
+  <meta property="og:title" content="Incoming positive-source repulsion at h=289, k=19 — Free Computation Foundation">
+  <meta property="og:description" content="On hard class">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Incoming positive-source repulsion at h=289, k=19</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">On hard class</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K19-INCOMING-SOURCE-REPULSION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact fixed-shift route theorem</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> reciprocity-route barrier, Jacobi-saturation character extraction, QR-saturating routed seeds</p>
+<p><strong>Primary classifier:</strong> <code>classify_k19_incoming_source_repulsion.py</code></p>
+<p><strong>Independent verifier:</strong> <code>verify_k19_incoming_source_repulsion.py</code></p>
+<p><strong>Claim boundary:</strong> this eliminates the three negative h=289 k=19 miss centers after a sharp class of positive incoming routes. It does not eliminate the positive k=19 centers and does not prove Erdős-Straus.</p>
+<h2>1. Ordinary h=289 geometry at k=19</h2>
+<p>On hard class</p>
+<p><code>p mod840 = 289</code>,</p>
+<p>the class-conditioned k=19 seed is</p>
+<p><code>g_(19,289) = 7</code>.</p>
+<p>Divisors of 7 squared have residues</p>
+<p><code>H = {1,7,11} mod19</code>.</p>
+<p>This is the unique order-3 subgroup inside the order-9 quadratic-residue group</p>
+<p><code>QR(19) = {1,4,5,6,7,9,11,16,17}</code>.</p>
+<p>The exact seed7 state closure has</p>
+<ul><li>51 total states;</li><li>18 miss states;</li><li>exactly three negative-character miss centers:</li></ul>
+<p><code>p mod19 = 2,3,14</code>.</p>
+<p>The remaining miss centers are quadratic residues.</p>
+<h2>2. Route a positive source q into C19</h2>
+<p>Let q be a prime available as a positive character source and suppose it is routed into</p>
+<p><code>C19 = (p+19)/4</code>.</p>
+<p>Thus</p>
+<p><code>q | C19</code>.</p>
+<p>The reciprocity-route barrier at destination k=19 implies</p>
+<p><code>(q/19)=+1</code>.</p>
+<p>Therefore</p>
+<p><code>q mod19</code> lies in QR(19).</p>
+<p>The mandatory seed becomes</p>
+<p><code>7q</code>.</p>
+<h2>3. Exact quotient-group saturation law</h2>
+<p>There are two cases.</p>
+<p>If</p>
+<p><code>q mod19</code> lies in H={1,7,11},</p>
+<p>then powers q^0,q^1,q^2 remain in H and adjoining q does not enlarge the seed7 subgroup beyond H.</p>
+<p>If instead</p>
+<p><code>q mod19</code> lies in</p>
+<p><code>{4,5,6,9,16,17}</code>,</p>
+<p>then q lies outside H. Since QR(19)/H has order3, the three cosets</p>
+<p><code>H</code>, <code>qH</code>, <code>q^2 H</code></p>
+<p>are all distinct and exhaust QR(19).</p>
+<p>But those are precisely the residue classes supplied by divisors</p>
+<p><code>7^a q^b</code>, with <code>0&lt;=a&lt;=2</code> and <code>0&lt;=b&lt;=2</code>,</p>
+<p>of <code>(7q)^2</code>.</p>
+<p>Therefore:</p>
+<blockquote><p>On h=289, an incoming positive source q QR-saturates k=19 exactly when <code>q mod19</code> lies in <code>{4,5,6,9,16,17}</code>.</p></blockquote>
+<p>The non-repelling positive residues <code>{1,7,11}</code> are the sharp complement.</p>
+<h2>4. Elimination of the three negative centers</h2>
+<p>Once seed7q is QR-saturating, a fixed k=19 miss requires every prime factor of C19 to be a quadratic residue modulo19. Hence p mod19 must itself be a quadratic residue.</p>
+<p>Therefore the ordinary negative miss centers</p>
+<p><code>2,3,14</code></p>
+<p>are impossible after any repelling incoming source route.</p>
+<p>So:</p>
+<blockquote><p>On h=289, if a positive-character prime q routes into C19 and <code>q mod19</code> is one of <code>4,5,6,9,16,17</code>, then k=19 cannot miss at p mod19=2,3,14.</p></blockquote>
+<h2>5. Explicit Type-II divisor table</h2>
+<p>The elimination is constructive.</p>
+<p>For the three negative centers the Type-II targets are</p>
+<ul><li>p mod19=2 -&gt; target9;</li><li>p mod19=3 -&gt; target4;</li><li>p mod19=14 -&gt; target6.</li></ul>
+<p>For every repelling q residue, the following divisors D of <code>(7q)^2</code> hit those targets exactly.</p>
+<table class="directory"><thead><tr><th>q mod19</th><th>p mod19=2, target9</th><th>p mod19=3, target4</th><th>p mod19=14, target6</th></tr></thead><tbody><tr><td>4</td><td><code>7q</code></td><td><code>q</code></td><td><code>7^2 q</code></td></tr><tr><td>5</td><td><code>7^2 q^2</code></td><td><code>7 q^2</code></td><td><code>q^2</code></td></tr><tr><td>6</td><td><code>7^2 q</code></td><td><code>7q</code></td><td><code>q</code></td></tr><tr><td>9</td><td><code>q</code></td><td><code>7^2 q</code></td><td><code>7q</code></td></tr><tr><td>16</td><td><code>q^2</code></td><td><code>7^2 q^2</code></td><td><code>7 q^2</code></td></tr><tr><td>17</td><td><code>7 q^2</code></td><td><code>q^2</code></td><td><code>7^2 q^2</code></td></tr></tbody></table>
+<p>Every exponent is at most2, so each D divides <code>(7q)^2</code>, which divides <code>C19^2</code>.</p>
+<h2>6. Current source examples</h2>
+<h3>q=23</h3>
+<p><code>23 mod19 = 4</code>.</p>
+<p>This is repelling. The merged q23-to-k19 h=289 route has seed161=7*23 and exact QR-support rigidity.</p>
+<h3>q=47</h3>
+<p><code>47 mod19 = 9</code>.</p>
+<p>This is repelling. The merged q47-to-k19 route has seed329=7*47 and exact QR-support rigidity.</p>
+<h3>q=17 - newly extracted recursive source</h3>
+<p>The composite k=51 theorem on h=289 can extract</p>
+<p><code>(17/p)=+1</code></p>
+<p>from the branch</p>
+<p><code>p mod11=4</code>, <code>p mod23=18</code>, k51 miss.</p>
+<p>Refining to</p>
+<p><code>p mod17=15</code></p>
+<p>routes 17 into C19. Since</p>
+<p><code>17 mod19=17</code>,</p>
+<p>this is a repelling source. Thus the three negative k19 centers die.</p>
+<h3>q=43 - newly extracted recursive source</h3>
+<p>The composite k=215 theorem on h=289 can extract</p>
+<p><code>(43/p)=+1</code></p>
+<p>from</p>
+<p><code>p mod11=5</code>, <code>p mod31=2</code>, k215 miss.</p>
+<p>Refining to</p>
+<p><code>p mod43=24</code></p>
+<p>routes 43 into C19. Since</p>
+<p><code>43 mod19=5</code>,</p>
+<p>this is also repelling and eliminates all three negative centers.</p>
+<h3>q=11 - sharp non-repelling control</h3>
+<p><code>11 mod19=11</code>,</p>
+<p>which lies inside H. A routed q11 factor therefore remains inside the existing seed7 subgroup and does not QR-saturate the destination by itself.</p>
+<p>This is the exact analogue of q47 as the identity-residue control in the k23 repulsion theorem, but here the non-repelling set is the full order-3 subgroup H rather than only the identity.</p>
+<h2>7. Six independent recursive anchors</h2>
+<p>The independent verifier pins one actual prime for every negative center on each of the two newly extracted recursive sources.</p>
+<p>For q17:</p>
+<ul><li>p mod19=2: p=123,985,129;</li><li>p mod19=3: p=116,759,449;</li><li>p mod19=14: p=311,852,809.</li></ul>
+<p>Each satisfies the q17 extraction-source residues, genuinely misses k51, routes 17 into C19, and then hits k19 with the explicit D from the table.</p>
+<p>For q43:</p>
+<ul><li>p mod19=2: p=817,957,849;</li><li>p mod19=3: p=571,619,449;</li><li>p mod19=14: p=1,606,240,729.</li></ul>
+<p>Each satisfies the q43 extraction-source residues, genuinely misses k215, routes 43 into C19, and then hits k19 with the exact Type-II divisor.</p>
+<p>These anchors validate the branch realizations but are not the proof. The proof is the quotient-group saturation argument.</p>
+<h2>8. Strategic consequence</h2>
+<p>The route graph now has two proved source-repulsion destinations:</p>
+<ul><li>k=23 - every nonidentity incoming QR source residue repels the two negative exceptions;</li><li>h=289, k=19 - every incoming QR source outside the seed7 subgroup repels the three negative exceptions.</li></ul>
+<p>This identifies a more general pattern:</p>
+<blockquote><p>the ordinary mandatory seed occupies a subgroup or near-subgroup of the destination QR geometry; an incoming positive source that leaves that stabilizer can expand the divisor lattice to full QR support, causing all negative-center miss branches to collapse.</p></blockquote>
+<p>The next theorem target is to characterize this stabilizer/repeller structure at the other non-rigid prime destinations rather than discovering routed saturation one source at a time.</p>
+<p>Erdős-Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

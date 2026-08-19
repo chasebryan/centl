@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Counterexample to universal external-NR failed-cycle obstruction — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/external-nr-failed-cycle-counterexample.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/external-nr-failed-cycle-counterexample.html">
+  <meta property="og:title" content="Counterexample to universal external-NR failed-cycle obstruction — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Counterexample to universal external-NR failed-cycle obstruction</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/EXTERNAL-NR-FAILED-CYCLE-COUNTEREXAMPLE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact counterexample to a proposed proof bridge</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>EXTERNAL-NR-FACTOR-CYCLE.md</code>, <code>BINARY-EXTERNAL-CYCLE-DEFECT.md</code>, <code>ES-BINARY-LANE-I-EQUIVALENCE.md</code></p>
+<p><strong>Claim boundary:</strong> this does <strong>not</strong> disprove Erdős–Straus. It disproves the proposed intermediate statement that no directed external-nonresidue factor cycle can carry binary/two-target failure at every vertex. The prime below is solved at another shift.</p>
+<hr>
+<h2>1. The hard prime</h2>
+<p>Take</p>
+<div class="math" role="math">\boxed{p=118801.}</div>
+<p>It is prime and</p>
+<div class="math" role="math">\boxed{p\equiv361\pmod{840},}</div>
+<p>so it lies in the Mordell-hard wheel.</p>
+<p>The external nonresidue primes</p>
+<div class="math" role="math">\boxed{113,\ 37,\ 929}</div>
+<p>all satisfy</p>
+<div class="math" role="math">\boxed{ \left(\frac{113}{p}\right) = \left(\frac{37}{p}\right) = \left(\frac{929}{p}\right) =-1. }</div>
+<hr>
+<h2>2. Exact directed cycle</h2>
+<p>For an external prime <code>q</code>, recall</p>
+<div class="math" role="math">R_q= \begin{cases} q,&amp;q\equiv3\pmod4,\\ 3q,&amp;q\equiv1\pmod4, \end{cases} \qquad A_q=\frac{p+R_q}{4}.</div>
+<p>All three vertices here are <code>1 mod 4</code>, so their admissible shifts are <code>3q</code>.</p>
+<h3>Vertex <code>113</code></h3>
+<div class="math" role="math">R_{113}=339,</div>
+<div class="math" role="math">A_{113} =\frac{118801+339}{4} =29785 =5\cdot7\cdot23\cdot37.</div>
+<p>The unique external-nonresidue prime factor is <code>37</code>, hence</p>
+<div class="math" role="math">\boxed{113\to37.}</div>
+<h3>Vertex <code>37</code></h3>
+<div class="math" role="math">R_{37}=111,</div>
+<div class="math" role="math">A_{37} =\frac{118801+111}{4} =29728 =2^5\cdot929.</div>
+<p>The unique external-nonresidue prime factor is <code>929</code>, hence</p>
+<div class="math" role="math">\boxed{37\to929.}</div>
+<h3>Vertex <code>929</code></h3>
+<div class="math" role="math">R_{929}=2787,</div>
+<div class="math" role="math">A_{929} =\frac{118801+2787}{4} =30397 =113\cdot269.</div>
+<p>The unique external-nonresidue prime factor is <code>113</code>, hence</p>
+<div class="math" role="math">\boxed{929\to113.}</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{113\to37\to929\to113}</div>
+<p>is an exact directed external-NR factor cycle.</p>
+<hr>
+<h2>3. Every vertex fails the exact two-target test</h2>
+<p>For a fixed admissible shift <code>R</code>, put</p>
+<div class="math" role="math">C=\frac{p+R}{4}.</div>
+<p>The divisor-square form of the exact two-target theorem uses</p>
+<div class="math" role="math">D(C^2)=\{d\bmod R:d\mid C^2\},</div>
+<p>with targets</p>
+<div class="math" role="math">\tau_I=-4^{-1}\pmod R, \qquad \tau_{II}=-C\pmod R.</div>
+<p>The three cycle vertices give:</p>
+<table class="directory"><thead><tr><th>source <code>q</code></th><th>shift <code>R_q</code></th><th><code>C=A_q</code></th><th>`</th><th>D(C^2)</th><th>`</th><th><code>tau_I</code></th><th><code>tau_II</code></th><th>result</th></tr></thead><tbody><tr><td>113</td><td>339</td><td>29,785</td><td>75</td><td>254</td><td>47</td><td>both miss</td><td></td><td></td></tr><tr><td>37</td><td>111</td><td>29,728</td><td>26</td><td>83</td><td>20</td><td>both miss</td><td></td><td></td></tr><tr><td>929</td><td>2,787</td><td>30,397</td><td>9</td><td>2,090</td><td>260</td><td>both miss</td><td></td><td></td></tr></tbody></table>
+<p>Thus</p>
+<div class="math" role="math">\boxed{ D(A_q^2)\cap\{\tau_I,\tau_{II}\}=\varnothing }</div>
+<p>for every vertex in the cycle.</p>
+<hr>
+<h2>4. Independent binary-collision check</h2>
+<p>The binary formulation uses</p>
+<div class="math" role="math">N_q=pA_q</div>
+<p>and its signed divisor box modulo <code>R_q</code>. By <code>ES-BINARY-LANE-I-EQUIVALENCE.md</code>, binary rescue is equivalent to the two-target Lane-I hit above.</p>
+<p>Direct signed-box reconstruction gives:</p>
+<table class="directory"><thead><tr><th>source <code>q</code></th><th>shift <code>R_q</code></th><th>signed-box size</th><th><code>-1</code> present?</th></tr></thead><tbody><tr><td>113</td><td>339</td><td>178</td><td>no</td></tr><tr><td>37</td><td>111</td><td>62</td><td>no</td></tr><tr><td>929</td><td>2,787</td><td>27</td><td>no</td></tr></tbody></table>
+<p>So the counterexample does not depend on choosing one coordinate system:</p>
+<div class="math" role="math">\boxed{ \text{every vertex fails both the exact Lane-I test and the equivalent binary collision.} }</div>
+<hr>
+<h2>5. The edge cofactor is factorwise QR</h2>
+<p>This cycle is especially sharp because every shifted factor has <strong>exactly one</strong> external-nonresidue valuation unit.</p>
+<p>Writing</p>
+<div class="math" role="math">A_q=c_q q_{\rm next},</div>
+<p>the cofactors are</p>
+<div class="math" role="math">\boxed{c_{113}=5\cdot7\cdot23,}</div>
+<div class="math" role="math">\boxed{c_{37}=2^5,}</div>
+<div class="math" role="math">\boxed{c_{929}=269.}</div>
+<p>Every prime factor of each cofactor is a quadratic residue modulo <code>p</code>; by the reciprocity-transfer theorem it is also Jacobi-positive at the corresponding source shift.</p>
+<p>Thus even the strongest first-odd-packet shape</p>
+<div class="math" role="math">\boxed{\text{one simple external-NR edge factor}\times\text{factorwise QR cofactor}}</div>
+<p>can persist around a complete failed cycle.</p>
+<p>This is the critical falsification.</p>
+<hr>
+<h2>6. Why this is not an Erdős–Straus counterexample</h2>
+<p>The same prime is solved at the ordinary corridor shift</p>
+<div class="math" role="math">\boxed{k=59.}</div>
+<p>There</p>
+<div class="math" role="math">C_{59} =\frac{118801+59}{4} =29715 =3\cdot5\cdot7\cdot283.</div>
+<p>The exact Type-II divisor target is</p>
+<div class="math" role="math">-C_{59}\equiv21\pmod{59},</div>
+<p>and the literal divisor</p>
+<div class="math" role="math">\boxed{21\mid C_{59}^2}</div>
+<p>hits it. The Type-I target is also attained, for example by</p>
+<div class="math" role="math">\boxed{21225\mid C_{59}^2.}</div>
+<p>Hence <code>p=118801</code> is an ordinary solved prime. It only disproves the proposed universal failed-cycle obstruction.</p>
+<hr>
+<h2>7. Research consequence</h2>
+<p>The following proposed bridge is false:</p>
+<blockquote><p>no directed external-nonresidue factor cycle can carry binary failure at every vertex.</p></blockquote>
+<p>Even strengthening the edge alphabet to</p>
+<ul><li>odd external-NR packet;</li><li>exactly one external-NR valuation unit;</li><li>factorwise QR cofactor;</li><li>exact binary/two-target failure at every vertex;</li></ul>
+<p>does not rescue that statement.</p>
+<p>Therefore the cycle program cannot close Erdős–Straus by a <strong>pure local-consistency contradiction around the cycle</strong>.</p>
+<p>Any surviving use of the cycle must import information from outside the cycle, for example:</p>
+<ol><li>another admissible shift attached to the same prime;</li><li>interaction between the cycle and the consecutive corridor;</li><li>a global size/order invariant not encoded by the local edge characters;</li><li>a theorem forcing a non-cycle target such as the observed <code>k=59</code> rescue.</li></ol>
+<p>The failed cycle is still useful structure, but it is not itself the contradiction.</p>
+<hr>
+<p>Erdős–Straus remains open. The counterexample closes only this proposed intermediate proof route.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

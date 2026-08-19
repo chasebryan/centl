@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="For">
+  <title>k35 survivor branch couples to the 3-adic phase — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k35-3adic-branch-coupling.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k35-3adic-branch-coupling.html">
+  <meta property="og:title" content="k35 survivor branch couples to the 3-adic phase — Free Computation Foundation">
+  <meta property="og:description" content="For">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>k35 survivor branch couples to the 3-adic phase</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">For</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K35-3ADIC-BRANCH-COUPLING.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact product-state coupling inside the candidate decomposition framework</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Verifier:</strong> <code>verify_k35_3adic_branch_coupling.py</code></p>
+<p><strong>Depends on:</strong> <code>K35-TWO-BRANCH-SURVIVOR-THEOREM.md</code></p>
+<p><strong>Claim boundary:</strong> exact implication on h169 branches surviving k35. This is a branch/valuation state reduction, not a termination theorem, not a closed decomposition method, and not an Erdős–Straus proof.</p>
+<h2>1. Exact k35 survivor branches</h2>
+<p>For</p>
+<p><code>p = 169 + 840t</code>,</p>
+<p>write</p>
+<p><code>C35 = 3F</code>,</p>
+<p>with</p>
+<p><code>F = 17 + 70t</code>.</p>
+<p>The landed exact theorem is</p>
+<p><code>k35 miss &lt;=&gt; J35(F) OR S7(F)</code>.</p>
+<p>The two conditions are:</p>
+<h3>J35</h3>
+<p>Every rational prime q dividing F satisfies</p>
+<p><code>(q/5)(q/7)=+1</code>.</p>
+<p>Equivalently every q|F lies in the index-two subgroup H35.</p>
+<h3>S7</h3>
+<p><code>F=qR</code>, where q is prime, q=3 mod7, q occurs with exponent exactly1, and every prime factor of R is1 mod7.</p>
+<p>Equivalently, among prime-factor occurrences of F, exactly one is3 modulo7 and every other occurrence is1 modulo7.</p>
+<p>The branches may overlap.</p>
+<h2>2. The rational prime3 is special</h2>
+<p>The rational prime3 satisfies</p>
+<p><code>3 = 3 mod7</code>.</p>
+<p>It also belongs to H35 because</p>
+<p><code>(3/5)=-1</code></p>
+<p>and</p>
+<p><code>(3/7)=-1</code>,</p>
+<p>so their product is +1.</p>
+<p>Thus additional powers of3 have opposite effects on the two survivor mechanisms:</p>
+<ul><li>S7 can tolerate the prime3 only as the unique 3-mod7 occurrence and only to exponent1;</li><li>J35 has no obstruction to repeated factors3 because residue3 lies in H35.</li></ul>
+<p>This creates an exact valuation-to-branch coupling.</p>
+<h2>3. Exact 3-adic phase of F</h2>
+<p>Modulo9,</p>
+<p><code>F = 17 + 70t = 8 + 7t mod9</code>.</p>
+<p>Therefore</p>
+<p><code>9 | F &lt;=&gt; t = 4 mod9</code>.</p>
+<p>Also</p>
+<p><code>3 | F &lt;=&gt; t = 1 mod3</code>.</p>
+<p>The three t phases modulo9 with 3|F are</p>
+<pre><code class="language-text">t=1 mod9 : F=6 mod9  -&gt; v3(F)=1
+t=4 mod9 : F=0 mod9  -&gt; v3(F)&gt;=2
+t=7 mod9 : F=3 mod9  -&gt; v3(F)=1.</code></pre>
+<h2>4. S7 is impossible when 9 divides F</h2>
+<p>Suppose</p>
+<p><code>t = 4 mod9</code>.</p>
+<p>Then <code>3^2 | F</code>. Hence the prime-factor occurrence multiset of F contains rational prime3 at least twice.</p>
+<p>Each of those occurrences is <code>3 mod7</code>.</p>
+<p>But S7 requires exactly one 3-mod7 occurrence, and that occurrence must have exponent exactly1.</p>
+<p>Therefore</p>
+<p><code>t = 4 mod9 =&gt; NOT S7(F)</code>.</p>
+<p>Combining with the exact k35 iff theorem gives</p>
+<p><code>k35 miss AND t=4 mod9 =&gt; J35(F)</code>.</p>
+<p>This removes the formal product-state combination</p>
+<p><code>S7 × (t=4 mod9)</code>.</p>
+<p>No finite census enters the argument.</p>
+<h2>5. The neighboring single-3 phases</h2>
+<p>Suppose</p>
+<p><code>t = 1 mod9</code></p>
+<p>or</p>
+<p><code>t = 7 mod9</code>.</p>
+<p>Then <code>v3(F)=1</code>.</p>
+<p>If S7 holds, rational prime3 is already a 3-mod7 occurrence. Since S7 permits exactly one such occurrence, it must be the distinguished exceptional prime q.</p>
+<p>Therefore on these phases</p>
+<p><code>S7(F) =&gt; F = 3R</code></p>
+<p>with</p>
+<p><code>every rational prime factor of R = 1 mod7</code>.</p>
+<p>So the S7 branch becomes completely explicit whenever 3 divides F to first order.</p>
+<p>Symbolically:</p>
+<pre><code class="language-text">t mod9 in {1,7}
+AND S7
+    -&gt; distinguished q = 3
+    -&gt; F/3 has only 1-mod7 prime support.</code></pre>
+<h2>6. Complete phase grammar modulo9</h2>
+<p>The resulting k35 branch/phase grammar is:</p>
+<pre><code class="language-text">t mod3 != 1:
+    3 does not divide F;
+    S7, if present, uses some prime q != 3 with q=3 mod7.
+
+t mod9 in {1,7}:
+    v3(F)=1;
+    S7, if present, must use q=3 exactly once.
+
+t mod9 = 4:
+    v3(F)&gt;=2;
+    S7 impossible;
+    k35 miss forces J35.</code></pre>
+<p>Because J35 and S7 may overlap on other phases, this theorem is not an exclusive global partition. Its exact pruning permission is the one-way implication above.</p>
+<h2>7. Realized-route forms</h2>
+<h3>Route A</h3>
+<p>Route A has</p>
+<p><code>t = 199 + 391u</code>.</p>
+<p>Modulo9,</p>
+<p><code>t = 1 + 4u</code>.</p>
+<p>Hence</p>
+<pre><code class="language-text">u=3 mod9 -&gt; t=4 mod9 -&gt; S7 impossible; k35 miss forces J35.</code></pre>
+<p>If Route-A S7 occurs while 3|F, then</p>
+<pre><code class="language-text">u mod9 in {0,6}</code></pre>
+<p>and the distinguished S7 prime is3.</p>
+<h3>Route B</h3>
+<p>Route B has</p>
+<p><code>t = 705 + 1081u</code>.</p>
+<p>Modulo9,</p>
+<p><code>t = 3 + u</code>.</p>
+<p>Hence</p>
+<pre><code class="language-text">u=1 mod9 -&gt; t=4 mod9 -&gt; S7 impossible; k35 miss forces J35.</code></pre>
+<p>If Route-B S7 occurs while 3|F, then</p>
+<pre><code class="language-text">u mod9 in {4,7}</code></pre>
+<p>and again the distinguished S7 prime is3.</p>
+<p>These are exact ancestry-conditioned phase rules.</p>
+<h2>8. Machine consequence</h2>
+<p>The k35 branch label and the 3-adic valuation/phase coordinate are not independent.</p>
+<p>The exact state grammar can record</p>
+<pre><code class="language-text">if v3(F) &gt;= 2:
+    S7 = false
+    if k35 misses: J35 = true
+
+if v3(F) == 1 and S7:
+    distinguished_S7_prime = 3
+    support(F/3) subset {q: q=1 mod7}</code></pre>
+<p>This is a second species of non-Cartesian state reduction, independent of the k31/k47 2-adic seam coupling.</p>
+<h2>9. Bryan Entanglement Cross draft boundary</h2>
+<p>The in-draft Bryan Entanglement Cross may later annotate the passage from S7 possibility to forced J35 as downward/excavation followed by a sharpened surviving branch.</p>
+<p>That annotation is not proof data. The exact 3-adic valuation and landed k35 iff theorem are the sole source of pruning permission.</p>
+<h2>10. Next target</h2>
+<p>The next useful intersection is to combine this k35 branch/valuation grammar with the route-conditioned phase state and the k31/k47 mode/seam grammar.</p>
+<p>The objective is no longer to enumerate all formal tuples. It is to construct a reduced dependency graph in which phase, valuation, survivor mode, and support edges propagate constraints into one another before any new signed-box search is scheduled.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

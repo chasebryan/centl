@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="For every Mordell-hard prime, the class-conditioned seed at fixed shift k=23 is exactly 6. The exact seed-6 unit-state closure modulo 23 has">
+  <title>Routed bottlenecks at k=19 and k=23 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k19-k23-routed-bottlenecks.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k19-k23-routed-bottlenecks.html">
+  <meta property="og:title" content="Routed bottlenecks at k=19 and k=23 — Free Computation Foundation">
+  <meta property="og:description" content="For every Mordell-hard prime, the class-conditioned seed at fixed shift k=23 is exactly 6. The exact seed-6 unit-state closure modulo 23 has">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Routed bottlenecks at k=19 and k=23</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">For every Mordell-hard prime, the class-conditioned seed at fixed shift k=23 is exactly 6. The exact seed-6 unit-state closure modulo 23 has</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K19-K23-ROUTED-BOTTLENECKS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact fixed-shift theorem series</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>SMALL-PRIME-CLASS-CHARACTER-ATLAS.md</code>, <code>K11-CHARACTER-COMPANION-ROUTING.md</code>, class-conditioned seed law, Lane-I divisor-square equivalence</p>
+<p><strong>Primary classifier:</strong> <code>classify_k19_k23_routed_bottlenecks.py</code></p>
+<p><strong>Independent realization regression:</strong> <code>verify_k19_k23_routed_bottlenecks.py</code></p>
+<p><strong>Claim boundary:</strong> every theorem below is range-free at its named fixed shifts. None proves a universal shift ceiling or Erdős-Straus.</p>
+<h2>1. k=23 has only two negative-character miss exits</h2>
+<p>For every Mordell-hard prime, the class-conditioned seed at fixed shift k=23 is exactly 6. The exact seed-6 unit-state closure modulo 23 has</p>
+<ul><li>49 total states;</li><li>15 miss states;</li><li>13 positive-character miss states;</li><li>exactly 2 negative-character miss states.</li></ul>
+<p>The two negative states have</p>
+<ul><li>p mod 23 = 5;</li><li>p mod 23 = 14.</li></ul>
+<p>There are no other negative-character k=23 misses.</p>
+<p>Therefore, range-free,</p>
+<blockquote><p>If a Mordell-hard prime misses fixed k=23 and <code>(23/p)=-1</code>, then <code>p mod23</code> is 5 or 14.</p></blockquote>
+<p>The character obstruction therefore has only two exits. The general companion-routing identity sends them to</p>
+<ul><li>p mod23 = 5 -&gt; 23 divides C87;</li><li>p mod23 = 14 -&gt; 23 divides C55.</li></ul>
+<p>So the negative k=23 branch is not an unstructured half of the prime classes. It is a two-route factor-allocation problem.</p>
+<h2>2. The p mod23 = 14 exit becomes rigid at k=55 for h=1,169</h2>
+<p>On the p mod23=14 route, factor 23 is forced into</p>
+<p><code>C55 = (p+55)/4</code>.</p>
+<p>For hard classes h=1 and h=169 modulo 840, the class-conditioned seed at k=55 is 14. Hence the routed seed is</p>
+<p><code>14 * 23 = 322</code>.</p>
+<p>The exact seed-322 closure modulo 55 has</p>
+<ul><li>85 total states;</li><li>5 miss states before the exact hard-class center is imposed.</li></ul>
+<p>After imposing the hard class, each of h=1 and h=169 leaves exactly one miss state.</p>
+<p>Those two possible miss centers correspond to</p>
+<ul><li>h=1 -&gt; p mod55 = 1;</li><li>h=169 -&gt; p mod55 = 34.</li></ul>
+<p>Both satisfy</p>
+<p><code>p mod11 = 1</code>.</p>
+<p>Therefore:</p>
+<blockquote><p>For h in {1,169} and p mod23=14, a fixed k=55 miss forces p mod11=1.</p></blockquote>
+<p>Equivalently, on this routed branch, every p mod11 value other than 1 is killed at k=55.</p>
+<p>If k=55 still misses, p mod11=1 routes factor 11 into</p>
+<p><code>C43 = (p+43)/4</code>.</p>
+<p>This gives the exact chain</p>
+<p><code>k23 negative miss -&gt; p mod23=14 -&gt; 23|C55 -&gt; either k55 hits or p mod11=1 -&gt; 11|C43</code>.</p>
+<p>For h=169 this sharpens the earlier k=11 positive-character restriction from five possible quadratic-residue classes modulo 11 to the single residue 1 on this routed branch.</p>
+<h2>3. The h=121 k=19 branch routes into a one-state k=15 obstruction</h2>
+<p>The existing small-prime atlas proves that on hard class h=121, a fixed k=19 miss has QR-only prime support modulo 19. In particular, <code>(19/p)=+1</code>.</p>
+<p>One positive-character branch is</p>
+<p><code>p mod19 = 4</code>.</p>
+<p>The routing identity sends this residue to k=15:</p>
+<p><code>19 divides C15</code>.</p>
+<p>For h=121, the class seed at k=15 is 2, so the routed seed is</p>
+<p><code>2 * 19 = 38</code>.</p>
+<p>Because 15 divides the hard-class modulus 840, h=121 also fixes</p>
+<p><code>p mod15 = 1</code></p>
+<p>and hence the exact k=15 center.</p>
+<p>The seed-38 closure modulo 15 has 12 states and 4 misses over all centers. After imposing p mod15=1, exactly one miss state remains. Its complete divisor-residue mask is</p>
+<p><code>{1,2,4,8} mod15</code>.</p>
+<p>This set is exactly the kernel of the Jacobi character modulo 15:</p>
+<p><code>(a/15) = (a/3)(a/5) = +1</code>.</p>
+<p>Therefore the routed branch admits a complete support characterization:</p>
+<blockquote><p>For h=121 and p mod19=4, fixed k=15 misses if and only if every prime factor of C15 lies in {1,2,4,8} modulo 15.</p></blockquote>
+<p>The forward direction follows because every prime factor of C15 occurs as an exponent-one divisor residue and the unique miss mask contains only the Jacobi-plus subgroup. The reverse direction follows because products of Jacobi-plus residues remain Jacobi-plus, while the k=15 target lies in the opposite character coset.</p>
+<p>Thus an h=121 simultaneous survivor on this route must satisfy two adjacent support restrictions:</p>
+<ul><li>C19 has only quadratic-residue prime support modulo 19;</li><li>C15 has only Jacobi-plus prime support modulo 15.</li></ul>
+<p>The companions are adjacent integers:</p>
+<p><code>C19 = C15 + 1</code>.</p>
+<p>In h=121 coordinates,</p>
+<p><code>C19 = 35(6r+1)</code></p>
+<p>and</p>
+<p><code>C15 = 2(105r+17)</code>,</p>
+<p>so the seed-stripped residuals obey</p>
+<p><code>35(6r+1) - 2(105r+17) = 1</code>.</p>
+<p>This is a genuine cross-shift support bottleneck, but not a contradiction. Small arithmetic realizations satisfying both support semigroups exist, so no universal coverage claim is made from the relation alone.</p>
+<h2>4. Why this narrows the proof search</h2>
+<p>The previous character atlas left positive and negative character branches as abstract residue conditions. The routed analysis converts several of those branches into compulsory prime factors in later companions, where the existing class seeds make the next state space much smaller.</p>
+<p>The new exact structure is:</p>
+<ul><li>k=23 negative miss has only two residue exits;</li><li>one exit feeds k=55 and, on h=1,169, either dies there or forces a single p mod11 residue and another routed factor;</li><li>the rigid h=121 k=19 branch has a p mod19=4 exit whose next obstruction at k=15 is a unique Jacobi-support state.</li></ul>
+<p>The remaining task is no longer to search blindly for stronger isolated characters. It is to couple these routed support semigroups to neighboring companion gcd identities and determine whether an infinite simultaneous allocation remains possible.</p>
+<p>Erdős-Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

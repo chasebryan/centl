@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The local research state now contains enough exact cross-coordinate implications that manual propagation is itself becoming a source of error.">
+  <title>h169 exact dependency propagator — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/h169-dependency-propagator.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/h169-dependency-propagator.html">
+  <meta property="og:title" content="h169 exact dependency propagator — Free Computation Foundation">
+  <meta property="og:description" content="The local research state now contains enough exact cross-coordinate implications that manual propagation is itself becoming a source of error.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>h169 exact dependency propagator</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">The local research state now contains enough exact cross-coordinate implications that manual propagation is itself becoming a source of error.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/H169-DEPENDENCY-PROPAGATOR.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> research implementation of the landed reduced dependency grammar</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Implementation:</strong> <code>propagate_h169_dependency_state.py</code></p>
+<p><strong>Claim boundary:</strong> this tool propagates already-proved constraints inside the realized h169 pair-route survivor laboratory. It does not prove that any surviving formal tuple has an arithmetic realization, does not generalize the two routes to all h169 survivors, does not establish termination, and does not prove Erdős–Straus.</p>
+<h2>1. Purpose</h2>
+<p>The local research state now contains enough exact cross-coordinate implications that manual propagation is itself becoming a source of error.</p>
+<p>The propagator turns the landed dependency grammar into an executable finite constraint system.</p>
+<p>Given a partial state such as</p>
+<pre><code class="language-text">route = B
+k19_mode = BARE</code></pre>
+<p>it applies only the theorem rules already proved in-tree and returns the exact remaining formal domains. In this example it derives</p>
+<pre><code class="language-text">tau19 = 8
+k27_mode = Q
+E_support = QR27.</code></pre>
+<p>The tool is deliberately a <strong>research grammar engine</strong>, not a new CBX cover lane and not a decomposition oracle.</p>
+<h2>2. Scope</h2>
+<p>The universe is the realized h169 pair-route simultaneous-survivor grammar used by <code>H169-REDUCED-DEPENDENCY-GRAMMAR.md</code>.</p>
+<p>The proof-state fields are</p>
+<pre><code class="language-text">tau19
+tau31
+tau4
+tau9
+k19_mode
+k27_mode
+k31_mode
+k35_status
+k47_mode   # Route B only; Route A uses NA internally</code></pre>
+<p>with base domains</p>
+<pre><code class="language-text">tau19 in S19
+tau31 in S31
+tau4 in {0,1,2,3}
+tau9 in {0,...,8}
+k19_mode in {BARE,FULL_QR}
+k27_mode in {Q,A,B,C,D,E,F}
+k31_mode in {BARE,FULL_QR}
+k35_status in {J_ONLY,S7_ONLY,BOTH}
+k47_mode in {THIN,FULL_QR} on Route B.</code></pre>
+<p>Every enumerated formal state already means the relevant shifts are in their survivor/miss state. The tool must not be applied to an arbitrary integer without first establishing that route/survivor context.</p>
+<h2>3. Exact rules compiled in v1</h2>
+<p>The engine contains six named theorem predicates.</p>
+<h3><code>k19-bare-phase</code></h3>
+<pre><code class="language-text">Route A BARE -&gt; tau19=2
+Route B BARE -&gt; tau19=8.</code></pre>
+<h3><code>k27-phase8-q-selector</code></h3>
+<pre><code class="language-text">tau19=8
+  -&gt; 19|E
+  -&gt; on k27 miss: k27 mode Q
+  -&gt; E support QR27.</code></pre>
+<h3><code>k31-bare-phase-seam</code></h3>
+<pre><code class="language-text">k31 BARE
+  -&gt; tau31 in {0,19,29}
+  -&gt; tau4 even.</code></pre>
+<h3><code>route-b-k47-thin-even</code></h3>
+<pre><code class="language-text">Route-B k47 THIN -&gt; tau4 even.</code></pre>
+<h3><code>route-b-odd-full-full</code></h3>
+<pre><code class="language-text">Route B + tau4 odd
+  -&gt; D-J gcd2 seam
+  -&gt; k31 FULL_QR
+  -&gt; k47 FULL_QR.</code></pre>
+<h3><code>k35-v3-ge2-j-only</code></h3>
+<pre><code class="language-text">tau9=4
+  -&gt; 9|F
+  -&gt; S7 impossible
+  -&gt; k35 J_ONLY.</code></pre>
+<p>These rules are not hypotheses generated by the software. They are executable forms of landed research theorems.</p>
+<h2>4. Finite-set semantics</h2>
+<p>The implementation uses a deliberately simple semantics:</p>
+<ol><li>enumerate the finite naive formal grammar for the selected route;</li><li>apply any user-supplied partial assignments;</li><li>filter by every exact theorem predicate;</li><li>project the surviving tuples back onto each field;</li><li>derive parity, 2-adic seam, k35 valuation bucket, and support consequences from those projections.</li></ol>
+<p>This is equivalent to enforcing the current finite relational grammar to a fixed point. No search order can create a state that is not present in the theorem-defined relation.</p>
+<p>A zero-size result is an exact contradiction <strong>inside this grammar scope</strong>.</p>
+<p>A nonzero result means only “not excluded by the compiled theorems.” It does not assert existence of an integer realizing any remaining tuple.</p>
+<h2>5. Examples</h2>
+<h3>Route-B BARE propagation</h3>
+<pre><code class="language-sh">python3 research/erdos-straus/propagate_h169_dependency_state.py \
+  --route B \
+  --k19-mode BARE \
+  --json</code></pre>
+<p>The projected state forces</p>
+<pre><code class="language-text">tau19=8
+k27_mode=Q</code></pre>
+<p>and reports the QR27 support consequence.</p>
+<h3>Exact contradiction</h3>
+<pre><code class="language-sh">python3 research/erdos-straus/propagate_h169_dependency_state.py \
+  --route B \
+  --k19-mode BARE \
+  --k27-mode A \
+  --json</code></pre>
+<p>This returns an empty formal state set because BARE forces tau19=8 and that phase forces k27 mode Q.</p>
+<h3>Route-B odd seam</h3>
+<pre><code class="language-sh">python3 research/erdos-straus/propagate_h169_dependency_state.py \
+  --route B \
+  --tau4 1 \
+  --json</code></pre>
+<p>The output forces</p>
+<pre><code class="language-text">k31_mode=FULL_QR
+k47_mode=FULL_QR
+gcd(D,J)=2.</code></pre>
+<h3>JSON partial state</h3>
+<pre><code class="language-sh">python3 research/erdos-straus/propagate_h169_dependency_state.py \
+  --route A \
+  --state-json &#x27;{&quot;k31_mode&quot;:&quot;BARE&quot;,&quot;tau9&quot;:[1,4,7]}&#x27; \
+  --json</code></pre>
+<p>Scalar values mean exact assignments. JSON lists mean allowed domains.</p>
+<h2>6. Output classes</h2>
+<p>The JSON report separates:</p>
+<ul><li><code>input_formal_tuples</code>: tuples satisfying only the supplied partial state;</li><li><code>surviving_formal_tuples</code>: tuples remaining after the exact grammar;</li><li><code>theorem_trace</code>: named rule filters and their ordered elimination counts;</li><li><code>domains</code>: exact field projections of the remaining formal relation;</li><li><code>forced</code>: singleton field projections;</li><li><code>derived</code>: parity, support seam, k35 valuation bucket, and D-J gcd domain;</li><li><code>support_consequences</code>: theorem-safe support statements available from the projected state;</li><li><code>contradiction</code>: whether the formal relation is empty.</li></ul>
+<p>The elimination count attached to an individual rule is telemetry for the fixed rule order. Rules can overlap, so that count must not be interpreted as a unique causal decomposition of the final compression.</p>
+<h2>7. BEC / BREC annotation boundary</h2>
+<p><code>--annotate-bec</code> adds a candidate directional annotation to theorem-trace events.</p>
+<p>In v1 the compiled rules are restriction/collapse rules and are therefore natural candidates for</p>
+<p><code>↓(⊖/⊕)</code></p>
+<p>metadata.</p>
+<p>The output explicitly labels these annotations as observational scheduling metadata only.</p>
+<p>The engine never reads a BEC/BREC annotation when deciding whether a state survives. Removing all directional metadata leaves the mathematical result unchanged.</p>
+<p>This implements the required separation:</p>
+<pre><code class="language-text">exact theorem relation -&gt; proof state
+BEC/BREC direction      -&gt; interpretation / scheduling metadata.</code></pre>
+<h2>8. Self-tests</h2>
+<p><code>--self-test</code> pins at least the following regressions:</p>
+<ul><li>empty partial state reproduces the landed grammar counts:</li></ul>
+<p>- Route A <code>105,600</code>; - Route B <code>147,900</code>;</p>
+<ul><li>Route-B BARE forces <code>tau19=8</code> and <code>k27=Q</code>;</li><li>Route-B BARE plus <code>k27=A</code> is contradictory;</li><li>Route-B odd tau4 forces FULL_QR at k31 and k47 plus D-J gcd2;</li><li>Route-B THIN restricts tau4 to <code>{0,2}</code>;</li><li>k31 BARE restricts tau31 to <code>{0,19,29}</code> and tau4 to <code>{0,2}</code>;</li><li>tau9=4 forces J_ONLY;</li><li>Route-A BARE fixes tau19=2 but does not falsely collapse k27.</li></ul>
+<h2>9. Why enumeration is acceptable here</h2>
+<p>The finite formal grammar is currently under one million naive tuples on Route B. Exhaustive symbolic filtering is therefore cheap, transparent, and much safer than introducing an optimizer or SAT encoding prematurely.</p>
+<p>If the state grows substantially, the same named constraints can later be compiled into a CSP/SAT/BDD representation. That would be an implementation change, not a mathematical change.</p>
+<h2>10. Next engineering step</h2>
+<p>Once this research propagator is stable, CBX theorem-mining tools can call it before expensive factor work to answer:</p>
+<blockquote><p>what does the existing proof grammar already force on this partial research state?</p></blockquote>
+<p>Any scheduling use must remain advisory until separately integrated and tested. Cover semantics and <code>W -&gt; I -&gt; N -&gt; L</code> remain unchanged.</p>
+<h2>11. Next mathematical step</h2>
+<p>The propagator also turns theorem gaps into visible unresolved domains.</p>
+<p>The highest-value next mining targets are states where the engine leaves several k27 modes or Route-A k51 endpoint sectors alive despite strong upstream assignments. Those are precisely the places where another cross-coordinate theorem would create the largest state contraction.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

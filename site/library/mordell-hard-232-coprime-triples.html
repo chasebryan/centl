@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Let p be Mordell-hard, so">
+  <title>Mordell-hard `2-3-2` coprime companion triples — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/mordell-hard-232-coprime-triples.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/mordell-hard-232-coprime-triples.html">
+  <meta property="og:title" content="Mordell-hard `2-3-2` coprime companion triples — Free Computation Foundation">
+  <meta property="og:description" content="Let p be Mordell-hard, so">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Mordell-hard `2-3-2` coprime companion triples</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Let p be Mordell-hard, so</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/MORDELL-HARD-232-COPRIME-TRIPLES.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved elementary cross-shift theorem</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>MORDELL-HARD-FORCED-SEED-LAW.md</code></p>
+<p><strong>Regression:</strong> <code>verify_mordell_hard_232_triples.py</code></p>
+<p><strong>Claim boundary:</strong> this is an exact structural relation between three neighboring fixed-shift companions. It does not by itself prove that one of the three shifts must hit the Erdős–Straus targets.</p>
+<h2>1. The recurring <code>2-3-2</code> shift block</h2>
+<p>Let <code>p</code> be Mordell-hard, so</p>
+<div class="math" role="math">p=24m+1.</div>
+<p>Take any nonnegative integer <code>t</code> and the three admissible shifts</p>
+<div class="math" role="math">\boxed{ k_0=24t+7, \qquad k_1=24t+11, \qquad k_2=24t+15. }</div>
+<p>Their <code>u=(k+1)/4</code> values are</p>
+<div class="math" role="math">6t+2,\qquad6t+3,\qquad6t+4.</div>
+<p>By the universal hard forced-seed law, the mandatory seeds are therefore</p>
+<div class="math" role="math">\boxed{2,\ 3,\ 2.}</div>
+<p>This produces the repeating blocks</p>
+<pre><code class="language-text">(7, 11, 15)
+(31, 35, 39)
+(55, 59, 63)
+(79, 83, 87)
+(103, 107, 111)
+...</code></pre>
+<h2>2. Exact residual normal form</h2>
+<p>Put</p>
+<div class="math" role="math">n=m+t.</div>
+<p>Then</p>
+<div class="math" role="math">C_{k_0}=\frac{p+k_0}{4} =6n+2 =2(3n+1),</div>
+<div class="math" role="math">C_{k_1}=\frac{p+k_1}{4} =6n+3 =3(2n+1),</div>
+<p>and</p>
+<div class="math" role="math">C_{k_2}=\frac{p+k_2}{4} =6n+4 =2(3n+2).</div>
+<p>Define the seed-stripped residuals</p>
+<div class="math" role="math">\boxed{ A=3n+1, \qquad B=2n+1, \qquad D=3n+2. }</div>
+<p>Then the companion triple is exactly</p>
+<div class="math" role="math">\boxed{ (C_{k_0},C_{k_1},C_{k_2})=(2A,3B,2D). }</div>
+<p>Since <code>D=A+1</code>, the three actual companions are consecutive integers:</p>
+<div class="math" role="math">\boxed{ C_{k_1}=C_{k_0}+1, \qquad C_{k_2}=C_{k_0}+2. }</div>
+<h2>3. Unimodular residual relations</h2>
+<p>The residuals satisfy three determinant-one relations:</p>
+<div class="math" role="math">2A-3B=-1,</div>
+<div class="math" role="math">3B-2D=-1,</div>
+<p>and</p>
+<div class="math" role="math">D-A=1.</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{ 3B=2A+1=2D-1, \qquad D=A+1. }</div>
+<p>These are exact identities, not congruences.</p>
+<h2>4. Pairwise coprimality theorem</h2>
+<p>Any common divisor of <code>A</code> and <code>B</code> divides</p>
+<div class="math" role="math">2A-3B=-1,</div>
+<p>so</p>
+<div class="math" role="math">\gcd(A,B)=1.</div>
+<p>Any common divisor of <code>B</code> and <code>D</code> divides</p>
+<div class="math" role="math">3B-2D=-1,</div>
+<p>so</p>
+<div class="math" role="math">\gcd(B,D)=1.</div>
+<p>Finally <code>D-A=1</code>, hence</p>
+<div class="math" role="math">\gcd(A,D)=1.</div>
+<p>Therefore:</p>
+<h3>Theorem — <code>2-3-2</code> coprime residual triple</h3>
+<p>For every Mordell-hard prime and every block</p>
+<div class="math" role="math">(24t+7,24t+11,24t+15),</div>
+<p>the three seed-stripped fixed-shift companions are pairwise coprime:</p>
+<div class="math" role="math">\boxed{ \gcd(A,B)=\gcd(B,D)=\gcd(A,D)=1. }</div>
+<p>Thus no rational prime can occur in the residual factorization of two different members of the same <code>2-3-2</code> block.</p>
+<h2>5. Exact gcds of the unstripped companions</h2>
+<p>Since</p>
+<div class="math" role="math">(C_{k_0},C_{k_1},C_{k_2})=(2A,3B,2D)</div>
+<p>and <code>A,B,D</code> are pairwise coprime, while adjacent companions are consecutive, one obtains</p>
+<div class="math" role="math">\boxed{ \gcd(C_{k_0},C_{k_1})=1, }</div>
+<div class="math" role="math">\boxed{ \gcd(C_{k_1},C_{k_2})=1, }</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ \gcd(C_{k_0},C_{k_2})=2. }</div>
+<p>So the common factor 2 of the two outer companions is exactly their universal seed and nothing more.</p>
+<h2>6. Factor-support disjointness</h2>
+<p>Let</p>
+<div class="math" role="math">\operatorname{Supp}(N)=\{q:q\text{ prime},\ q\mid N\}.</div>
+<p>The theorem gives</p>
+<div class="math" role="math">\boxed{ \operatorname{Supp}(A), \operatorname{Supp}(B), \operatorname{Supp}(D) \text{ are pairwise disjoint}. }</div>
+<p>This is the key cross-shift consequence for exact state analysis.</p>
+<p>A prime used as a nontrivial packet direction in the seed-stripped state at one member of a <code>2-3-2</code> block cannot simultaneously supply a packet at either of the other two members.</p>
+<p>The forced primes <code>2</code> and <code>3</code> are the only shared structural resources, and those have already been consumed into the seeds.</p>
+<h2>7. The two currently classified blocks</h2>
+<h3>Block <code>(31,35,39)</code></h3>
+<p>Here <code>t=1</code>. The universal seeds are</p>
+<div class="math" role="math">2,\ 3,\ 2.</div>
+<p>The existing k=31 valuation theorem already incorporates the forced factor 2. The new hard reductions give only 64 miss states at k=35 and 36 at k=39.</p>
+<p>The residual factor supports for all three shifts are pairwise disjoint by this theorem.</p>
+<h3>Block <code>(55,59,63)</code></h3>
+<p>Here <code>t=2</code>. Write</p>
+<div class="math" role="math">A=3m+7, \qquad B=2m+5, \qquad D=3m+8.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{ C_{55}=2A, \quad C_{59}=3B, \quad C_{63}=2D, }</div>
+<p>with</p>
+<div class="math" role="math">\boxed{3B=2A+1,\qquad D=A+1.}</div>
+<p>The exact hard miss tables currently have sizes</p>
+<pre><code class="language-text">k=55    314
+k=59  5,869
+k=63     87</code></pre>
+<p>but their residual prime supports cannot overlap. Any simultaneous cross-shift obstruction must therefore be assembled from three disjoint rational-prime sets satisfying the two linear determinant-one identities above.</p>
+<h2>8. The corrected 100M tail sits in the next block</h2>
+<p>The unique corrected 100M corridor survivor after k=63 is</p>
+<div class="math" role="math">p=8,803,369.</div>
+<p>Its first later hit is at k=107.</p>
+<p>The shift 107 is the middle member of the next <code>2-3-2</code> block</p>
+<div class="math" role="math">\boxed{(103,107,111).}</div>
+<p>Accordingly,</p>
+<div class="math" role="math">3\mid C_{107}</div>
+<p>is not an isolated accident. It is the middle seed of the same universal block structure.</p>
+<p>For this prime, k=103 misses and k=107 hits. Since the hit occurs at the middle member, k=111 is not needed for its finite certificate.</p>
+<h2>9. Research consequence</h2>
+<p>The fixed-shift proof problem should no longer treat neighboring seeded layers as independent factorization states.</p>
+<p>For every <code>2-3-2</code> block, after consuming the mandatory seeds, the residual data live on the rigid Diophantine skeleton</p>
+<div class="math" role="math">\boxed{ A,\quad B=\frac{2A+1}{3},\quad A+1, }</div>
+<p>with pairwise disjoint prime supports.</p>
+<p>A universal cross-shift theorem may therefore be attacked by combining:</p>
+<ol><li>the reduced miss-state constraints at the three moduli;</li><li>pairwise disjoint residual prime supports;</li><li>the exact linear relations <code>2A-3B=-1</code> and <code>3B-2D=-1</code>;</li><li>quadratic/Jacobi character restrictions on the allowed packet directions.</li></ol>
+<p>That is a strictly smaller and more structured problem than intersecting three generic fixed-shift state tables.</p>
+<h2>10. Reproduction</h2>
+<pre><code class="language-sh">python3 research/erdos-straus/verify_mordell_hard_232_triples.py --max-t 10000 --json</code></pre>
+<p>The verifier checks the normal form, determinant-one identities, pairwise residual gcds, and exact companion gcds throughout the requested symbolic test range.</p>
+<p>Erdős–Straus remains open. This theorem supplies an exact cross-shift bridge between the seed-reduced fixed-shift state spaces.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

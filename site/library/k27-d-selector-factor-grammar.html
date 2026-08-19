@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Assume">
+  <title>Exact factor grammar of the k27 D selector — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k27-d-selector-factor-grammar.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k27-d-selector-factor-grammar.html">
+  <meta property="og:title" content="Exact factor grammar of the k27 D selector — Free Computation Foundation">
+  <meta property="og:description" content="Assume">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact factor grammar of the k27 D selector</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Assume</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K27-D-SELECTOR-FACTOR-GRAMMAR.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact cross-coordinate refinement inside the candidate decomposition framework</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Verifier:</strong> <code>verify_k27_d_selector_factor_grammar.py</code></p>
+<p><strong>Depends on:</strong> the k27 seven-mode survivor grammar, QR-factor selectors, corrected phase-intersection theorem, and realized Route-B k19/k31 survivor modes.</p>
+<p><strong>Claim boundary:</strong> exact necessary factor grammar conditional on the stated phase pair and k27 survival. Not a termination theorem, not a closed decomposition method, and not an Erdős–Straus proof.</p>
+<h2>1. Correct phase pair</h2>
+<p>Assume</p>
+<pre><code class="language-text">tau17 = 6
+tau31 = 7</code></pre>
+<p>so</p>
+<p><code>t = 193 mod527</code>.</p>
+<p>For <code>E=7+30t</code>, these phases force</p>
+<pre><code class="language-text">17 | E
+31 | E.</code></pre>
+<p>At k27 their residues are</p>
+<pre><code class="language-text">17 mod27 = 17   # nonresidue
+31 mod27 = 4    # quadratic residue.</code></pre>
+<p>The landed phase selectors give</p>
+<pre><code class="language-text">tau17=6 -&gt; k27 NR mode in {B,D}
+tau31=7 -&gt; k27 NR mode in {Q,A,D}.</code></pre>
+<p>Therefore a k27 miss forces</p>
+<p><code>k27 NR mode = D</code>.</p>
+<h2>2. D collapses to one exact NR occurrence skeleton</h2>
+<p>The complete D-mode NR skeletons are</p>
+<pre><code class="language-text">(2,17)
+(14,14)
+(2,14,14,14).</code></pre>
+<p>Rational prime17 is known to divide E, so the NR occurrence multiset must contain17.</p>
+<p>Only one D skeleton does:</p>
+<p><code>(2,17)</code>.</p>
+<p>Hence a k27 miss on this phase pair forces the exact NR occurrence grammar</p>
+<pre><code class="language-text">one occurrence 17 mod27
+one occurrence 2 mod27
+no other NR27 occurrences.</code></pre>
+<p>In particular</p>
+<p><code>v17(E)=1</code>.</p>
+<p>The unique residue2 occurrence comes from one rational prime <code>r</code> with</p>
+<p><code>r = 2 mod27</code>,</p>
+<p>and that prime also occurs to exponent exactly1.</p>
+<h2>3. The forced factor31 makes the QR completion rigid</h2>
+<p>The forced rational prime31 contributes QR residue4.</p>
+<p>In the exact k27 transition table,</p>
+<p><code>D --4--&gt; B</code>.</p>
+<p>Mode B survives only QR residue1:</p>
+<pre><code class="language-text">B --1--&gt; B
+B --r--&gt; HIT for r in {4,7,10,13,16,19,22,25}.</code></pre>
+<p>Therefore:</p>
+<ul><li>the forced factor31 occurs exactly once, so <code>v31(E)=1</code>;</li><li>every other QR27 prime-factor occurrence of E is <code>1 mod27</code>.</li></ul>
+<p>Thus the complete factor grammar is</p>
+<p><code>E = 17 * 31 * r * A</code>,</p>
+<p>where</p>
+<pre><code class="language-text">r is prime,
+r = 2 mod27,
+v_r(E)=1,
+every prime factor of A is 1 mod27.</code></pre>
+<p>No factorization of A is otherwise required.</p>
+<h2>4. k27 survival forces tau9=7</h2>
+<p>Modulo27, the forced non-1 factors contribute</p>
+<p><code>17 * 4 * 2 = 1 mod27</code>.</p>
+<p>All factors of A are1 mod27. Therefore</p>
+<p><code>E = 1 mod27</code>.</p>
+<p>But</p>
+<p><code>E = 7 + 30t = 7 + 3t mod27</code>.</p>
+<p>Hence</p>
+<p><code>7 + 3t = 1 mod27</code>,</p>
+<p>so</p>
+<p><code>t = 7 mod9</code>.</p>
+<p>Therefore the exact three-coordinate implication is</p>
+<pre><code class="language-text">tau17=6
+tau31=7
+k27 miss
+    -&gt; k27 mode D
+    -&gt; tau9=7.</code></pre>
+<p>The originally independent tau9 coordinate is no longer free on this state.</p>
+<h2>5. Refined periodic class</h2>
+<p>Write the correct two-phase CRT class as</p>
+<p><code>t = 193 + 527n</code>.</p>
+<p>Then</p>
+<p><code>E = 527(11+30n)</code>.</p>
+<p>The factor grammar requires</p>
+<p><code>E/527 = 2 mod27</code>.</p>
+<p>Thus</p>
+<p><code>11+30n = 2 mod27</code>,</p>
+<p>which is equivalent to</p>
+<p><code>n = 6 mod9</code>.</p>
+<p>Therefore</p>
+<p><code>t = 3355 mod4743</code>.</p>
+<p>This is the exact periodic class for the surviving D-selector state.</p>
+<h2>6. Route-B ancestry form</h2>
+<p>On realized Route B,</p>
+<p><code>t = 705 + 1081u</code>.</p>
+<p>The corrected two-phase selector is</p>
+<p><code>u = 469 mod527</code>.</p>
+<p>The newly forced <code>tau9=7</code> is equivalent on Route B to</p>
+<p><code>u = 4 mod9</code>.</p>
+<p>Combining them gives</p>
+<p><code>u = 3631 mod4743</code>.</p>
+<p>So on Route B:</p>
+<pre><code class="language-text">tau17=6
+tau31=7
+survive k19,k27,k31
+    -&gt; k19 FULL_QR
+    -&gt; k27 exact factor grammar 17*31*r*A
+    -&gt; tau9=7
+    -&gt; k31 FULL_QR
+    -&gt; u=3631 mod4743.</code></pre>
+<p>The k19 and k31 FULL_QR conclusions are the already-landed mode consequences of the same phase pair.</p>
+<h2>7. Consequence for k35</h2>
+<p>Since <code>tau9=7</code>, the landed k35 3-adic theorem gives</p>
+<p><code>v3(F)=1</code>.</p>
+<p>If the k35 survivor state contains the S7 branch, then rational prime3 is necessarily the distinguished S7 factor and</p>
+<p><code>every prime factor of F/3 is 1 mod7</code>.</p>
+<p>This is conditional support refinement, not a forced choice between J35 and S7.</p>
+<h2>8. Machine consequence</h2>
+<p>The dependency grammar can strengthen the existing selector from</p>
+<pre><code class="language-text">tau17=6 + tau31=7 -&gt; k27_mode=D</code></pre>
+<p>to</p>
+<pre><code class="language-text">tau17=6 + tau31=7 + k27 miss:
+    k27_mode = D
+    tau9 = 7
+    v17(E) = 1
+    v31(E) = 1
+    E = 17*31*r*A
+    r prime, r=2 mod27
+    support(A) subset {q:q=1 mod27}.</code></pre>
+<p>This is a genuine propagation rule from phase state into factor-support state.</p>
+<h2>9. Bryan Entanglement Cross / BREC boundary</h2>
+<p>The phase pair first excavates the seven-mode k27 space to D, then exposes a rigid constructive factor grammar and a new forced phase. That path is a natural candidate for compound directional metadata such as</p>
+<p><code>↓ -&gt; →</code></p>
+<p>or a richer BEC/BREC history.</p>
+<p>The directional label is not part of the theorem. The exact skeleton and residue transitions above are the sole sources of mathematical force.</p>
+<h2>10. Next target</h2>
+<p>The exact factor grammar now gives a new surface for support interaction. The next high-value question is whether the forced prime <code>r=2 mod27</code> or the 1-mod27 reservoir A can coexist with the already-separated QR23, QR31, k35, and Route-B k47 support reservoirs under the affine companion equations.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

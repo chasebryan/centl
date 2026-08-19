@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact structural reduction at the composite shift `k=27` — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k27-two-target-structure.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k27-two-target-structure.html">
+  <meta property="og:title" content="Exact structural reduction at the composite shift `k=27` — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact structural reduction at the composite shift `k=27`</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K27-TWO-TARGET-STRUCTURE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved structural reduction; full combined-miss classification still open</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>ES-TWO-TARGET-DIVISOR-SQUARE.md</code>, <code>ES-BINARY-LANE-I-EQUIVALENCE.md</code>, <code>K23-TWO-TARGET-FILTER.md</code></p>
+<p><strong>Claim boundary:</strong> this proves the hard-prime wheel law, the pure-QR combined-miss branch, a full-QR-part hit criterion, and an exact four-companion criterion when the total nonresidue valuation is two. It does not yet classify every <code>k=27</code> miss and does not prove Erdős–Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be Mordell-hard and write</p>
+<div class="math" role="math">P=\frac{p-1}{4}.</div>
+<p>Every Mordell-hard prime satisfies</p>
+<div class="math" role="math">p\equiv1\pmod{24},</div>
+<p>so</p>
+<div class="math" role="math">\boxed{P\equiv0\pmod6.}</div>
+<p>At shift <code>k=27</code>, put</p>
+<div class="math" role="math">\boxed{C=\frac{p+27}{4}=P+7.}</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{C\equiv1\pmod6.}</div>
+<p>In particular, <code>C</code> is odd and coprime to <code>27</code>.</p>
+<hr>
+<h2>2. Logarithmic coordinates modulo 27</h2>
+<p>The unit group</p>
+<div class="math" role="math">G=(\mathbb Z/27\mathbb Z)^\times</div>
+<p>is cyclic of order <code>18</code>, with primitive root <code>2</code>.</p>
+<p>Write</p>
+<div class="math" role="math">\log x=\log_2 x\pmod{18}</div>
+<p>for unit residues modulo <code>27</code>.</p>
+<p>The powers of <code>2</code> are</p>
+<div class="math" role="math">1,2,4,8,16,5,10,20,13,26,25,23,19,11,22,17,7,14.</div>
+<p>Thus</p>
+<div class="math" role="math">\boxed{\log(-1)=9.}</div>
+<p>The quadratic-residue subgroup is the even-log subgroup</p>
+<div class="math" role="math">\boxed{Q=2\mathbb Z/18\mathbb Z}</div>
+<p>of order <code>9</code>.</p>
+<p>There is also a particularly simple arithmetic description:</p>
+<div class="math" role="math">\boxed{ x\in Q \iff x\equiv1\pmod3 }</div>
+<p>for every unit <code>x mod27</code>.</p>
+<p>Indeed every square unit is <code>1 mod3</code>, and there are exactly nine unit classes <code>1 mod3</code>, equal to the size of <code>Q</code>.</p>
+<hr>
+<h2>3. The hard-prime wheel forces even nonresidue valuation</h2>
+<p>Let</p>
+<div class="math" role="math">C=\prod_i q_i^{e_i}.</div>
+<p>A prime factor <code>q_i</code> is a quadratic nonresidue modulo <code>27</code> exactly when</p>
+<div class="math" role="math">q_i\equiv2\pmod3.</div>
+<p>Define the total nonresidue valuation</p>
+<div class="math" role="math">\boxed{ E_{NR}(C) = \sum_{q^e\parallel C,\ q\equiv2\ (3)}e. }</div>
+<p>Since</p>
+<div class="math" role="math">C\equiv1\pmod3,</div>
+<p>the number of <code>2 mod3</code> factors counted with multiplicity must be even. Therefore</p>
+<div class="math" role="math">\boxed{E_{NR}(C)\equiv0\pmod2.}</div>
+<p>So the <code>k=27</code> corridor cannot contain exactly one nonresidue valuation unit. It moves from pure QR support directly to packets of size <code>2,4,6,...</code>.</p>
+<hr>
+<h2>4. The two exact targets in C18 coordinates</h2>
+<p>Let</p>
+<div class="math" role="math">c=\log C\pmod{18}.</div>
+<p>The signed Lane-I box in log coordinates is</p>
+<div class="math" role="math">\mathcal S(C) = \left\{ \sum_i z_i\log q_i: -e_i\le z_i\le e_i \right\} \subseteq C_{18}.</div>
+<h3>Type II</h3>
+<p>Type II asks for <code>-1</code> in the signed box, hence</p>
+<div class="math" role="math">\boxed{9\in\mathcal S(C).}</div>
+<h3>Type I</h3>
+<p>By the divisor-square theorem, Type I asks for a divisor <code>d|C^2</code> satisfying</p>
+<div class="math" role="math">4d\equiv-1\pmod{27}.</div>
+<p>Because</p>
+<div class="math" role="math">4^{-1}\equiv7\pmod{27},</div>
+<p>the fixed divisor residue is</p>
+<div class="math" role="math">\boxed{d\equiv20\pmod{27}.}</div>
+<p>And</p>
+<div class="math" role="math">\boxed{\log20=7.}</div>
+<p>Therefore, in divisor-log coordinates, Type I is the fixed odd target</p>
+<div class="math" role="math">\boxed{7.}</div>
+<p>For comparison, in signed-box coordinates <code>p==4C mod27</code>, so</p>
+<div class="math" role="math">\log(-p^{-1}) =9-(2+c) =\boxed{7-c}.</div>
+<hr>
+<h2>5. Divisor-log box</h2>
+<p>Let</p>
+<div class="math" role="math">\mathcal D(C) = \left\{ \sum_i f_i\log q_i: 0\le f_i\le2e_i \right\}.</div>
+<p>This is exactly the log set of the divisors of <code>C^2</code>.</p>
+<p>Since the interval <code>[0,2e_i]</code> is the translate by <code>e_i</code> of <code>[-e_i,e_i]</code>,</p>
+<div class="math" role="math">\boxed{ \mathcal D(C)=c+\mathcal S(C). }</div>
+<p>Thus the two exact targets are</p>
+<div class="math" role="math">\boxed{7\in\mathcal D(C)}</div>
+<p>for Type I and</p>
+<div class="math" role="math">\boxed{9+c\in\mathcal D(C)}</div>
+<p>for Type II.</p>
+<p>The parity law from Section 3 implies <code>c</code> is even, so both divisor-log targets are odd.</p>
+<hr>
+<h2>6. Pure-QR trap</h2>
+<h3>Theorem — pure quadratic support misses both targets</h3>
+<p>If every prime factor of <code>C</code> is a quadratic residue modulo <code>27</code>, then</p>
+<div class="math" role="math">\boxed{\text{Type I misses and Type II misses at }k=27.}</div>
+<h3>Proof</h3>
+<p>Every prime-factor log is even, so every element of <code>D(C)</code> is even. Both targets <code>7</code> and <code>9+c</code> are odd. Therefore neither target lies in <code>D(C)</code>. QED.</p>
+<p>So pure QR support is an exact combined-miss branch, not merely a Type-II obstruction.</p>
+<hr>
+<h2>7. Full QR divisor mass plus any nonresidue forces a hit</h2>
+<p>Factor</p>
+<div class="math" role="math">C=C_QC_N,</div>
+<p>where <code>C_Q</code> contains all QR prime powers and <code>C_N</code> all nonresidue prime powers.</p>
+<p>Let</p>
+<div class="math" role="math">\mathcal D_Q</div>
+<p>be the divisor-log set of <code>C_Q^2</code>. It is contained in the even subgroup.</p>
+<h3>Theorem — full-QR fill</h3>
+<p>If</p>
+<div class="math" role="math">\boxed{\mathcal D_Q=2\mathbb Z/18\mathbb Z}</div>
+<p>and</p>
+<div class="math" role="math">E_{NR}(C)&gt;0,</div>
+<p>then both odd target classes occur in <code>D(C)</code>. In particular <code>k=27</code> hits.</p>
+<h3>Proof</h3>
+<p>A nonresidue prime factor has odd log. Choosing exponent <code>1</code> of that factor in a divisor of <code>C_N^2</code> produces at least one odd class <code>o</code>. Adding the full even subgroup <code>D_Q</code> to <code>o</code> gives the entire odd coset of <code>C_18</code>. Both <code>7</code> and <code>9+c</code> are odd, hence both occur. QED.</p>
+<p>Therefore every non-pure combined miss must have a <strong>thin QR divisor-log box</strong>.</p>
+<hr>
+<h2>8. Exact four-companion criterion when E_NR=2</h2>
+<p>The first possible non-pure case is</p>
+<div class="math" role="math">\boxed{E_{NR}(C)=2.}</div>
+<p>Split the two nonresidue valuation units into odd log classes</p>
+<div class="math" role="math">\alpha,\beta\in\{1,3,5,7,9,11,13,15,17\},</div>
+<p>allowing</p>
+<div class="math" role="math">\alpha=\beta</div>
+<p>when the same residue class supplies both valuation units.</p>
+<p>Each valuation unit contributes divisor exponent <code>0,1,2</code>. Therefore the nonresidue divisor-log contribution is</p>
+<div class="math" role="math">\{u\alpha+v\beta: u,v\in\{0,1,2\}\}.</div>
+<p>The odd elements of this set are exactly</p>
+<div class="math" role="math">\boxed{ \mathcal O(\alpha,\beta) = \{\alpha,\beta,\alpha+2\beta,2\alpha+\beta\} \pmod{18}. }</div>
+<p>When <code>alpha=beta</code>, this collapses to the two-element set</p>
+<div class="math" role="math">\{\alpha,3\alpha\}.</div>
+<p>Because <code>D_Q</code> is even and both targets are odd, only these odd nonresidue contributions can participate in a hit.</p>
+<h3>Theorem — four companions</h3>
+<p>Assume <code>E_NR(C)=2</code>. Let <code>c=log C</code>. Then:</p>
+<p>Type I hits if and only if</p>
+<div class="math" role="math">\boxed{ \mathcal D_Q \cap \bigl(7-\mathcal O(\alpha,\beta)\bigr) \ne\varnothing. }</div>
+<p>Type II hits if and only if</p>
+<div class="math" role="math">\boxed{ \mathcal D_Q \cap \bigl(9+c-\mathcal O(\alpha,\beta)\bigr) \ne\varnothing. }</div>
+<p>Hence both targets miss if and only if</p>
+<div class="math" role="math">\boxed{ \mathcal D_Q \cap \bigl(7-\mathcal O(\alpha,\beta)\bigr) = \mathcal D_Q \cap \bigl(9+c-\mathcal O(\alpha,\beta)\bigr) = \varnothing. }</div>
+<h3>Proof</h3>
+<p>Write</p>
+<div class="math" role="math">\mathcal D(C)=\mathcal D_Q+\mathcal D_N.</div>
+<p>Both exact targets are odd. Since <code>D_Q</code> is even, a representation of either target must use an odd element of <code>D_N</code>. Under total nonresidue valuation two, those odd elements are exactly <code>O(alpha,beta)</code>. Rearranging the two target equations gives the displayed intersections. QED.</p>
+<p>This converts the first non-pure <code>k=27</code> branch into at most four explicit even companion tests.</p>
+<hr>
+<h2>9. Finite 10M signal on the full hard-prime universe</h2>
+<p>On the preserved <code>p&lt;=10,000,000</code> Mordell-hard corpus (<code>20,513</code> primes), the exact standalone <code>k=27</code> hit relation and independent factorization give:</p>
+<table class="directory"><thead><tr><th>E_NR(C)</th><th>hits</th><th>misses</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>11,926</td></tr><tr><td>2</td><td>6,063</td><td>2,401</td></tr><tr><td>4</td><td>117</td><td>6</td></tr></tbody></table>
+<p>No larger <code>E_NR</code> occurs in that finite range.</p>
+<p>The first row is explained universally by the pure-QR theorem. The other rows are finite counts only.</p>
+<p>In particular, the six observed <code>E_NR=4</code> misses show that <strong>nonresidue valuation four is not automatically sufficient</strong>. A full <code>k=27</code> theorem must still control thin QR mass and higher nonresidue packets rather than asserting a false valuation cutoff.</p>
+<hr>
+<h2>10. Finite signal after the six classified shifts</h2>
+<p>The first six exact Lane-I shifts</p>
+<div class="math" role="math">3,7,11,15,19,23</div>
+<p>leave exactly</p>
+<div class="math" role="math">\boxed{308}</div>
+<p>hard primes through <code>10^7</code>.</p>
+<p>At <code>k=27</code>, those 308 split as:</p>
+<div class="math" role="math">\boxed{185\text{ pure-QR misses}},</div>
+<div class="math" role="math">\boxed{91\text{ non-pure hits}},</div>
+<p>and</p>
+<div class="math" role="math">\boxed{32\text{ non-pure misses}}.</div>
+<p>Every non-pure member of this six-shift residual has</p>
+<div class="math" role="math">E_{NR}(C)=2</div>
+<p>on this finite domain. Thus the new four-companion theorem exactly contains the entire observed non-pure residual geometry after <code>k=23</code>.</p>
+<p>This last statement is finite evidence, not a proof that six-shift survivors universally satisfy <code>E_NR&lt;=2</code>.</p>
+<hr>
+<h2>11. What remains for a full k=27 classification</h2>
+<p>The exact remaining task is now narrow:</p>
+<ol><li>classify the possible thin QR divisor-log sets <code>D_Q</code> in <code>C_18</code>;</li><li>combine them with the four-companion criterion for <code>E_NR=2</code>;</li><li>classify the analogous odd contribution sets for <code>E_NR&gt;=4</code>;</li><li>determine whether the six earlier shift-failure laws impose additional restrictions on these packets.</li></ol>
+<p>The most promising route is <strong>not</strong> to enumerate residue classes of <code>p</code>. It is to classify the small additive subsets of the even subgroup <code>C_9</code> that can occur as <code>D_Q</code>, then test their translated companion sets.</p>
+<hr>
+<p>Erdős–Straus remains open. This note reduces the next layer to a finite-group packet problem without claiming that the packet problem is already solved.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

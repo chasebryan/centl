@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The landed feedback theorem gives">
+  <title>Exact intersections of k27 phase selectors — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k27-phase-intersection-elimination.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k27-phase-intersection-elimination.html">
+  <meta property="og:title" content="Exact intersections of k27 phase selectors — Free Computation Foundation">
+  <meta property="og:description" content="The landed feedback theorem gives">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact intersections of k27 phase selectors</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">The landed feedback theorem gives</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K27-PHASE-INTERSECTION-ELIMINATION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact cross-coordinate elimination module inside the candidate decomposition framework</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Verifier:</strong> <code>verify_k27_phase_intersection_elimination.py</code></p>
+<p><strong>Depends on:</strong> <code>K27-LATER-PHASE-FEEDBACK.md</code>, <code>K27-QR-FACTOR-MODE-SELECTORS.md</code>, and the realized k19/k31 survivor-mode theorems.</p>
+<p><strong>Claim boundary:</strong> exact necessary mode intersections and contradictions inside the k27 survivor grammar. This is not a termination theorem, not a closed decomposition method, and not an Erdős–Straus proof.</p>
+<h2>1. Phase selectors are set-valued constraints</h2>
+<p>The landed feedback theorem gives</p>
+<pre><code class="language-text">tau13=8   -&gt; {Q,E}
+tau17=6   -&gt; {B,D}
+tau19=8   -&gt; {Q}
+tau31=7   -&gt; {Q,A,D}
+tau43=27  -&gt; {Q}.</code></pre>
+<p>All constrain the same exact k27 NR-skeleton coordinate. Simultaneous phases therefore require mode-set intersection. Empty intersection is an exact contradiction with k27 survival; singleton intersection is a mode selector.</p>
+<h2>2. Complete pairwise table with independently recomputed CRT labels</h2>
+<pre><code class="language-text">phase pair                     intersection   CRT class
+----------------------------------------------------------------
+tau13=8 + tau17=6              empty          t=125 mod221
+tau13=8 + tau19=8              {Q}            t=8 mod247
+tau13=8 + tau31=7              {Q}            t=255 mod403
+tau13=8 + tau43=27             {Q}            t=242 mod559
+
+tau17=6 + tau19=8              empty          t=312 mod323
+tau17=6 + tau31=7              {D}            t=193 mod527
+tau17=6 + tau43=27             empty          t=414 mod731
+
+tau19=8 + tau31=7              {Q}            t=255 mod589
+tau19=8 + tau43=27             {Q}            t=27 mod817
+tau31=7 + tau43=27             {Q}            t=844 mod1333.</code></pre>
+<p>The mode intersections are the theorem-bearing content. The CRT values above are now computed and asserted independently by the verifier for every row.</p>
+<h2>3. Exact contradiction progressions</h2>
+<p>Three pairwise collisions have empty k27 mode intersection:</p>
+<pre><code class="language-text">t=125 mod221  : tau13=8 + tau17=6
+t=312 mod323  : tau17=6 + tau19=8
+t=414 mod731  : tau17=6 + tau43=27.</code></pre>
+<p>They are periodic k27 absorption classes generated by incompatible forced factor geometry, not by a single one-factor killer.</p>
+<h2>4. Unique non-Q selector</h2>
+<p>The phase pair</p>
+<pre><code class="language-text">tau17=6
+tau31=7</code></pre>
+<p>has exact CRT class</p>
+<p><code>t=193 mod527</code>.</p>
+<p>Its mode requirements are</p>
+<p><code>{B,D} intersection {Q,A,D} = {D}</code>.</p>
+<p>Therefore</p>
+<p><code>t=193 mod527 AND k27 miss -&gt; k27_NR_mode=D</code>.</p>
+<p>This is the first pure CRT-phase combination in the present grammar that selects a unique non-Q k27 mode.</p>
+<h2>5. Route-B consequences</h2>
+<p>Route-B k19 BARE forces <code>tau19=8</code>. Since <code>tau17=6</code> is incompatible with that phase at k27,</p>
+<p><code>Route-B k19 BARE + tau17=6 -&gt; k27 hit</code>.</p>
+<p>Writing Route B as</p>
+<p><code>t=705+1081u</code>,</p>
+<p>we have</p>
+<pre><code class="language-text">tau17=6 -&gt; u=10 mod17
+BARE     -&gt; u=16 mod19</code></pre>
+<p>and the excluded joint class is</p>
+<p><code>u=282 mod323</code>.</p>
+<p>For the non-Q selector pair,</p>
+<pre><code class="language-text">tau17=6
+tau31=7</code></pre>
+<p>we have</p>
+<pre><code class="language-text">t=193 mod527
+u=469 mod527.</code></pre>
+<p>If the Route-B branch survives k19, k27, and k31, then</p>
+<ul><li>k27 is D by the phase intersection;</li><li>k31 is FULL_QR because tau31=7 is outside the BARE phase set <code>{0,19,29}</code>;</li><li>k19 is FULL_QR because BARE would force tau19=8, contradicting tau17=6 at k27.</li></ul>
+<p>Hence</p>
+<pre><code class="language-text">Route B + tau17=6 + tau31=7 + survival
+  -&gt; k19 FULL_QR
+  -&gt; k27 D
+  -&gt; k31 FULL_QR.</code></pre>
+<h2>6. Constraint-engine consequence</h2>
+<p>The propagator should intersect phase-induced k27 domains before factor enumeration:</p>
+<pre><code class="language-text">K27_ALLOWED = {Q,A,B,C,D,E,F}
+if tau13==8:  K27_ALLOWED &amp;= {Q,E}
+if tau17==6:  K27_ALLOWED &amp;= {B,D}
+if tau19==8:  K27_ALLOWED &amp;= {Q}
+if tau31==7:  K27_ALLOWED &amp;= {Q,A,D}
+if tau43==27: K27_ALLOWED &amp;= {Q}</code></pre>
+<p>An empty set is contradiction in the exact survivor grammar. A singleton is a forced local mode.</p>
+<h2>7. Bryan Entanglement Cross / BREC boundary</h2>
+<p>An empty intersection may later receive an obstructive/excavation annotation and a singleton may receive a constructive-sharpening annotation. These are observational and scheduling semantics only. The CRT conditions and exact mode-set intersection are the proof-bearing objects.</p>
+<h2>8. Next target</h2>
+<p>Resolve the unique D selector into its exact factor grammar and collide the resulting rigid E-support reservoir with the separated B, D, F, and J reservoirs under the affine companion equations.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

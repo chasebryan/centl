@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Let p be Mordell-hard and put">
+  <title>Exact two-target filter at the composite shift `k=51` — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k51-two-target-filter.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k51-two-target-filter.html">
+  <meta property="og:title" content="Exact two-target filter at the composite shift `k=51` — Free Computation Foundation">
+  <meta property="og:description" content="Let p be Mordell-hard and put">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact two-target filter at the composite shift `k=51`</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Let p be Mordell-hard and put</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K51-TWO-TARGET-FILTER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact computer-assisted finite-group classification</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>FIXED-SHIFT-JACOBI-PARITY.md</code>, <code>ES-TWO-TARGET-DIVISOR-SQUARE.md</code>, <code>ES-BINARY-LANE-I-EQUIVALENCE.md</code></p>
+<p><strong>Machine certificate:</strong> <code>classify_k51_states.py</code></p>
+<p><strong>Independent finite regression:</strong> <code>verify_k51_structure.py</code></p>
+<p><strong>Claim boundary:</strong> this closes the fixed Lane-I shift <code>k=51</code>. It does not prove a universal finite shift ceiling and does not prove Erdős–Straus.</p>
+<h2>1. Group and hard-prime center</h2>
+<p>Let <code>p</code> be Mordell-hard and put</p>
+<div class="math" role="math">C=\frac{p+51}{4}.</div>
+<p>Since every Mordell-hard prime satisfies <code>p = 1 mod 3</code>, one has</p>
+<div class="math" role="math">C\equiv1\pmod3.</div>
+<p>The unit group is</p>
+<div class="math" role="math">(\mathbb Z/51\mathbb Z)^\times\cong C_{16}\times C_2.</div>
+<p>Use coordinates</p>
+<div class="math" role="math">x=35^\varepsilon 37^a\pmod{51},\qquad \varepsilon\in C_2,\ a\in C_{16}.</div>
+<p>Here <code>37</code> has order 16, <code>35</code> is an involution, and</p>
+<div class="math" role="math">H=\{x:x\equiv1\pmod3\}=\{(0,a):a\in C_{16}\}.</div>
+<p>Thus every hard-prime center lies in <code>H</code>.</p>
+<h2>2. Exact targets</h2>
+<p>The divisor-square Type-I target is</p>
+<div class="math" role="math">-4^{-1}\equiv38\pmod{51},</div>
+<p>whose coordinate is</p>
+<div class="math" role="math">(1,12).</div>
+<p>Also</p>
+<div class="math" role="math">-1=(1,8).</div>
+<p>If the center is <code>(0,c)</code>, the Type-II target <code>-C</code> is therefore</p>
+<div class="math" role="math">(1,c+8).</div>
+<p>Both targets lie outside <code>H</code>.</p>
+<p>For a factorization of <code>C</code>, one valuation occurrence in coordinate <code>g</code> acts by the exact divisor-square transition</p>
+<div class="math" role="math">T_g(D,c)=\left(D+\{0,g,2g\},c+g\right).</div>
+<p>Closing the empty state under all 32 unit directions exhausts arbitrary factorization residue states.</p>
+<h2>3. Exact finite closure</h2>
+<p>The least closed state space contains exactly</p>
+<div class="math" role="math">\boxed{6217}</div>
+<p>states. Of these,</p>
+<div class="math" role="math">\boxed{2907}</div>
+<p>have hard-prime-admissible center in <code>H</code>.</p>
+<p>Applying the two targets gives</p>
+<div class="math" role="math">\boxed{2000\text{ hit states}}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{907\text{ combined-miss states}.}</div>
+<p>Therefore the emitted 907-state miss table is the complete fixed-<code>k=51</code> obstruction geometry. This statement is range-free: it is closure inside the finite unit group, not extrapolation from a prime bound.</p>
+<h2>4. Pure-H branch</h2>
+<p>Closing only the 16 directions in <code>H</code> produces exactly</p>
+<div class="math" role="math">\boxed{293}</div>
+<p>states. Since both targets are outside <code>H</code>, every pure-H state misses:</p>
+<div class="math" role="math">\boxed{293/293.}</div>
+<p>The other</p>
+<div class="math" role="math">\boxed{614}</div>
+<p>miss states use outside-H support.</p>
+<h2>5. Four-unit outside-H cutoff</h2>
+<p>For each exact state, minimize lexicographically</p>
+<div class="math" role="math">(\text{outside-H valuation units},\ \text{total valuation units}).</div>
+<p>Among all 907 misses the exact distribution is</p>
+<div class="math" role="math">\begin{array}{c|r} \text{minimum outside-H units}&amp;\text{miss states}\\ \hline 0&amp;293\\ 2&amp;602\\ 4&amp;12 \end{array}</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{\text{every fixed-51 miss state has a state-equivalent representative using at most four outside-H valuation units}.}</div>
+<p>Only even packet counts occur because the final hard-prime center must return to <code>H</code>.</p>
+<h2>6. Character split</h2>
+<p>Modulo 17, the chosen generator <code>37</code> reduces to primitive root <code>3</code>. Since <code>4</code> is a square and <code>51 = 0 mod 17</code>, the parity of the <code>C16</code> center coordinate is exactly the quadratic character of <code>p</code> modulo 17. Because <code>17 = 1 mod 4</code>, quadratic reciprocity gives</p>
+<div class="math" role="math">(-1)^c=\left(\frac{17}{p}\right).</div>
+<p>The exact 907 miss states split as</p>
+<div class="math" role="math">\boxed{463\text{ with }(17/p)=+1}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{444\text{ with }(17/p)=-1.}</div>
+<p>Both character branches contain fixed-shift misses.</p>
+<h2>7. Target-preserving symmetry</h2>
+<p>The four automorphisms</p>
+<div class="math" role="math">(\varepsilon,a)\mapsto(\varepsilon,ma), \qquad m\in\{1,5,9,13\},</div>
+<p>fix both <code>(1,12)</code> and the <code>-1</code> translation <code>(1,8)</code>. They preserve the complete miss set.</p>
+<p>The 907 misses collapse to</p>
+<div class="math" role="math">\boxed{273\text{ symmetry orbits},}</div>
+<p>with orbit-size histogram</p>
+<pre><code class="language-text">size 1 :  31
+size 2 :  46
+size 4 : 196</code></pre>
+<p>This is the smaller canonical object for later cross-shift mining.</p>
+<h2>8. Independent regression</h2>
+<p><code>verify_k51_structure.py</code> independently generates Mordell-hard primes, factors <code>C</code>, builds the divisor residue set of <code>C^2</code> directly modulo 51, and compares direct target membership with the finite-state classifier.</p>
+<p>The Fedora-sized regression through <code>100,000</code> gives</p>
+<pre><code class="language-text">hard primes     273
+k=51 hits        54
+k=51 misses     219
+mismatches        0</code></pre>
+<p>During derivation an independent direct signed-box census through <code>100,000,000</code> gave</p>
+<pre><code class="language-text">hard primes     179,468
+k=51 hits        59,424
+k=51 misses     120,044
+mismatches             0</code></pre>
+<p>Character outcomes on that finite 100M census were</p>
+<pre><code class="language-text">(17/p)=+1 : 18,070 hits, 71,205 misses
+(17/p)=-1 : 41,354 hits, 48,839 misses</code></pre>
+<p>These population counts are finite evidence. The fixed-shift theorem is the closed finite-group state system above.</p>
+<h2>9. Corrected 100M corridor</h2>
+<p>Using a complete hard-prime universe, rather than the union of hit rows, exactly 29 hard primes through 100M survive every classified shift through <code>k=47</code>.</p>
+<p>At <code>k=51</code>:</p>
+<pre><code class="language-text">hits      7
+misses   22</code></pre>
+<p>with character split</p>
+<pre><code class="language-text">(17/p)=+1 : 5 hits, 18 misses
+(17/p)=-1 : 2 hits,  4 misses</code></pre>
+<p>The 22 remaining primes first hit later at <code>k=55</code>, <code>59</code>, <code>63</code>, or <code>107</code>. This is finite theorem-mining evidence only.</p>
+<h2>10. Reproduction</h2>
+<pre><code class="language-sh">python3 research/erdos-straus/classify_k51_states.py --json
+python3 research/erdos-straus/verify_k51_structure.py --limit 100000 --json</code></pre>
+<p>The complete 907-row miss table is emitted by</p>
+<pre><code class="language-sh">python3 research/erdos-straus/classify_k51_states.py --json --table</code></pre>
+<p>Hard regression constants are</p>
+<pre><code class="language-text">total states                 6,217
+admissible states            2,907
+hit states                   2,000
+miss states                    907
+pure-H states                  293
+pure-H misses                  293
+nonpure misses                 614
+symmetry orbits                273
+Legendre(17/p) split     {+1:463, -1:444}
+minimum outside-H       {0:293, 2:602, 4:12}</code></pre>
+<p>Erdős–Straus remains open. Fixed <code>k=51</code> is now completely classified; the corrected corridor moves next to <code>k=55</code>.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact two-target filter at the prime shift `k=47` — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k47-two-target-filter.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k47-two-target-filter.html">
+  <meta property="og:title" content="Exact two-target filter at the prime shift `k=47` — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact two-target filter at the prime shift `k=47`</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K47-TWO-TARGET-FILTER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact computer-assisted finite-group classification</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>FIXED-SHIFT-JACOBI-PARITY.md</code>, <code>ES-TWO-TARGET-DIVISOR-SQUARE.md</code>, <code>ES-BINARY-LANE-I-EQUIVALENCE.md</code></p>
+<p><strong>Machine certificate:</strong> <code>classify_k47_states.py</code></p>
+<p><strong>Independent finite regression:</strong> <code>verify_k47_structure.py</code> and the preserved CBX 10M standalone relation</p>
+<p><strong>Claim boundary:</strong> this closes the fixed Lane-I shift <code>k=47</code>. It does not prove a universal finite shift ceiling and does not prove Erdős–Straus.</p>
+<hr>
+<h2>1. Cyclic coordinate</h2>
+<p>Let <code>p</code> be Mordell-hard and put</p>
+<div class="math" role="math">\boxed{C=\frac{p+47}{4}.}</div>
+<p>Since <code>p != 47</code>, <code>C</code> is a unit modulo 47. The group</p>
+<div class="math" role="math">(\mathbb Z/47\mathbb Z)^\times</div>
+<p>is cyclic of order 46. Use primitive root</p>
+<div class="math" role="math">\boxed{5\pmod{47}}</div>
+<p>and write</p>
+<div class="math" role="math">\lambda(x)=\log_5x\pmod{46}.</div>
+<p>For a factorization <code>C=prod q_i^{e_i}</code>, define</p>
+<div class="math" role="math">D(C)=\left\{\sum_i f_i\lambda(q_i):0\le f_i\le2e_i\right\}\subseteq C_{46}, \qquad c(C)=\lambda(C).</div>
+<p>The exact factorization state is <code>S(C)=(D(C),c(C))</code>.</p>
+<hr>
+<h2>2. Exact targets</h2>
+<p>The Type-I divisor-square target is</p>
+<div class="math" role="math">-4^{-1}\equiv35\pmod{47}.</div>
+<p>Its discrete log is</p>
+<div class="math" role="math">\boxed{\lambda(35)=33.}</div>
+<p>Also</p>
+<div class="math" role="math">\lambda(-1)=23.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ k=47\text{ misses} \iff 33\notin D(C) \text{ and } c(C)+23\notin D(C).}</div>
+<hr>
+<h2>3. Exact finite transition system</h2>
+<p>One prime-valuation occurrence with log <code>a</code> contributes divisor exponents <code>0,1,2</code>, so the exact state transition is</p>
+<div class="math" role="math">\boxed{ T_a(D,c)=\left(D+\{0,a,2a\},\ c+a\right). }</div>
+<p>Repeated occurrences represent arbitrary valuations exactly. Starting from <code>( {0},0 )</code>, close under all 46 transition directions.</p>
+<p>The least closed system has exactly</p>
+<div class="math" role="math">\boxed{61,134}</div>
+<p>states.</p>
+<p>Because every outgoing transition from every state remains inside this finite set, it exhausts arbitrary factorization lengths and valuations. No bound on <code>p</code> is used.</p>
+<hr>
+<h2>4. Complete fixed-47 classification</h2>
+<p>Testing the two exact targets on the complete closure gives</p>
+<div class="math" role="math">\boxed{46,660\text{ hit states}}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{14,474\text{ combined-miss states}.}</div>
+<p>Let the exact machine-emitted miss table be <code>M_47</code>.</p>
+<h3>Theorem</h3>
+<p>For every Mordell-hard prime <code>p</code>, with <code>C=(p+47)/4</code>,</p>
+<div class="math" role="math">\boxed{k=47\text{ misses both Lane-I targets}\iff S(C)\in\mathcal M_{47}.}</div>
+<p>No other fixed-47 miss state exists.</p>
+<p>By <code>ES-BINARY-LANE-I-EQUIVALENCE.md</code>, this is also the complete fixed-47 binary-selector classification.</p>
+<hr>
+<h2>5. Pure quadratic support</h2>
+<p>Quadratic residues are exactly the even discrete logs. If every prime factor of <code>C</code> is a quadratic residue modulo 47, then <code>D(C)</code> and <code>c(C)</code> are even-log objects, while</p>
+<div class="math" role="math">33\quad\text{and}\quad c(C)+23</div>
+<p>are odd.</p>
+<p>Hence pure QR support misses both targets universally.</p>
+<p>The exact even-direction closure contains</p>
+<div class="math" role="math">\boxed{1,498}</div>
+<p>states, and all 1,498 are misses.</p>
+<hr>
+<h2>6. Legendre parity</h2>
+<p>Because <code>4</code> is a square and every hard prime is <code>1 mod4</code>,</p>
+<div class="math" role="math">\left(\frac C{47}\right) = \left(\frac p{47}\right) = \left(\frac{47}{p}\right).</div>
+<p>In the primitive-root coordinate,</p>
+<div class="math" role="math">\left(\frac C{47}\right)=(-1)^{c(C)}.</div>
+<p>Thus</p>
+<div class="math" role="math">\boxed{(-1)^{c(C)}=\left(\frac{47}{p}\right).}</div>
+<p>The 14,474 exact miss states split as</p>
+<div class="math" role="math">\boxed{7,626\text{ with }(47/p)=+1,}</div>
+<div class="math" role="math">\boxed{6,848\text{ with }(47/p)=-1.}</div>
+<p>So both Legendre branches genuinely contain fixed-shift misses.</p>
+<hr>
+<h2>7. Every miss state has a four-nonresidue core</h2>
+<p>Minimize, over all exact transition paths producing a state,</p>
+<div class="math" role="math">(\text{number of odd-log valuation units},\ \text{total valuation units}).</div>
+<p>The minimum nonresidue counts among the 14,474 miss states are</p>
+<div class="math" role="math">\boxed{ \begin{array}{c|r} 0&amp;1498\\ 1&amp;5187\\ 2&amp;5740\\ 3&amp;1661\\ 4&amp;388 \end{array}}</div>
+<p>No miss state requires five or more nonresidue units in a minimum state representative.</p>
+<p>Hence</p>
+<div class="math" role="math">\boxed{\text{every fixed-47 miss state has a state-equivalent core with at most four NR units}.}</div>
+<p>As before, this is a statement about finite-group state representatives, not a factor-count bound on the original integer <code>C</code>.</p>
+<p>Parity is exact:</p>
+<ul><li><code>(47/p)=+1</code> states use minimum counts <code>0,2,4</code>;</li><li><code>(47/p)=-1</code> states use minimum counts <code>1,3</code>.</li></ul>
+<p>Unlike shifts 35, 39, and 43, there is no nontrivial power automorphism of <code>C_46</code> that simultaneously fixes the Type-I log 33 and the <code>-1</code> log 23. The complete miss table therefore does not collapse through the same simple target-preserving symmetry.</p>
+<hr>
+<h2>8. Independent finite regression</h2>
+<p><code>verify_k47_structure.py</code> independently factors <code>C</code>, constructs the divisor set of <code>C^2</code> directly modulo 47, and compares direct target membership with the closed state classifier.</p>
+<p>The Fedora smoke domain through 100,000 has zero mismatches.</p>
+<p>Separately, the preserved CBX 10M standalone relation gives</p>
+<pre><code class="language-text">Mordell-hard primes       20,513
+CBX k=47 hits              13,553
+state-classifier hits      13,553
+mismatches                      0</code></pre>
+<p>The finite population split is</p>
+<pre><code class="language-text">(47/p)=+1 : 4,071 hits, 6,138 misses
+(47/p)=-1 : 9,482 hits,   822 misses</code></pre>
+<p>These counts are finite evidence only. The fixed-shift theorem is the range-free finite-state closure above.</p>
+<hr>
+<h2>9. Corridor-conditioned signal</h2>
+<p>After the completely classified shifts through <code>k=43</code>, the 10M corpus leaves only</p>
+<div class="math" role="math">\boxed{21}</div>
+<p>hard primes entering shift 47.</p>
+<p>At <code>k=47</code>:</p>
+<pre><code class="language-text">(47/p)=+1 :  2 hits, 6 misses
+(47/p)=-1 : 13 hits, 0 misses</code></pre>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{15\text{ hit and }6\text{ miss}.}</div>
+<p>The absence of a <code>(47/p)=-1</code> miss after the earlier corridor is a strong finite theorem-mining signal, but it is <strong>not</strong> asserted universally.</p>
+<p>The six finite survivors are</p>
+<pre><code class="language-text">118801
+496609
+532249
+806521
+2458369
+8803369</code></pre>
+<p>and their next first-hit distribution is</p>
+<pre><code class="language-text">k=51   1
+k=55   2
+k=59   2
+k=107  1</code></pre>
+<p>The next symbolic question is sharper than simply classifying <code>k=51</code>:</p>
+<blockquote><p>Can the exact failure laws at <code>3,7,11,15,19,23,27,31,35,39,43</code> be combined to prove that a surviving hard prime with <code>(47/p)=-1</code> must hit at 47?</p></blockquote>
+<p>A positive answer would be the first genuinely cross-shift Legendre exclusion in this corridor.</p>
+<hr>
+<h2>10. Reproduction</h2>
+<pre><code class="language-sh">python3 research/erdos-straus/classify_k47_states.py --json
+python3 research/erdos-straus/verify_k47_structure.py --limit 100000 --json</code></pre>
+<p>The exact 14,474-row miss table is emitted by</p>
+<pre><code class="language-sh">python3 research/erdos-straus/classify_k47_states.py --json --table</code></pre>
+<p>Hard state constants are</p>
+<pre><code class="language-text">total states                    61,134
+hit states                      46,660
+miss states                     14,474
+pure-QR states                   1,498
+pure-QR misses                   1,498
+Legendre miss split       {+1:7626, -1:6848}
+minimum NR histogram      {0:1498, 1:5187, 2:5740, 3:1661, 4:388}</code></pre>
+<hr>
+<p>Erdős–Straus remains open. Fixed <code>k=47</code> is completely classified; the most promising new target is the observed disappearance of the <code>(47/p)=-1</code> miss branch after the earlier exact corridor constraints.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

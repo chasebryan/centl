@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Every Mordell-hard prime has">
+  <title>Hard-prime forced-3 reduction at `k=59` — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k59-forced3-hard-reduction.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k59-forced3-hard-reduction.html">
+  <meta property="og:title" content="Hard-prime forced-3 reduction at `k=59` — Free Computation Foundation">
+  <meta property="og:description" content="Every Mordell-hard prime has">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Hard-prime forced-3 reduction at `k=59`</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Every Mordell-hard prime has</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K59-FORCED3-HARD-REDUCTION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact computer-assisted hard-prime state reduction</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>K59-TWO-TARGET-FILTER.md</code></p>
+<p><strong>Machine certificate:</strong> <code>classify_k59_forced3_states.py</code></p>
+<p><strong>Independent finite regression:</strong> <code>verify_k59_forced3_structure.py</code></p>
+<p><strong>Claim boundary:</strong> every Mordell-hard prime state at fixed <code>k=59</code> lies in the reduced closure proved here. The closure is a hard-prime superset, not a claim that every abstract reduced state is realized by a prime. This does not prove Erdős–Straus.</p>
+<h2>1. A universal factor was hidden in the hard-prime coordinate</h2>
+<p>Every Mordell-hard prime has</p>
+<div class="math" role="math">p=24m+1.</div>
+<p>At shift <code>k=59</code>,</p>
+<div class="math" role="math">C_{59}=\frac{p+59}{4} =\frac{24m+60}{4} =6m+15 =3(2m+5).</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{3\mid C_{59}}</div>
+<p>for every Mordell-hard prime.</p>
+<p>This is range-free arithmetic. It does not depend on a finite prime census.</p>
+<h2>2. Forced starting state</h2>
+<p>The fixed-59 unit group is</p>
+<div class="math" role="math">(\mathbb Z/59\mathbb Z)^\times\cong C_{58},</div>
+<p>with primitive root <code>2</code> as in <code>K59-TWO-TARGET-FILTER.md</code>.</p>
+<p>The forced factor has log</p>
+<div class="math" role="math">\boxed{\log_2 3=50\pmod{58}.}</div>
+<p>One mandatory valuation occurrence therefore changes the empty state from</p>
+<div class="math" role="math">(\{0\},0)</div>
+<p>to</p>
+<div class="math" role="math">\boxed{S_3=T_{50}(\{0\},0).}</div>
+<p>The divisor-log set in this seed has size three, corresponding to the exact local packet</p>
+<div class="math" role="math">\{0,50,100\}\pmod{58}.</div>
+<p>Every actual Mordell-hard <code>C59</code> factorization is obtained from this seed by applying the ordinary exact transitions for the remaining prime-valuation occurrences. Thus every hard-prime state lies in the closure of <code>S3</code>.</p>
+<h2>3. Exact reduced closure</h2>
+<p>The generic fixed-59 closure contains</p>
+<div class="math" role="math">291,907</div>
+<p>states and 61,215 miss states.</p>
+<p>Starting instead from the universally forced factor-3 seed and closing under all 58 possible subsequent directions gives exactly</p>
+<div class="math" role="math">\boxed{35,740\text{ states}.}</div>
+<p>Among them,</p>
+<div class="math" role="math">\boxed{29,871\text{ hit states}}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{5,869\text{ combined-miss states}.}</div>
+<p>So the hard-prime arithmetic compresses the exact obstruction space from</p>
+<div class="math" role="math">61,215\longrightarrow5,869</div>
+<p>before any finite prime bound is introduced.</p>
+<h3>Theorem — forced-3 hard containment</h3>
+<p>For every Mordell-hard prime <code>p</code>, the exact fixed-59 state of</p>
+<div class="math" role="math">C_{59}=\frac{p+59}{4}</div>
+<p>belongs to this 35,740-state closure.</p>
+<p>Consequently every actual hard-prime fixed-59 miss belongs to the emitted 5,869-state reduced miss table.</p>
+<p>The reverse realization statement is not asserted.</p>
+<h2>4. The forced factor is quadratic-residue support</h2>
+<p>Because the forced log is even,</p>
+<div class="math" role="math">50\equiv0\pmod2,</div>
+<p>the mandatory factor <code>3</code> is a quadratic residue modulo 59.</p>
+<p>Thus the seed does not flip center parity and does not change the interpretation</p>
+<div class="math" role="math">(-1)^c=\left(\frac{59}{p}\right).</div>
+<p>The 5,869 reduced miss states split as</p>
+<div class="math" role="math">\boxed{3,148\text{ with }(59/p)=+1}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{2,721\text{ with }(59/p)=-1.}</div>
+<p>Both character branches remain possible in the reduced hard superset.</p>
+<h2>5. The apparent five-packet breach disappears</h2>
+<p>The generic k=59 closure has 283 miss states whose smallest state-equivalent representative needs five nonresidue valuation units.</p>
+<p>After the universally forced factor 3 is imposed, minimize only the <strong>additional</strong> odd-log valuation units needed beyond the seed. The exact reduced histogram is</p>
+<pre><code class="language-text">minimum added NR units   miss states
+0                            900
+1                          2,263
+2                          2,185
+3                            458
+4                             63</code></pre>
+<p>No reduced miss needs five added nonresidue units.</p>
+<p>Hence</p>
+<div class="math" role="math">\boxed{\text{every hard-prime k=59 miss state has a state-equivalent forced-3 representative with at most four additional NR units}.}</div>
+<p>This restores the four-unit hard-state ceiling that appeared at the earlier classified shifts. It does <strong>not</strong> prove that four is a universal ceiling for arbitrary future shifts.</p>
+<h2>6. Pure quadratic-residue branch</h2>
+<p>Starting from the forced-3 seed and allowing only even-log directions produces exactly</p>
+<div class="math" role="math">\boxed{900}</div>
+<p>states. Every one is a miss:</p>
+<div class="math" role="math">\boxed{900/900.}</div>
+<p>This is the forced-seed version of the generic pure-QR miss branch.</p>
+<h2>7. Independent finite regression</h2>
+<p><code>verify_k59_forced3_structure.py</code> independently generates Mordell-hard primes, proves <code>3|C59</code> for each generated prime, factors <code>C59</code>, consumes one mandatory factor 3, reconstructs the reduced state, and compares it with the direct divisor-square target test.</p>
+<p>The Fedora regression through <code>100,000</code> has the same finite fixed-59 outcomes as the generic verifier:</p>
+<pre><code class="language-text">hard primes     273
+k=59 hits       117
+k=59 misses     156
+mismatches        0</code></pre>
+<p>The finite regression checks realization inside the exact closure. The reduction theorem itself comes from the identity <code>C59=3(2m+5)</code> and exhaustive finite-group closure from the forced seed.</p>
+<h2>8. Reproduction</h2>
+<pre><code class="language-sh">python3 research/erdos-straus/classify_k59_forced3_states.py --json
+python3 research/erdos-straus/verify_k59_forced3_structure.py --limit 100000 --json</code></pre>
+<p>The full 5,869-row reduced miss table is emitted with <code>--table</code>.</p>
+<p>Hard regression constants:</p>
+<pre><code class="language-text">forced factor                    3
+forced log                      50
+forced seed divisor-set size     3
+reduced states              35,740
+reduced hits                29,871
+reduced misses               5,869
+pure-QR states                 900
+pure-QR misses                 900
+Legendre split        {+1:3148, -1:2721}
+minimum added NR      {0:900, 1:2263, 2:2185, 3:458, 4:63}</code></pre>
+<p>Erdős–Straus remains open. The significance is that the generic k=59 obstruction geometry is much larger than the state space available to Mordell-hard primes once their universally forced factor is respected.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

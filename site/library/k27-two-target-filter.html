@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact two-target filter at the composite shift `k=27` — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k27-two-target-filter.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k27-two-target-filter.html">
+  <meta property="og:title" content="Exact two-target filter at the composite shift `k=27` — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact two-target filter at the composite shift `k=27`</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K27-TWO-TARGET-FILTER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact combined Type-I/Type-II classification</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>K27-TWO-TARGET-STRUCTURE.md</code>, <code>ES-TWO-TARGET-DIVISOR-SQUARE.md</code>, <code>ES-BINARY-LANE-I-EQUIVALENCE.md</code></p>
+<p><strong>Machine certificate:</strong> <code>classify_k27_even_packets.py</code></p>
+<p><strong>Independent finite regression:</strong> <code>verify_k27_structure.py</code></p>
+<p><strong>Claim boundary:</strong> this closes the fixed Lane-I shift <code>k=27</code> for Mordell-hard primes by an exact finite-group classification. It does not prove that every earlier-shift survivor must hit at <code>27</code>, does not give a universal finite shift bound, and does not prove Erdős–Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be Mordell-hard and write</p>
+<div class="math" role="math">P=\frac{p-1}{4}.</div>
+<p>Then</p>
+<div class="math" role="math">P\equiv0\pmod6.</div>
+<p>At shift <code>k=27</code>, put</p>
+<div class="math" role="math">\boxed{C=\frac{p+27}{4}=P+7.}</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{C\equiv1\pmod6,}</div>
+<p>so <code>gcd(C,27)=1</code>.</p>
+<p>The unit group</p>
+<div class="math" role="math">(\mathbb Z/27\mathbb Z)^\times</div>
+<p>is cyclic of order <code>18</code>; take <code>2</code> as primitive root and write all unit residues as discrete logs modulo <code>18</code>.</p>
+<p>The quadratic residues are exactly the even-log classes. Equivalently, among units modulo <code>27</code>,</p>
+<div class="math" role="math">\boxed{x\text{ is QR mod }27\iff x\equiv1\pmod3.}</div>
+<hr>
+<h2>2. The two exact targets</h2>
+<p>Let</p>
+<div class="math" role="math">\mathcal D(C) = \left\{ \sum_i f_i\log_2 q_i\pmod{18}: 0\le f_i\le2e_i \right\}</div>
+<p>be the divisor-log set of <code>C^2</code>, where</p>
+<div class="math" role="math">C=\prod_i q_i^{e_i}.</div>
+<p>By the exact divisor-square formulation:</p>
+<h3>Type I</h3>
+<p><code>4d == -1 (mod 27)</code> with <code>d|C^2</code>.</p>
+<p>Since</p>
+<div class="math" role="math">-4^{-1}\equiv20\pmod{27}</div>
+<p>and</p>
+<div class="math" role="math">\log_2 20=7,</div>
+<p>Type I is exactly</p>
+<div class="math" role="math">\boxed{7\in\mathcal D(C).}</div>
+<h3>Type II</h3>
+<p>Let</p>
+<div class="math" role="math">c=\log_2 C\pmod{18}.</div>
+<p>The signed-box target <code>-1</code> is equivalent in divisor-log coordinates to</p>
+<div class="math" role="math">\boxed{9+c\in\mathcal D(C).}</div>
+<p>Thus the combined fixed-shift test is an exact two-target membership problem in <code>C_18</code>.</p>
+<hr>
+<h2>3. Nonresidue valuation is forced even</h2>
+<p>A prime factor of <code>C</code> is a quadratic nonresidue modulo <code>27</code> exactly when it is <code>2 mod 3</code>.</p>
+<p>Define</p>
+<div class="math" role="math">\boxed{ E_{NR}(C) = \sum_{q^e\parallel C,\ q\equiv2\ (3)}e. }</div>
+<p>Because</p>
+<div class="math" role="math">C\equiv1\pmod3,</div>
+<p>the number of <code>2 mod 3</code> factors counted with multiplicity is even. Therefore</p>
+<div class="math" role="math">\boxed{E_{NR}(C)\equiv0\pmod2.}</div>
+<p>There are no odd packet sizes to classify.</p>
+<hr>
+<h2>4. Split the QR and nonresidue data</h2>
+<p>Write</p>
+<div class="math" role="math">C=C_QC_N,</div>
+<p>where <code>C_Q</code> contains the quadratic-residue prime powers and <code>C_N</code> the nonresidue prime powers.</p>
+<h3>QR state</h3>
+<p>Every QR prime has an even log. Divide those logs by <code>2</code> and work in</p>
+<div class="math" role="math">C_9=\mathbb Z/9\mathbb Z.</div>
+<p>For the QR part define the state</p>
+<div class="math" role="math">\boxed{(A,s)}</div>
+<p>where</p>
+<ul><li><code>A</code> is the half-log divisor set of <code>C_Q^2</code>;</li><li><code>s</code> is half of <code>log C_Q</code>.</li></ul>
+<p>For a QR prime-power contribution with half-log <code>a</code> and exponent <code>e</code>, the local state is</p>
+<div class="math" role="math">\left( \{0,a,2a,\ldots,2ea\}, \ ea \right) \pmod9.</div>
+<p>This local state space is finite for exact algebraic reasons:</p>
+<ul><li><code>a=0</code> is trivial;</li><li><code>a=3,6</code> has order <code>3</code>, so <code>e=1,2,3</code> exhausts the possibilities;</li><li>every other nonzero <code>a</code> has order <code>9</code>;</li><li>for those order-9 classes, <code>e=1,2,3</code> gives local divisor sets of sizes <code>3,5,7</code>, while <code>e&gt;=4</code> fills all of <code>C_9</code>; after saturation only the center <code>ea mod 9</code> remains, and nine consecutive exponents exhaust it.</li></ul>
+<p>Therefore <code>e=1,...,12</code> exhausts every possible local QR prime-power state.</p>
+<p>Closing those exact local states under multiplication/Minkowski sum yields</p>
+<div class="math" role="math">\boxed{31\text{ local QR states}}</div>
+<p>and exactly</p>
+<div class="math" role="math">\boxed{40\text{ reachable aggregate QR states }(A,s).}</div>
+<p><code>classify_k27_even_packets.py</code> constructs this closure directly and emits every state used below.</p>
+<h3>Nonresidue packet</h3>
+<p>Every nonresidue prime has an odd log modulo <code>18</code>.</p>
+<p>Split each exponent-<code>e</code> nonresidue prime power into <code>e</code> identical valuation units. This loses no divisor information because sums of <code>e</code> choices from <code>{0,1,2}</code> fill every exponent from <code>0</code> through <code>2e</code>.</p>
+<p>Thus a nonresidue packet of size</p>
+<div class="math" role="math">E=E_{NR}(C)</div>
+<p>is represented by an unordered multiset</p>
+<div class="math" role="math">\boxed{U=(\alpha_1,\ldots,\alpha_E), \qquad \alpha_i\in\{1,3,5,7,9,11,13,15,17\}.}</div>
+<p>Let</p>
+<div class="math" role="math">\mathcal O(U)</div>
+<p>be the set of odd divisor-log contributions obtainable from that packet.</p>
+<hr>
+<h2>5. Exact hit criterion for one structural state</h2>
+<p>Lift the QR half-log set back to even logs:</p>
+<div class="math" role="math">2A=\{2a:a\in A\}\subset C_{18}.</div>
+<p>The full center is</p>
+<div class="math" role="math">\boxed{ c=2s+\sum_{\alpha\in U}\alpha\pmod{18}.}</div>
+<p>Because both exact targets are odd, only odd contributions from the nonresidue packet can complete them.</p>
+<p>Therefore:</p>
+<h3>Type I</h3>
+<div class="math" role="math">\boxed{ \text{Type I hits} \iff \exists o\in\mathcal O(U): 7-o\in2A.}</div>
+<h3>Type II</h3>
+<div class="math" role="math">\boxed{ \text{Type II hits} \iff \exists o\in\mathcal O(U): 9+c-o\in2A.}</div>
+<p>Consequently a structural state <code>(A,s,U)</code> is a combined miss if and only if <strong>both</strong> intersections are empty.</p>
+<p>This criterion is exact. No prime search or probabilistic assumption enters it.</p>
+<hr>
+<h2>6. Exhaustive packet classification</h2>
+<p>Since <code>E_NR</code> is even, evaluate packet sizes</p>
+<div class="math" role="math">E=0,2,4,6,8,10.</div>
+<p>For each <code>E</code>, every unordered multiset of <code>E</code> odd logs is combined with every one of the 40 reachable QR states and tested by the exact criterion above.</p>
+<p>The complete exhaustion is:</p>
+<table class="directory"><thead><tr><th><code>E_NR</code></th><th>nonresidue multisets</th><th>structural cases</th><th>exact miss configurations</th><th>miss-capable QR states</th></tr></thead><tbody><tr><td>0</td><td>1</td><td>40</td><td><strong>40</strong></td><td>40</td></tr><tr><td>2</td><td>45</td><td>1,800</td><td><strong>95</strong></td><td>21</td></tr><tr><td>4</td><td>495</td><td>19,800</td><td><strong>46</strong></td><td>12</td></tr><tr><td>6</td><td>3,003</td><td>120,120</td><td><strong>16</strong></td><td>6</td></tr><tr><td>8</td><td>12,870</td><td>514,800</td><td><strong>3</strong></td><td>1</td></tr><tr><td>10</td><td>43,758</td><td>1,750,320</td><td><strong>0</strong></td><td>0</td></tr></tbody></table>
+<p>The classifier emits the complete miss table:</p>
+<div class="math" role="math">\boxed{200\text{ exact miss rows total}}</div>
+<p>of which</p>
+<div class="math" role="math">\boxed{160\text{ are non-pure-QR rows}.}</div>
+<p>The remaining 40 rows are the pure-QR <code>E=0</code> states.</p>
+<p>These are not sampled examples. They are the entire finite-group exception table for packet sizes through <code>10</code>.</p>
+<hr>
+<h2>7. Pure-QR branch</h2>
+<p>When</p>
+<div class="math" role="math">E_{NR}=0,</div>
+<p>every divisor log is even while both targets are odd. Hence every reachable QR state misses:</p>
+<div class="math" role="math">\boxed{E_{NR}=0\Longrightarrow\text{combined miss at }k=27.}</div>
+<p>This accounts for the 40 <code>E=0</code> table rows without any enumeration beyond the QR-state closure itself.</p>
+<hr>
+<h2>8. Universal cutoff at ten nonresidue valuation units</h2>
+<p>The <code>E=10</code> exhaustion has</p>
+<div class="math" role="math">\boxed{0\text{ combined miss configurations}.}</div>
+<p>This immediately yields a universal cutoff for larger packets.</p>
+<h3>Theorem — nonresidue cutoff</h3>
+<p>If</p>
+<div class="math" role="math">\boxed{E_{NR}(C)\ge10,}</div>
+<p>then the <code>k=27</code> Lane-I test hits.</p>
+<h3>Proof</h3>
+<p>Choose any ten nonresidue valuation units from <code>C</code>, retaining the entire QR part. The exact <code>E=10</code> table says this subconfiguration has either a Type-I or a Type-II witness.</p>
+<p>If it is Type I, the witness is a divisor</p>
+<div class="math" role="math">d\mid C&#x27;^2, \qquad d\equiv20\pmod{27}.</div>
+<p>After restoring the omitted factors, <code>d</code> remains a divisor of <code>C^2</code>, so the Type-I witness survives unchanged.</p>
+<p>If it is Type II, the witness is a signed-box exponent vector giving <code>-1 mod 27</code>. After restoring the omitted factors, extend that vector by assigning exponent <code>0</code> to every restored factor. The same Type-II witness survives unchanged.</p>
+<p>Thus adjoining additional factors cannot destroy the subconfiguration witness. Therefore every packet with at least ten nonresidue valuation units hits. QED.</p>
+<p>Because <code>E_NR</code> is even, no packet size above <code>8</code> remains capable of missing.</p>
+<hr>
+<h2>9. Exact combined-miss theorem at k=27</h2>
+<h3>Theorem</h3>
+<p>For a Mordell-hard prime <code>p</code>, put</p>
+<div class="math" role="math">C=\frac{p+27}{4}.</div>
+<p>Construct its exact QR state <code>(A,s)</code> and nonresidue log multiset <code>U</code> as above.</p>
+<p>Then both Lane-I targets miss at <code>k=27</code> if and only if:</p>
+<ol><li>&lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;E_{NR}(C)\in\{0,2,4,6,8\};&lt;/div&gt;</li></ol>
+<ol><li>the structural row <code>(A,s,U)</code> occurs in the complete miss table emitted by <code>classify_k27_even_packets.py</code>.</li></ol>
+<p>Equivalently:</p>
+<div class="math" role="math">\boxed{ \delta_{27}(C)&gt;0 \iff (A,s,U)\in\mathcal M_{27},}</div>
+<p>where <code>M_27</code> is the explicit 200-row table generated by the exact finite-group classifier.</p>
+<p>For</p>
+<div class="math" role="math">E_{NR}\ge10,</div>
+<p>combined failure is impossible.</p>
+<p>This is a complete fixed-shift classification.</p>
+<hr>
+<h2>10. The extreme E_NR=8 edge</h2>
+<p>At <code>E_NR=8</code>, only <strong>three</strong> structural misses survive, and all three require the trivial QR state</p>
+<div class="math" role="math">\boxed{A=\{0\},\qquad s=0.}</div>
+<p>Thus every QR prime factor must contribute log <code>0</code>, i.e. residue <code>1 mod 27</code>.</p>
+<p>The three nonresidue log multisets are exactly</p>
+<pre><code class="language-text">(1,1,1,17,17,17,17,17)
+(5,5,13,13,13,13,13,13)
+(11,11,11,11,11,11,11,11)</code></pre>
+<p>In each case the attainable odd contribution set is</p>
+<div class="math" role="math">\{1,3,5,9,11,13,15,17\},</div>
+<p>which is every odd log class except <code>7</code>.</p>
+<p>This is the final miss layer before the universal <code>E_NR&gt;=10</code> hit cutoff.</p>
+<hr>
+<h2>11. Independent finite regression</h2>
+<p>The exact structural identities were independently replayed on Mordell-hard primes using <code>verify_k27_structure.py</code>, without invoking CBX.</p>
+<p>On the preserved full <code>p&lt;=10,000,000</code> corpus:</p>
+<table class="directory"><thead><tr><th><code>E_NR(C)</code></th><th>hits at k=27</th><th>misses at k=27</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>11,926</td></tr><tr><td>2</td><td>6,063</td><td>2,401</td></tr><tr><td>4</td><td>117</td><td>6</td></tr></tbody></table>
+<p>No larger nonresidue packet occurs in that finite range.</p>
+<p>These population counts are finite regression evidence only. The exact theorem is the group classification above.</p>
+<p>On the six-shift residual after</p>
+<div class="math" role="math">3,7,11,15,19,23,</div>
+<p>there are 308 hard primes through <code>10^7</code>. At <code>k=27</code> they split as:</p>
+<div class="math" role="math">185\text{ pure-QR misses}, \qquad 91\text{ non-pure hits}, \qquad 32\text{ non-pure misses}.</div>
+<p>Every observed non-pure member of that six-shift residual has <code>E_NR=2</code>, so the exact <code>E=2</code> table contains the entire observed thin residual geometry there.</p>
+<p>Again, this last population statement is finite evidence, not a universal theorem about six-shift survivors.</p>
+<hr>
+<h2>12. Verification and reproducibility</h2>
+<p>The exact table is generated by:</p>
+<pre><code class="language-sh">python3 research/erdos-straus/classify_k27_even_packets.py --json</code></pre>
+<p>The program checks as hard regression constants:</p>
+<pre><code class="language-text">QR local states       31
+QR reachable states   40
+
+E=0   misses          40
+E=2   misses          95
+E=4   misses          46
+E=6   misses          16
+E=8   misses           3
+E=10  misses           0
+
+total miss rows      200
+non-pure miss rows   160</code></pre>
+<p>The Fedora CI gate independently requires the same counts, requires every emitted table length to equal its exact miss count, and requires the universal cutoff to report</p>
+<pre><code class="language-text">E_NR_at_least = 10
+combined_miss_possible = false</code></pre>
+<p>The structural verifier separately checks:</p>
+<ul><li>the hard-prime wheel law;</li><li><code>QR mod 27 iff 1 mod 3</code> for units;</li><li>even nonresidue valuation;</li><li>signed-box/divisor-log coordinate equivalence;</li><li>the pure-QR combined miss theorem;</li><li>the full-QR-mass hit theorem;</li><li>the exact <code>E_NR=2</code> companion criterion.</li></ul>
+<hr>
+<h2>13. Corridor status</h2>
+<p>The exact consecutive Lane-I corridor is now classified through</p>
+<div class="math" role="math">\boxed{k=3,7,11,15,19,23,27.}</div>
+<p>By <code>ES-BINARY-LANE-I-EQUIVALENCE.md</code>, these are simultaneously exact consecutive binary-selector classifications.</p>
+<p>The next shift is</p>
+<div class="math" role="math">\boxed{k=31,}</div>
+<p>where a separate quotient/<code>v_2</code> analysis is already underway. The theorem-mining priority is no longer to revisit <code>k=27</code>; it is to combine the seven exact failure laws and compress the residual entering <code>k=31</code>.</p>
+<hr>
+<p>Erdős–Straus remains open. This closes one fixed shift by exact finite-group exhaustion and a universal packet cutoff; it does not supply the missing universal existence argument across shifts.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

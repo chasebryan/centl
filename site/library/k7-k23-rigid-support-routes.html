@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Every Mordell-hard class modulo 840 has class-conditioned seed 2 at k=7. The exact seed-2 closure modulo 7 has">
+  <title>k=7 universal support and rigid positive k=23 routes — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k7-k23-rigid-support-routes.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k7-k23-rigid-support-routes.html">
+  <meta property="og:title" content="k=7 universal support and rigid positive k=23 routes — Free Computation Foundation">
+  <meta property="og:description" content="Every Mordell-hard class modulo 840 has class-conditioned seed 2 at k=7. The exact seed-2 closure modulo 7 has">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>k=7 universal support and rigid positive k=23 routes</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Every Mordell-hard class modulo 840 has class-conditioned seed 2 at k=7. The exact seed-2 closure modulo 7 has</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K7-K23-RIGID-SUPPORT-ROUTES.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact fixed-shift support theorem and routed affine-coupling atlas</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Primary classifier:</strong> <code>classify_k7_k23_rigid_support_routes.py</code></p>
+<p><strong>Independent realization regression:</strong> <code>verify_k7_k23_rigid_support_routes.py</code></p>
+<p><strong>Claim boundary:</strong> all support statements are range-free at their named shifts. The coupled residual equations are necessary conditions for simultaneous misses, not contradictions and not an Erdős-Straus proof.</p>
+<h2>1. Universal Mordell-hard k=7 support theorem</h2>
+<p>Every Mordell-hard class modulo 840 has class-conditioned seed 2 at k=7. The exact seed-2 closure modulo 7 has</p>
+<ul><li>9 states;</li><li>3 miss states;</li><li>one miss center for each hard p residue 1, 2, 4 modulo 7.</li></ul>
+<p>All three miss states have the same divisor-residue mask</p>
+<p><code>{1,2,4} mod7</code>,</p>
+<p>which is exactly the nonzero quadratic-residue subgroup modulo 7.</p>
+<p>Therefore:</p>
+<blockquote><p>For every Mordell-hard prime p, fixed k=7 misses if and only if every prime factor of C7=(p+7)/4 is a quadratic residue modulo 7.</p></blockquote>
+<p>This is stronger than a Legendre-sign statement. The hard mod-840 skeleton already places p in a positive 7-character class, so the actual information at k=7 is factor-support rigidity.</p>
+<h2>2. Exact miss decomposition at k=23</h2>
+<p>Every Mordell-hard class has seed 6 at k=23. The exact seed-6 closure has</p>
+<ul><li>49 states;</li><li>15 misses.</li></ul>
+<p>Ten positive p residues modulo 23 are completely rigid:</p>
+<p><code>2,3,4,6,8,9,12,13,16,18</code>.</p>
+<p>For each of those residues there is exactly one miss state, and its divisor mask is exactly the quadratic-residue subgroup</p>
+<p><code>{1,2,3,4,6,8,9,12,13,16,18} mod23</code>.</p>
+<p>Hence, on any of those ten residue branches:</p>
+<blockquote><p>fixed k=23 misses if and only if every prime factor of C23=(p+23)/4 is a quadratic residue modulo 23.</p></blockquote>
+<p>Only three p residues support non-rigid k=23 miss geometry:</p>
+<ul><li>p mod23=1 has three miss states, with mask sizes 9, 11, and 21;</li><li>p mod23=5 has one 19-residue miss mask;</li><li>p mod23=14 has one 19-residue miss mask.</li></ul>
+<p>The latter two are exactly the negative-character exits already isolated by the k=19/k=23 routed-bottleneck theorem.</p>
+<h2>3. Routing the rigid k=23 support into lower companions</h2>
+<p>Positive k=23 character routes factor 23 into a uniquely determined companion. Four destinations are especially useful because the receiving shift already has an exact support theorem.</p>
+<h3>3.1 p mod23=8 routes into k=15</h3>
+<p>Here</p>
+<p><code>23 divides C15</code>.</p>
+<p>Every hard class also forces 2|C15, so write</p>
+<p><code>C15 = 46 A</code>.</p>
+<p>At k=23 write</p>
+<p><code>C23 = 6 B</code>.</p>
+<p>Since C23-C15=2,</p>
+<p><code>3B - 23A = 1</code>.</p>
+<p>Thus gcd(A,B)=1.</p>
+<p>If k=15 and k=23 both miss, then</p>
+<ul><li>every prime factor of A lies in the Jacobi-plus subgroup <code>{1,2,4,8} mod15</code>;</li><li>every prime factor of B is a quadratic residue modulo 23.</li></ul>
+<p>The k=15 support statement is exact: the routed seed is 46, the closure has 12 states, and the exact hard-class center leaves one Jacobi-plus miss state for every hard class.</p>
+<p>This route is universal across all six Mordell-hard classes.</p>
+<h3>3.2 p mod23=12 routes into k=11</h3>
+<p>Here</p>
+<p><code>23 divides C11</code>.</p>
+<p>For h in {169,289,529}, the class-conditioned k=11 seed is 15. Therefore</p>
+<p><code>C11 = 345 A</code></p>
+<p>and again</p>
+<p><code>C23 = 6 B</code>.</p>
+<p>Because C23-C11=3,</p>
+<p><code>2B - 115A = 1</code>.</p>
+<p>Hence gcd(A,B)=1.</p>
+<p>A simultaneous k=11/k=23 miss forces</p>
+<ul><li>A to have only quadratic-residue prime support modulo 11;</li><li>B to have only quadratic-residue prime support modulo 23.</li></ul>
+<h3>3.3 p mod23=4 routes into k=19</h3>
+<p>Here</p>
+<p><code>23 divides C19</code>.</p>
+<p>For h=289, the k=19 class seed is 7, so</p>
+<p><code>C19 = 161 A</code>.</p>
+<p>For h=121, the class seed is 35, so</p>
+<p><code>C19 = 805 A</code>.</p>
+<p>In both cases C23=6B and C23-C19=1. Therefore</p>
+<ul><li>h=289: <code>6B - 161A = 1</code>;</li><li>h=121: <code>6B - 805A = 1</code>.</li></ul>
+<p>Both equations force gcd(A,B)=1.</p>
+<p>The routed k=19 seed closures have 27 states and 9 misses, and every miss mask is exactly the quadratic-residue subgroup modulo 19. Thus simultaneous k=19/k=23 misses force A and B into QR-support semigroups modulo 19 and 23 respectively.</p>
+<h3>3.4 p mod23=16 routes into k=7</h3>
+<p>Here</p>
+<p><code>23 divides C7</code>.</p>
+<p>Since every hard class also forces 2|C7,</p>
+<p><code>C7 = 46 A</code>.</p>
+<p>With C23=6B and C23-C7=4,</p>
+<p><code>3B - 23A = 2</code>.</p>
+<p>Therefore gcd(A,B) divides 2.</p>
+<p>A simultaneous k=7/k=23 miss forces</p>
+<ul><li>every prime factor of A to be a quadratic residue modulo 7;</li><li>every prime factor of B to be a quadratic residue modulo 23.</li></ul>
+<p>This route is also universal across all six hard classes.</p>
+<h2>4. What the new atlas changes</h2>
+<p>The k=23 positive branch is no longer appropriately described as a single Legendre condition. Ten of its eleven positive residue classes are exact prime-support states. Several of those states route factor 23 directly into lower companions whose miss geometry is independently rigid.</p>
+<p>The resulting residual equations have tiny right-hand sides:</p>
+<p><code>3B - 23A = 1</code></p>
+<p><code>2B - 115A = 1</code></p>
+<p><code>6B - 161A = 1</code></p>
+<p><code>6B - 805A = 1</code></p>
+<p><code>3B - 23A = 2</code>.</p>
+<p>They couple coprimality or near-coprimality with two different multiplicative support semigroups.</p>
+<p>A quadratic-reciprocity pass over the first equation was checked and does not yield an additional contradiction; the reciprocity identity is compatible with the affine relation. Finite simultaneous realizations also exist. Those negative results are important: the correct next target is a stronger support-allocation or higher-character obstruction, not a claim that these equations are already impossible.</p>
+<p>Erdős-Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

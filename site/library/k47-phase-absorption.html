@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="For">
+  <title>k47 phase absorption on h169 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k47-phase-absorption.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k47-phase-absorption.html">
+  <meta property="og:title" content="k47 phase absorption on h169 — Free Computation Foundation">
+  <meta property="og:description" content="For">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>k47 phase absorption on h169</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">For</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K47-PHASE-ABSORPTION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved fixed-shift module inside the candidate decomposition framework</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Verifier:</strong> <code>verify_k47_phase_absorption.py</code></p>
+<p><strong>Claim boundary:</strong> exact h169 k47 survivor-phase implication only. This is not a universal depth bound, not a closed decomposition method, and not an Erdős–Straus proof.</p>
+<h2>1. Coordinate</h2>
+<p>For</p>
+<p><code>p = 169 + 840t</code></p>
+<p>at the admissible shift <code>k=47</code>,</p>
+<p><code>C47 = (p+47)/4 = 54 + 210t = 6J</code>,</p>
+<p>with</p>
+<p><code>J = 9 + 35t</code>.</p>
+<p>The fixed mandatory seed is therefore <code>6=2*3</code>.</p>
+<p>Modulo47,</p>
+<p><code>C47 = 7 + 22t</code>.</p>
+<p>The exact signed-box targets are</p>
+<ul><li>Type I: <code>d = -4^(-1) = 35 mod47</code>;</li><li>Type II: <code>d = -C47 mod47</code>.</li></ul>
+<p>If <code>C47 = 0 mod47</code>, then the factor47 case is an immediate Type-II hit. Otherwise every residual prime factor of <code>J</code> is a unit modulo47 and the complete unit residue-state closure applies.</p>
+<h2>2. Exact seed-6 closure</h2>
+<p>Starting from the divisor-square state supplied by the fixed factors2 and3 and adjoining every possible nonzero residue modulo47, the complete exact closure contains</p>
+<pre><code class="language-text">1079 states
+ 883 hits
+ 196 misses</code></pre>
+<p>with hit mechanisms</p>
+<pre><code class="language-text">Type I only       221
+Type II only       68
+Type I + Type II  594
+miss              196</code></pre>
+<p>This reconstructs the same seed-6 exact state geometry already used by the incoming-repulsion program, but here the final hard-class center is imposed as the response coordinate.</p>
+<h2>3. Range-free phase theorem</h2>
+<p>Filter the complete miss set by the required final center</p>
+<p><code>C47 = 7 + 22t mod47</code>.</p>
+<p>Exactly thirteen phases have no possible miss state:</p>
+<p><code>A47 = {1,5,6,10,13,21,23,36,37,38,40,42,44}</code>.</p>
+<p>Therefore</p>
+<p><code>k47 miss =&gt; t mod47 notin A47</code>.</p>
+<p>Equivalently,</p>
+<p><code>k47 absorbs every h169 integer with t mod47 in A47</code>.</p>
+<p>The possible survivor phases are</p>
+<p><code>S47 = {0,2,3,4,7,8,9,11,12,14,15,16,17,18,19,20,22,24,25,26,27,28,29,30,31,32,33,34,35,39,41,43,45,46}</code>.</p>
+<p>This implication is range-free. It is obtained from complete exact residue-state closure, not from a finite prime census.</p>
+<p>The phases in <code>S47</code> are only <strong>possible</strong> survivor phases. Existence of an abstract miss state with the same center does not assert that every, or any particular, arithmetic integer in that phase realizes it.</p>
+<h2>4. Ten absorptions beyond the universal divisor shell</h2>
+<p>The universal signed-box selector shell handles three of the thirteen phases directly:</p>
+<ul><li><code>t=21</code>: <code>C47=-1 mod47</code>, so <code>d=1</code> is Type II;</li><li><code>t=36</code>: <code>C47=0 mod47</code>, so <code>d=C47</code> is Type II;</li><li><code>t=44</code>: <code>C47=35=-4^(-1) mod47</code>, so <code>d=C47</code> is Type I.</li></ul>
+<p>The remaining ten absorbed phases</p>
+<p><code>{1,5,6,10,13,23,37,38,40,42}</code></p>
+<p>are not explained by those universal divisors. They arise from the full exact seed-6 divisor-state geometry.</p>
+<p>Thus k47 contributes genuine state-dependent phase absorption beyond the factorization-free selector shell.</p>
+<h2>5. Center structure</h2>
+<p>The thirteen absorbed phases correspond to final centers</p>
+<p><code>{0,11,22,23,29,35,38,39,41,43,44,45,46}</code> modulo47.</p>
+<p>Every nonzero absorbed center is a quadratic nonresidue modulo47.</p>
+<p>The complete closure still has miss states at the eleven other nonresidue centers</p>
+<p><code>{5,10,13,15,19,20,26,30,31,33,40}</code>,</p>
+<p>and at every quadratic-residue center.</p>
+<p>So the theorem is strictly finer than a quadratic-character test: character alone does not determine k47 survival.</p>
+<h2>6. p-coordinate form</h2>
+<p>Since the h169 parameter has period47 at this shift, the absorbed p residues modulo</p>
+<p><code>840*47 = 39480</code></p>
+<p>are</p>
+<p><code>{1009,4369,5209,8569,11089,17809,19489,30409,31249,32089,33769,35449,37129}</code>.</p>
+<h2>7. Place in the local machine</h2>
+<p>The post-k23 ladder now carries several different exact transition forms:</p>
+<ul><li>k27: finite survivor grammar;</li><li>k31: BARE/FULL_QR normal form;</li><li>k35: two-branch survivor theorem;</li><li>k39: phase absorption modulo13;</li><li>k43: universal selector-shell phases;</li><li>k47: thirteen-phase absorption modulo47, ten of them beyond the universal shell.</li></ul>
+<p>This diversity is useful. It argues against forcing every fixed shift into one preferred representation. The candidate decomposition framework should retain whichever exact coordinate is smallest and lossless for that shift.</p>
+<p>The developing Bryan Entanglement Cross layer is intentionally not used as proof data here. If attached later, it should annotate or schedule these exact transitions without changing their arithmetic semantics or granting pruning permission.</p>
+<h2>8. Next theorem target</h2>
+<p>Intersect the surviving k47 phases with the already-proved k39 phase restriction and the k27/k31/k35 survivor coordinates, then test whether the residual product state forces k51 or k55.</p>
+<p>The important target is no longer another census. It is an implication of the form</p>
+<p><code>survive k27,k31,k35,k39,k43,k47 =&gt; restricted residual state</code></p>
+<p>followed by a deterministic next selector or a strictly smaller exact survivor grammar.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

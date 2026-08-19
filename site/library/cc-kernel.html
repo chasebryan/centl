@@ -24,7 +24,7 @@
     <div class="title"><h1>CC.kernel</h1><p>Synthesis · hosted from the CENTL repository</p></div>
   </header>
   <div class="layout">
-            <nav aria-label="Primary">
+    <nav aria-label="Primary">
       <h2>CENTL &amp; Hub</h2>
       <ul>
         <li><a href="../index.html#top">CENTL Work Area</a></li>
@@ -67,7 +67,7 @@
 <p>One job: for each Mordell-hard prime, emit an explicit</p>
 <pre><code class="language-text">4/p = 1/x + 1/y + 1/z</code></pre>
 <p>or report that the declared menu missed. It does not prove the conjecture.</p>
-<p>Lives next to <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/B-BervigES.kernel"><code>../bb.kernel</code></a> (Python reference stack, also <code>B-BervigES.kernel</code>). Same two-target mathematics. bb.kernel covers general <code>n</code> and the full menu; this binary only attacks Mordell-hard primes.</p>
+<p>Lives next to <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/bb.kernel"><code>../bb.kernel</code></a> (Python reference stack, also <code>B-BervigES.kernel</code>). Same two-target mathematics. bb.kernel covers general <code>n</code> and the full menu; this binary only attacks Mordell-hard primes.</p>
 <h2>Menu</h2>
 <ol><li><strong>theorem</strong> — <code>4p+1</code>, <code>p+4</code>, two-target <code>k ∈ {3,7,11,15}</code></li><li><strong>window</strong> — coprime <code>fab(a,b)</code> with <code>a,b ≤ 11</code></li><li><strong>search</strong> — two-target corridor <code>k = 4h+3</code> through <code>--k-max</code>, then aligned external-nonresidue shifts</li></ol>
 <p>Every hit is an explicit witness: method, <code>(k,A,B,D,T,kind)</code> when applicable, and the three denominators.</p>

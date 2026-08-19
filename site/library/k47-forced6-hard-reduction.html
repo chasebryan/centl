@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Forced-6 hard-prime reduction at `k=47` — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k47-forced6-hard-reduction.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k47-forced6-hard-reduction.html">
+  <meta property="og:title" content="Forced-6 hard-prime reduction at `k=47` — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Forced-6 hard-prime reduction at `k=47`</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K47-FORCED6-HARD-REDUCTION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal reduction plus exact finite-group state closure</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>K47-TWO-TARGET-FILTER.md</code>, <code>STRONG-ES-PRIME-SHIFT-KNESER-DICHOTOMY.md</code>, <code>FIXED-SHIFT-JACOBI-PARITY.md</code></p>
+<p><strong>Machine certificate:</strong> <code>classify_k47_forced6_states.py</code></p>
+<p><strong>Claim boundary:</strong> this sharply reduces the fixed-47 state universe for Mordell-hard primes. It does not prove the cross-shift exclusion candidate and does not prove Erdős–Straus.</p>
+<hr>
+<h2>1. Universal forced factor</h2>
+<p>Every Mordell-hard prime satisfies</p>
+<div class="math" role="math">p\equiv1\pmod{24}.</div>
+<p>Hence</p>
+<div class="math" role="math">p+47\equiv48\equiv0\pmod{24},</div>
+<p>so</p>
+<div class="math" role="math">\boxed{6\mid C_{47}:=\frac{p+47}{4}.}</div>
+<p>Thus every actual hard-prime state at shift 47 contains at least one factor <code>2</code> and at least one factor <code>3</code>.</p>
+<p>In the primitive-root-5 coordinate modulo 47,</p>
+<div class="math" role="math">\boxed{\lambda(2)=18,\qquad\lambda(3)=20.}</div>
+<p>Both are even, so both forced factors are quadratic residues.</p>
+<hr>
+<h2>2. Forced starting state</h2>
+<p>The generic exact state machine begins at the empty state and allows every possible factor direction.</p>
+<p>For a hard prime we can instead begin after one mandatory <code>2</code> and one mandatory <code>3</code> occurrence.</p>
+<p>The exact forced starting state is obtained by the two transitions</p>
+<div class="math" role="math">T_{18}T_{20}(\{0\},0).</div>
+<p>Its divisor-log set has size</p>
+<div class="math" role="math">\boxed{9}</div>
+<p>and its center log is</p>
+<div class="math" role="math">\boxed{38\pmod{46}.}</div>
+<p>From that state, allowing all additional valuation directions still covers every possible hard-prime factorization because further powers of 2 and 3 are simply additional occurrences of the same transitions.</p>
+<hr>
+<h2>3. Exact hard-prime state closure</h2>
+<p>Close the forced starting state under all 46 valuation directions.</p>
+<p>The least closed system contains only</p>
+<div class="math" role="math">\boxed{1,079}</div>
+<p>states, compared with 61,134 states in the completely generic fixed-47 closure.</p>
+<p>Testing the exact two targets gives</p>
+<div class="math" role="math">\boxed{883\text{ hit states}}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{196\text{ combined-miss states}.}</div>
+<h3>Theorem — forced-6 hard-state reduction</h3>
+<p>For every Mordell-hard prime <code>p</code>, the exact <code>k=47</code> state of <code>(p+47)/4</code> belongs to this 1,079-state closure.</p>
+<p>Therefore every actual hard-prime miss at 47 belongs to the exact 196-row forced-6 miss table.</p>
+<p>This is range-free. No finite prime bound enters the reduction.</p>
+<hr>
+<h2>4. Pure quadratic branch shrinks to 66 states</h2>
+<p>Restrict all additional factor directions to quadratic residues, i.e. even logs.</p>
+<p>Starting from the forced <code>2·3</code> packet gives exactly</p>
+<div class="math" role="math">\boxed{66}</div>
+<p>pure-QR states.</p>
+<p>All 66 miss both targets.</p>
+<p>Thus the pure splitting branch of the safe-prime Kneser dichotomy is represented by a very small exact state family once the hard congruence is imposed.</p>
+<hr>
+<h2>5. Only one- and two-packet nonresidue defects remain</h2>
+<p>Minimize the number of <strong>additional</strong> odd-log valuation occurrences needed to represent each forced-6 miss state.</p>
+<p>The exact distribution is</p>
+<div class="math" role="math">\boxed{ \begin{array}{c|r} \text{minimum added NR units}&amp;\text{miss states}\\ \hline 0&amp;66\\ 1&amp;80\\ 2&amp;50 \end{array}}</div>
+<p>No forced-6 miss state needs three or more additional nonresidue units in a minimum representative.</p>
+<p>This is much sharper than the generic fixed-47 state table, whose minimum representative can require up to four nonresidue units.</p>
+<p>The parity split is exactly the Jacobi law:</p>
+<div class="math" role="math">\boxed{116\text{ misses with }(47/p)=+1,}</div>
+<div class="math" role="math">\boxed{80\text{ misses with }(47/p)=-1.}</div>
+<p>The negative-character branch is therefore <strong>exactly a one-packet state problem</strong> in this reduced coordinate.</p>
+<p>That is the key compression for the cross-shift proof search.</p>
+<hr>
+<h2>6. Safe-prime interpretation</h2>
+<p>Since</p>
+<div class="math" role="math">47=2\cdot23+1</div>
+<p>is a safe prime, <code>STRONG-ES-PRIME-SHIFT-KNESER-DICHOTOMY.md</code> says every Type-II miss is either:</p>
+<ol><li>pure quadratic splitting; or</li><li>a trivial-stabilizer aperiodic defect.</li></ol>
+<p>The forced-6 closure refines this for the combined two-target problem:</p>
+<ul><li>66 exact pure-QR miss states;</li><li>80 one-nonresidue negative-character miss states;</li><li>50 two-nonresidue positive-character miss states.</li></ul>
+<p>So all non-pure hard-prime failure geometry at 47 is concentrated into at most a two-packet core.</p>
+<hr>
+<h2>7. Connection to the 10M cross-shift signal</h2>
+<p><code>K47-NEGATIVE-LEGENDRE-CORRIDOR-10M.md</code> shows that the preserved 10M earlier corridor realizes <strong>none</strong> of the 80 negative-character forced-6 miss states after shift 39.</p>
+<p>The proof target can therefore be stated in its smallest current form:</p>
+<blockquote><p>Show that the exact failure conditions at shifts <code>3,7,11,15,19,23,27,31,35,39</code> are incompatible with all 80 one-packet negative-character miss states in the forced-6 <code>k=47</code> table.</p></blockquote>
+<p>This is still open.</p>
+<p>But the target is now finite on the <code>k=47</code> side and symbolic on the earlier-corridor side. It is no longer “explain thousands of arbitrary 47 states.”</p>
+<hr>
+<h2>8. Reproduction</h2>
+<pre><code class="language-sh">python3 research/erdos-straus/classify_k47_forced6_states.py --json
+python3 research/erdos-straus/classify_k47_forced6_states.py --json --table</code></pre>
+<p>Hard constants are</p>
+<pre><code class="language-text">forced factors                    2,3
+forced logs                      18,20
+forced starting D size               9
+forced starting center              38
+closed states                     1079
+hit states                         883
+miss states                        196
+pure-QR states                      66
+pure-QR misses                      66
+Legendre miss split       {+1:116, -1:80}
+minimum added NR histogram   {0:66, 1:80, 2:50}</code></pre>
+<hr>
+<p>Erdős–Straus remains open. The important new object is the 80-state negative-character packet family, which is small enough to attack against the earlier exact corridor one state family at a time.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

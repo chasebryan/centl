@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="For h169,">
+  <title>k27 QR-factor mode selectors — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k27-qr-factor-mode-selectors.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k27-qr-factor-mode-selectors.html">
+  <meta property="og:title" content="k27 QR-factor mode selectors — Free Computation Foundation">
+  <meta property="og:description" content="For h169,">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>k27 QR-factor mode selectors</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">For h169,</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K27-QR-FACTOR-MODE-SELECTORS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact cross-coordinate selector module inside the candidate decomposition framework</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Verifier:</strong> <code>verify_k27_qr_factor_mode_selectors.py</code></p>
+<p><strong>Depends on:</strong> <code>K27-SURVIVOR-GRAMMAR.md</code> and the realized k19 pair survivor normal form</p>
+<p><strong>Claim boundary:</strong> exact necessary mode restrictions for k27 survival. This is not a termination theorem, not a closed decomposition method, and not an Erdős–Straus proof.</p>
+<h2>1. Why the seven-mode coordinate can sometimes collapse</h2>
+<p>For h169,</p>
+<p><code>C27 = 7E</code>,</p>
+<p>with</p>
+<p><code>E = 7 + 30t</code>.</p>
+<p>The exact k27 theorem separates the nonresidue factor occurrences of E into one of seven live NR-skeleton modes</p>
+<p><code>Q,A,B,C,D,E,F</code>,</p>
+<p>then processes QR27 factor occurrences through the exact transition table.</p>
+<p>Because factor transitions commute and hits are absorbing, if one known rational prime factor of E has QR residue r modulo27, that occurrence may be applied immediately to the skeleton mode. Any skeleton mode sent to HIT by r is impossible for a final k27 miss.</p>
+<p>Thus deterministic divisibility of E by a rational prime can act as a <strong>mode selector</strong> before the rest of E is factored.</p>
+<h2>2. Complete one-occurrence QR selector table</h2>
+<p>The landed transition table gives the exact live skeleton modes after requiring one occurrence of each QR residue:</p>
+<pre><code class="language-text">QR residue r   skeleton modes not killed by one r
+-------------------------------------------------
+1              Q,A,B,C,D,E,F
+4              Q,A,D
+7              Q,A,C
+10             Q
+13             Q,E
+16             Q
+19             Q
+22             Q
+25             Q,F</code></pre>
+<p>This is read directly from the exact transition table:</p>
+<ul><li>Q is stable under every QR residue;</li><li>A survives only r in <code>{1,4,7}</code>;</li><li>B survives only r=1;</li><li>C survives only r in <code>{1,7}</code>;</li><li>D survives only r in <code>{1,4}</code>;</li><li>E survives only r in <code>{1,13}</code>;</li><li>F survives only r in <code>{1,25}</code>.</li></ul>
+<p>Therefore residues</p>
+<p><code>{10,16,19,22}</code></p>
+<p>are <strong>one-occurrence Q selectors</strong>:</p>
+<blockquote><p>if E contains any prime-factor occurrence with one of those residues and k27 still misses, then the NR skeleton must be Q.</p></blockquote>
+<p>Since Q is the empty NR skeleton, this implies every prime factor of E is QR27.</p>
+<h2>3. Repeated QR occurrences</h2>
+<p>For residues</p>
+<p><code>{4,7,13,25}</code>,</p>
+<p>one occurrence still permits one or two non-Q skeleton modes. A second occurrence removes them:</p>
+<pre><code class="language-text">r=4:  A -&gt; C -&gt; HIT, D -&gt; B -&gt; HIT
+r=7:  A -&gt; D -&gt; HIT, C -&gt; B -&gt; HIT
+r=13: E -&gt; B -&gt; HIT
+r=25: F -&gt; B -&gt; HIT.</code></pre>
+<p>Hence for</p>
+<p><code>r in {4,7,13,25}</code>,</p>
+<p>two occurrences of r force Q on any surviving k27 branch.</p>
+<p>Symbolically:</p>
+<p><code>multiplicity_r(E) &gt;= 2 AND k27 miss =&gt; mode Q</code>.</p>
+<p>Together with the one-occurrence selectors, every nontrivial QR residue except1 has a finite mode-collapse threshold of at most2.</p>
+<h2>4. Rational-prime divisibility phases</h2>
+<p>For any rational prime q not dividing30,</p>
+<p><code>q | E</code></p>
+<p>is equivalent to the unique phase</p>
+<p><code>t = -7 * 30^(-1) mod q</code>.</p>
+<p>Likewise</p>
+<p><code>q^2 | E</code></p>
+<p>has a unique phase modulo q^2.</p>
+<p>The smallest useful examples are:</p>
+<pre><code class="language-text">q    q mod27    q|E phase       q^2|E phase       k27 miss consequence
+7       7       t=0 mod7        t=21 mod49        Q/A/C; square -&gt; Q
+13     13       t=8 mod13       t=73 mod169       Q/E;   square -&gt; Q
+19     19       t=8 mod19       t=84 mod361       Q immediately
+31      4       t=7 mod31       t=224 mod961      Q/A/D; square -&gt; Q
+37     10       t=1 mod37       t=593 mod1369     Q immediately
+43     16       t=27 mod43      t=801 mod1849     Q immediately
+79     25       t=34 mod79      t=1456 mod6241    Q/F;   square -&gt; Q
+103    22       t=65 mod103     t=4597 mod10609   Q immediately</code></pre>
+<p>These are exact phase-to-mode implications, not frequency observations.</p>
+<h2>5. The Route-B k19 BARE collapse</h2>
+<p>The realized Route-B k19 BARE state has exact center phase</p>
+<p><code>t = 8 mod19</code>.</p>
+<p>But the k27 cofactor satisfies</p>
+<p><code>E = 7 + 30t</code>.</p>
+<p>Modulo19,</p>
+<p><code>E = 7 + 11t</code>.</p>
+<p>At t=8,</p>
+<p><code>E = 0 mod19</code>.</p>
+<p>Therefore every Route-B k19 BARE branch has rational prime19 dividing E.</p>
+<p>The residue of that prime in the k27 unit group is</p>
+<p><code>19 mod27</code>,</p>
+<p>which is a one-occurrence Q selector.</p>
+<p>Hence the exact cross-shift theorem:</p>
+<p><code>Route-B k19 BARE AND k27 miss =&gt; k27 mode Q</code>.</p>
+<p>Equivalently:</p>
+<blockquote><p>on a Route-B BARE survivor that also survives k27, every rational prime factor of E is a quadratic residue modulo27.</p></blockquote>
+<p>The seven-mode k27 coordinate collapses to one mode on this upstream state.</p>
+<p>No factorization of the remaining cofactor E is needed to derive the mode collapse.</p>
+<h2>6. Stronger support form</h2>
+<p>Mode Q is the empty NR skeleton and is stable under arbitrary QR27 completion.</p>
+<p>Therefore the Route-B BARE/k27 survivor state carries the exact support law</p>
+<p><code>support(E) subset QR27</code>.</p>
+<p>The local simultaneous survivor state then includes four separated support systems already present in the program:</p>
+<pre><code class="language-text">R: Route-B k19 BARE residual support = 1 mod19
+B: every prime factor QR mod23
+E: every prime factor QR mod27
+D: every prime factor QR mod31</code></pre>
+<p>with R,B,E,D pairwise coprime by the landed support-separation theorem.</p>
+<p>This is substantially sharper than retaining <code>k27_mode in {Q,A,B,C,D,E,F}</code> on the Route-B BARE branch.</p>
+<h2>7. General phase selector t=8 mod19</h2>
+<p>The Q-selector statement does not require k19 BARE as a logical premise.</p>
+<p>For any h169 branch,</p>
+<p><code>t=8 mod19 AND k27 miss =&gt; mode Q</code>,</p>
+<p>because the phase alone forces19|E.</p>
+<p>The Route-B BARE theorem is important because it supplies that phase automatically from an already-live upstream survivor mode.</p>
+<p>Thus the dependency graph contains both edges:</p>
+<pre><code class="language-text">Route-B k19 BARE -&gt; tau19=8
+
+tau19=8 -&gt; 19|E -&gt; k27 Q  (conditional on k27 miss).</code></pre>
+<p>Their composition gives the cross-shift collapse.</p>
+<h2>8. Machine consequence</h2>
+<p>The normalized h169 dependency grammar should no longer treat Route-B k19 BARE and k27 mode as independent.</p>
+<p>Add the exact propagation rule</p>
+<pre><code class="language-text">if route == B and k19_mode == BARE:
+    tau19 = 8
+    if k27 misses:
+        k27_mode = Q
+        E_support = QR27</code></pre>
+<p>More generally, whenever a proved phase or factorization route guarantees a QR27 factor residue in <code>{10,16,19,22}</code>, k27 mode Q may be promoted immediately on a miss.</p>
+<p>Repeated residues in <code>{4,7,13,25}</code> provide an analogous Q promotion after the second occurrence.</p>
+<p>This turns the seven-mode k27 automaton into a factor-triggered selector rather than an opaque state block.</p>
+<h2>9. Bryan Entanglement Cross / BREC boundary</h2>
+<p>A deterministic factor that collapses seven possible k27 modes to one is a natural candidate for a downward/excavation annotation in the directional layer, while the surviving QR27 support law is the constructive information exposed by that descent.</p>
+<p>That narrative is metadata. The exact residue transition table and divisibility phase are the proof-bearing objects and the sole source of the mode reduction.</p>
+<h2>10. Next target</h2>
+<p>Two immediate continuations are now concrete:</p>
+<ol><li>feed <code>Route-B BARE -&gt; k27 Q</code> back into the reduced dependency grammar and measure the additional formal-state contraction;</li><li>search the remaining upstream modes/phases for deterministic factors whose QR27 residues select smaller subsets of <code>{Q,A,...,F}</code>.</li></ol>
+<p>The first is bookkeeping. The second is theorem mining. Both can now be performed without reopening the raw 132-state k27 closure.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

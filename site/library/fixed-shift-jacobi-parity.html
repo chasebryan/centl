@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Fixed-shift Jacobi parity law for the signed-box corridor — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fixed-shift-jacobi-parity.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fixed-shift-jacobi-parity.html">
+  <meta property="og:title" content="Fixed-shift Jacobi parity law for the signed-box corridor — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Fixed-shift Jacobi parity law for the signed-box corridor</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FIXED-SHIFT-JACOBI-PARITY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved corollary of the composite reciprocity-transfer theorem</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>FAB-MIRROR-CHARACTER-OBSTRUCTION.md</code>, <code>ES-TWO-TARGET-DIVISOR-SQUARE.md</code>, <code>ES-INDEX-TWO-TWO-TARGET-PACKET.md</code></p>
+<p><strong>Claim boundary:</strong> this is a structural parity/character law for each admissible fixed shift. It does not prove that either exact target is attained and does not prove Erdős–Straus. The prime-factor reciprocity transfer used here was already proved in <code>FAB-MIRROR-CHARACTER-OBSTRUCTION.md</code>; the contribution here is the product-level corridor synthesis.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be Mordell-hard and let</p>
+<div class="math" role="math">\boxed{k\equiv3\pmod4}</div>
+<p>be odd with</p>
+<div class="math" role="math">\gcd(k,p)=1.</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{C_k=\frac{p+k}{4}.}</div>
+<p>Then</p>
+<div class="math" role="math">k=4C_k-p,</div>
+<p>so this is exactly the mirror setup of <code>FAB-MIRROR-CHARACTER-OBSTRUCTION.md</code>.</p>
+<hr>
+<h2>2. Prime-factor reciprocity, recalled</h2>
+<p>That theorem proves that for every odd prime</p>
+<div class="math" role="math">q\mid C_k,</div>
+<p>one has</p>
+<div class="math" role="math">\boxed{ \left(\frac qk\right) = \left(\frac qp\right), }</div>
+<p>where the left symbol is Jacobi when <code>k</code> is composite.</p>
+<p>If <code>2|C_k</code>, the same equality holds for <code>q=2</code> on the Mordell-hard lane:</p>
+<div class="math" role="math">\boxed{ \left(\frac2k\right) = \left(\frac2p\right)=+1. }</div>
+<p>Thus <strong>every prime-factor occurrence of <code>C_k</code> has the same quadratic character sign relative to <code>k</code> and to <code>p</code>.</strong></p>
+<hr>
+<h2>3. Product-level identity</h2>
+<p>Multiply the prime-factor equalities with valuation.</p>
+<p>Since the Jacobi and Legendre symbols are completely multiplicative in the numerator,</p>
+<div class="math" role="math">\boxed{ \left(\frac{C_k}{k}\right) = \left(\frac{C_k}{p}\right). }</div>
+<p>But modulo <code>p</code>,</p>
+<div class="math" role="math">C_k\equiv4^{-1}k\pmod p.</div>
+<p>The factor <code>4^{-1}</code> is a square modulo <code>p</code>, so</p>
+<div class="math" role="math">\left(\frac{C_k}{p}\right) = \left(\frac{k}{p}\right).</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ \left(\frac{C_k}{k}\right) = \left(\frac{k}{p}\right). }</div>
+<p>This is the fixed-shift Jacobi parity law.</p>
+<hr>
+<h2>4. External-nonresidue parity</h2>
+<p>Define</p>
+<div class="math" role="math">E_k = \sum_{q^e\parallel C_k,\ (q/k)=-1}e.</div>
+<p>By the prime-factor transfer theorem the same factors are exactly the external quadratic nonresidues modulo <code>p</code>:</p>
+<div class="math" role="math">\left(\frac qk\right)=-1 \iff \left(\frac qp\right)=-1.</div>
+<p>Hence</p>
+<div class="math" role="math">\left(\frac{C_k}{k}\right)=(-1)^{E_k}.</div>
+<p>Combining with Section 3 gives</p>
+<div class="math" role="math">\boxed{ (-1)^{E_k} = \left(\frac{k}{p}\right). }</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{ E_k\equiv \frac{1-(k/p)}2 \pmod2. }</div>
+<p>Thus:</p>
+<ul><li>if <code>(k/p)=+1</code>, the shifted integer <code>C_k</code> contains an <strong>even</strong> total valuation of external nonresidue factors;</li><li>if <code>(k/p)=-1</code>, it contains an <strong>odd</strong> total valuation.</li></ul>
+<p>This parity is forced before any factorization is performed.</p>
+<hr>
+<h2>5. Character of the two exact divisor targets</h2>
+<p>The exact divisor-square targets are</p>
+<div class="math" role="math">\tau_I=-4^{-1}\pmod k, \qquad \tau_{II}=-C_k\pmod k.</div>
+<p>Because</p>
+<div class="math" role="math">k\equiv3\pmod4,</div>
+<p>one has</p>
+<div class="math" role="math">\left(\frac{-1}{k}\right)=-1.</div>
+<p>Since <code>4</code> is a square,</p>
+<div class="math" role="math">\boxed{ \left(\frac{\tau_I}{k}\right)=-1. }</div>
+<p>For Type II,</p>
+<div class="math" role="math">\left(\frac{\tau_{II}}{k}\right) = -\left(\frac{C_k}{k}\right) = -\left(\frac{k}{p}\right).</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ \left(\frac{\tau_{II}}{k}\right) =-\left(\frac{k}{p}\right). }</div>
+<p>The complete character picture is consequently</p>
+<div class="math" role="math">\boxed{ \begin{array}{c|c|c|c} (k/p)&amp;E_k\bmod2&amp;\tau_I&amp;\tau_{II}\\ \hline +1&amp;0&amp;\text{Jacobi }-1&amp;\text{Jacobi }-1\\ -1&amp;1&amp;\text{Jacobi }-1&amp;\text{Jacobi }+1 \end{array} }</div>
+<p>This is exactly the even/odd split in <code>ES-INDEX-TWO-TWO-TARGET-PACKET.md</code>, now canonically tied to the Legendre symbol of the shift itself.</p>
+<hr>
+<h2>6. Immediate corridor examples</h2>
+<h3><code>k=27</code></h3>
+<p>Hard primes have</p>
+<div class="math" role="math">\left(\frac3p\right)=+1,</div>
+<p>so</p>
+<div class="math" role="math">\left(\frac{27}{p}\right)=+1.</div>
+<p>Hence <code>E_27</code> is even. The first non-pure packet has size two, exactly as in <code>K27-TWO-TARGET-FILTER.md</code>.</p>
+<h3><code>k=35</code></h3>
+<p>Hard primes have</p>
+<div class="math" role="math">\left(\frac5p\right)= \left(\frac7p\right)=+1,</div>
+<p>so</p>
+<div class="math" role="math">\left(\frac{35}{p}\right)=+1.</div>
+<p>Again <code>E_35</code> is even, recovering the parity theorem in <code>K35-TWO-TARGET-STRUCTURE.md</code>.</p>
+<h3><code>k=39</code></h3>
+<p>Since</p>
+<div class="math" role="math">\left(\frac3p\right)=+1,</div>
+<p>one gets</p>
+<div class="math" role="math">\boxed{ \left(\frac{39}{p}\right) = \left(\frac{13}{p}\right). }</div>
+<p>Therefore the <code>k=39</code> packet parity is controlled entirely by whether <code>13</code> is an external nonresidue of <code>p</code>:</p>
+<ul><li><code>(13/p)=+1</code> gives the even-packet branch;</li><li><code>(13/p)=-1</code> gives the odd-packet branch.</li></ul>
+<p>This explains the two distinct geometries seen in the exact finite residual without introducing a modulus-specific character by hand.</p>
+<hr>
+<h2>7. Research consequence</h2>
+<p>For a hypothetical counterexample, every admissible shift is now assigned a forced packet parity by the Legendre sequence</p>
+<div class="math" role="math">\boxed{ \left(\frac{3}{p}\right), \left(\frac{7}{p}\right), \left(\frac{11}{p}\right), \left(\frac{15}{p}\right), \ldots }</div>
+<p>or equivalently by</p>
+<div class="math" role="math">\boxed{ \left(\frac{k}{p}\right), \qquad k\equiv3\pmod4. }</div>
+<p>The local fixed-shift problem is therefore not an arbitrary sequence of factorizations. It is a sequence of external-nonresidue packets whose parity is prescribed globally by one quadratic character modulo <code>p</code>.</p>
+<p>Combined with the index-two packet lemma, the remaining global proof target becomes:</p>
+<blockquote><p>show that the Legendre-prescribed packet sequence cannot keep every kernel divisor set thin enough to miss both exact targets for all admissible shifts.</p></blockquote>
+<p>That is a sharper cross-shift formulation than searching for a universal finite shift ceiling.</p>
+<hr>
+<p>Erdős–Straus remains open. This is a parity/character synthesis, not the missing global expansion theorem.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Write">
+  <title>Route-B k47 survivor normal form — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/route-b-k47-survivor-normal-form.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/route-b-k47-survivor-normal-form.html">
+  <meta property="og:title" content="Route-B k47 survivor normal form — Free Computation Foundation">
+  <meta property="og:description" content="Write">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Route-B k47 survivor normal form</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Write</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ROUTE-B-K47-SURVIVOR-NORMAL-FORM.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact route-local module inside the candidate decomposition framework</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Verifier:</strong> <code>verify_route_b_k47_survivor_normal_form.py</code></p>
+<p><strong>Depends on:</strong> realized Route B, exact k23 survivor support, and the landed k47 signed-box semantics</p>
+<p><strong>Claim boundary:</strong> exact theorem on the realized h169 Route-B branch. It is not a universal decomposition method and not an Erdős–Straus proof.</p>
+<h2>1. Route B fixes the k47 phase</h2>
+<p>Write</p>
+<p><code>p = 169 + 840t</code>.</p>
+<p>Realized Route B is</p>
+<p><code>p mod23 = 4</code>,</p>
+<p><code>p mod47 = 28</code>.</p>
+<p>Since <code>169=28 mod47</code> and <code>840=41 mod47</code> is invertible, the second condition gives</p>
+<p><code>t = 0 mod47</code>.</p>
+<p>Equivalently the exact route parameter is</p>
+<p><code>t = 705 + 1081u</code>.</p>
+<p>The post-k23 cofactors are</p>
+<p><code>C23 = 6B</code>,  <code>B=8+35t</code>,</p>
+<p><code>C47 = 6J</code>,  <code>J=9+35t</code>.</p>
+<p>Therefore</p>
+<p><code>J = B+1</code>.</p>
+<p>On Route B,</p>
+<p><code>B = 8 mod47</code>,</p>
+<p><code>J = 9 mod47</code>,</p>
+<p>and hence</p>
+<p><code>C47 = 7 mod47</code>.</p>
+<p>In particular <code>47</code> never divides J.</p>
+<h2>2. Exact k47 state at the Route-B center</h2>
+<p>The mandatory k47 seed is <code>6=2*3</code>.</p>
+<p>Its exact square-divisor residue mask is</p>
+<p><code>M6={1,2,3,4,6,9,12,18,36}</code></p>
+<p>with center6 modulo47.</p>
+<p>The complete exact k47 unit-residue closure has</p>
+<pre><code class="language-text">1079 states
+196 misses.</code></pre>
+<p>At the Route-B center</p>
+<p><code>C47=7 mod47</code></p>
+<p>there are exactly <strong>two</strong> miss states.</p>
+<h3>FULL_QR</h3>
+<p>The first mask is the complete quadratic-residue set modulo47:</p>
+<p><code>QR47={1,2,3,4,6,7,8,9,12,14,16,17,18,21,24,25,27,28,32,34,36,37,42}</code>.</p>
+<p>Its size is23.</p>
+<h3>THIN</h3>
+<p>The second mask is</p>
+<p><code>T47={1,2,3,4,6,7,8,9,12,14,16,18,21,24,27,32,34,36,42}</code>.</p>
+<p>Its size is19.</p>
+<p>Equivalently</p>
+<p><code>T47 = QR47 \ {17,25,28,37}</code>.</p>
+<p>There are no other Route-B k47 miss masks.</p>
+<h2>3. Exact QR-support theorem</h2>
+<p>The Type-I target at k47 is</p>
+<p><code>-4^{-1}=35 mod47</code>.</p>
+<p>The Route-B Type-II target is</p>
+<p><code>-C47=-7=40 mod47</code>.</p>
+<p>Both 35 and40 are quadratic nonresidues modulo47.</p>
+<p>The seed primes2 and3 are quadratic residues modulo47.</p>
+<h3>Theorem</h3>
+<p>On realized Route B,</p>
+<p><code>k47 miss  &lt;=&gt;  every rational prime factor q of J is QR mod47</code>.</p>
+<h3>QR direction</h3>
+<p>If every q dividing J is QR modulo47, then every divisor of</p>
+<p><code>C47^2=(6J)^2</code></p>
+<p>is QR modulo47. Both exact signed-box targets35 and40 are nonresidues, so neither can occur.</p>
+<p>Hence k47 misses.</p>
+<h3>Converse</h3>
+<p>The complete exact center-7 closure has only FULL_QR and THIN as misses, and both masks are subsets of QR47.</p>
+<p>If a rational prime q dividing J were a quadratic nonresidue modulo47, then q itself is a divisor of <code>C47^2</code>, so its residue must occur in the final divisor mask. That mask could not equal either exact miss mask.</p>
+<p>Because <code>47∤J</code>, there is no zero-residue exception.</p>
+<p>Hence every q dividing J must be QR modulo47.</p>
+<p>This is an exact iff theorem, not a finite prime census.</p>
+<h2>4. Lossless two-mode compression</h2>
+<p>Conditional on Route B and a k47 miss, the full signed-box state compresses losslessly to</p>
+<p><code>k47_mode = THIN | FULL_QR</code>.</p>
+<p>The QR-only closure from the seed has only66 states, and exactly two of them have final center7: THIN and FULL_QR.</p>
+<p>So after the QR-support theorem there is no hidden third survivor geometry.</p>
+<h2>5. Exact THIN factor grammar</h2>
+<p>Prime-factor <strong>occurrences</strong> are counted with multiplicity.</p>
+<p>Because a factor transition multiplies the mask by <code>{1,r,r^2}</code>, every old mask element remains present. Masks are therefore monotone under factor insertion.</p>
+<p>Factor transitions also commute, so occurrences can be reordered without changing the final state.</p>
+<p>Among all66 QR-only states, exactly three masks lie inside T47:</p>
+<ol><li>the seed state <code>M6</code>, center6;</li><li>a 15-element intermediate state, center18;</li><li>T47 itself, center7.</li></ol>
+<p>The only QR transitions that remain inside T47 are</p>
+<pre><code class="language-text">M6   --1--&gt; M6
+M6   --3--&gt; intermediate
+M6   --9--&gt; T47
+
+intermediate --1--&gt; intermediate
+intermediate --3--&gt; T47
+
+T47 --1--&gt; T47.</code></pre>
+<p>Every other QR residue exits T47 irreversibly.</p>
+<p>Therefore:</p>
+<h3>THIN theorem</h3>
+<p>Route-B k47 is THIN iff, after deleting all prime-factor occurrences congruent to1 modulo47, the remaining residue multiset of J is exactly one of</p>
+<p><code>{9}</code></p>
+<p>or</p>
+<p><code>{3,3}</code>.</p>
+<p>Equivalently:</p>
+<ul><li>either exactly one prime-factor occurrence of J is <code>9 mod47</code> and every other occurrence is <code>1 mod47</code>;</li><li>or exactly two prime-factor occurrences are <code>3 mod47</code> and every other occurrence is <code>1 mod47</code>.</li></ul>
+<p>All multiplicities are literal. For example a prime <code>q=3 mod47</code> appearing with exponent2 contributes the <code>{3,3}</code> alternative.</p>
+<h2>6. FULL_QR theorem</h2>
+<p>Conditional on every q|J being QR modulo47 and <code>J=9 mod47</code>, every factorization not satisfying the THIN grammar lands in FULL_QR.</p>
+<p>Thus the complete route-local classification is</p>
+<pre><code class="language-text">some q|J is NR47          -&gt; k47 hit
+all q|J are QR47
+    |
+    +-- non-1 residues {9} or {3,3} -&gt; THIN miss
+    |
+    `-- otherwise                   -&gt; FULL_QR miss.</code></pre>
+<h2>7. Coupling to k23</h2>
+<p>The landed k23 theorem on the realized routes gives</p>
+<p><code>k23 miss =&gt; every rational prime factor of B is QR mod23</code>.</p>
+<p>Route B now adds</p>
+<p><code>k47 miss =&gt; every rational prime factor of B+1 is QR mod47</code>.</p>
+<p>Since</p>
+<p><code>J=B+1</code>,</p>
+<p>we have</p>
+<p><code>gcd(B,J)=1</code>.</p>
+<p>A simultaneous k23/k47 Route-B survivor therefore carries two consecutive, disjoint support reservoirs:</p>
+<pre><code class="language-text">B     : QR23 support
+B + 1 : QR47 support, with THIN | FULL_QR mode.</code></pre>
+<p>The exact route relation with the k19 residual is</p>
+<p><code>6B - 1081R = 1</code>,</p>
+<p>hence</p>
+<p><code>6J - 1081R = 7</code>.</p>
+<p>On Route B, <code>R=137+210u=4 mod7</code>, so <code>gcd(R,J)=1</code> as well.</p>
+<h2>8. Framework consequence</h2>
+<p>This is stronger than the coarse k47 phase filter for Route B.</p>
+<p>The phase filter says only that <code>t=0 mod47</code> is not automatically absorbed. The route-local normal form says exactly what survival at that phase costs:</p>
+<ol><li>every prime of the new consecutive cofactor <code>B+1</code> must lie in QR47;</li><li>the entire k47 miss state has only two modes;</li><li>the exceptional THIN mode has a two-pattern factor grammar;</li><li>the new support is disjoint from both B and R.</li></ol>
+<p>That is a genuine compressed transition state for the developing decomposition framework.</p>
+<p>The next target is to intersect</p>
+<p><code>QR23(B)</code></p>
+<p>with</p>
+<p><code>QR47(B+1) + {THIN,FULL_QR}</code></p>
+<p>and the landed k27/k31/k35 support grammars under the affine companion chain, looking for impossible product states or a forced later selector.</p>
+<p>Erdős–Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

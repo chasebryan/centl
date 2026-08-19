@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The composite Jacobi-saturation theorem produces two conditional q13 character sources.">
+  <title>q13 recursive elimination of the exceptional k=23 branches — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/q13-k23-recursive-branch-elimination.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/q13-k23-recursive-branch-elimination.html">
+  <meta property="og:title" content="q13 recursive elimination of the exceptional k=23 branches — Free Computation Foundation">
+  <meta property="og:description" content="The composite Jacobi-saturation theorem produces two conditional q13 character sources.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>q13 recursive elimination of the exceptional k=23 branches</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">The composite Jacobi-saturation theorem produces two conditional q13 character sources.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/Q13-K23-RECURSIVE-BRANCH-ELIMINATION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved conditional branch-elimination theorem</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>JACOBI-SATURATION-CHARACTER-EXTRACTION.md</code>, <code>QR-SATURATING-ROUTED-SEEDS.md</code>, Lane-I Type-II divisor-square equivalence</p>
+<p><strong>Primary classifier:</strong> <code>classify_q13_k23_branch_elimination.py</code></p>
+<p><strong>Independent anchors:</strong> <code>verify_q13_k23_branch_elimination.py</code></p>
+<p><strong>Claim boundary:</strong> this eliminates two exact subbranches after the q13 extraction. It does not eliminate the positive k=23 centers and does not prove Erdős-Straus.</p>
+<h2>1. The recursive source</h2>
+<p>The composite Jacobi-saturation theorem produces two conditional q13 character sources.</p>
+<p>On hard class h=121:</p>
+<ul><li>p mod47 = 8 routes 47 into C39;</li><li>the routed k=39 seed is Jacobi-saturating;</li><li>if k=39 misses, then <code>(13/p)=+1</code>.</li></ul>
+<p>On hard class h=289:</p>
+<ul><li>p mod11 = 5 and p mod47 = 8 route 11 and47 into C39;</li><li>the pair seed is Jacobi-saturating;</li><li>if k=39 misses, then <code>(13/p)=+1</code>.</li></ul>
+<p>Thus q13 is a new conditional source on both branches.</p>
+<h2>2. Route q13 into k=23</h2>
+<p>For q=13, the k=23 routing condition is</p>
+<p><code>p mod13 = -23 mod13 = 3</code>.</p>
+<p>Residue 3 is a quadratic residue modulo13, so it is a permitted subbranch of <code>(13/p)=+1</code>.</p>
+<p>On this subbranch</p>
+<p><code>13 divides C23</code>.</p>
+<p>Every Mordell-hard prime already has the universal k=23 seed6, so</p>
+<p><code>6 divides C23</code>.</p>
+<p>Therefore</p>
+<p><code>78 = 6*13 divides C23</code>.</p>
+<p>The divisors of 78 squared realize exactly the complete nonzero quadratic-residue subgroup modulo23.</p>
+<p>Hence seed78 is QR-saturating at k=23.</p>
+<h2>3. Saturation eliminates every negative p mod23 center</h2>
+<p>Because 78 is QR-saturating, a k=23 miss is possible only when every prime factor of C23 is a quadratic residue modulo23. In particular C23 itself is then a quadratic residue, and therefore p mod23 must be a quadratic residue.</p>
+<p>The ordinary seed-6 k=23 closure has exactly two negative-character miss centers:</p>
+<p><code>p mod23 = 5</code></p>
+<p>and</p>
+<p><code>p mod23 = 14</code>.</p>
+<p>Both are therefore impossible after the q13 route supplies seed78.</p>
+<p>This already proves the branch elimination. In fact, the two branches admit explicit Type-II divisors.</p>
+<h2>4. Explicit Type-II collision for p mod23=5</h2>
+<p>The inverse of 4 modulo23 is6. Thus</p>
+<p><code>C23 mod23 = 6p mod23</code>.</p>
+<p>If</p>
+<p><code>p mod23 = 5</code>,</p>
+<p>then</p>
+<p><code>C23 mod23 = 7</code>.</p>
+<p>The Type-II target is</p>
+<p><code>-C23 mod23 = 16</code>.</p>
+<p>Now</p>
+<p><code>39 mod23 = 16</code>.</p>
+<p>Also</p>
+<p><code>39 = 3*13</code>.</p>
+<p>Since 6*13 divides C23, both 3 and13 divide C23, so</p>
+<p><code>39 divides C23 squared</code>.</p>
+<p>Therefore D=39 is an exact Type-II divisor-square certificate and fixed k=23 hits.</p>
+<p>So:</p>
+<blockquote><p>On either extracted-q13 branch, if p mod13=3 and p mod23=5, k=23 cannot miss.</p></blockquote>
+<h2>5. Explicit Type-II collision for p mod23=14</h2>
+<p>If</p>
+<p><code>p mod23 = 14</code>,</p>
+<p>then</p>
+<p><code>C23 mod23 = 15</code>.</p>
+<p>The Type-II target is</p>
+<p><code>-C23 mod23 = 8</code>.</p>
+<p>But</p>
+<p><code>169 = 13^2 = 8 mod23</code>.</p>
+<p>Since 13 divides C23,</p>
+<p><code>169 divides C23 squared</code>.</p>
+<p>Thus D=169 is an exact Type-II divisor-square certificate and k=23 hits.</p>
+<p>Therefore:</p>
+<blockquote><p>On either extracted-q13 branch, if p mod13=3 and p mod23=14, k=23 cannot miss.</p></blockquote>
+<h2>6. Recursive branch-elimination theorem</h2>
+<p>Combining the two cases gives the range-free conditional result:</p>
+<blockquote><p>Let p lie on either q13 extraction branch from the composite k=39 theorem. Assume k=39 misses, so <code>(13/p)=+1</code>, and refine to the valid source residue p mod13=3. Then 13 is routed into C23 and seed78 becomes mandatory. If k=23 also misses, p mod23 must lie in the quadratic-residue subgroup modulo23. In particular the two exceptional negative k=23 miss residues 5 and14 are impossible.</p></blockquote>
+<p>Equivalently, the branch tree</p>
+<p><code>k39 miss -&gt; q13 positive -&gt; p mod13=3 -&gt; k23</code></p>
+<p>has no surviving children with</p>
+<p><code>p mod23 in {5,14}</code>.</p>
+<p>This is the first recursive route result in the current program where a character extracted from one saturated destination is routed onward and <strong>eliminates</strong> pre-existing miss branches at a second destination.</p>
+<h2>7. Independent prime anchors</h2>
+<p>The verifier pins one actual prime on each hard-class and exceptional-center combination before the final k=23 collision:</p>
+<ul><li>h=121, p mod23=5: p=15,840,841;</li><li>h=121, p mod23=14: p=21,999,721;</li><li>h=289, p mod23=5: p=327,480,169;</li><li>h=289, p mod23=14: p=62,135,089.</li></ul>
+<p>Each prime satisfies</p>
+<ul><li>the relevant origin source residues;</li><li>p mod13=3;</li><li>a genuine k=39 miss;</li><li>78 divides C23;</li><li>k=23 hits;</li><li>the named D=39 or D=169 is the exact Type-II divisor target.</li></ul>
+<p>These finite anchors are regressions, not the proof. The branch-elimination theorem is the range-free divisor argument above.</p>
+<h2>8. What survives</h2>
+<p>The theorem does not force k=23 to hit on every q13-routed branch. The positive p mod23 centers can still miss when the remaining C23 factorization stays inside QR(23).</p>
+<p>The gain is exact pruning:</p>
+<ul><li>ordinary k=23 miss geometry includes two negative-character exceptions;</li><li>after the extracted q13 route p mod13=3, both negative exceptions are gone;</li><li>any remaining k=23 miss is a QR-support node and can be promoted again as a positive q23 character source.</li></ul>
+<p>This is the desired recursive pattern:</p>
+<p><code>composite saturation -&gt; extracted prime character -&gt; routed factor -&gt; prime saturation -&gt; branch elimination / promotion</code>.</p>
+<p>The next search should apply this branch-aware rule to the extracted q17, q37, and q43 sources and test whether their saturation destinations conflict with fixed residues already carried by the branch.</p>
+<p>Erdős-Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

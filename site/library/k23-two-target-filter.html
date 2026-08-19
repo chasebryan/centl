@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact two-target filter at the prime shift `k=23` — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k23-two-target-filter.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k23-two-target-filter.html">
+  <meta property="og:title" content="Exact two-target filter at the prime shift `k=23` — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact two-target filter at the prime shift `k=23`</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K23-TWO-TARGET-FILTER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact combined Type-I/Type-II classification</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>STRONG-ES-Q23-EXACT-FILTER.md</code>, <code>ES-TWO-TARGET-DIVISOR-SQUARE.md</code>, <code>ES-BINARY-LANE-I-EQUIVALENCE.md</code></p>
+<p><strong>Claim boundary:</strong> this closes the fixed shift <code>k=23</code> for Mordell-hard primes. It does not prove that a smaller-shift survivor must hit at <code>23</code>, does not give a universal finite shift bound, and does not prove Erdős–Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be Mordell-hard and put</p>
+<div class="math" role="math">\boxed{C=\frac{p+23}{4}.}</div>
+<p>Since every Mordell-hard prime satisfies</p>
+<div class="math" role="math">p\equiv1\pmod{24},</div>
+<p>we have</p>
+<div class="math" role="math">\boxed{6\mid C.}</div>
+<p>Thus <code>2</code> and <code>3</code> are forced factors of <code>C</code>.</p>
+<p>The existing <code>STRONG-ES-Q23-EXACT-FILTER.md</code> gives an exact classification of failure of the Type-II target</p>
+<div class="math" role="math">-1\in\mathcal R_{23}(C).</div>
+<p>The remaining task is to determine exactly when the Type-I target rescues one of those Type-II failures.</p>
+<hr>
+<h2>2. Type I is a fixed divisor-square residue</h2>
+<p>By <code>ES-TWO-TARGET-DIVISOR-SQUARE.md</code>, Type I at shift <code>23</code> succeeds if and only if there exists</p>
+<div class="math" role="math">d\mid C^2</div>
+<p>with</p>
+<div class="math" role="math">4d\equiv-1\pmod{23}.</div>
+<p>Since</p>
+<div class="math" role="math">4^{-1}\equiv6\pmod{23},</div>
+<p>the Type-I divisor target is the fixed residue</p>
+<div class="math" role="math">\boxed{d\equiv17\pmod{23}.}</div>
+<p>Use <code>5</code> as a primitive root modulo <code>23</code>. Then</p>
+<div class="math" role="math">\boxed{\log_5(17)=7\pmod{22}.}</div>
+<p>In these coordinates Type I asks whether the divisor-log set of <code>C^2</code> contains the odd class <code>7</code>.</p>
+<hr>
+<h2>3. Recall the exact Type-II miss branches</h2>
+<p>The existing q=23 theorem proves that Type II misses exactly in one of two branches.</p>
+<h3>Branch A: pure quadratic splitting</h3>
+<p>Every prime factor of <code>C</code> is a quadratic residue modulo <code>23</code>.</p>
+<h3>Branch B: forced-6 thin defect</h3>
+<p>All of the following hold:</p>
+<ol><li>&lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;v_2(C)=v_3(C)=1;&lt;/div&gt;</li></ol>
+<ol><li>every other quadratic-residue prime factor is actually <code>1 mod 23</code>;</li><li>the only quadratic-nonresidue prime-factor classes are</li></ol>
+<div class="math" role="math">\boxed{5,14\pmod{23}};</div>
+<ol><li>if</li></ol>
+<div class="math" role="math">e_+=\sum_{q^e\parallel C,\ q\equiv5\ (23)}e, \qquad e_- =\sum_{q^e\parallel C,\ q\equiv14\ (23)}e,</div>
+<p>then &lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;\boxed{e_++e_-\le2.}&lt;/div&gt;</p>
+<p>No other Type-II miss geometry is possible.</p>
+<hr>
+<h2>4. Branch A also forces Type-I failure</h2>
+<p>The quadratic-residue subgroup modulo <code>23</code> is the even-log subgroup of <code>C_22</code>.</p>
+<p>If every prime factor of <code>C</code> is a quadratic residue, then every divisor of <code>C^2</code> also has even discrete log modulo <code>22</code>.</p>
+<p>But the Type-I target <code>17</code> has log</p>
+<div class="math" role="math">7,</div>
+<p>which is odd.</p>
+<p>Therefore:</p>
+<h3>Theorem A</h3>
+<p>On the pure quadratic-splitting branch,</p>
+<div class="math" role="math">\boxed{ \text{Type II misses} \quad\text{and}\quad \text{Type I misses}.}</div>
+<p>Thus every Branch-A q=23 miss is automatically a combined two-target miss.</p>
+<hr>
+<h2>5. Forced divisor logs on the thin branch</h2>
+<p>Now assume Branch B.</p>
+<p>In primitive-root-<code>5</code> coordinates,</p>
+<div class="math" role="math">\log_5(2)=2, \qquad \log_5(3)=16.</div>
+<p>Because <code>v_2(C)=v_3(C)=1</code>, a divisor of <code>C^2</code> may use exponent <code>0</code>, <code>1</code>, or <code>2</code> of each forced factor. Their possible combined divisor logs are therefore</p>
+<div class="math" role="math">S = \{2a+16b\pmod{22}:a,b\in\{0,1,2\}\}.</div>
+<p>Directly,</p>
+<div class="math" role="math">\boxed{ S=\{0,2,4,10,12,14,16,18,20\}.}</div>
+<p>Every other quadratic-residue factor in Branch B is <code>1 mod23</code>, so it contributes log <code>0</code> and does not enlarge this set.</p>
+<p>The allowed nonresidue classes satisfy</p>
+<div class="math" role="math">\log_5(5)=1, \qquad \log_5(14)=-1\pmod{22}.</div>
+<p>Hence their divisor-log contribution is</p>
+<div class="math" role="math">\boxed{ I(e_+,e_-) =\{i-j\pmod{22}: 0\le i\le2e_+, 0\le j\le2e_-\}.}</div>
+<p>Type I succeeds exactly when</p>
+<div class="math" role="math">\boxed{7\in S+I(e_+,e_-).}</div>
+<hr>
+<h2>6. Exact Type-I behavior inside Branch B</h2>
+<p>Because Branch B already forces</p>
+<div class="math" role="math">e_++e_-\le2,</div>
+<p>there are only six possible valuation pairs.</p>
+<h3><code>(e_+,e_-)=(0,0)</code></h3>
+<p>Then <code>I={0}</code>. Since <code>7 notin S</code>, Type I misses.</p>
+<h3><code>(1,0)</code></h3>
+<p>Then</p>
+<div class="math" role="math">I=\{0,1,2\}.</div>
+<p>None of <code>7,6,5</code> lies in <code>S</code>, so Type I misses.</p>
+<h3><code>(0,1)</code></h3>
+<p>Then</p>
+<div class="math" role="math">I=\{0,-1,-2\}.</div>
+<p>None of <code>7,8,9</code> lies in <code>S</code>, so Type I misses.</p>
+<h3><code>(1,1)</code></h3>
+<p>Then</p>
+<div class="math" role="math">I=\{-2,-1,0,1,2\}.</div>
+<p>Again <code>7-I</code> misses <code>S</code>, so Type I misses.</p>
+<h3><code>(2,0)</code></h3>
+<p>Now</p>
+<div class="math" role="math">I=\{0,1,2,3,4\}.</div>
+<p>Since</p>
+<div class="math" role="math">4\in S, \qquad 3\in I, \qquad 4+3=7,</div>
+<p>Type I hits.</p>
+<h3><code>(0,2)</code></h3>
+<p>Now</p>
+<div class="math" role="math">I=\{0,-1,-2,-3,-4\}.</div>
+<p>Since</p>
+<div class="math" role="math">10\in S, \qquad -3\in I, \qquad 10-3=7,</div>
+<p>Type I hits.</p>
+<p>Therefore:</p>
+<h3>Theorem B</h3>
+<p>Inside the forced-6 thin Type-II defect,</p>
+<div class="math" role="math">\boxed{ \text{Type I hits} \iff (e_+,e_-)\in\{(2,0),(0,2)\}.}</div>
+<p>Equivalently, Type I rescues the thin defect exactly when the allowed total nonresidue valuation is <code>2</code> and both units of valuation lie on the <strong>same</strong> primitive residue class <code>5</code> or <code>14</code>.</p>
+<p>It misses when</p>
+<div class="math" role="math">\boxed{ (e_+,e_-) \in \{(0,0),(1,0),(0,1),(1,1)\}.}</div>
+<hr>
+<h2>7. Exact combined-miss theorem at k=23</h2>
+<h3>Theorem</h3>
+<p>For a Mordell-hard prime <code>p</code>, both exact Lane-I targets miss at <code>k=23</code> if and only if one of the following holds.</p>
+<h3>Combined Branch A: pure quadratic splitting</h3>
+<p>Every prime factor of</p>
+<div class="math" role="math">C=\frac{p+23}{4}</div>
+<p>is a quadratic residue modulo <code>23</code>.</p>
+<h3>Combined Branch B: unresolved forced-6 thin defect</h3>
+<p>All of the following hold:</p>
+<ol><li>&lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;v_2(C)=v_3(C)=1;&lt;/div&gt;</li></ol>
+<ol><li>every other quadratic-residue prime factor is <code>1 mod23</code>;</li><li>every quadratic-nonresidue prime factor is <code>5</code> or <code>14 mod23</code>;</li><li>its aggregate valuations satisfy</li></ol>
+<div class="math" role="math">\boxed{ (e_+,e_-) \in \{(0,0),(1,0),(0,1),(1,1)\}.}</div>
+<p>In every other case at least one exact target hits, and <code>p</code> has an Erdős–Straus decomposition at shift <code>23</code>.</p>
+<hr>
+<h2>8. What Type I adds beyond the strong q=23 filter</h2>
+<p>The strong/Type-II theorem allows six valuation patterns in Branch B:</p>
+<div class="math" role="math">(0,0),(1,0),(0,1),(2,0),(1,1),(0,2).</div>
+<p>The Type-I companion removes exactly</p>
+<div class="math" role="math">\boxed{(2,0)\text{ and }(0,2).}</div>
+<p>Therefore the exact two-target corridor is strictly stronger than the strong/Type-II q=23 filter while preserving its very thin residual structure.</p>
+<hr>
+<h2>9. Independent 10M regression</h2>
+<p>The theorem was independently compared with the exact CBX Lane-I standalone hit set at <code>k=23</code> on the preserved Mordell-hard corpus</p>
+<div class="math" role="math">p\le10,000,000.</div>
+<p>Population:</p>
+<div class="math" role="math">\boxed{20,513\text{ hard primes}.}</div>
+<p>Exact <code>k=23</code> hits:</p>
+<div class="math" role="math">\boxed{13,860.}</div>
+<p>Exact combined misses:</p>
+<div class="math" role="math">\boxed{6,653.}</div>
+<p>The classification above predicted every hit/miss correctly:</p>
+<div class="math" role="math">\boxed{0\text{ mismatches}.}</div>
+<p>The combined misses split as</p>
+<div class="math" role="math">\boxed{6,377\text{ Branch A}}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{276\text{ Branch B}.}</div>
+<p>The 276 thin combined misses have valuation patterns</p>
+<pre><code class="language-text">(e_+,e_-)=(0,1): 142
+(e_+,e_-)=(1,0): 123
+(e_+,e_-)=(1,1): 11</code></pre>
+<p>No <code>(0,0)</code> example occurs in this finite range, although the theorem permits it.</p>
+<p>The Type-II theorem alone has seven additional finite misses with concentrated valuation two:</p>
+<pre><code class="language-text">(e_+,e_-)=(0,2): 6
+(e_+,e_-)=(2,0): 1</code></pre>
+<p>All seven are rescued by Type I exactly as Theorem B predicts.</p>
+<p>These finite counts are regression evidence only. The classification is proved by the group calculation above.</p>
+<hr>
+<h2>10. Corridor consequence</h2>
+<p>The exact consecutive corridor is now classified through</p>
+<div class="math" role="math">\boxed{k=3,7,11,15,19,23}</div>
+<p>at the level needed for the two-target Lane-I predicate.</p>
+<p>By <code>ES-BINARY-LANE-I-EQUIVALENCE.md</code>, these are simultaneously exact fixed-selector binary classifications.</p>
+<p>The next theorem-mining step should use the <strong>simultaneous failure laws</strong> of these six positions rather than reclassifying the same shifts under separate binary, signed-box, or CBX names.</p>
+<p>The natural next objects are:</p>
+<ol><li>the joint multiplicative constraints on the six nearby integers</li></ol>
+<div class="math" role="math">\frac{p+3}{4}, \frac{p+7}{4}, \frac{p+11}{4}, \frac{p+15}{4}, \frac{p+19}{4}, \frac{p+23}{4};</div>
+<ol><li>exact characterization of primes that fail all six fixed shifts;</li><li>the first genuinely new layer beyond the classified corridor, <code>k=27</code>, if joint incompatibility does not already close the residual.</li></ol>
+<hr>
+<p>Erdős–Straus remains open. This closes one fixed shift; it does not prove a universal existence statement.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

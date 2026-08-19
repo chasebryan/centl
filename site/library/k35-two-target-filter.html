@@ -3,57 +3,284 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Exact finite-group classification of the Erdős–Straus two-target signed-box shift k=35.">
-  <title>Exact two-target filter at k=35 — Free Computation Foundation</title>
+  <meta name="description" content="---">
+  <title>Exact two-target filter at the composite shift `k=35` — Free Computation Foundation</title>
   <link rel="canonical" href="https://freecomputation.org/library/k35-two-target-filter.html">
   <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
   <meta property="og:type" content="article">
-  <meta property="og:title" content="Exact two-target filter at k=35 — Free Computation Foundation">
-  <meta property="og:description" content="1,298 exact residue states; 232 combined-miss states; fixed k=35 completely classified.">
+  <meta property="og:url" content="https://freecomputation.org/library/k35-two-target-filter.html">
+  <meta property="og:title" content="Exact two-target filter at the composite shift `k=35` — Free Computation Foundation">
+  <meta property="og:description" content="---">
   <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
   <link rel="stylesheet" href="../style.css">
+  
 </head>
 <body>
-<div class="shell">
+<div class="shell" id="top">
   <a class="skip" href="#content">Skip to content</a>
   <header class="masthead">
-    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
-    <div class="title"><h1>Exact two-target filter at <code>k=35</code></h1><p>CBX corridor · exact finite-group classification</p></div>
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact two-target filter at the composite shift `k=35`</h1><p>Theorem · hosted from the CENTL repository</p></div>
   </header>
   <div class="layout">
     <nav aria-label="Primary">
-      <h2>Foundation</h2><ul><li><a href="../index.html">Home</a></li><li><a href="../about.html">About FCF</a></li><li><a href="../centl.html">CENTL</a></li></ul>
-      <h2>Research</h2><ul><li><a href="../research.html">Research library</a></li><li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li></ul>
-      <h2>External</h2><ul><li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li></ul>
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
     </nav>
     <main id="content">
-      <p class="crumbs"><a href="../research.html">Research library</a> · Erdős–Straus · CBX corridor</p>
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
       <article class="paper">
         <header class="paper-head">
-          <p class="kicker">Exact fixed-shift theorem</p>
-          <p class="dek">The composite shift 35 is completely classified by a closed 24-element group-state system.</p>
-          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/agent/cbx-kernel/research/erdos-straus/K35-TWO-TARGET-FILTER.md">Canonical research note</a> · <a href="https://github.com/chasebryan/centl/blob/agent/cbx-kernel/research/erdos-straus/classify_k35_states.py">Machine certificate</a></p>
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K35-TWO-TARGET-FILTER.md">Source in the repository</a></p>
         </header>
         <div class="paper-body">
-          <p><strong>Status:</strong> exact computer-assisted finite-group classification. Erdős–Straus remains open.</p>
-          <h2>The state space</h2>
-          <p>For <code>C=(p+35)/4</code>, the unit group modulo 35 is coordinatized as <code>C12 × C2</code>. One prime-valuation occurrence gives the exact transition <code>(D,c) → (D+{0,g,2g}, c+g)</code>. Closing under every unit direction exhausts arbitrary factorization residue states without imposing any bound on <code>p</code>.</p>
-          <div class="math" role="math">\boxed{1298\text{ total states},\quad650\text{ hard-center states}}</div>
-          <div class="math" role="math">\boxed{418\text{ hit states},\quad232\text{ combined-miss states}}</div>
-          <h2>Structure of the miss table</h2>
-          <p>All 92 pure Jacobi-subgroup states miss both targets. The remaining 140 misses are non-pure. Every miss state has a state-equivalent core using at most four outside-subgroup valuation units:</p>
-          <pre><code>minimum outside units   miss states
-0                        92
-2                       138
-4                         2</code></pre>
-          <p>The two four-unit states are exceptionally thin: each divisor set contains 21 of the 24 group elements, and the Type-I and Type-II targets coincide.</p>
-          <h2>Independent 10M replay</h2>
-          <pre><code>Mordell-hard primes       20,513
-CBX k=35 hits               5,978
-state-classifier hits       5,978
-mismatches                      0</code></pre>
-          <p>After the exact corridor through <code>k=31</code>, 65 finite targets enter 35; 17 hit and 48 miss. This population statement is finite evidence only. The fixed-shift classification itself is range-free finite-group exhaustion.</p>
-          <p><strong>Claim boundary:</strong> fixed <code>k=35</code> is classified. This does not supply a universal finite shift bound or prove Erdős–Straus.</p>
+<p><strong>Status:</strong> exact computer-assisted finite-group classification</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>K35-TWO-TARGET-STRUCTURE.md</code>, <code>FIXED-SHIFT-JACOBI-PARITY.md</code>, <code>ES-TWO-TARGET-DIVISOR-SQUARE.md</code>, <code>ES-BINARY-LANE-I-EQUIVALENCE.md</code></p>
+<p><strong>Machine certificate:</strong> <code>classify_k35_states.py</code></p>
+<p><strong>Independent finite regression:</strong> <code>verify_k35_structure.py</code> plus the preserved CBX 10M standalone hit relation</p>
+<p><strong>Claim boundary:</strong> this closes the fixed Lane-I shift <code>k=35</code> by an exact finite-group state exhaustion. It does not prove that every hard prime reaches a successful shift by 35, does not give a universal finite shift bound, and does not prove Erdős–Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be Mordell-hard and put</p>
+<div class="math" role="math">\boxed{C=\frac{p+35}{4}}.</div>
+<p>The structural theorem <code>K35-TWO-TARGET-STRUCTURE.md</code> gives</p>
+<div class="math" role="math">G=(\mathbb Z/35\mathbb Z)^\times \cong C_{12}\times C_2.</div>
+<p>Use the coordinates</p>
+<div class="math" role="math">\boxed{x=6^\varepsilon3^a\pmod{35}, \qquad (\varepsilon,a)\in C_2\times C_{12}.}</div>
+<p>The index-two subgroup</p>
+<div class="math" role="math">\boxed{H=\langle3\rangle}</div>
+<p>is exactly the Jacobi-<code>+1</code> kernel.</p>
+<p>For every Mordell-hard prime,</p>
+<div class="math" role="math">\boxed{C\in H.}</div>
+<p>Equivalently, the final center coordinate of <code>C</code> has</p>
+<div class="math" role="math">\boxed{\varepsilon(C)=0.}</div>
+<p>This is also the <code>k=35</code> specialization of <code>FIXED-SHIFT-JACOBI-PARITY.md</code>.</p>
+<hr>
+<h2>2. Exact divisor-state coordinate</h2>
+<p>Factor</p>
+<div class="math" role="math">C=\prod_iq_i^{e_i}.</div>
+<p>Let</p>
+<div class="math" role="math">g_i=(\varepsilon_i,a_i)\in G</div>
+<p>be the coordinate of <code>q_i mod 35</code>.</p>
+<p>Define</p>
+<div class="math" role="math">\boxed{ D(C)= \left\{ \sum_i f_i g_i: 0\le f_i\le2e_i \right\} \subseteq G }</div>
+<p>and let</p>
+<div class="math" role="math">\boxed{c(C)=\sum_i e_i g_i}</div>
+<p>be the group coordinate of <code>C</code> itself.</p>
+<p>Thus the complete fixed-shift state is</p>
+<div class="math" role="math">\boxed{S(C)=(D(C),c(C)).}</div>
+<p>This state contains all information needed for both exact Lane-I targets.</p>
+<hr>
+<h2>3. The two targets</h2>
+<p>From <code>K35-TWO-TARGET-STRUCTURE.md</code>, the Type-I divisor-square target is</p>
+<div class="math" role="math">\boxed{\tau_I=(1,8),}</div>
+<p>while</p>
+<div class="math" role="math">-1=(1,6).</div>
+<p>Because <code>c(C)=(0,c)</code> lies in <code>H</code>, the Type-II divisor-square target is</p>
+<div class="math" role="math">\boxed{\tau_{II}(c)=(1,c+6).}</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ k=35\text{ misses} \iff (1,8)\notin D(C) \text{ and } (1,c+6)\notin D(C).}</div>
+<p>This is an exact membership criterion in a 24-element group.</p>
+<hr>
+<h2>4. One valuation occurrence gives one exact transition</h2>
+<p>A single prime-valuation occurrence with group coordinate</p>
+<div class="math" role="math">g\in G</div>
+<p>allows divisor exponents <code>0,1,2</code>. Hence it contributes the local set</p>
+<div class="math" role="math">\boxed{\{0,g,2g\}.}</div>
+<p>If the current state is <code>(D,c)</code>, adjoining one valuation occurrence gives</p>
+<div class="math" role="math">\boxed{ T_g(D,c) = \left(D+\{0,g,2g\},\ c+g\right). }</div>
+<p>This transition is exact.</p>
+<p>Repeated application also handles a prime power <code>q^e</code>: the Minkowski sum of <code>e</code> copies of <code>{0,g,2g}</code> contains every multiple</p>
+<div class="math" role="math">0,g,2g,\ldots,2eg,</div>
+<p>because every integer from <code>0</code> through <code>2e</code> is a sum of <code>e</code> digits from <code>{0,1,2}</code>.</p>
+<p>Therefore arbitrary factorizations of <code>C</code> are exactly represented by finite sequences of the 24 transitions <code>T_g</code>.</p>
+<hr>
+<h2>5. Finite closure theorem</h2>
+<p>Start from the empty factorization state</p>
+<div class="math" role="math">\boxed{S_0=(\{0\},0).}</div>
+<p><code>classify_k35_states.py</code> closes this state under all 24 transitions <code>T_g</code> until no new state appears.</p>
+<p>The least closed state space has exactly</p>
+<div class="math" role="math">\boxed{1298}</div>
+<p>states.</p>
+<p>Because each state is checked under every one of the 24 transitions, the closed system contains all states reachable by arbitrarily long factorization sequences. No upper bound on <code>p</code>, on the number of prime factors, or on the valuations is used.</p>
+<p>Among the 1298 states, exactly</p>
+<div class="math" role="math">\boxed{650}</div>
+<p>have final center in <code>H</code>, i.e. <code>epsilon(c)=0</code>, and are therefore compatible with the Mordell-hard <code>k=35</code> center law.</p>
+<h3>Theorem — exact state exhaustion</h3>
+<p>Every possible <code>k=35</code> divisor state of a Mordell-hard prime belongs to these 650 admissible states.</p>
+<p>This is a finite-group exhaustion, not a finite-prime search.</p>
+<hr>
+<h2>6. Complete miss table</h2>
+<p>Apply the two exact target tests to all 650 admissible states.</p>
+<p>The result is</p>
+<div class="math" role="math">\boxed{418\text{ hit states}}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{232\text{ combined-miss states}.}</div>
+<p>The classifier can emit all 232 miss rows with</p>
+<pre><code class="language-sh">python3 research/erdos-straus/classify_k35_states.py --json --table</code></pre>
+<p>Define that emitted exact table to be</p>
+<div class="math" role="math">\boxed{\mathcal M_{35}.}</div>
+<h3>Theorem — exact fixed-<code>k=35</code> classification</h3>
+<p>For a Mordell-hard prime <code>p</code>, let</p>
+<div class="math" role="math">C=\frac{p+35}{4}</div>
+<p>and form its exact state <code>S(C)=(D(C),c(C))</code>.</p>
+<p>Then</p>
+<div class="math" role="math">\boxed{ k=35\text{ misses both Lane-I targets} \iff S(C)\in\mathcal M_{35}.}</div>
+<p>No other miss state exists.</p>
+<p>By <code>ES-BINARY-LANE-I-EQUIVALENCE.md</code>, this is simultaneously the complete fixed-35 binary-selector classification.</p>
+<hr>
+<h2>7. The pure-<code>H</code> theorem is recovered exactly</h2>
+<p>Close the state system using only valuation directions in</p>
+<div class="math" role="math">H.</div>
+<p>There are exactly</p>
+<div class="math" role="math">\boxed{92}</div>
+<p>such states.</p>
+<p>Every one is a combined miss:</p>
+<div class="math" role="math">\boxed{92/92\text{ pure-}H\text{ states miss}.}</div>
+<p>Thus the universal pure-subgroup trap from <code>K35-TWO-TARGET-STRUCTURE.md</code> appears as an exact subspace of the full state classifier.</p>
+<p>The remaining</p>
+<div class="math" role="math">\boxed{140}</div>
+<p>miss states are genuinely non-pure.</p>
+<hr>
+<h2>8. Every non-pure miss state has a tiny outside core</h2>
+<p>Count a valuation occurrence as <strong>outside</strong> when its coordinate has</p>
+<div class="math" role="math">\varepsilon=1,</div>
+<p>i.e. its residue lies outside <code>H</code>.</p>
+<p>For each of the 232 miss states, minimize lexicographically</p>
+<div class="math" role="math">(\text{number of outside valuation units},\ \text{total valuation units})</div>
+<p>over all transition paths producing the same exact state.</p>
+<p>The minimum-outside distribution is</p>
+<div class="math" role="math">\boxed{ \begin{array}{c|c} \text{minimum outside units}&amp;\text{miss states}\\ \hline 0&amp;92\\ 2&amp;138\\ 4&amp;2 \end{array}}</div>
+<p>Hence:</p>
+<div class="math" role="math">\boxed{ \text{every }k=35\text{ miss state has a state-equivalent core using at most four outside units}.}</div>
+<p>This is a statement about <strong>state representatives</strong>, not a claim that the original integer <code>C</code> itself contains at most four outside prime-factor occurrences. A factorization with many outside factors can collapse to the same residue/divisor state as a smaller core.</p>
+<p>This sharpens the earlier four-companion theorem: the two-packet geometry generates 138 of the 140 non-pure miss states, while only two genuinely new states require a four-outside-unit representative.</p>
+<hr>
+<h2>9. The two four-unit core states</h2>
+<p>Both exceptional minimum-four states have center</p>
+<div class="math" role="math">\boxed{c=(0,2),}</div>
+<p>so</p>
+<div class="math" role="math">\tau_{II}=(1,2+6)=(1,8)=\tau_I.</div>
+<p>Thus the two exact targets coincide.</p>
+<p>Each exceptional divisor set has size</p>
+<div class="math" role="math">\boxed{21/24,}</div>
+<p>and misses the common target <code>(1,8)</code> plus only two additional group elements.</p>
+<p>One shortest outside-only representative uses coordinates</p>
+<div class="math" role="math">\boxed{(1,1),(1,1),(1,2),(1,10),}</div>
+<p>corresponding to residues</p>
+<div class="math" role="math">\boxed{18,18,19,24\pmod{35}.}</div>
+<p>Its three missing residues are</p>
+<div class="math" role="math">\boxed{17,13,26.}</div>
+<p>The second uses</p>
+<div class="math" role="math">\boxed{(1,2),(1,2),(1,5),(1,5),}</div>
+<p>corresponding to residues</p>
+<div class="math" role="math">\boxed{19,19,23,23\pmod{35},}</div>
+<p>and its three missing residues are</p>
+<div class="math" role="math">\boxed{3,27,26.}</div>
+<p>In both cases <code>26</code> is the common Type-I/Type-II target.</p>
+<p>These two states are the entire minimum-four exception to the two-outside-unit core picture.</p>
+<hr>
+<h2>10. Target-preserving symmetry</h2>
+<p>The automorphism</p>
+<div class="math" role="math">\boxed{(\varepsilon,a)\mapsto(\varepsilon,7a)}</div>
+<p>of <code>C_2 x C_12</code> fixes</p>
+<div class="math" role="math">(1,8), \qquad (1,6),</div>
+<p>and therefore preserves both the Type-I target and the Type-II translation law.</p>
+<p>It preserves the complete miss set.</p>
+<p>Under this involution, the 232 miss states collapse to</p>
+<div class="math" role="math">\boxed{149\text{ orbits},}</div>
+<p>consisting of</p>
+<div class="math" role="math">\boxed{66\text{ fixed states}}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{83\text{ two-state orbits}.}</div>
+<p>This symmetry is useful for theorem mining and for compact independent reimplementations of the table.</p>
+<hr>
+<h2>11. Independent finite regression through 10 million</h2>
+<p>The exact state theorem above is range-free. Separately, the preserved CBX standalone artifact supplies an independent finite hit relation through</p>
+<div class="math" role="math">p\le10^7.</div>
+<p>On all</p>
+<div class="math" role="math">\boxed{20,513}</div>
+<p>Mordell-hard primes in that domain, an independent factorization/state reconstruction gives:</p>
+<pre><code class="language-text">direct CBX k=35 hits      5,978
+state-classifier hits     5,978
+mismatches                    0</code></pre>
+<p>The comparison reconstructs the state from the factorization of <code>(p+35)/4</code>; it does not use the CBX Lane-I decision to choose the predicted state outcome.</p>
+<p>The older <code>verify_k35_structure.py</code> independently checks the subgroup, parity, pure-<code>H</code>, full-<code>H</code>, and exact two-packet companion identities by constructing divisor residue boxes directly modulo <code>35</code>.</p>
+<p>These finite checks support the implementation. The theorem itself is the exhaustive 24-element-group state closure.</p>
+<hr>
+<h2>12. Corridor consequence</h2>
+<p>On the same preserved 10M corpus, the completely classified shifts</p>
+<div class="math" role="math">3,7,11,15,19,23,27,31</div>
+<p>leave</p>
+<div class="math" role="math">\boxed{65}</div>
+<p>hard primes entering <code>k=35</code>.</p>
+<p>The <code>k=35</code> classifier gives</p>
+<div class="math" role="math">\boxed{17\text{ hits},\qquad48\text{ misses}.}</div>
+<p>Their later first-hit distribution is</p>
+<pre><code class="language-text">k=39   22
+k=43    5
+k=47   15
+k=51    1
+k=55    2
+k=59    2
+k=107   1</code></pre>
+<p>This is finite evidence only. It does not make <code>107</code> a universal bound.</p>
+<p>The next local corridor target is therefore</p>
+<div class="math" role="math">\boxed{k=39.}</div>
+<p>By <code>FIXED-SHIFT-JACOBI-PARITY.md</code>, its outside-packet parity is already controlled by</p>
+<div class="math" role="math">\left(\frac{39}{p}\right)=\left(\frac{13}{p}\right).</div>
+<p>So the next theorem search should exploit the split between the <code>(13/p)=+1</code> even-packet branch and <code>(13/p)=-1</code> odd-packet branch rather than treating <code>k=39</code> as an unstructured modulus.</p>
+<hr>
+<h2>13. Reproduction</h2>
+<p>The complete exact state classifier is</p>
+<pre><code class="language-sh">python3 research/erdos-straus/classify_k35_states.py --json</code></pre>
+<p>and the complete 232-row table is</p>
+<pre><code class="language-sh">python3 research/erdos-straus/classify_k35_states.py --json --table</code></pre>
+<p>Hard regression constants are:</p>
+<pre><code class="language-text">total states                 1298
+admissible H-center states    650
+hit states                    418
+miss states                   232
+pure-H states                  92
+pure-H miss states             92
+non-pure miss states          140
+miss symmetry orbits          149
+symmetry fixed states          66
+symmetry pairs                 83
+minimum-outside histogram   {0:92, 2:138, 4:2}</code></pre>
+<p>Any change to these constants causes the classifier to fail.</p>
+<hr>
+<p>Erdős–Straus remains open. Fixed <code>k=35</code> is now completely classified; the missing global step is still to prove that the Legendre-prescribed sequence of fixed-shift miss states cannot persist indefinitely.</p>
         </div>
       </article>
     </main>

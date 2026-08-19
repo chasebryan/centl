@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Realized Route B has">
+  <title>Route-B joint k31/k47 mode and 2-adic seam — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/route-b-joint-k31-k47-seam.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/route-b-joint-k31-k47-seam.html">
+  <meta property="og:title" content="Route-B joint k31/k47 mode and 2-adic seam — Free Computation Foundation">
+  <meta property="og:description" content="Realized Route B has">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Route-B joint k31/k47 mode and 2-adic seam</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Realized Route B has</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ROUTE-B-JOINT-K31-K47-SEAM.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact product-state coupling inside the candidate decomposition framework</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Verifier:</strong> <code>verify_route_b_joint_k31_k47_seam.py</code></p>
+<p><strong>Depends on:</strong> <code>K31-MODE-2ADIC-COUPLING.md</code>, <code>ROUTE-B-K47-SURVIVOR-NORMAL-FORM.md</code>, and <code>TEN-COFACTOR-ODD-SUPPORT-SEPARATION.md</code></p>
+<p><strong>Claim boundary:</strong> exact implication on realized Route B conditional on simultaneous k31/k47 survival. This is a state-grammar reduction, not a termination theorem, not a closed decomposition method, and not an Erdős–Straus proof.</p>
+<h2>1. Route-B ancestry</h2>
+<p>Realized Route B has</p>
+<p><code>C19 = 1081R</code></p>
+<p>and the exact parameterization</p>
+<p><code>t = 705 + 1081u</code>.</p>
+<p>The relevant later cofactors are</p>
+<pre><code class="language-text">C31 = 10D,   D = 5 + 21t
+C47 =  6J,   J = 9 + 35t.</code></pre>
+<p>The landed support theorem gives</p>
+<p><code>gcd(D,J) = gcd(2,t+1)</code>.</p>
+<p>Because 705 and1081 are both odd,</p>
+<pre><code class="language-text">t even iff u odd
+t odd  iff u even.</code></pre>
+<p>Thus Route-B ancestry already turns parity into a branch-local state coordinate.</p>
+<h2>2. k31 mode pressure from the rational prime2</h2>
+<p>Conditional on a k31 miss, the exact modes are</p>
+<p><code>BARE | FULL_QR</code>.</p>
+<p>BARE requires every prime factor of D to lie in</p>
+<p><code>H31 = {1,5,25} mod31</code>.</p>
+<p>The rational prime2 satisfies</p>
+<p><code>2 in QR31</code></p>
+<p>but</p>
+<p><code>2 notin H31</code>.</p>
+<p>Since D is even exactly when t is odd,</p>
+<p><code>t odd AND k31 miss =&gt; k31_mode = FULL_QR</code>.</p>
+<p>Equivalently</p>
+<p><code>k31_mode = BARE =&gt; t even</code>.</p>
+<h2>3. k47 mode pressure from the same rational prime2</h2>
+<p>On Route B, conditional on a k47 miss, the exact modes are</p>
+<p><code>THIN | FULL_QR</code>.</p>
+<p>The THIN factor-occurrence grammar says that after deleting every prime-factor occurrence congruent to1 modulo47, the remaining multiset must be exactly</p>
+<p><code>{9}</code></p>
+<p>or</p>
+<p><code>{3,3}</code>.</p>
+<p>The rational prime2 has residue2 modulo47. It is a QR47 residue, so its presence does not force a k47 hit, but residue2 is not allowed by the THIN grammar.</p>
+<p>Since</p>
+<p><code>J = 9 + 35t</code></p>
+<p>is even exactly when t is odd, any odd-t Route-B k47 miss contains the prime-factor occurrence2 and therefore cannot be THIN.</p>
+<p>Hence</p>
+<p><code>t odd AND k47 miss =&gt; k47_mode = FULL_QR</code>.</p>
+<p>Equivalently</p>
+<p><code>k47_mode = THIN =&gt; t even</code>.</p>
+<h2>4. Joint mode/seam theorem</h2>
+<p>Assume realized Route B survives both k31 and k47.</p>
+<h3>Odd sector</h3>
+<p>If t is odd, then D and J are both even and</p>
+<p><code>gcd(D,J)=2</code>.</p>
+<p>The shared rational prime2 simultaneously forces</p>
+<pre><code class="language-text">k31_mode = FULL_QR
+k47_mode = FULL_QR.</code></pre>
+<p>Therefore the odd support seam has exactly one possible mode pair:</p>
+<p><code>(FULL_QR31, FULL_QR47, ODD_SEAM)</code>.</p>
+<p>Equivalently, every odd-sector mode pair containing BARE31 or THIN47 is impossible.</p>
+<h3>Even sector</h3>
+<p>If t is even, then D and J are odd and</p>
+<p><code>gcd(D,J)=1</code>.</p>
+<p>The factor2 obstruction disappears from both mode grammars. The local theorems therefore do not by themselves eliminate any of the four mode pairs</p>
+<pre><code class="language-text">BARE31    × THIN47
+BARE31    × FULL_QR47
+FULL_QR31 × THIN47
+FULL_QR31 × FULL_QR47.</code></pre>
+<p>This statement is deliberately non-existential: it says these four pairs are not excluded by the present coupling theorem, not that every pair has an arithmetic realization.</p>
+<p>The even sector further splits by t modulo4 into the landed support seams</p>
+<pre><code class="language-text">EVEN_0: gcd(B,L)=4
+EVEN_2: gcd(B,L)=2</code></pre>
+<p>with <code>gcd(D,J)=1</code> in both.</p>
+<h2>5. Exact forbidden product states</h2>
+<p>At the coarse parity level, the naive Cartesian state</p>
+<p><code>{BARE31,FULL_QR31} × {THIN47,FULL_QR47} × {EVEN,ODD}</code></p>
+<p>contains eight formal combinations.</p>
+<p>The exact arithmetic removes three:</p>
+<pre><code class="language-text">BARE31    × THIN47    × ODD
+BARE31    × FULL_QR47 × ODD
+FULL_QR31 × THIN47    × ODD.</code></pre>
+<p>Only</p>
+<p><code>FULL_QR31 × FULL_QR47 × ODD</code></p>
+<p>survives in the odd sector.</p>
+<p>If the even seam is refined to <code>EVEN_0 | EVEN_2</code>, the naive 12-state mode/seam product contracts to nine not-excluded schematic states:</p>
+<ul><li>four mode pairs over EVEN_0;</li><li>four mode pairs over EVEN_2;</li><li>one FULL_QR/FULL_QR pair over ODD.</li></ul>
+<p>Again, “not excluded” is not an existence claim.</p>
+<h2>6. Route-parameter form</h2>
+<p>Because</p>
+<p><code>t = 705 + 1081u</code>,</p>
+<p>we can state the theorem directly in the Route-B ancestry coordinate:</p>
+<pre><code class="language-text">u even -&gt; t odd
+        -&gt; gcd(D,J)=2
+        -&gt; k31 FULL_QR and k47 FULL_QR
+
+u odd  -&gt; t even
+        -&gt; gcd(D,J)=1
+        -&gt; BARE/FULL_QR at k31 and THIN/FULL_QR at k47 remain locally possible.</code></pre>
+<p>This is an exact branch-local transition grammar.</p>
+<h2>7. BARE phase shadow inside Route B</h2>
+<p>The k31 BARE support group is H31. Since</p>
+<p><code>D = 5 + 21t mod31</code>,</p>
+<p>BARE also forces</p>
+<p><code>t mod31 in {0,19,29}</code>.</p>
+<p>On Route B, <code>t=705+1081u</code> reduces to</p>
+<p><code>t = 23 + 27u mod31</code>,</p>
+<p>so</p>
+<p><code>k31 BARE =&gt; u mod31 in {1,14,29}</code>.</p>
+<p>Combining with the already-proved <code>u odd</code> condition gives</p>
+<p><code>k31 BARE =&gt; u mod62 in {1,29,45}</code>.</p>
+<p>This is a mode-conditioned phase refinement, not a converse: those u-classes need not realize BARE.</p>
+<h2>8. Machine consequence</h2>
+<p>The state coordinates</p>
+<p><code>k31_mode</code>, <code>k47_mode</code>, <code>parity</code>, and <code>D-J support seam</code></p>
+<p>cannot be modeled independently on Route B.</p>
+<p>The exact grammar can be encoded as</p>
+<pre><code class="language-text">if seam == ODD:
+    k31_mode = FULL_QR
+    k47_mode = FULL_QR
+
+if k31_mode == BARE or k47_mode == THIN:
+    seam = EVEN
+    gcd(D,J) = 1</code></pre>
+<p>This is a stronger product-state reduction than either local normal form alone.</p>
+<h2>9. Bryan Entanglement Cross draft boundary</h2>
+<p>The in-draft Bryan Entanglement Cross may later annotate this as downward/excavation pressure: the same exact 2-adic edge removes several formal product states at once.</p>
+<p>That description is observational only. The factor-support and mode theorems are the proof-bearing objects and are the sole source of pruning permission.</p>
+<h2>10. Next target</h2>
+<p>The next high-value coupling is k35 branch versus phase. In particular, <code>3^2 | F</code> is incompatible with the S7 branch&#x27;s unique exponent-one <code>3 mod7</code> occurrence. That should remove S7 on an exact t modulo9 phase and give another non-Cartesian state rule independent of the 2-adic seam.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

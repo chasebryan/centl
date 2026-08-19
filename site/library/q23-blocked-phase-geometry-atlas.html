@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>q23 blocked-phase full-geometry atlas — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/q23-blocked-phase-geometry-atlas.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/q23-blocked-phase-geometry-atlas.html">
+  <meta property="og:title" content="q23 blocked-phase full-geometry atlas — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>q23 blocked-phase full-geometry atlas</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/Q23-BLOCKED-PHASE-GEOMETRY-ATLAS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite earliest-hit atlas on the two realized h169 route families</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Primary analyzer:</strong> <code>analyze_q23_blocked_phase_geometry.py</code></p>
+<p><strong>Depends on:</strong> <code>Q23-SQUARE-LIFT-PHASE-SIEVE.md</code>, <code>CANONICAL-Q2-TYPEII-BOUNDARY.md</code>, full Type-II root geometry</p>
+<p><strong>Claim boundary:</strong> this exhausts each stated arithmetic progression only through its pinned first replacement hit. It is a finite exact result, not a density theorem, a universal phase theorem, or an Erdős–Straus proof.</p>
+<hr>
+<h2>1. The controlled experiment</h2>
+<p>The q23 phase sieve proves that on h169 the canonical square-lift divisor</p>
+<div class="math" role="math">d=23^2=529</div>
+<p>is Type-II-compatible on 13 valuation phases and blocked on the ten phases</p>
+<pre><code class="language-text">n = 1,2,4,7,9,10,13,16,19,22.</code></pre>
+<p><code>CANONICAL-Q2-TYPEII-BOUNDARY.md</code> sharpens the interpretation: whenever <code>d=23^2</code> succeeds at a genuine q23 square lift, that Type-II certificate is necessarily López Type A (<code>b|c</code>).</p>
+<p>So a blocked phase gives a clean experiment:</p>
+<blockquote><p>remove the deterministic canonical boundary certificate, preserve the complete signed box, and ask what mechanism replaces it first.</p></blockquote>
+<p>The answer is not uniform.</p>
+<hr>
+<h2>2. Exact phase progressions</h2>
+<p>For</p>
+<div class="math" role="math">k_n=19+92n,</div>
+<p>the q23 square-lift condition is</p>
+<div class="math" role="math">23^2\mid C_{k_n} \iff p\equiv-k_n\pmod{4\cdot23^2} \iff p\equiv-k_n\pmod{2116}.</div>
+<p>The analyzer intersects this exactly with</p>
+<div class="math" role="math">p\equiv169\pmod{840}</div>
+<p>and one of the two realized route residues:</p>
+<pre><code class="language-text">Route A: p mod17 = 15
+Route B: p mod47 = 28</code></pre>
+<p>Every phase therefore becomes one exact arithmetic progression. The progression modulus is</p>
+<pre><code class="language-text">Route A:  7,554,120
+Route B: 20,884,920</code></pre>
+<p>For every candidate through the pinned first replacement hit, the analyzer then checks:</p>
+<ol><li>deterministic 64-bit primality;</li><li>exact Lane-I miss at k=19;</li><li>exact Lane-I miss at k=23;</li><li>full signed-box status at the square-lift destination <code>k_n</code>;</li><li>canonical <code>d=529</code> is indeed blocked;</li><li>every Type-II divisor witness, classified by root comparability.</li></ol>
+<p>Thus “first” below means first inside the exact stated route-phase progression after simultaneous k19/k23 survival, not first in an ad hoc sample.</p>
+<hr>
+<h2>3. Route A: q17 + q23</h2>
+<table class="directory"><thead><tr><th>n</th><th>k</th><th>first replacement p</th><th>mechanism</th><th>Type-II geometry</th></tr></thead><tbody><tr><td>1</td><td>111</td><td>288,537,649</td><td>I+II</td><td>mixed</td></tr><tr><td>2</td><td>203</td><td>382,143,049</td><td>Type II only</td><td>interior-only</td></tr><tr><td>4</td><td>387</td><td>2,246,368,489</td><td>Type I only</td><td>n/a</td></tr><tr><td>7</td><td>663</td><td>457,355,809</td><td>Type II only</td><td>interior-only</td></tr><tr><td>9</td><td>847</td><td>2,019,416,449</td><td>Type II only</td><td>boundary-only</td></tr><tr><td>10</td><td>939</td><td>1,108,323,889</td><td>Type I only</td><td>n/a</td></tr><tr><td>13</td><td>1215</td><td>1,842,387,289</td><td>Type I only</td><td>n/a</td></tr><tr><td>16</td><td>1491</td><td>8,049,889</td><td>Type II only</td><td>boundary-only</td></tr><tr><td>19</td><td>1767</td><td>341,744,929</td><td>Type II only</td><td>interior-only</td></tr><tr><td>22</td><td>2043</td><td>3,840,616,249</td><td>Type II only</td><td>interior-only</td></tr></tbody></table>
+<p>Route A therefore gives, among the ten blocked phases:</p>
+<pre><code class="language-text">Type I only   3
+Type II only  6
+I+II          1</code></pre>
+<p>Among the seven first replacements containing Type II:</p>
+<pre><code class="language-text">interior-only  4
+boundary-only  2
+mixed          1</code></pre>
+<p>So on this realized route, removing the canonical q23 boundary certificate does <strong>not</strong> merely reveal another López layer. Four blocked phases first terminate through exclusively incomparable-root Type-II witnesses.</p>
+<hr>
+<h2>4. Route B: q23 + q47</h2>
+<table class="directory"><thead><tr><th>n</th><th>k</th><th>first replacement p</th><th>mechanism</th><th>Type-II geometry</th></tr></thead><tbody><tr><td>1</td><td>111</td><td>209,441,569</td><td>I+II</td><td>mixed</td></tr><tr><td>2</td><td>203</td><td>118,637,569</td><td>I+II</td><td>boundary-only</td></tr><tr><td>4</td><td>387</td><td>3,362,156,449</td><td>Type II only</td><td>boundary-only</td></tr><tr><td>7</td><td>663</td><td>5,763,014,209</td><td>Type I only</td><td>n/a</td></tr><tr><td>9</td><td>847</td><td>9,090,072,769</td><td>Type I only</td><td>n/a</td></tr><tr><td>10</td><td>939</td><td>3,590,074,489</td><td>Type I only</td><td>n/a</td></tr><tr><td>13</td><td>1215</td><td>6,366,860,809</td><td>Type II only</td><td>interior-only</td></tr><tr><td>16</td><td>1491</td><td>580,829,929</td><td>Type I only</td><td>n/a</td></tr><tr><td>19</td><td>1767</td><td>8,328,227,209</td><td>Type I only</td><td>n/a</td></tr><tr><td>22</td><td>2043</td><td>2,124,497,929</td><td>Type I only</td><td>n/a</td></tr></tbody></table>
+<p>Route B gives</p>
+<pre><code class="language-text">Type I only   6
+Type II only  2
+I+II          2</code></pre>
+<p>Among its four Type-II-containing first replacements:</p>
+<pre><code class="language-text">interior-only  1
+boundary-only  2
+mixed          1</code></pre>
+<p>The route is visibly more Type-I-heavy than Route A in this finite atlas, but it still produces both mixed and purely incomparable replacement geometry.</p>
+<hr>
+<h2>5. Combined finite picture</h2>
+<p>Across all twenty route-phase cells:</p>
+<pre><code class="language-text">Type I only    9
+Type II only   8
+I+II           3</code></pre>
+<p>Eleven first replacements contain Type II. Their exact root geometry is</p>
+<pre><code class="language-text">interior-only  5
+boundary-only  4
+mixed          2</code></pre>
+<p>Therefore seven of the eleven Type-II-containing replacement hits include an incomparable-root witness, and five of them have <strong>no comparable-root Type-II witness at all at that destination</strong>.</p>
+<p>This is the cleanest finite evidence yet for why López A/B cannot be allowed to govern the full Type-II search: after a specifically identified López-A mechanism is removed, exact signed-box survival frequently terminates in geometry that cannot be expressed as either comparable-root boundary family at the same shift.</p>
+<p>This is evidence about these twenty exact cells only. It is not a population-frequency claim.</p>
+<hr>
+<h2>6. Representative interior replacements</h2>
+<h3>Route A, n=2</h3>
+<div class="math" role="math">p=382,143,049, \qquad k=203, \qquad C=95,535,813.</div>
+<p>Factorization:</p>
+<div class="math" role="math">C=3\cdot23^2\cdot37\cdot1627.</div>
+<p>The destination is Type-II-only and interior-only. One canonical incomparable root witness is</p>
+<div class="math" role="math">\boxed{(s,b,c)=(3,37,860683)}.</div>
+<p>Neither root divides the other.</p>
+<h3>Route A, n=7</h3>
+<div class="math" role="math">p=457,355,809, \qquad k=663, \qquad C=114,339,118.</div>
+<p>The destination is Type-II-only and interior-only. A canonical incomparable witness is</p>
+<div class="math" role="math">\boxed{(s,b,c)=(1613,134,529)}.</div>
+<p>Again neither root divides the other.</p>
+<h3>Route B, n=13</h3>
+<div class="math" role="math">p=6,366,860,809, \qquad k=1215, \qquad C=1,591,715,506.</div>
+<p>The destination is Type-II-only and interior-only, with canonical incomparable witness</p>
+<div class="math" role="math">\boxed{(s,b,c)=(1679,46,20609)}.</div>
+<p>These are not “failed López certificates.” They are successful exact Type-II certificates in the interior of the larger root geometry.</p>
+<hr>
+<h2>7. Mixed replacements are also informative</h2>
+<p>The blocked n=1 phase is mixed on both realized routes:</p>
+<pre><code class="language-text">Route A: p=288,537,649, k=111, I+II, mixed Type II
+Route B: p=209,441,569, k=111, I+II, mixed Type II</code></pre>
+<p>So even at the same destination shift, the correct state is not a binary label “López versus non-López.” A single signed box can contain both comparable and incomparable Type-II certificates simultaneously, alongside Type I.</p>
+<p>This is why the CBX geometry telemetry classifies the <strong>entire witness set</strong> at a shift rather than reporting whichever divisor happened to be enumerated first.</p>
+<hr>
+<h2>8. What the blocked phases now mean</h2>
+<p>Before this atlas, the ten blocked phases meant only:</p>
+<blockquote><p><code>d=529</code> cannot be the canonical Type-II target.</p></blockquote>
+<p>They can now be separated into three experimentally realized replacement regimes:</p>
+<pre><code class="language-text">canonical boundary blocked -&gt; Type I replacement
+canonical boundary blocked -&gt; noncanonical boundary Type II replacement
+canonical boundary blocked -&gt; incomparable Type II replacement</code></pre>
+<p>and mixtures of those mechanisms.</p>
+<p>This converts the q23 phase sieve from a one-divisor obstruction into a controlled full-geometry experiment.</p>
+<hr>
+<h2>9. Next theorem target</h2>
+<p>The obvious next question is no longer whether blocked phases can still succeed. They do.</p>
+<p>The sharper question is:</p>
+<blockquote><p>Which exact survivor-state coordinates predict the replacement geometry?</p></blockquote>
+<p>The candidate decomposition framework already carries:</p>
+<pre><code class="language-text">k19 mode
+residual support
+k23 support
+affine coupling
+q23 valuation phase
+canonical phase allowed/blocked
+full signed-box status</code></pre>
+<p>The new response variable is</p>
+<pre><code class="language-text">replacement geometry
+    Type I
+    comparable-root Type II
+    incomparable-root Type II
+    mixed</code></pre>
+<p>The next attack should condition the twenty cells on <code>FULL_QR/BARE</code>, residual-support class, factor pattern, and affine-coupling data. A successful implication there would be a genuine state-transition theorem rather than another census observation.</p>
+<p>Erdős–Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>
