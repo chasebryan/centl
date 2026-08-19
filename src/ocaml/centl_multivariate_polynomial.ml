@@ -13,6 +13,12 @@ module Monomial_map = Map.Make (Monomial_order)
 
 type t = Q.t Monomial_map.t
 
+type coefficient_array = {
+  variables : string list;
+  shape : int list;
+  coefficients : Q.t array;
+}
+
 type error =
   | Empty_variable
   | Negative_exponent of string * int
@@ -20,6 +26,7 @@ type error =
   | Undefined_zero_power
   | Negative_power of int
   | Duplicate_substitution of string
+  | Dense_coefficient_array_too_large
   | Cancelled
 
 let total_degree_marker = "<total-degree>"
@@ -40,6 +47,8 @@ let error_message = function
         "negative polynomial power %d leaves the polynomial ring" exponent
   | Duplicate_substitution variable ->
       "duplicate rational substitution for variable " ^ variable
+  | Dense_coefficient_array_too_large ->
+      "dense polynomial coefficient array exceeds the coefficient limit"
   | Cancelled -> "polynomial operation was cancelled"
 
 let zero = Monomial_map.empty
@@ -206,6 +215,67 @@ let variables polynomial =
       polynomial String_set.empty
   in
   String_set.elements variables
+
+let maximum_exponents polynomial =
+  Monomial_map.fold
+    (fun monomial _ maxima ->
+      List.fold_left
+        (fun maxima (variable, exponent) ->
+          let current =
+            match String_map.find_opt variable maxima with
+            | None -> 0
+            | Some current -> current
+          in
+          String_map.add variable (max current exponent) maxima)
+        maxima monomial)
+    polynomial String_map.empty
+
+let coefficient_array ?(cancelled = never_cancelled) ~max_coefficients polynomial =
+  let ( let* ) result next = Result.bind result next in
+  if max_coefficients < 1 then Error Dense_coefficient_array_too_large
+  else if cancelled () then Error Cancelled
+  else
+    let variables = variables polynomial in
+    let maxima = maximum_exponents polynomial in
+    let rec build_shape reversed size = function
+      | [] -> Ok (List.rev reversed, size)
+      | variable :: rest ->
+          let exponent =
+            match String_map.find_opt variable maxima with
+            | None -> 0
+            | Some exponent -> exponent
+          in
+          if exponent >= max_coefficients then
+            Error Dense_coefficient_array_too_large
+          else
+            let dimension = exponent + 1 in
+            if size > max_coefficients / dimension then
+              Error Dense_coefficient_array_too_large
+            else build_shape (dimension :: reversed) (size * dimension) rest
+    in
+    let* shape, size = build_shape [] 1 variables in
+    let coefficients = Array.make size Q.zero in
+    let index_of_monomial monomial =
+      List.fold_left2
+        (fun index variable dimension ->
+          let exponent =
+            match List.assoc_opt variable monomial with
+            | None -> 0
+            | Some exponent -> exponent
+          in
+          (index * dimension) + exponent)
+        0 variables shape
+    in
+    let rec fill = function
+      | [] -> Ok { variables; shape; coefficients }
+      | (monomial, coefficient) :: rest ->
+          if cancelled () then Error Cancelled
+          else begin
+            coefficients.(index_of_monomial monomial) <- coefficient;
+            fill rest
+          end
+    in
+    fill (Monomial_map.bindings polynomial)
 
 let monomial_total_degree monomial =
   List.fold_left (fun degree (_, exponent) -> degree + exponent) 0 monomial
