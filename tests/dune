@@ -226,6 +226,21 @@
  (libraries centl_lib alcotest zarith))
 
 (test
+ (name test_physics_cherenkov)
+ (modules test_physics_cherenkov)
+ (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_physics_cherenkov_protocol)
+ (modules test_physics_cherenkov_protocol)
+ (libraries centl_lib alcotest zarith yojson))
+
+(test
+ (name test_physics_cherenkov_mcp)
+ (modules test_physics_cherenkov_mcp)
+ (libraries centl_lib alcotest zarith yojson))
+
+(test
  (name test_physics_collision_3d)
  (modules test_physics_collision_3d)
  (libraries centl_lib alcotest zarith))
