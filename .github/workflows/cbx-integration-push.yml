@@ -1,0 +1,87 @@
+name: CBX integration push
+
+on:
+  push:
+    branches:
+      - agent/cbx-kernel
+    paths:
+      - '.github/workflows/cbx-integration-push.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/cbx-kernel
+          fetch-depth: 0
+
+      - name: Configure integration identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Reconcile current main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          set +e
+          git merge --no-commit --no-ff origin/main
+          status=$?
+          set -e
+          if [ "$status" -ne 0 ]; then
+            echo 'CBX_MAIN_CONFLICTS_BEGIN'
+            git diff --name-only --diff-filter=U
+            echo 'CBX_MAIN_CONFLICTS_END'
+            git merge --abort
+            exit 23
+          fi
+
+      - name: Import authoritative centl-cbx payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_SHA=8da8d7a13991adfbd7fa1b76dd4d85e56c3c8ca2
+          rm -rf /tmp/centl-cbx
+          git clone --quiet https://github.com/chasebryan/centl-cbx.git /tmp/centl-cbx
+          git -C /tmp/centl-cbx checkout --quiet "$SOURCE_SHA"
+          test "$(git -C /tmp/centl-cbx rev-parse HEAD)" = "$SOURCE_SHA"
+
+          rm -rf research/erdos-straus/cbx.kernel
+          mkdir -p research/erdos-straus/cbx.kernel
+          cp -a /tmp/centl-cbx/kernel/. research/erdos-straus/cbx.kernel/
+
+          cp -a /tmp/centl-cbx/research/. research/erdos-straus/
+
+          for src in /tmp/centl-cbx/.github/workflows/*.yml; do
+            dst=".github/workflows/$(basename "$src")"
+            sed 's#research/#research/erdos-straus/#g' "$src" > "$dst"
+          done
+
+          printf '%s\n' "$SOURCE_SHA" > research/erdos-straus/cbx.kernel/SOURCE-CENTL-CBX-SHA
+
+      - name: Validate CBX engine and research surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m compileall -q research/erdos-straus
+          make -C research/erdos-straus/cbx.kernel clean
+          make -C research/erdos-straus/cbx.kernel
+          make -C research/erdos-straus/cbx.kernel check
+          ./centl es cbx probe 1009 >/tmp/cbx-probe-1009.txt
+          ./centl es cbx probe 2521 >/tmp/cbx-probe-2521.txt
+          ./centl es cbx probe 9658489 >/tmp/cbx-probe-9658489.txt
+
+      - name: Commit reconciled CBX push
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/cbx-integration-push.yml
+          git add -A
+          git status --short
+          git commit -m "cbx: sync standalone engine and reconcile main"
+          git push origin HEAD:agent/cbx-kernel
