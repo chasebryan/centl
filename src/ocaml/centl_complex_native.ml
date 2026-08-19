@@ -47,7 +47,7 @@ let evaluate_source ?(limits = Centl_complex_rational.default_evaluation_limits)
 let rational_expression value =
   Centl_Core.Literal (Q.num value, Q.den value)
 
-let expression_of_exact value =
+let expression_of_exact (value : Centl_complex_rational.t) =
   Centl_Core.Function
     ( "complex",
       [ rational_expression value.real; rational_expression value.imaginary ] )
