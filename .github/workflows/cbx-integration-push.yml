@@ -24,7 +24,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Reconcile current main
+      - name: Reconcile current main and resolve CBX seams
         shell: bash
         run: |
           set -euo pipefail
@@ -33,18 +33,186 @@ jobs:
           git merge --no-commit --no-ff origin/main
           status=$?
           set -e
+
           if [ "$status" -ne 0 ]; then
-            git diff --name-only --diff-filter=U > /tmp/cbx-main-conflicts.txt
-            git merge --abort
-            {
-              echo "CBX integration merge conflicts against $(git rev-parse origin/main)"
-              echo
-              cat /tmp/cbx-main-conflicts.txt
-            } > research/erdos-straus/CBX-MAIN-MERGE-CONFLICTS.txt
-            git add research/erdos-straus/CBX-MAIN-MERGE-CONFLICTS.txt
-            git commit -m "ci: record CBX main merge conflicts"
-            git push origin HEAD:agent/cbx-kernel
-            exit 23
+            conflicts="$(git diff --name-only --diff-filter=U)"
+            expected="$(printf 'centl\nsite/index.html')"
+            if [ "$conflicts" != "$expected" ]; then
+              printf 'Unexpected CBX/main conflicts:\n%s\n' "$conflicts" >&2
+              exit 23
+            fi
+
+            # Start from current main for the two genuinely overlapping live
+            # surfaces, then reapply the CBX routes deliberately.
+            git checkout --theirs -- centl site/index.html
+
+            cat > centl <<'EOF'
+          #!/bin/sh
+          set -eu
+
+          project_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+          binary="$project_root/_build/default/src/main.exe"
+          rust_binary="$project_root/target/release/centl-web"
+
+          # Erdős–Straus kernels and Web Hub plug in here.
+          case "${1:-}" in
+            hub|web|serve)
+              shift || true
+              if [ -x "$rust_binary" ]; then
+                exec "$rust_binary" --serve "$@"
+              else
+                exec cargo run --release -- --serve "$@"
+              fi
+              ;;
+            es|erdos|erdos-straus)
+              shift
+              # CBX remains a separate research instrument rather than part of
+              # the coupled production hunt. Keep its state and grade isolated.
+              if [ "${1:-}" = "cbx" ]; then
+                shift
+                cbx_dir="$project_root/research/erdos-straus/cbx.kernel"
+                case "${1:-}" in
+                  inverse)
+                    shift
+                    cbx_inverse="$cbx_dir/cbx-inverse"
+                    if [ ! -x "$cbx_inverse" ]; then make -s -C "$cbx_dir" cbx-inverse; fi
+                    exec "$cbx_inverse" "$@"
+                    ;;
+                  shift-i)
+                    shift
+                    cbx_shift="$cbx_dir/cbx-shift-i"
+                    if [ ! -x "$cbx_shift" ]; then make -s -C "$cbx_dir" cbx-shift-i; fi
+                    exec "$cbx_shift" "$@"
+                    ;;
+                  forward-i)
+                    shift
+                    cbx_forward="$cbx_dir/cbx-forward-i"
+                    if [ ! -x "$cbx_forward" ]; then make -s -C "$cbx_dir" cbx-forward-i; fi
+                    exec "$cbx_forward" "$@"
+                    ;;
+                  profile-i)
+                    shift
+                    cbx_profile="$cbx_dir/cbx-profile-i"
+                    if [ ! -x "$cbx_profile" ]; then make -s -C "$cbx_dir" cbx-profile-i; fi
+                    exec "$cbx_profile" "$@"
+                    ;;
+                  standalone-i)
+                    shift
+                    cbx_standalone="$cbx_dir/cbx-standalone-i"
+                    if [ ! -x "$cbx_standalone" ]; then make -s -C "$cbx_dir" cbx-standalone-i; fi
+                    exec "$cbx_standalone" "$@"
+                    ;;
+                  certify-i)
+                    shift
+                    exec python3 "$cbx_dir/certify_i.py" "$@"
+                    ;;
+                  bench)
+                    shift
+                    exec python3 "$cbx_dir/bench_i.py" "$@"
+                    ;;
+                  analyze)
+                    shift
+                    exec python3 "$cbx_dir/analyze.py" "$@"
+                    ;;
+                  analyze-geometry)
+                    shift
+                    exec python3 "$cbx_dir/analyze_geometry.py" "$@"
+                    ;;
+                  analyze-layers)
+                    shift
+                    exec python3 "$cbx_dir/analyze_layers.py" "$@"
+                    ;;
+                  analyze-profile)
+                    shift
+                    exec python3 "$cbx_dir/analyze_profile.py" "$@"
+                    ;;
+                  analyze-standalone)
+                    shift
+                    exec python3 "$cbx_dir/analyze_standalone.py" "$@"
+                    ;;
+                  analyze-overlap)
+                    shift
+                    exec python3 "$cbx_dir/analyze_overlap.py" "$@"
+                    ;;
+                  analyze-spectrum-overlap)
+                    shift
+                    exec python3 "$cbx_dir/analyze_spectrum_overlap.py" "$@"
+                    ;;
+                  plan-hybrid)
+                    shift
+                    exec python3 "$cbx_dir/plan_hybrid.py" "$@"
+                    ;;
+                esac
+                cbx="$cbx_dir/cbx"
+                if [ ! -x "$cbx" ]; then make -s -C "$cbx_dir" cbx; fi
+                exec "$cbx" "$@"
+              fi
+
+              if [ -f "$project_root/research/erdos-straus/es" ]; then
+                exec python3 "$project_root/research/erdos-straus/es" "$@"
+              elif [ -x "$rust_binary" ]; then
+                exec "$rust_binary" es "$@"
+              fi
+              ;;
+          esac
+
+          if [ -x "$binary" ]; then
+            exec "$binary" "$@"
+          fi
+
+          if [ -x "$rust_binary" ]; then
+            exec "$rust_binary" "$@"
+          fi
+
+          if command -v fstar.exe >/dev/null 2>&1; then
+            fstar=$(command -v fstar.exe)
+          elif [ -n "${HOME:-}" ] && [ -x "$HOME/.local/bin/fstar.exe" ]; then
+            fstar="$HOME/.local/bin/fstar.exe"
+          else
+            # Fallback to the Rust implementation if the F* toolchain is not active.
+            if command -v cargo >/dev/null 2>&1 || [ -x "$HOME/.cargo/bin/cargo" ]; then
+              cargo_bin=$(command -v cargo || echo "$HOME/.cargo/bin/cargo")
+              "$cargo_bin" build --release --manifest-path "$project_root/Cargo.toml" >/dev/null 2>&1 || true
+              if [ -x "$rust_binary" ]; then exec "$rust_binary" "$@"; fi
+            fi
+            echo "centl: F* was not found; run 'make build' in the configured development shell" >&2
+            exit 127
+          fi
+
+          if command -v dune >/dev/null 2>&1; then
+            FSTAR="$fstar" make -s -C "$project_root" build
+          elif command -v opam >/dev/null 2>&1; then
+            FSTAR="$fstar" opam exec --switch=centl -- make -s -C "$project_root" build
+          else
+            echo "centl: Dune and OPAM were not found; activate the CENTL toolchain first" >&2
+            exit 127
+          fi
+
+          exec "$binary" "$@"
+          EOF
+            # The heredoc is indented for YAML; strip exactly ten leading spaces.
+            sed -i 's/^          //' centl
+            chmod +x centl
+
+            python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("site/index.html")
+          text = path.read_text()
+          text = text.replace(
+              "congruence shadow, Bryan Recursive Entanglement Calculus",
+              "congruence shadow, CBX kernel, Bryan Recursive Entanglement Calculus",
+          )
+          needle = '<p class="card-links"><a href="research-erdos-straus.html">Research Program</a> · <a href="research-erdos-straus.html#es-hunt">Public Hunt</a></p>'
+          addition = needle + '\n          <p class="card-links"><a href="library/cbx-implementation-status.html">CBX X-ray kernel</a> · <a href="library/cbx-initial-xray-census.html">Clean CBX census</a> · <a href="library/cbis-k-parameter-status.html">K/search-grade audit</a></p>'
+          if needle not in text:
+              raise SystemExit("CBX site integration anchor not found")
+          text = text.replace(needle, addition, 1)
+          path.write_text(text)
+          PY
+
+            git add centl site/index.html
+            test -z "$(git diff --name-only --diff-filter=U)"
           fi
 
       - name: Import authoritative centl-cbx payload
@@ -69,18 +237,38 @@ jobs:
 
           printf '%s\n' "$SOURCE_SHA" > research/erdos-straus/cbx.kernel/SOURCE-CENTL-CBX-SHA
           rm -f research/erdos-straus/CBX-MAIN-MERGE-CONFLICTS.txt
+          rm -f research/erdos-straus/CBX-INTEGRATION-FAILURE.txt
 
       - name: Validate CBX engine and research surface
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m compileall -q research/erdos-straus
-          make -C research/erdos-straus/cbx.kernel clean
-          make -C research/erdos-straus/cbx.kernel
-          make -C research/erdos-straus/cbx.kernel check
-          ./centl es cbx probe 1009 >/tmp/cbx-probe-1009.txt
-          ./centl es cbx probe 2521 >/tmp/cbx-probe-2521.txt
-          ./centl es cbx probe 9658489 >/tmp/cbx-probe-9658489.txt
+          set +e
+          {
+            python3 -m compileall -q research/erdos-straus
+            make -C research/erdos-straus/cbx.kernel clean
+            make -C research/erdos-straus/cbx.kernel
+            make -C research/erdos-straus/cbx.kernel check
+            ./centl es cbx probe 1009
+            ./centl es cbx probe 2521
+            ./centl es cbx probe 9658489
+          } > /tmp/cbx-integration-validation.log 2>&1
+          status=$?
+          set -e
+
+          if [ "$status" -ne 0 ]; then
+            {
+              echo "CBX integration validation failed with status $status"
+              echo
+              tail -n 240 /tmp/cbx-integration-validation.log
+            } > research/erdos-straus/CBX-INTEGRATION-FAILURE.txt
+            git add -A
+            git commit -m "cbx: stage integration for validation repair"
+            git push origin HEAD:agent/cbx-kernel
+            exit "$status"
+          fi
+
+          cat /tmp/cbx-integration-validation.log
 
       - name: Commit reconciled CBX push
         shell: bash
