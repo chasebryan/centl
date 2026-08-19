@@ -24,6 +24,11 @@
  (modules test_real_algebraic)
  (libraries centl_lib alcotest zarith))
 
+(test
+ (name test_real_algebraic_protocol)
+ (modules test_real_algebraic_protocol)
+ (libraries centl_lib alcotest zarith yojson))
+
 (executable
  (name algebraic_probe)
  (modules algebraic_probe)
