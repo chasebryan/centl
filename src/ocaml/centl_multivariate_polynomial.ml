@@ -111,7 +111,9 @@ let scale scalar polynomial =
   if Q.equal scalar Q.zero then zero else Monomial_map.map (Q.mul scalar) polynomial
 
 let add left right =
-  Monomial_map.fold (fun monomial coefficient result -> add_term coefficient monomial result) right left
+  Monomial_map.fold
+    (fun monomial coefficient result -> add_term coefficient monomial result)
+    right left
 
 let sub left right = add left (neg right)
 
@@ -177,15 +179,19 @@ let variables polynomial =
   String_set.elements variables
 
 let monomial_total_degree monomial =
-  List.fold_left (fun degree (_, exponent) -> degree + exponent) 0 monomial
+  List.fold_left
+    (fun degree (_, exponent) -> Z.add degree (Z.of_int exponent))
+    Z.zero monomial
 
 let total_degree polynomial =
   if is_zero polynomial then None
   else
     Some
       (Monomial_map.fold
-         (fun monomial _ degree -> max degree (monomial_total_degree monomial))
-         polynomial 0)
+         (fun monomial _ degree ->
+           let candidate = monomial_total_degree monomial in
+           if Z.compare candidate degree > 0 then candidate else degree)
+         polynomial Z.zero)
 
 let decrement_power variable monomial =
   let rec loop reversed = function
@@ -228,7 +234,8 @@ let substitution_map substitutions =
     | [] -> Ok map
     | (variable, value) :: rest ->
         if String.equal variable "" then Error Empty_variable
-        else if String_map.mem variable map then Error (Duplicate_substitution variable)
+        else if String_map.mem variable map then
+          Error (Duplicate_substitution variable)
         else build (String_map.add variable value map) rest
   in
   build String_map.empty substitutions
@@ -240,10 +247,13 @@ let substitute_rationals substitutions polynomial =
     let rec loop coefficient reversed = function
       | [] -> (coefficient, List.rev reversed)
       | ((variable, exponent) as power) :: rest ->
-          begin match String_map.find_opt variable substitutions with
-          | None -> loop coefficient (power :: reversed) rest
-          | Some value ->
-              loop (Q.mul coefficient (q_power value exponent)) reversed rest
+          begin
+            match String_map.find_opt variable substitutions with
+            | None -> loop coefficient (power :: reversed) rest
+            | Some value ->
+                loop
+                  (Q.mul coefficient (q_power value exponent))
+                  reversed rest
           end
     in
     loop coefficient [] monomial
@@ -263,8 +273,7 @@ let exact_bits polynomial =
       in
       let exponent_bits =
         List.fold_left
-          (fun bits (_, exponent) ->
-            bits + Z.numbits (Z.of_int exponent))
+          (fun bits (_, exponent) -> bits + Z.numbits (Z.of_int exponent))
           0 monomial
       in
       total + coefficient_bits + exponent_bits)
