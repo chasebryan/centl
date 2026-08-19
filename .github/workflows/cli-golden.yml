@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'src/ocaml/centl_version.ml'
+      - 'src/ocaml/**'
       - 'src/dune'
       - 'scripts/offline-rebuild'
       - 'scripts/write-build-identity'
@@ -17,7 +17,7 @@ on:
     branches:
       - main
     paths:
-      - 'src/ocaml/centl_version.ml'
+      - 'src/ocaml/**'
       - 'src/dune'
       - 'scripts/offline-rebuild'
       - 'scripts/write-build-identity'
