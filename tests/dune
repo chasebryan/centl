@@ -24,6 +24,17 @@
  (modules test_real_algebraic)
  (libraries centl_lib alcotest zarith))
 
+(executable
+ (name algebraic_probe)
+ (modules algebraic_probe)
+ (libraries centl_lib zarith))
+
+(rule
+ (alias runtest)
+ (deps test_real_algebraic_differential.py algebraic_probe.exe)
+ (action
+  (run python3 %{dep:test_real_algebraic_differential.py} %{dep:algebraic_probe.exe})))
+
 (test
  (name test_history)
  (modules test_history)
