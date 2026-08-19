@@ -175,6 +175,7 @@ let capabilities limits =
                       "differentiate";
                       "substitute_rationals";
                       "coefficient";
+                      "coefficient_array";
                       "variables";
                       "total_degree";
                     ] );
