@@ -103,6 +103,13 @@ let input_schema =
         [ "action"; "symbol" ];
       strict_object
         [
+          ("action", const_string "cherenkov");
+          ("refractive_index", string_schema);
+          ("speed", quantity_input_schema);
+        ]
+        [ "action"; "refractive_index"; "speed" ];
+      strict_object
+        [
           ("action", const_string "simulate_particle");
           ("particle", particle_input_schema);
           ("forces", array_of force_input_schema);
@@ -171,19 +178,22 @@ let tool () =
       ("title", `String "Compute with CENTL Physics");
       ( "description",
         `String
-          "Use CENTL's deterministic exact-rational particle mechanics. \
-           Discover physics capabilities and units, convert compatible units, \
-           inspect exact physical constants, simulate a dimension-checked \
-           particle, solve ideal exact elastic collisions, analyze exact \
-           sphere contact geometry, resolve only isolated disjoint touching \
-           sphere pairs, or certify bounded continuous sphere contact under an \
-           exact constant-velocity model. Overlaps and ambiguous simultaneous \
-           contacts are returned as explicit deferred results rather than \
-           guessed, and irrational contact times remain algebraic certificates \
-           rather than rounded timestamps." );
+          "Use CENTL's deterministic exact-rational physics engine. Discover \
+           physics capabilities and units, convert compatible units, inspect \
+           exact physical constants, certify the Cherenkov threshold and exact \
+           cone-angle cosine for a scalar refractive index, simulate a \
+           dimension-checked particle, solve ideal exact elastic collisions, \
+           analyze exact sphere contact geometry, resolve only isolated \
+           disjoint touching sphere pairs, or certify bounded continuous sphere \
+           contact under an exact constant-velocity model. Cherenkov results \
+           keep theta symbolic as acos(exact-rational) instead of inventing \
+           floating-point digits. Overlaps and ambiguous simultaneous contacts \
+           are returned as explicit deferred results rather than guessed, and \
+           irrational contact times remain algebraic certificates rather than \
+           rounded timestamps." );
       ("inputSchema", input_schema);
       ( "outputSchema",
-        Lazy.force Centl_physics_linear_contact_mcp_output.output_schema );
+        Lazy.force Centl_physics_cherenkov_mcp_output.output_schema );
       ("annotations", read_only_annotations);
     ]
 
@@ -198,6 +208,10 @@ let action_fields = function
         ( [ "action"; "value"; "from_unit"; "to_unit" ],
           [ "action"; "value"; "from_unit"; "to_unit" ] )
   | "constant" -> Some ([ "action"; "symbol" ], [ "action"; "symbol" ])
+  | "cherenkov" ->
+      Some
+        ( [ "action"; "refractive_index"; "speed" ],
+          [ "action"; "refractive_index"; "speed" ] )
   | "simulate_particle" ->
       Some
         ( [ "action"; "particle"; "forces"; "dt"; "steps" ],
