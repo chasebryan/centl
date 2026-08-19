@@ -7,6 +7,7 @@ type limits = {
   max_exponent : int;
   max_exact_bits : int;
   max_work : int;
+  max_dense_coefficients : int;
   max_result_bytes : int;
 }
 
@@ -18,6 +19,7 @@ let default_limits =
     max_exponent = 1_000_000;
     max_exact_bits = 1_000_000;
     max_work = 8_000_000;
+    max_dense_coefficients = 65_536;
     max_result_bytes = 1_048_576;
   }
 
@@ -82,6 +84,29 @@ let polynomial_json polynomial =
       ("text", `String (polynomial_text polynomial));
     ]
 
+let coefficient_array_json array =
+  let variables =
+    `List (List.map (fun variable -> `String variable) array.variables)
+  in
+  let shape = `List (List.map (fun dimension -> `Int dimension) array.shape) in
+  let coefficients =
+    `List (Array.to_list array.coefficients |> List.map rational_json)
+  in
+  let shape_text = array.shape |> List.map string_of_int |> String.concat "x" in
+  `Assoc
+    [
+      ("kind", `String "polynomial_coefficient_array");
+      ("exact", `Bool true);
+      ("variables", variables);
+      ("shape", shape);
+      ("order", `String "row_major_last_variable_fastest");
+      ("coefficients", coefficients);
+      ( "text",
+        `String
+          (if array.variables = [] then "scalar coefficient array"
+           else "coefficient array shape " ^ shape_text) );
+    ]
+
 let provenance method_ classification =
   `Assoc
     [
@@ -133,6 +158,8 @@ let error_of_polynomial = function
         error_message (Negative_power exponent) )
   | Duplicate_substitution variable ->
       ("invalid_request", error_message (Duplicate_substitution variable))
+  | Dense_coefficient_array_too_large ->
+      ("resource_limit", error_message Dense_coefficient_array_too_large)
   | Cancelled -> ("cancelled", error_message Cancelled)
 
 let parse_q label = function
@@ -279,6 +306,12 @@ let check_output limits ~method_ polynomial =
       failure ~method_ "resource_limit" "polynomial result exceeds the byte limit"
     else response
 
+let check_json_output limits ~method_ result =
+  let response = success ~method_ result in
+  if String.length (Yojson.Safe.to_string response) > limits.max_result_bytes then
+    failure ~method_ "resource_limit" "polynomial result exceeds the byte limit"
+  else response
+
 let polynomial_field limits name fields =
   match List.assoc_opt name fields with
   | None -> Error ("missing " ^ name)
@@ -362,6 +395,7 @@ let capabilities limits =
             "differentiate";
             "substitute_rationals";
             "coefficient";
+            "coefficient_array";
             "variables";
             "total_degree";
           ] );
@@ -374,6 +408,7 @@ let capabilities limits =
             ("max_exponent", `Int limits.max_exponent);
             ("max_exact_bits", `Int limits.max_exact_bits);
             ("max_work", `Int limits.max_work);
+            ("max_dense_coefficients", `Int limits.max_dense_coefficients);
             ("max_result_bytes", `Int limits.max_result_bytes);
           ] );
       ("text", `String "Exact sparse multivariate polynomials over Q.");
@@ -475,6 +510,28 @@ let dispatch ?(cancelled = never_cancelled) limits action fields =
                         failure ~method_:action code message
                     | Ok value -> success ~method_:action (rational_json value)
                     end
+                end
+            end
+        end
+    | "coefficient_array" ->
+        begin match
+          check_fields [ "version"; "id"; "action"; "polynomial" ] fields
+        with
+        | Error message -> failure ~method_:action "invalid_request" message
+        | Ok () ->
+            begin match polynomial_field limits "polynomial" fields with
+            | Error message -> failure ~method_:action "invalid_request" message
+            | Ok polynomial ->
+                begin match
+                  coefficient_array ~cancelled
+                    ~max_coefficients:limits.max_dense_coefficients polynomial
+                with
+                | Error error ->
+                    let code, message = error_of_polynomial error in
+                    failure ~method_:action code message
+                | Ok array ->
+                    check_json_output limits ~method_
+                      (coefficient_array_json array)
                 end
             end
         end
