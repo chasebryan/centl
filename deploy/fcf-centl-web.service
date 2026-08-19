@@ -1,0 +1,19 @@
+[Unit]
+Description=FCF CENTL zero-JS web hub
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/centl
+ExecStart=%h/centl/target/release/centl-web --serve 8088
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=false
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=default.target

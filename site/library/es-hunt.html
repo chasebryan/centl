@@ -17,34 +17,41 @@
   
 </head>
 <body>
-<div class="shell">
+<div class="shell" id="top">
   <a class="skip" href="#content">Skip to content</a>
   <header class="masthead">
-    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
     <div class="title"><h1>Public Erdős–Straus hunt</h1><p>Synthesis · hosted from the CENTL repository</p></div>
   </header>
   <div class="layout">
-    <nav aria-label="Primary">
-      <h2>Foundation</h2>
+            <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
       <ul>
-        <li><a href="../index.html">Home</a></li>
-        <li><a href="../about.html">About FCF</a></li>
-        <li><a href="../funding.html">Funding</a></li>
-        <li><a href="../centl.html">CENTL</a></li>
-        <li><a href="../software.html">Software</a></li>
-        <li><a href="../mirrors.html">The Bazaar</a></li>
-        <li><a href="../docs.html">Documentation</a></li>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
       </ul>
       <h2>Research</h2>
       <ul>
-        <li><a href="../research.html">Research library</a></li>
-        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
       </ul>
-      <h2>External</h2>
+      <h2>Foundation</h2>
       <ul>
-        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
-        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
-        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
       </ul>
     </nav>
     <main id="content">
@@ -67,13 +74,22 @@
 <p>in positive integers. The remaining computational burden, after the classical identities, lives on Mordell-hard primes: those congruent to</p>
 <div class="math" role="math">1,\ 121,\ 169,\ 289,\ 361,\ 529 \pmod{840}.</div>
 <p>This note records the public hunt that attacks those primes, files readable findings, and can be resumed on any machine. It is the operator-facing surface of the same two-target mathematics used in the theorem notes. It is not a new existence theorem.</p>
-<p>From the CENTL root:</p>
+<p>From the CENTL root, the letter-only C engine is <strong>cbap.kernel</strong>:</p>
+<pre><code class="language-text">./centl es cbap
+./centl es cbap go --random
+./centl es cbap letters</code></pre>
+<p>The older coupled hunt is still:</p>
 <pre><code class="language-text">./centl es
 ./centl es go
 ./centl es go --random
 ./centl es letters
 ./centl es seed</code></pre>
 <p><code>./centl es</code> opens a menu. <code>go</code> is the infinite hunt. Ctrl+C stops it and saves the seed.</p>
+<p>GREAT and GOOD records are a compact ledger, not hundreds of thousands of files. They are <strong>not</strong> in a git clone. Fetch them, compact an old pile, or hunt letters only:</p>
+<pre><code class="language-text">./centl es fetch
+./centl es compact
+./centl es go --all
+./centl es go --letters-only</code></pre>
 <hr>
 <h2>2. Two kernels</h2>
 <p>The work is split so a mathematician can read one stack and a long hunt can run the other.</p>
@@ -100,7 +116,7 @@
 ./centl es go --hunt NAME  # resume a named hunt
 ./centl es hunts           # list every hunt cursor in this tree</code></pre>
 <p><code>--from</code> and <code>--random</code> used to overwrite the only seed file. They no longer do. Each hunt keeps its own cursor under <code>findings/seeds/</code>. Two <code>go</code> processes on the same hunt become siblings and claim distinct windows on that line.</p>
-<p><strong>Confirmed on one machine (2026-08-15):</strong> two concurrent <code>./centl es go</code> processes can run in two terminals on the same checkout. They share the findings library. They do not replace each other&#x27;s cursors. They claim distinct windows. A catalog race that could crash the dashboard has been closed. This is an operational capability, not a proof of the conjecture.</p>
+<p><strong>Two hunts on one machine:</strong> each named hunt has its own lane. <code>main</code> and <code>h-0</code> must not share a cursor. A bug briefly put <code>main</code> on <code>lane-0</code>, so starting <code>h-0</code> jumped to five billion and looked frozen. That is fixed: <code>h-0</code> continues from its own <code>scanned_through</code>. Two <code>go</code> processes on the <em>same</em> named hunt still split windows. You can also run only <code>./centl es go</code> and ignore siblings. Not a proof of the conjecture.</p>
 <p>Two people who begin at different start factors explore different stretches of the line. That is the only role of the factor. It is not part of a letter&#x27;s identity.</p>
 <hr>
 <h2>5. Letter numbers</h2>
@@ -113,7 +129,7 @@ extra=&lt;empty, or a hash of a claimed certificate&gt;</code></pre>
 <p>Anyone who finds the same rule at the same prime computes the same integer and the same file name <code>letters/L-&lt;32 hex chars&gt;.md</code>. The start factor, the clock, and the hostname are not in the key.</p>
 <p>Different primes, or a different rule on the same prime, receive different numbers.</p>
 <p>The three letter rules are mechanical. They are written in <a href="how-grades-work.html"><code>findings/HOW-GRADES-WORK.md</code></a>.</p>
-<table class="directory"><thead><tr><th>stamp</th><th>meaning</th></tr></thead><tbody><tr><td>GOOD</td><td>A checked hard identity that is not a routine small-shift hit.</td></tr><tr><td>GREAT</td><td>Escaped the small theorems, Type I only, a deep first hit, or a cleared bound.</td></tr><tr><td>LETTER</td><td>Unsolved after the full menu, \(a,b\le 11\) failed, or a claimed universal proof.</td></tr></tbody></table>
+<table class="directory"><thead><tr><th>stamp</th><th>meaning</th></tr></thead><tbody><tr><td>GOOD</td><td>A checked hard identity that is not a routine small-shift hit.</td></tr><tr><td>GREAT</td><td>Escaped the small theorems, Type I only, or a deep first hit. Stored as one line in <code>findings/great.jsonl</code>. A cleared bound is the running <code>max_cleared_bound</code>, not a new row.</td></tr><tr><td>LETTER</td><td>Unsolved after the full menu, \(a,b\le 11\) failed, or a claimed universal proof.</td></tr></tbody></table>
 <p>A finding is refused if it claims three denominators that fail \(4xyz = n(yz+xz+xy)\).</p>
 <hr>
 <h2>6. What the hunt does not claim</h2>

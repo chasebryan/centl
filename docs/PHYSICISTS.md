@@ -1,4 +1,4 @@
-# Physicist onboarding ⚛️ 🔬
+# Physicist onboarding  
 
 This page is deliberately narrow. It is for physicists who want to use CENTL and CENTL Physics for physical calculation and exact-first mechanics without learning the rest of the repository first.
 
@@ -19,19 +19,19 @@ A physicist does **not** need to install the whole CENTL product family.
 
 On GNU/Linux, each choice is a **component-specific archive**. Asking for Physics does not first download the complete CENTL bundle. Required runtime libraries, license texts, provenance metadata, and the selected executable remain because they are required to run and redistribute that command correctly.
 
-## Start here: choose your operating system 🐧 🍎 🪟
+## Start here: choose your operating system   
 
 CENTL currently has three scientist-facing operating-system paths. The physics interfaces are the same after installation; what differs is how the software reaches your machine.
 
 | Platform | Current path | Assurance / distribution status |
 | --- | --- | --- |
-| 🐧 **GNU/Linux x86_64** | Oasis component archives or full Oasis installer | Qualified stable CENTL product. This is the reference release path. |
-| 🍎 **macOS** | `CENTL-Marsa` component build | Current Camp software built from source through the macOS harbor. It is not an Oasis declaration. |
-| 🪟 **Windows** | `CENTL-Marsa` component build under MSYS2 MinGW64 | Current Windows harbor/source-build path. It is not an Oasis declaration; the full Windows product CI gate is not yet enabled. |
+|  **GNU/Linux x86_64** | Oasis component archives or full Oasis installer | Qualified stable CENTL product. This is the reference release path. |
+|  **macOS** | `CENTL-Marsa` component build | Current Camp software built from source through the macOS harbor. It is not an Oasis declaration. |
+|  **Windows** | `CENTL-Marsa` component build under MSYS2 MinGW64 | Current Windows harbor/source-build path. It is not an Oasis declaration; the full Windows product CI gate is not yet enabled. |
 
 The distinction above is about release assurance, **not different physics**.
 
-### 🐧 GNU/Linux x86_64 — download only the physics command
+###  GNU/Linux x86_64 — download only the physics command
 
 Download the component installer and ask for CENTL Physics only:
 
@@ -81,7 +81,7 @@ curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
 sh install --channel oasis
 ```
 
-### 🍎 macOS — build and install only what you want
+###  macOS — build and install only what you want
 
 macOS uses the `CENTL-Marsa` harbor. Homebrew is required; the Marsa bootstrap prepares GMP, MPFR, FLINT, `pkg-config`, and the OCaml/opam environment.
 
@@ -112,7 +112,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 Marsa currently builds from the shared source graph, so the source checkout contains shared build dependencies even when only one command is installed. The **installed product surface** is component-selective. macOS Marsa is the Camp harbor, not an Oasis-qualified release.
 
-### 🪟 Windows — install only the selected command
+###  Windows — install only the selected command
 
 Windows currently uses `CENTL-Marsa` from an **MSYS2 MinGW64 shell**, not ordinary Command Prompt. You need Git and `opam` available in that environment; the Marsa bootstrap prepares the MinGW numeric and build dependencies.
 

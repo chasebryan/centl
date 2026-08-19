@@ -36,6 +36,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/bryan-recursive-entanglement-calculus.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/mirrors.html</loc>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>

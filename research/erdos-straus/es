@@ -17,7 +17,7 @@ from pathlib import Path
 
 ES_ROOT = Path(__file__).resolve().parent
 BB_ROOT = ES_ROOT / "bb.kernel"
-if not BB_ROOT.exists():
+if not BB_ROOT.exists() or not (BB_ROOT / "bberviges").exists():
     BB_ROOT = ES_ROOT / "B-BervigES.kernel"
 sys.path.insert(0, str(BB_ROOT))
 

@@ -1,0 +1,34 @@
+name: Site consistency
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - 'docs/MATHEMATICIANS.md'
+      - 'docs/PHYSICISTS.md'
+      - 'scripts/publish-site-library.py'
+      - 'scripts/site-consistency.py'
+      - '.github/workflows/site-consistency.yml'
+  pull_request:
+    paths:
+      - 'site/**'
+      - 'docs/MATHEMATICIANS.md'
+      - 'docs/PHYSICISTS.md'
+      - 'scripts/publish-site-library.py'
+      - 'scripts/site-consistency.py'
+      - '.github/workflows/site-consistency.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  consistency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check site consistency
+        run: |
+          python3 scripts/site-consistency.py --check
+          python3 scripts/publish-site-library.py --check
