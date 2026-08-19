@@ -13,7 +13,6 @@
    %{env:CENTL_BUILD_IDENTITY_SHELL=sh}
    %{dep:../scripts/write-build-identity}
    %{target}
-   %{dep:../scripts/write-build-identity}
    %{dep:generated/Centl_Core.ml}
    %{dep:generated/Centl_Gcd.ml}
    %{dep:generated/Centl_PolynomialSoundness.ml})))
