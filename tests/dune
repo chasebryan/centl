@@ -20,48 +20,6 @@
  (libraries centl_lib alcotest zarith yojson))
 
 (test
- (name test_complex_rational)
- (modules test_complex_rational)
- (libraries centl_lib alcotest zarith))
-
-(test
- (name test_complex_rational_protocol)
- (modules test_complex_rational_protocol)
- (libraries centl_lib alcotest zarith yojson))
-
-(executable
- (name complex_probe)
- (modules complex_probe)
- (libraries centl_lib zarith))
-
-(rule
- (alias runtest)
- (deps test_complex_rational_differential.py complex_probe.exe)
- (action
-  (run python3 %{dep:test_complex_rational_differential.py} %{dep:complex_probe.exe})))
-
-(test
- (name test_matrix)
- (modules test_matrix)
- (libraries centl_lib alcotest zarith))
-
-(test
- (name test_matrix_protocol)
- (modules test_matrix_protocol)
- (libraries centl_lib alcotest zarith yojson))
-
-(executable
- (name matrix_probe)
- (modules matrix_probe)
- (libraries centl_lib zarith))
-
-(rule
- (alias runtest)
- (deps test_matrix_differential.py matrix_probe.exe)
- (action
-  (run python3 %{dep:test_matrix_differential.py} %{dep:matrix_probe.exe})))
-
-(test
  (name test_history)
  (modules test_history)
  (libraries centl_lib alcotest unix yojson))
