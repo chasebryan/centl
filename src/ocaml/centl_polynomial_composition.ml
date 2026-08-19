@@ -106,6 +106,20 @@ let multiply_bounded state left right =
   in
   outer zero left_terms
 
+let add_scaled_bounded state scalar destination source =
+  let ( let* ) result next = Result.bind result next in
+  let rec loop result = function
+    | [] -> Ok result
+    | (monomial, coefficient) :: rest ->
+        let* () = checkpoint state in
+        let* () = charge_linear state 1 in
+        let coefficient = Q.mul scalar coefficient in
+        let result = add_term coefficient monomial result in
+        let* result = guard state.limits result in
+        loop result rest
+  in
+  loop destination (bindings source)
+
 let power_bounded state variable polynomial exponent =
   let ( let* ) result next = Result.bind result next in
   if exponent < 0 then
@@ -190,10 +204,7 @@ let compose ?(limits = default_limits) ?(cancelled = never_cancelled)
       | (monomial, coefficient) :: rest ->
           let* () = checkpoint state in
           let* expanded = compose_monomial monomial in
-          let expanded = scale coefficient expanded in
-          let candidate = add accumulator expanded in
-          let* candidate = guard limits candidate in
-          let* () = charge_linear state (max 1 (term_count expanded)) in
+          let* candidate = add_scaled_bounded state coefficient accumulator expanded in
           compose_terms candidate rest
     in
     compose_terms zero (bindings polynomial)
