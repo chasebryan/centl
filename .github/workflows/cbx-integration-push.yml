@@ -6,11 +6,6 @@ on:
       - agent/cbx-kernel
     paths:
       - '.github/workflows/cbx-integration-push.yml'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - '.github/workflows/cbx-integration-push.yml'
 
 permissions:
   contents: write
@@ -39,10 +34,16 @@ jobs:
           status=$?
           set -e
           if [ "$status" -ne 0 ]; then
-            echo 'CBX_MAIN_CONFLICTS_BEGIN'
-            git diff --name-only --diff-filter=U
-            echo 'CBX_MAIN_CONFLICTS_END'
+            git diff --name-only --diff-filter=U > /tmp/cbx-main-conflicts.txt
             git merge --abort
+            {
+              echo "CBX integration merge conflicts against $(git rev-parse origin/main)"
+              echo
+              cat /tmp/cbx-main-conflicts.txt
+            } > research/erdos-straus/CBX-MAIN-MERGE-CONFLICTS.txt
+            git add research/erdos-straus/CBX-MAIN-MERGE-CONFLICTS.txt
+            git commit -m "ci: record CBX main merge conflicts"
+            git push origin HEAD:agent/cbx-kernel
             exit 23
           fi
 
@@ -59,7 +60,6 @@ jobs:
           rm -rf research/erdos-straus/cbx.kernel
           mkdir -p research/erdos-straus/cbx.kernel
           cp -a /tmp/centl-cbx/kernel/. research/erdos-straus/cbx.kernel/
-
           cp -a /tmp/centl-cbx/research/. research/erdos-straus/
 
           for src in /tmp/centl-cbx/.github/workflows/*.yml; do
@@ -68,6 +68,7 @@ jobs:
           done
 
           printf '%s\n' "$SOURCE_SHA" > research/erdos-straus/cbx.kernel/SOURCE-CENTL-CBX-SHA
+          rm -f research/erdos-straus/CBX-MAIN-MERGE-CONFLICTS.txt
 
       - name: Validate CBX engine and research surface
         shell: bash
