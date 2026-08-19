@@ -61,33 +61,36 @@ let div a b =
   | Error _ as error -> error
   | Ok inverse -> Ok (mul a inverse)
 
-let rec pow_nonnegative ~checkpoint base exponent accumulator =
+let rec pow_nonnegative ~checkpoint ~guard base exponent accumulator =
   let ( let* ) result next = Result.bind result next in
   let* () = checkpoint () in
   if Z.equal exponent Z.zero then Ok accumulator
   else
-    let accumulator =
-      if Z.testbit exponent 0 then mul accumulator base else accumulator
+    let* accumulator =
+      if Z.testbit exponent 0 then guard (mul accumulator base)
+      else Ok accumulator
     in
     let exponent = Z.shift_right exponent 1 in
     if Z.equal exponent Z.zero then Ok accumulator
     else
-      pow_nonnegative ~checkpoint (mul base base) exponent accumulator
+      let* base = guard (mul base base) in
+      pow_nonnegative ~checkpoint ~guard base exponent accumulator
 
-let pow_with_checkpoint ~checkpoint base exponent =
+let pow_with_guards ~checkpoint ~guard base exponent =
   let ( let* ) result next = Result.bind result next in
   let* () = checkpoint () in
   if Z.equal exponent Z.zero then
-    if is_zero base then Error Undefined_zero_power else Ok one
+    if is_zero base then Error Undefined_zero_power else guard one
   else if Z.sign exponent > 0 then
-    pow_nonnegative ~checkpoint base exponent one
+    pow_nonnegative ~checkpoint ~guard base exponent one
   else
     let* inverse = reciprocal base in
-    pow_nonnegative ~checkpoint inverse (Z.neg exponent) one
+    let* inverse = guard inverse in
+    pow_nonnegative ~checkpoint ~guard inverse (Z.neg exponent) one
 
 let pow ?(cancelled = never_cancelled) base exponent =
   let checkpoint () = if cancelled () then Error Cancelled else Ok () in
-  pow_with_checkpoint ~checkpoint base exponent
+  pow_with_guards ~checkpoint ~guard:(fun value -> Ok value) base exponent
 
 let q_of_literal numerator denominator =
   if Z.equal denominator Z.zero then Error Zero_denominator_literal
@@ -215,8 +218,8 @@ let rec evaluate_node_with_state state expression =
   | Centl_Core.Power (base, exponent) ->
       let* base = evaluate_node_with_state state base in
       let* () = guard_power_exponent state exponent in
-      let* value = pow_with_checkpoint ~checkpoint:(fun () -> checkpoint state) base exponent in
-      guard_value state value
+      pow_with_guards ~checkpoint:(fun () -> checkpoint state)
+        ~guard:(guard_value state) base exponent
   | Centl_Core.Function ("complex", [ real; imaginary ]) ->
       let* real_value = evaluate_node_with_state state real in
       let* imaginary_value = evaluate_node_with_state state imaginary in
