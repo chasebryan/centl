@@ -114,6 +114,23 @@ let test_power_boundaries () =
   check_poly "x^0" one (unwrap (power x 0));
   check_poly "zero multiplier" zero (unwrap (multiply zero (add x y)))
 
+let test_total_degree_overflow () =
+  begin match term Q.one [ ("x", max_int); ("y", 1) ] with
+  | Error (Exponent_overflow marker)
+    when String.equal marker total_degree_marker ->
+      ()
+  | Error error -> Alcotest.fail (error_message error)
+  | Ok _ -> Alcotest.fail "overflowing total degree must be rejected"
+  end;
+  let huge_x = unwrap (term Q.one [ ("x", max_int) ]) in
+  begin match multiply huge_x y with
+  | Error (Exponent_overflow marker)
+    when String.equal marker total_degree_marker ->
+      ()
+  | Error error -> Alcotest.fail (error_message error)
+  | Ok _ -> Alcotest.fail "multiplication must preserve the degree invariant"
+  end
+
 let () =
   Alcotest.run "centl exact multivariate polynomials"
     [
@@ -127,5 +144,7 @@ let () =
           Alcotest.test_case "rational substitution" `Quick
             test_rational_substitution;
           Alcotest.test_case "power boundaries" `Quick test_power_boundaries;
+          Alcotest.test_case "total degree overflow" `Quick
+            test_total_degree_overflow;
         ] );
     ]
