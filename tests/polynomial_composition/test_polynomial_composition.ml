@@ -68,6 +68,19 @@ let test_duplicate_substitution () =
   | Error error -> Alcotest.fail (error_message error)
   | Ok _ -> Alcotest.fail "duplicate polynomial substitution must be refused"
 
+let test_final_accumulation_cancellation () =
+  let checks = ref 0 in
+  let cancelled () =
+    incr checks;
+    !checks >= 2
+  in
+  begin match compose ~cancelled [] (constant (q 7)) with
+  | Error Cancelled -> ()
+  | Error error -> Alcotest.fail (error_message error)
+  | Ok _ -> Alcotest.fail "final coefficient accumulation must remain cancellable"
+  end;
+  Alcotest.(check bool) "final accumulation checkpoint reached" true (!checks >= 2)
+
 let test_mid_work_cancellation () =
   let source =
     add (termi 1 [ ("x", 12) ]) (termi 1 [ ("y", 8) ])
@@ -100,6 +113,8 @@ let () =
             test_intermediate_term_ceiling;
           Alcotest.test_case "duplicate substitution" `Quick
             test_duplicate_substitution;
+          Alcotest.test_case "final accumulation cancellation" `Quick
+            test_final_accumulation_cancellation;
           Alcotest.test_case "mid-work cancellation" `Quick
             test_mid_work_cancellation;
         ] );
