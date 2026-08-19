@@ -1,5 +1,5 @@
-# Template only. scripts/x200-centl-web renders __FCF_HOME__ to the actual
-# runtime home directory before this becomes the live cloudflared config.
+# Reference template only. scripts/x200-centl-web renders the equivalent live
+# config directly from the runtime $HOME. Replace __FCF_HOME__ before manual use.
 tunnel: d59e3e73-544d-40f8-8ad4-9bb6aa6cd689
 credentials-file: __FCF_HOME__/.cloudflared/d59e3e73-544d-40f8-8ad4-9bb6aa6cd689.json
 
