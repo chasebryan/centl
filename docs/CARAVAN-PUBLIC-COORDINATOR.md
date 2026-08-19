@@ -33,3 +33,27 @@ the coordinator transaction. Re-enrollment of the same identity returns the
 same number. The join release prints the coordinator's number only after the
 first heartbeat succeeds, so a supporter sees a real live position rather than
 a locally invented count.
+
+## Recruitment observability
+
+The coordinator also maintains a private, aggregate recruitment funnel so the
+operator can distinguish traffic from actual join attempts without enabling
+access logs. Tracking begins when the observability schema is first initialized.
+It retains only cumulative counts for enrollment requests, accepted and rejected
+enrollments, successful session establishment, and the number of distinct
+accepted carriers that reached an authenticated heartbeat. Current Active,
+Hungry, Lost, Withdrawn, and Quarantined counts are derived from coordinator
+state.
+
+No IP address, user agent, HTTP header, request body, per-request timestamp, or
+public carrier roster is collected for this purpose. The aggregate observability
+report is intentionally not exposed through the public HTTP service. On the
+coordinator host, run:
+
+```sh
+python3 scripts/caravan-observability
+```
+
+The report states its tracking start time explicitly. Enrollment attempts that
+occurred before that timestamp and failed before durable carrier registration
+cannot be reconstructed from the coordinator database.
