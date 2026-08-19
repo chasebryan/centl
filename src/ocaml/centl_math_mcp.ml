@@ -162,6 +162,12 @@ let polynomial_request_schema =
         [ "action"; "polynomial"; "powers" ];
       strict_object
         [
+          ("action", const_string "coefficient_array");
+          ("polynomial", polynomial_schema);
+        ]
+        [ "action"; "polynomial" ];
+      strict_object
+        [
           ("action", const_string "variables");
           ("polynomial", polynomial_schema);
         ]
