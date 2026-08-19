@@ -19,6 +19,8 @@ let default_limits =
     max_result_bytes = 1_048_576;
   }
 
+let never_cancelled () = false
+
 let rational_text value =
   let numerator = Q.num value in
   let denominator = Q.den value in
@@ -39,7 +41,10 @@ let polynomial_json polynomial =
       ("kind", `String "integer_polynomial");
       ("coefficient_order", `String "constant_to_leading");
       ("degree", `Int (Array.length polynomial - 1));
-      ("coefficients", `List (Array.to_list polynomial |> List.map (fun value -> `String (Z.to_string value))));
+      ( "coefficients",
+        `List
+          (Array.to_list polynomial
+          |> List.map (fun value -> `String (Z.to_string value))) );
       ("text", `String (polynomial_text polynomial));
     ]
 
@@ -129,7 +134,8 @@ let parse_z label = function
   | `String text ->
       begin
         try Ok (Z.of_string text)
-        with Invalid_argument _ -> Error ("invalid integer in " ^ label ^ ": " ^ text)
+        with Invalid_argument _ ->
+          Error ("invalid integer in " ^ label ^ ": " ^ text)
       end
   | _ -> Error (label ^ " must contain integer strings")
 
@@ -210,19 +216,50 @@ let bounded_cube ceiling degree =
 let check_work limits polynomial multiplier =
   let degree = max 1 (degree_z polynomial) in
   let base = bounded_cube limits.max_work degree in
-  if base > limits.max_work || multiplier > 0 && base > limits.max_work / multiplier then
-    Error "algebraic operation exceeds the work limit"
+  if
+    base > limits.max_work
+    || (multiplier > 0 && base > limits.max_work / multiplier)
+  then Error "algebraic operation exceeds the work limit"
   else Ok ()
 
 let result_with_limit limits ~method_ result algebraic =
-  let response = if algebraic then success ~method_ result else success_exact ~method_ result in
+  let response =
+    if algebraic then success ~method_ result else success_exact ~method_ result
+  in
   if String.length (Yojson.Safe.to_string response) > limits.max_result_bytes then
     failure ~method_ "resource_limit" "algebraic result exceeds the byte limit"
   else response
 
-let certify_action limits fields =
+let certificate_result limits ~method_ certificate =
+  if
+    q_bits certificate.lower > limits.max_endpoint_bits
+    || q_bits certificate.upper > limits.max_endpoint_bits
+  then
+    failure ~method_ "resource_limit"
+      "algebraic result exceeds the endpoint-bit limit"
+  else result_with_limit limits ~method_ (certificate_json certificate) true
+
+let rational_root_result limits ~method_ value =
+  if q_bits value > limits.max_endpoint_bits then
+    failure ~method_ "resource_limit"
+      "algebraic result exceeds the endpoint-bit limit"
+  else
+    result_with_limit limits ~method_
+      (`Assoc
+         [
+           ("kind", `String "rational");
+           ("exact", `Bool true);
+           ("value", rational_json value);
+           ("text", `String (rational_text value));
+         ])
+      false
+
+let certify_action ?(cancelled = never_cancelled) limits fields =
   let method_ = "certify" in
-  match check_fields [ "version"; "id"; "action"; "polynomial"; "lower"; "upper" ] fields with
+  match
+    check_fields [ "version"; "id"; "action"; "polynomial"; "lower"; "upper" ]
+      fields
+  with
   | Error message -> failure ~method_ "invalid_request" message
   | Ok () ->
       begin match
@@ -236,19 +273,24 @@ let certify_action limits fields =
           begin match check_work limits polynomial 1 with
           | Error message -> failure ~method_ "resource_limit" message
           | Ok () ->
-              begin match make ~polynomial ~lower ~upper with
-              | Error error ->
-                  let code, message = error_of_algebraic error in
-                  failure ~method_ code message
-              | Ok certificate ->
-                  result_with_limit limits ~method_ (certificate_json certificate) true
-              end
+              if cancelled () then
+                failure ~method_ "cancelled" "algebraic operation was cancelled"
+              else
+                begin match make ~polynomial ~lower ~upper with
+                | Error error ->
+                    let code, message = error_of_algebraic error in
+                    failure ~method_ code message
+                | Ok certificate -> certificate_result limits ~method_ certificate
+                end
           end
       end
 
-let count_action limits fields =
+let count_action ?(cancelled = never_cancelled) limits fields =
   let method_ = "count_roots" in
-  match check_fields [ "version"; "id"; "action"; "polynomial"; "lower"; "upper" ] fields with
+  match
+    check_fields [ "version"; "id"; "action"; "polynomial"; "lower"; "upper" ]
+      fields
+  with
   | Error message -> failure ~method_ "invalid_request" message
   | Ok () ->
       begin match
@@ -262,28 +304,40 @@ let count_action limits fields =
           begin match check_work limits polynomial 1 with
           | Error message -> failure ~method_ "resource_limit" message
           | Ok () ->
-              begin match root_count polynomial lower upper with
-              | Error error ->
-                  let code, message = error_of_algebraic error in
-                  failure ~method_ code message
-              | Ok count ->
-                  result_with_limit limits ~method_
-                    (`Assoc
-                       [
-                         ("kind", `String "real_root_count");
-                         ("exact", `Bool true);
-                         ("count", `Int count);
-                         ("polynomial", polynomial_json polynomial);
-                         ("lower", rational_json lower);
-                         ("upper", rational_json upper);
-                         ("text", `String (string_of_int count));
-                       ])
-                    false
-              end
+              if cancelled () then
+                failure ~method_ "cancelled" "algebraic operation was cancelled"
+              else
+                begin match root_count polynomial lower upper with
+                | Error error ->
+                    let code, message = error_of_algebraic error in
+                    failure ~method_ code message
+                | Ok count ->
+                    result_with_limit limits ~method_
+                      (`Assoc
+                         [
+                           ("kind", `String "real_root_count");
+                           ("exact", `Bool true);
+                           ("count", `Int count);
+                           ("polynomial", polynomial_json polynomial);
+                           ("lower", rational_json lower);
+                           ("upper", rational_json upper);
+                           ("text", `String (string_of_int count));
+                         ])
+                      false
+                end
           end
       end
 
-let refine_action limits fields =
+let rec refine_with_cancellation ~cancelled certificate steps =
+  if cancelled () then Error ()
+  else if steps = 0 then Ok (Isolating_interval certificate)
+  else
+    match refine_once certificate with
+    | Rational_root _ as exact -> Ok exact
+    | Isolating_interval certificate ->
+        refine_with_cancellation ~cancelled certificate (steps - 1)
+
+let refine_action ?(cancelled = never_cancelled) limits fields =
   let method_ = "refine" in
   match
     check_fields
@@ -304,34 +358,36 @@ let refine_action limits fields =
       | _, _, _, Error message ->
           failure ~method_ "invalid_request" message
       | Ok polynomial, Ok lower, Ok upper, Ok steps ->
-          if steps < 0 then failure ~method_ "invalid_request" "steps must be nonnegative"
+          if steps < 0 then
+            failure ~method_ "invalid_request" "steps must be nonnegative"
           else if steps > limits.max_refinement_steps then
-            failure ~method_ "resource_limit" "steps exceeds the refinement limit"
+            failure ~method_ "resource_limit"
+              "steps exceeds the refinement limit"
           else
             begin match check_work limits polynomial (max 1 (steps + 1)) with
             | Error message -> failure ~method_ "resource_limit" message
             | Ok () ->
-                begin match make ~polynomial ~lower ~upper with
-                | Error error ->
-                    let code, message = error_of_algebraic error in
-                    failure ~method_ code message
-                | Ok certificate ->
-                    begin match refine certificate steps with
-                    | Rational_root value ->
-                        result_with_limit limits ~method_
-                          (`Assoc
-                             [
-                               ("kind", `String "rational");
-                               ("exact", `Bool true);
-                               ("value", rational_json value);
-                               ("text", `String (rational_text value));
-                             ])
-                          false
-                    | Isolating_interval certificate ->
-                        result_with_limit limits ~method_
-                          (certificate_json certificate) true
-                    end
-                end
+                if cancelled () then
+                  failure ~method_ "cancelled"
+                    "algebraic operation was cancelled"
+                else
+                  begin match make ~polynomial ~lower ~upper with
+                  | Error error ->
+                      let code, message = error_of_algebraic error in
+                      failure ~method_ code message
+                  | Ok certificate ->
+                      begin match
+                        refine_with_cancellation ~cancelled certificate steps
+                      with
+                      | Error () ->
+                          failure ~method_ "cancelled"
+                            "algebraic operation was cancelled"
+                      | Ok (Rational_root value) ->
+                          rational_root_result limits ~method_ value
+                      | Ok (Isolating_interval certificate) ->
+                          certificate_result limits ~method_ certificate
+                      end
+                  end
             end
       end
 
@@ -340,6 +396,7 @@ let capabilities limits =
     [
       ("kind", `String "real_algebraic_capabilities");
       ("exact", `Bool true);
+      ("cooperative_cancellation", `Bool true);
       ( "actions",
         `List
           [
@@ -363,17 +420,23 @@ let capabilities limits =
           "Exact Sturm-certified isolation of square-free real algebraic roots." );
     ]
 
-let dispatch limits action fields =
-  match action with
-  | "capabilities" ->
-      begin match check_fields [ "version"; "id"; "action" ] fields with
-      | Error message -> failure ~method_:action "invalid_request" message
-      | Ok () -> result_with_limit limits ~method_:action (capabilities limits) false
-      end
-  | "count_roots" -> count_action limits fields
-  | "certify" -> certify_action limits fields
-  | "refine" -> refine_action limits fields
-  | _ -> failure ~method_:action "invalid_request" ("unknown algebraic action " ^ action)
+let dispatch ?(cancelled = never_cancelled) limits action fields =
+  if cancelled () && not (String.equal action "capabilities") then
+    failure ~method_:action "cancelled" "algebraic operation was cancelled"
+  else
+    match action with
+    | "capabilities" ->
+        begin match check_fields [ "version"; "id"; "action" ] fields with
+        | Error message -> failure ~method_:action "invalid_request" message
+        | Ok () ->
+            result_with_limit limits ~method_:action (capabilities limits) false
+        end
+    | "count_roots" -> count_action ~cancelled limits fields
+    | "certify" -> certify_action ~cancelled limits fields
+    | "refine" -> refine_action ~cancelled limits fields
+    | _ ->
+        failure ~method_:action "invalid_request"
+          ("unknown algebraic action " ^ action)
 
 let request_id fields =
   match List.assoc_opt "id" fields with
@@ -388,14 +451,16 @@ let with_id id = function
       | Some id ->
           let rec insert = function
             | [] -> [ ("id", id) ]
-            | (("version", _) as version) :: rest -> version :: ("id", id) :: rest
+            | (("version", _) as version) :: rest ->
+                version :: ("id", id) :: rest
             | field :: rest -> field :: insert rest
           in
           `Assoc (insert fields)
       end
   | json -> json
 
-let handle_json ?(limits = default_limits) = function
+let handle_json ?(limits = default_limits) ?(cancelled = never_cancelled) =
+  function
   | `Assoc fields ->
       begin match request_id fields with
       | Error message -> failure ~method_:"request" "invalid_request" message
@@ -404,12 +469,27 @@ let handle_json ?(limits = default_limits) = function
           begin match List.assoc_opt "version" fields with
           | Some (`Int 1) ->
               begin match List.assoc_opt "action" fields with
-              | Some (`String action) -> respond (dispatch limits action fields)
-              | Some _ -> respond (failure ~method_:"request" "invalid_request" "action must be a string")
-              | None -> respond (failure ~method_:"request" "invalid_request" "missing action")
+              | Some (`String action) ->
+                  respond (dispatch ~cancelled limits action fields)
+              | Some _ ->
+                  respond
+                    (failure ~method_:"request" "invalid_request"
+                       "action must be a string")
+              | None ->
+                  respond
+                    (failure ~method_:"request" "invalid_request"
+                       "missing action")
               end
-          | Some (`Int _) -> respond (failure ~method_:"request" "invalid_request" "unsupported protocol version")
-          | _ -> respond (failure ~method_:"request" "invalid_request" "version must be 1")
+          | Some (`Int _) ->
+              respond
+                (failure ~method_:"request" "invalid_request"
+                   "unsupported protocol version")
+          | _ ->
+              respond
+                (failure ~method_:"request" "invalid_request"
+                   "version must be 1")
           end
       end
-  | _ -> failure ~method_:"request" "invalid_request" "request must be a JSON object"
+  | _ ->
+      failure ~method_:"request" "invalid_request"
+        "request must be a JSON object"
