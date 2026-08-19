@@ -21,7 +21,8 @@ let int name json =
   | `Int value -> value
   | _ -> Alcotest.fail ("expected integer field " ^ name)
 
-let polynomial coefficients = `List (List.map (fun value -> `String value) coefficients)
+let polynomial coefficients =
+  `List (List.map (fun value -> `String value) coefficients)
 
 let request fields =
   Centl_real_algebraic_protocol.handle_json
@@ -33,8 +34,12 @@ let test_capabilities () =
   let response = request [ ("action", `String "capabilities") ] in
   Alcotest.(check bool) "success" true (bool "ok" response);
   let result = assoc "result" response in
-  Alcotest.(check string) "kind" "real_algebraic_capabilities" (string "kind" result);
-  Alcotest.(check int) "degree limit" 64 (int "max_degree" (assoc "limits" result))
+  Alcotest.(check string) "kind" "real_algebraic_capabilities"
+    (string "kind" result);
+  Alcotest.(check bool) "cooperative cancellation" true
+    (bool "cooperative_cancellation" result);
+  Alcotest.(check int) "degree limit" 64
+    (int "max_degree" (assoc "limits" result))
 
 let test_certify_sqrt2 () =
   let response =
@@ -155,7 +160,8 @@ let test_limits () =
   Alcotest.(check string) "degree code" "invalid_request"
     (string "code" (assoc "error" response));
   let step_limits =
-    Centl_real_algebraic_protocol.{ default_limits with max_refinement_steps = 2 }
+    Centl_real_algebraic_protocol.
+      { default_limits with max_refinement_steps = 2 }
   in
   let response =
     Centl_real_algebraic_protocol.handle_json ~limits:step_limits
@@ -171,7 +177,49 @@ let test_limits () =
   in
   Alcotest.(check bool) "step failure" false (bool "ok" response);
   Alcotest.(check string) "step code" "resource_limit"
+    (string "code" (assoc "error" response));
+  let endpoint_limits =
+    Centl_real_algebraic_protocol.
+      { default_limits with max_endpoint_bits = 3 }
+  in
+  let response =
+    Centl_real_algebraic_protocol.handle_json ~limits:endpoint_limits
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("action", `String "refine");
+           ("polynomial", sqrt2);
+           ("lower", `String "1");
+           ("upper", `String "2");
+           ("steps", `Int 1);
+         ])
+  in
+  Alcotest.(check bool) "grown endpoint refused" false (bool "ok" response);
+  Alcotest.(check string) "endpoint code" "resource_limit"
     (string "code" (assoc "error" response))
+
+let test_cancellation () =
+  let checks = ref 0 in
+  let cancelled () =
+    incr checks;
+    !checks >= 4
+  in
+  let response =
+    Centl_real_algebraic_protocol.handle_json ~cancelled
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("action", `String "refine");
+           ("polynomial", sqrt2);
+           ("lower", `String "1");
+           ("upper", `String "2");
+           ("steps", `Int 8);
+         ])
+  in
+  Alcotest.(check bool) "cancelled" false (bool "ok" response);
+  Alcotest.(check string) "cancel code" "cancelled"
+    (string "code" (assoc "error" response));
+  Alcotest.(check bool) "callback reached refinement" true (!checks >= 4)
 
 let () =
   Alcotest.run "centl real algebraic protocol"
@@ -183,5 +231,6 @@ let () =
           Alcotest.test_case "count and refine" `Quick test_count_and_refine;
           Alcotest.test_case "refusals" `Quick test_refusals;
           Alcotest.test_case "limits" `Quick test_limits;
+          Alcotest.test_case "cancellation" `Quick test_cancellation;
         ] );
     ]
