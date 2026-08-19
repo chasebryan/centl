@@ -364,7 +364,8 @@ let validate_arguments arguments =
   | Ok _ -> Ok ()
   | Error _ as error -> error
 
-let call ?(cancelled = Centl_engine.never_cancelled) arguments =
+let call ?(limits = Centl_math_gateway.default_limits)
+    ?(cancelled = Centl_engine.never_cancelled) arguments =
   match request_of_arguments arguments with
   | Error message ->
       `Assoc
@@ -382,7 +383,7 @@ let call ?(cancelled = Centl_engine.never_cancelled) arguments =
             Centl_engine.json_of_provenance ~classification:"failure"
               ~method_:"mcp_math_argument_validation" ~backend:"centl-mcp" );
         ]
-  | Ok request -> Centl_math_gateway.handle_json ~cancelled request
+  | Ok request -> Centl_math_gateway.handle_json ~limits ~cancelled request
 
 let nested_text field response =
   match response with
