@@ -123,6 +123,14 @@ let test_cancellation () =
   let z = make Q.one Q.one in
   expect_error "direct power cancellation" Cancelled
     (pow ~cancelled:(fun () -> true) z (Z.of_int 100));
+  let checks = ref 0 in
+  let cancelled () =
+    incr checks;
+    !checks >= 4
+  in
+  expect_error "mid-power cancellation" Cancelled
+    (pow ~cancelled z (Z.of_int 65_536));
+  Alcotest.(check bool) "power reached repeated squaring" true (!checks >= 4);
   begin match
     evaluate_expression ~cancelled:(fun () -> true) (complex_expression ())
   with
@@ -136,9 +144,7 @@ let test_evaluation_limits () =
   let power_limits =
     { default_evaluation_limits with max_power_exponent = 2 }
   in
-  let powered =
-    Centl_Core.Power (complex_expression (), Z.of_int 3)
-  in
+  let powered = Centl_Core.Power (complex_expression (), Z.of_int 3) in
   begin match evaluate_expression ~limits:power_limits powered with
   | Some (Error (Resource_limit _)) -> ()
   | Some (Error error) -> Alcotest.fail (error_message error)
@@ -159,6 +165,29 @@ let test_evaluation_limits () =
   | Some (Error error) -> Alcotest.fail (error_message error)
   | Some (Ok _) -> Alcotest.fail "bit-limited evaluation should be refused"
   | None -> Alcotest.fail "complex trigger was not detected"
+  end;
+  let growth_limits = { default_evaluation_limits with max_exact_bits = 32 } in
+  let growth_base =
+    Centl_Core.Function ("complex", [ lit 3 1; lit 4 1 ])
+  in
+  let growth = Centl_Core.Power (growth_base, Z.of_int 32) in
+  begin match evaluate_expression ~limits:growth_limits growth with
+  | Some (Error (Resource_limit _)) -> ()
+  | Some (Error error) -> Alcotest.fail (error_message error)
+  | Some (Ok _) -> Alcotest.fail "power growth should trip the bit ceiling"
+  | None -> Alcotest.fail "complex trigger was not detected"
+  end
+
+let test_large_exact_field_identity () =
+  let huge = Z.add (Z.shift_left Z.one 4_096) (Z.of_int 19) in
+  let denominator = Z.sub huge (Z.of_int 2) in
+  let z =
+    make (Q.make huge denominator)
+      (Q.make (Z.add huge Z.one) (Z.add denominator (Z.of_int 6)))
+  in
+  begin match div z z with
+  | Error error -> Alcotest.fail (error_message error)
+  | Ok value -> check_complex "4096-bit z/z" Q.one Q.zero value
   end
 
 let test_rendering () =
@@ -185,6 +214,8 @@ let () =
             test_expression_evaluator;
           Alcotest.test_case "cancellation" `Quick test_cancellation;
           Alcotest.test_case "evaluation limits" `Quick test_evaluation_limits;
+          Alcotest.test_case "4096-bit identity" `Quick
+            test_large_exact_field_identity;
           Alcotest.test_case "rendering" `Quick test_rendering;
         ] );
     ]
