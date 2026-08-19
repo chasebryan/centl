@@ -220,7 +220,7 @@ let dispatch_domain limits ~cancelled id domain request =
           Centl_matrix_protocol.handle_json ~limits:limits.matrix ~cancelled request
       | "multivariate_polynomial" ->
           Centl_multivariate_polynomial_protocol.handle_json
-            ~limits:limits.polynomial request
+            ~limits:limits.polynomial ~cancelled request
       | "real_algebraic" ->
           Centl_real_algebraic_protocol.handle_json ~limits:limits.algebraic request
       | _ ->
