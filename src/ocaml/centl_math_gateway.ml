@@ -109,6 +109,39 @@ let complex_resource_limits limits =
       ("cooperative_cancellation", `Bool true);
     ]
 
+let polynomial_composition_limits limits =
+  let defaults = Centl_polynomial_composition.default_limits in
+  let polynomial = limits.polynomial in
+  let composition =
+    Centl_polynomial_composition.
+      {
+        max_substitutions = min defaults.max_substitutions polynomial.max_variables;
+        max_power_exponent = min defaults.max_power_exponent polynomial.max_exponent;
+        max_terms = min defaults.max_terms polynomial.max_terms;
+        max_exact_bits = min defaults.max_exact_bits polynomial.max_exact_bits;
+        max_work = min defaults.max_work polynomial.max_work;
+      }
+  in
+  Centl_polynomial_composition_protocol.
+    {
+      polynomial;
+      composition;
+      max_result_bytes = min polynomial.max_result_bytes limits.max_result_bytes;
+    }
+
+let polynomial_composition_resource_limits limits =
+  let limits = polynomial_composition_limits limits in
+  `Assoc
+    [
+      ("max_substitutions", `Int limits.composition.max_substitutions);
+      ("max_power_exponent", `Int limits.composition.max_power_exponent);
+      ("max_terms", `Int limits.composition.max_terms);
+      ("max_exact_bits", `Int limits.composition.max_exact_bits);
+      ("max_work", `Int limits.composition.max_work);
+      ("max_result_bytes", `Int limits.max_result_bytes);
+      ("cooperative_cancellation", `Bool true);
+    ]
+
 let capabilities limits =
   `Assoc
     [
@@ -182,6 +215,14 @@ let capabilities limits =
               ];
             `Assoc
               [
+                ("name", `String "polynomial_composition");
+                ("classification", `String "exact");
+                ("input", `String "sparse Q-polynomial plus polynomial substitutions");
+                ("operations", strings [ "compose" ]);
+                ("limits", polynomial_composition_resource_limits limits);
+              ];
+            `Assoc
+              [
                 ("name", `String "real_algebraic");
                 ("classification", `String "algebraic_exact");
                 ("input", `String "integer polynomial plus rational interval");
@@ -236,6 +277,9 @@ let dispatch_domain limits ~cancelled id domain request =
       | "multivariate_polynomial" ->
           Centl_multivariate_polynomial_protocol.handle_json
             ~limits:limits.polynomial ~cancelled request
+      | "polynomial_composition" ->
+          Centl_polynomial_composition_protocol.handle_json
+            ~limits:(polynomial_composition_limits limits) ~cancelled request
       | "real_algebraic" ->
           Centl_real_algebraic_protocol.handle_json ~limits:limits.algebraic
             ~cancelled request

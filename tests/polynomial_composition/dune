@@ -1,0 +1,11 @@
+(test
+ (name test_polynomial_composition)
+ (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_polynomial_composition_protocol)
+ (libraries centl_lib alcotest yojson zarith))
+
+(test
+ (name test_polynomial_composition_grid)
+ (libraries centl_lib alcotest zarith))

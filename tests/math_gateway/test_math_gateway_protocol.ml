@@ -42,6 +42,13 @@ let term coefficient powers =
 
 let polynomial terms = `Assoc [ ("terms", `List terms) ]
 
+let polynomial_substitution variable replacement =
+  `Assoc
+    [
+      ("variable", `String variable);
+      ("polynomial", replacement);
+    ]
+
 let public_math ?id state domain request =
   let id_fields = match id with None -> [] | Some id -> [ ("id", id) ] in
   Centl_protocol.handle_json state
@@ -111,6 +118,48 @@ let test_polynomial_coefficient_array_public_protocol () =
   Alcotest.(check string) "exact provenance" "exact"
     (string "classification" (assoc "provenance" response))
 
+let test_polynomial_composition_public_protocol () =
+  let state = Centl_protocol.create () in
+  let source =
+    polynomial
+      [
+        term "3" [ power "x" 2; power "y" 1 ];
+        term "-2" [ power "y" 1 ];
+        term "5" [];
+      ]
+  in
+  let substitutions =
+    `List
+      [
+        polynomial_substitution "x"
+          (polynomial
+             [
+               term "1" [ power "u" 1 ];
+               term "1" [];
+             ]);
+        polynomial_substitution "y"
+          (polynomial [ term "1" [ power "v" 1 ] ]);
+      ]
+  in
+  let response =
+    public_math ~id:(`String "compose") state "polynomial_composition"
+      [
+        ("action", `String "compose");
+        ("polynomial", source);
+        ("substitutions", substitutions);
+      ]
+  in
+  Alcotest.(check bool) "success" true (bool "ok" response);
+  Alcotest.(check string) "id" "compose" (string "id" response);
+  Alcotest.(check string) "domain" "polynomial_composition"
+    (string "domain" response);
+  let result = assoc "result" response in
+  Alcotest.(check string) "kind" "multivariate_rational_polynomial"
+    (string "kind" result);
+  Alcotest.(check int) "four canonical terms" 4 (int "term_count" result);
+  Alcotest.(check string) "exact provenance" "exact"
+    (string "classification" (assoc "provenance" response))
+
 let test_describe_advertises_math () =
   let state = Centl_protocol.create () in
   let response =
@@ -152,6 +201,33 @@ let test_server_limit_clamps_gateway () =
   Alcotest.(check string) "resource code" "resource_limit"
     (string "code" (assoc "error" response))
 
+let test_composition_result_limit_clamp () =
+  let evaluation =
+    Centl_engine.{ default_evaluation_limits with max_result_bytes = 256 }
+  in
+  let limits = Centl_protocol.{ default_server_limits with evaluation } in
+  let state = Centl_protocol.create ~limits () in
+  let response =
+    public_math state "polynomial_composition"
+      [
+        ("action", `String "compose");
+        ("polynomial", polynomial [ term "1" [ power "x" 8 ] ]);
+        ( "substitutions",
+          `List
+            [
+              polynomial_substitution "x"
+                (polynomial
+                   [
+                     term "1" [ power "u" 1 ];
+                     term "1" [ power "v" 1 ];
+                   ]);
+            ] );
+      ]
+  in
+  Alcotest.(check bool) "refused" false (bool "ok" response);
+  Alcotest.(check string) "resource code" "resource_limit"
+    (string "code" (assoc "error" response))
+
 let test_public_protocol_cancellation () =
   let state = Centl_protocol.create () in
   let response =
@@ -173,6 +249,48 @@ let test_public_protocol_cancellation () =
   Alcotest.(check bool) "cancelled" false (bool "ok" response);
   Alcotest.(check string) "cancel code" "cancelled"
     (string "code" (assoc "error" response))
+
+let test_deep_composition_cancellation () =
+  let state = Centl_protocol.create () in
+  let checks = ref 0 in
+  let cancelled () =
+    incr checks;
+    !checks >= 8
+  in
+  let response =
+    Centl_protocol.handle_json ~cancelled state
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("id", `String "compose-deep-cancel");
+           ("op", `String "math");
+           ("domain", `String "polynomial_composition");
+           ( "request",
+             `Assoc
+               [
+                 ("action", `String "compose");
+                 ("polynomial", polynomial [ term "1" [ power "x" 12 ] ]);
+                 ( "substitutions",
+                   `List
+                     [
+                       polynomial_substitution "x"
+                         (polynomial
+                            [
+                              term "1" [ power "u" 1 ];
+                              term "1" [ power "v" 1 ];
+                            ]);
+                     ] );
+               ] );
+         ])
+  in
+  Alcotest.(check bool) "cancelled" false (bool "ok" response);
+  Alcotest.(check string) "id preserved" "compose-deep-cancel"
+    (string "id" response);
+  Alcotest.(check string) "domain preserved" "polynomial_composition"
+    (string "domain" response);
+  Alcotest.(check string) "cancel code" "cancelled"
+    (string "code" (assoc "error" response));
+  Alcotest.(check bool) "callback reached composition loop" true (!checks >= 8)
 
 let test_deep_complex_cancellation () =
   let state = Centl_protocol.create () in
@@ -270,12 +388,18 @@ let () =
             test_matrix_through_public_protocol;
           Alcotest.test_case "polynomial coefficient array" `Quick
             test_polynomial_coefficient_array_public_protocol;
+          Alcotest.test_case "polynomial composition" `Quick
+            test_polynomial_composition_public_protocol;
           Alcotest.test_case "describe advertises math" `Quick
             test_describe_advertises_math;
           Alcotest.test_case "server limits clamp gateway" `Quick
             test_server_limit_clamps_gateway;
+          Alcotest.test_case "composition result limit" `Quick
+            test_composition_result_limit_clamp;
           Alcotest.test_case "cancellation" `Quick
             test_public_protocol_cancellation;
+          Alcotest.test_case "deep composition cancellation" `Quick
+            test_deep_composition_cancellation;
           Alcotest.test_case "deep complex cancellation" `Quick
             test_deep_complex_cancellation;
           Alcotest.test_case "deep algebraic cancellation" `Quick

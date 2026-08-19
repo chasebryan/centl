@@ -84,6 +84,13 @@ let term coefficient powers =
 
 let polynomial terms = `Assoc [ ("terms", `List terms) ]
 
+let polynomial_substitution variable replacement =
+  `Assoc
+    [
+      ("variable", `String variable);
+      ("polynomial", replacement);
+    ]
+
 let find_tool name tools =
   List.find_opt
     (function
@@ -223,6 +230,51 @@ let test_polynomial_coefficient_array_call () =
   | _ -> Alcotest.fail "coefficient array must be a list"
   end
 
+let test_polynomial_composition_call () =
+  let state = Centl_mcp.create () in
+  initialize state;
+  let source =
+    polynomial
+      [
+        term "3" [ power "x" 2; power "y" 1 ];
+        term "-2" [ power "y" 1 ];
+        term "5" [];
+      ]
+  in
+  let response =
+    tool_call state 2
+      [
+        ("domain", `String "polynomial_composition");
+        ( "request",
+          `Assoc
+            [
+              ("action", `String "compose");
+              ("polynomial", source);
+              ( "substitutions",
+                `List
+                  [
+                    polynomial_substitution "x"
+                      (polynomial
+                         [
+                           term "1" [ power "u" 1 ];
+                           term "1" [];
+                         ]);
+                    polynomial_substitution "y"
+                      (polynomial [ term "1" [ power "v" 1 ] ]);
+                  ] );
+            ] );
+      ]
+  in
+  Alcotest.(check bool) "tool success" false (tool_is_error response);
+  let protocol = structured response in
+  Alcotest.(check bool) "protocol success" true (bool "ok" protocol);
+  Alcotest.(check string) "domain" "polynomial_composition"
+    (string "domain" protocol);
+  let result = assoc "result" protocol in
+  Alcotest.(check string) "kind" "multivariate_rational_polynomial"
+    (string "kind" result);
+  Alcotest.(check int) "four canonical terms" 4 (int "term_count" result)
+
 let test_strict_arguments () =
   let state = Centl_mcp.create () in
   initialize state;
@@ -255,6 +307,44 @@ let test_cancellation () =
   let protocol = structured cancelled in
   Alcotest.(check string) "cancelled code" "cancelled"
     (string "code" (assoc "error" protocol))
+
+let test_deep_composition_cancellation () =
+  let state = Centl_mcp.create () in
+  initialize state;
+  let checks = ref 0 in
+  let cancelled () =
+    incr checks;
+    !checks >= 8
+  in
+  let response =
+    tool_call ~cancelled state 2
+      [
+        ("domain", `String "polynomial_composition");
+        ( "request",
+          `Assoc
+            [
+              ("action", `String "compose");
+              ("polynomial", polynomial [ term "1" [ power "x" 12 ] ]);
+              ( "substitutions",
+                `List
+                  [
+                    polynomial_substitution "x"
+                      (polynomial
+                         [
+                           term "1" [ power "u" 1 ];
+                           term "1" [ power "v" 1 ];
+                         ]);
+                  ] );
+            ] );
+      ]
+  in
+  Alcotest.(check bool) "tool error" true (tool_is_error response);
+  let protocol = structured response in
+  Alcotest.(check string) "domain" "polynomial_composition"
+    (string "domain" protocol);
+  Alcotest.(check string) "cancelled code" "cancelled"
+    (string "code" (assoc "error" protocol));
+  Alcotest.(check bool) "callback reached composition loop" true (!checks >= 8)
 
 let test_deep_complex_cancellation () =
   let state = Centl_mcp.create () in
@@ -302,6 +392,42 @@ let test_server_limit_parity () =
   Alcotest.(check string) "resource limit" "resource_limit"
     (string "code" (assoc "error" (structured limited)))
 
+let test_composition_result_limit_parity () =
+  let evaluation =
+    {
+      Centl_protocol.default_server_limits.evaluation with
+      max_result_bytes = 256;
+    }
+  in
+  let limits = { Centl_protocol.default_server_limits with evaluation } in
+  let state = Centl_mcp.create ~limits () in
+  initialize state;
+  let limited =
+    tool_call state 2
+      [
+        ("domain", `String "polynomial_composition");
+        ( "request",
+          `Assoc
+            [
+              ("action", `String "compose");
+              ("polynomial", polynomial [ term "1" [ power "x" 8 ] ]);
+              ( "substitutions",
+                `List
+                  [
+                    polynomial_substitution "x"
+                      (polynomial
+                         [
+                           term "1" [ power "u" 1 ];
+                           term "1" [ power "v" 1 ];
+                         ]);
+                  ] );
+            ] );
+      ]
+  in
+  Alcotest.(check bool) "tool error" true (tool_is_error limited);
+  Alcotest.(check string) "resource limit" "resource_limit"
+    (string "code" (assoc "error" (structured limited)))
+
 let () =
   Alcotest.run "centl canonical mathematics mcp"
     [
@@ -313,11 +439,17 @@ let () =
           Alcotest.test_case "complex" `Quick test_exact_complex_call;
           Alcotest.test_case "polynomial coefficient array" `Quick
             test_polynomial_coefficient_array_call;
+          Alcotest.test_case "polynomial composition" `Quick
+            test_polynomial_composition_call;
           Alcotest.test_case "strict arguments" `Quick test_strict_arguments;
           Alcotest.test_case "cancellation" `Quick test_cancellation;
+          Alcotest.test_case "deep composition cancellation" `Quick
+            test_deep_composition_cancellation;
           Alcotest.test_case "deep complex cancellation" `Quick
             test_deep_complex_cancellation;
           Alcotest.test_case "server limit parity" `Quick
             test_server_limit_parity;
+          Alcotest.test_case "composition result limit parity" `Quick
+            test_composition_result_limit_parity;
         ] );
     ]
