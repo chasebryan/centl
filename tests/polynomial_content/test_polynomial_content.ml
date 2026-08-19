@@ -84,7 +84,7 @@ let test_work_limit () =
   | Ok _ -> Alcotest.fail "two-term denominator pass must hit max_work=1"
 
 let test_exact_bit_limit () =
-  let polynomial = constant (Q.of_bigint (Z.shift_left Z.one 32)) in
+  let polynomial = constant (Q.make (Z.shift_left Z.one 32) Z.one) in
   let limits = { default_limits with max_exact_bits = 16 } in
   match decompose ~limits polynomial with
   | Error (Resource_limit _) -> ()
