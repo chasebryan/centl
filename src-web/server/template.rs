@@ -221,7 +221,7 @@ mod tests {
             execution_micros: 42,
             success: true,
         });
-        let html = render_centl_work_area("", Some(&result), None, None, None, None, &session, "/hub");
+        let html = render_centl_work_area("", Some(&result), None, None, None, &session, "/hub");
         assert_eq!(html.matches(">44</pre>").count(), 1);
         assert!(!html.contains("[EXACT RESULT]"));
     }
