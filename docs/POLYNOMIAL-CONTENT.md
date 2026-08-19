@@ -49,14 +49,17 @@ For a negative constant, for example `p = -6/35`, CENTL returns content
 
 ## Algorithm
 
-CENTL performs two bounded passes over canonical nonzero terms.
+CENTL performs three bounded traversals over canonical nonzero terms.
 
 The first pass forms the denominator LCM. The second pass clears those
 denominators conceptually and forms the gcd of the resulting integerized
-numerators. The primitive part is then obtained by exact rational scaling.
+numerators. The third pass constructs the primitive polynomial term by term by
+exactly dividing each coefficient by the positive rational content.
 
 The implementation guards intermediate LCMs, integerized coefficients, the
-rational content, and the primitive polynomial against the exact-bit ceiling.
+rational content, every primitive coefficient, and the aggregate primitive
+polynomial exact-bit budget. A primitive term is not retained if doing so would
+cross the admitted aggregate exact-bit ceiling.
 
 ## Resource semantics
 
@@ -66,9 +69,10 @@ The operation has explicit ceilings for:
 - exact-bit size;
 - deterministic work.
 
-Each coefficient visited by either normalization pass consumes one unit from
-the work budget. Intermediate denominator LCMs and integerized coefficients are
-checked before the computation proceeds.
+Each coefficient visited by any of the three bounded traversals consumes one
+unit from the request-wide work budget. Intermediate denominator LCMs,
+integerized coefficients, primitive coefficients, and the accumulated primitive
+result are checked before the computation proceeds.
 
 If a boundary is exceeded, the request fails with `resource_limit`. CENTL does
 not return a partial decomposition and does not fall back to approximate
@@ -76,9 +80,10 @@ arithmetic.
 
 ## Cancellation
 
-Content decomposition is cooperatively cancellable before and during both
-coefficient passes. A cancelled request returns `cancelled` and no partial
-normalization is presented as a result.
+Content decomposition is cooperatively cancellable before and during all three
+coefficient traversals, including primitive-part construction. A cancelled
+request returns `cancelled` and no partial normalization is presented as a
+result.
 
 ## Machine protocol
 
@@ -107,8 +112,8 @@ The direct test ladder includes:
 - zero normalization;
 - negative-constant sign normalization;
 - already-primitive integer input;
-- term, work, and exact-bit refusal;
-- mid-operation cancellation;
+- term, work, input exact-bit, and aggregate primitive-output exact-bit refusal;
+- cancellation inside primitive-part construction;
 - a separately coded denominator-clearing oracle over 49 deterministic rational
   coefficient cases;
 - a large-exact-denominator oracle case;
