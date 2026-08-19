@@ -37,11 +37,31 @@ class X200CentlWebTests(unittest.TestCase):
     def test_runtime_configuration_is_host_and_commit_explicit(self) -> None:
         text = SCRIPT.read_text(encoding="utf-8")
         self.assertIn('home=${HOME:?HOME must be set for the X200 deployment}', text)
+        self.assertIn('site_build=${CENTL_SITE_BUILD:-$home/.local/share/fcf-centl/site}', text)
         self.assertIn("current_commit=$(git -C \"$centl_root\" rev-parse HEAD)", text)
         self.assertIn("Environment=CENTL_BIND_HOST=127.0.0.1", text)
-        self.assertIn("Environment=CENTL_SITE_DIR=$centl_root/site", text)
+        self.assertIn("Environment=CENTL_SITE_DIR=$site_build", text)
+        self.assertNotIn("Environment=CENTL_SITE_DIR=$centl_root/site", text)
         self.assertIn("Environment=CENTL_BUILD_COMMIT=$current_commit", text)
         self.assertIn("ExecStart=$centl_root/target/release/centl-web --serve $hub_port", text)
+
+    def test_x200_renders_bazaar_before_serving_it(self) -> None:
+        text = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn('cp -a "$centl_root/site/." "$site_build/"', text)
+        self.assertIn('"http://127.0.0.1:8789/census-v1.json"', text)
+        self.assertIn('scripts/caravan-census-validate', text)
+        self.assertIn('scripts/caravan-render-bazaar', text)
+        self.assertIn('--template "$centl_root/site/mirrors.html"', text)
+        self.assertIn('--output "$site_build/mirrors.html"', text)
+        self.assertIn("rendering the committed lead census instead", text)
+        self.assertIn("rendered site still contains unresolved __FCF_ placeholders", text)
+
+    def test_health_check_rejects_unrendered_bazaar(self) -> None:
+        text = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn('http://127.0.0.1:$hub_port/mirrors.html', text)
+        self.assertIn('https://freecomputation.org/mirrors.html', text)
+        self.assertIn("local Bazaar page exposed an unresolved CARAVAN census placeholder", text)
+        self.assertIn("public Bazaar page exposed an unresolved CARAVAN census placeholder", text)
 
     def test_health_check_proves_refresh_clears_history(self) -> None:
         text = SCRIPT.read_text(encoding="utf-8")
