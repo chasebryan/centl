@@ -13,6 +13,7 @@
    %{env:CENTL_BUILD_IDENTITY_SHELL=sh}
    %{dep:../scripts/write-build-identity}
    %{target}
+   %{dep:../scripts/write-build-identity}
    %{dep:generated/Centl_Core.ml}
    %{dep:generated/Centl_Gcd.ml}
    %{dep:generated/Centl_PolynomialSoundness.ml})))
@@ -41,6 +42,8 @@
   Centl_matrix_protocol
   Centl_multivariate_polynomial
   Centl_multivariate_polynomial_protocol
+  Centl_polynomial_composition
+  Centl_polynomial_composition_protocol
   Centl_real_algebraic
   Centl_real_algebraic_protocol
   Centl_math_gateway
