@@ -20,8 +20,10 @@ type error =
   | Undefined_zero_power
   | Negative_power of int
   | Duplicate_substitution of string
+  | Cancelled
 
 let total_degree_marker = "<total-degree>"
+let never_cancelled () = false
 
 let error_message = function
   | Empty_variable -> "polynomial variable names must not be empty"
@@ -38,6 +40,7 @@ let error_message = function
         "negative polynomial power %d leaves the polynomial ring" exponent
   | Duplicate_substitution variable ->
       "duplicate rational substitution for variable " ^ variable
+  | Cancelled -> "polynomial operation was cancelled"
 
 let zero = Monomial_map.empty
 let is_zero polynomial = Monomial_map.is_empty polynomial
@@ -135,43 +138,51 @@ let add left right =
 
 let sub left right = add left (neg right)
 
-let multiply left right =
+let multiply ?(cancelled = never_cancelled) left right =
   let ( let* ) result next = Result.bind result next in
   let left_terms = Monomial_map.bindings left in
   let right_terms = Monomial_map.bindings right in
   let rec outer result = function
     | [] -> Ok result
     | (left_monomial, left_coefficient) :: rest ->
-        let rec inner result = function
-          | [] -> Ok result
-          | (right_monomial, right_coefficient) :: right_rest ->
-              let* monomial = monomial_multiply left_monomial right_monomial in
-              let coefficient = Q.mul left_coefficient right_coefficient in
-              inner (add_term coefficient monomial result) right_rest
-        in
-        let* result = inner result right_terms in
-        outer result rest
+        if cancelled () then Error Cancelled
+        else
+          let rec inner result = function
+            | [] -> Ok result
+            | (right_monomial, right_coefficient) :: right_rest ->
+                if cancelled () then Error Cancelled
+                else
+                  let* monomial =
+                    monomial_multiply left_monomial right_monomial
+                  in
+                  let coefficient = Q.mul left_coefficient right_coefficient in
+                  inner (add_term coefficient monomial result) right_rest
+          in
+          let* result = inner result right_terms in
+          outer result rest
   in
   outer zero left_terms
 
-let rec power_loop base exponent accumulator =
-  if exponent = 0 then Ok accumulator
+let rec power_loop ~cancelled base exponent accumulator =
+  if cancelled () then Error Cancelled
+  else if exponent = 0 then Ok accumulator
   else
     let ( let* ) result next = Result.bind result next in
     let* accumulator =
-      if exponent land 1 = 1 then multiply accumulator base else Ok accumulator
+      if exponent land 1 = 1 then multiply ~cancelled accumulator base
+      else Ok accumulator
     in
     let exponent = exponent lsr 1 in
     if exponent = 0 then Ok accumulator
     else
-      let* base = multiply base base in
-      power_loop base exponent accumulator
+      let* base = multiply ~cancelled base base in
+      power_loop ~cancelled base exponent accumulator
 
-let power polynomial exponent =
+let power ?(cancelled = never_cancelled) polynomial exponent =
   if exponent < 0 then Error (Negative_power exponent)
   else if exponent = 0 then
     if is_zero polynomial then Error Undefined_zero_power else Ok one
-  else power_loop polynomial exponent one
+  else power_loop ~cancelled polynomial exponent one
 
 let coefficient polynomial powers =
   match normalize_monomial powers with
@@ -217,28 +228,35 @@ let decrement_power variable monomial =
   in
   loop [] monomial
 
-let derivative variable polynomial =
+let derivative ?(cancelled = never_cancelled) variable polynomial =
   if String.equal variable "" then Error Empty_variable
   else
-    Ok
-      (Monomial_map.fold
-         (fun monomial coefficient result ->
-           match List.assoc_opt variable monomial with
-           | None -> result
-           | Some exponent ->
-               let coefficient = Q.mul coefficient (Q.of_int exponent) in
-               add_term coefficient (decrement_power variable monomial) result)
-         polynomial zero)
+    let rec loop result = function
+      | [] -> Ok result
+      | (monomial, coefficient) :: rest ->
+          if cancelled () then Error Cancelled
+          else
+            let result =
+              match List.assoc_opt variable monomial with
+              | None -> result
+              | Some exponent ->
+                  let coefficient = Q.mul coefficient (Q.of_int exponent) in
+                  add_term coefficient (decrement_power variable monomial) result
+            in
+            loop result rest
+    in
+    loop zero (Monomial_map.bindings polynomial)
 
-let q_power value exponent =
+let q_power ?(cancelled = never_cancelled) value exponent =
   let rec loop base exponent accumulator =
-    if exponent = 0 then accumulator
+    if cancelled () then Error Cancelled
+    else if exponent = 0 then Ok accumulator
     else
       let accumulator =
         if exponent land 1 = 1 then Q.mul accumulator base else accumulator
       in
       let exponent = exponent lsr 1 in
-      if exponent = 0 then accumulator
+      if exponent = 0 then Ok accumulator
       else loop (Q.mul base base) exponent accumulator
   in
   loop value exponent Q.one
@@ -254,27 +272,33 @@ let substitution_map substitutions =
   in
   build String_map.empty substitutions
 
-let substitute_rationals substitutions polynomial =
+let substitute_rationals ?(cancelled = never_cancelled) substitutions polynomial =
   let ( let* ) result next = Result.bind result next in
   let* substitutions = substitution_map substitutions in
   let substitute_term monomial coefficient =
     let rec loop coefficient reversed = function
-      | [] -> (coefficient, List.rev reversed)
+      | [] -> Ok (coefficient, List.rev reversed)
       | ((variable, exponent) as power) :: rest ->
-          begin match String_map.find_opt variable substitutions with
-          | None -> loop coefficient (power :: reversed) rest
-          | Some value ->
-              loop (Q.mul coefficient (q_power value exponent)) reversed rest
-          end
+          if cancelled () then Error Cancelled
+          else
+            begin match String_map.find_opt variable substitutions with
+            | None -> loop coefficient (power :: reversed) rest
+            | Some value ->
+                let* factor = q_power ~cancelled value exponent in
+                loop (Q.mul coefficient factor) reversed rest
+            end
     in
     loop coefficient [] monomial
   in
-  Ok
-    (Monomial_map.fold
-       (fun monomial coefficient result ->
-         let coefficient, monomial = substitute_term monomial coefficient in
-         add_term coefficient monomial result)
-       polynomial zero)
+  let rec loop result = function
+    | [] -> Ok result
+    | (monomial, coefficient) :: rest ->
+        if cancelled () then Error Cancelled
+        else
+          let* coefficient, monomial = substitute_term monomial coefficient in
+          loop (add_term coefficient monomial result) rest
+  in
+  loop zero (Monomial_map.bindings polynomial)
 
 let saturating_add left right =
   if left >= max_int || right >= max_int || right > max_int - left then max_int
