@@ -1,0 +1,23 @@
+name: Route-A k51 sector normal form
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/ROUTE-A-K51-SECTOR-NORMAL-FORM.md'
+      - 'research/erdos-straus/verify_route_a_k51_sector_normal_form.py'
+      - '.github/workflows/route-a-k51-sector-normal-form.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exact Route-A k51 sector normal form
+        run: python3 research/erdos-straus/verify_route_a_k51_sector_normal_form.py --json
