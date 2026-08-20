@@ -40,6 +40,8 @@
   Centl_complex_native
   Centl_matrix
   Centl_matrix_protocol
+  Centl_chemistry
+  Centl_chemistry_protocol
   Centl_multivariate_polynomial
   Centl_multivariate_polynomial_protocol
   Centl_polynomial_composition
@@ -185,6 +187,13 @@
  (public_name centl-physics)
  (package centl)
  (modules Physics_main)
+ (libraries centl_lib zarith yojson))
+
+(executable
+ (name chemistry_main)
+ (public_name centl-chem)
+ (package centl)
+ (modules Chemistry_main)
  (libraries centl_lib zarith yojson))
 
 (executable
