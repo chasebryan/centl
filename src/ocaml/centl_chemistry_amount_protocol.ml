@@ -3,9 +3,15 @@ open Centl_chemistry_amount
 let q_string value = `String (Q.to_string value)
 let z_string value = `String (Z.to_string value)
 
+let result_source_class_to_string = function
+  | Unspecified -> "derived_from_unspecified"
+  | Measured -> "derived_from_measured"
+  | Declared_exact -> "derived_exact"
+
 let source_fields source_class =
   [
-    ("source_class", `String (source_class_to_string source_class));
+    ("input_source_class", `String (source_class_to_string source_class));
+    ("result_source_class", `String (result_source_class_to_string source_class));
     ("arithmetic_class", `String "exact_over_supplied_values");
   ]
 
@@ -29,6 +35,10 @@ let entities_to_yojson conversion =
        ("moles_unit", `String "mol");
        ("entities", q_string conversion.entities);
        ("entities_integral", `Bool conversion.entities_integral);
+       ( "entity_count_status",
+         `String
+           (if conversion.entities_integral then "integral_count"
+            else "nonintegral_mathematical_equivalent") );
        ( "avogadro_constant",
          avogadro_fields conversion.avogadro_value conversion.avogadro_provenance );
      ]
