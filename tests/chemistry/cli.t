@@ -58,6 +58,19 @@
   target_moles=6 mol
   reaction_verified=true
 
+  $ ../../src/chemistry_main.exe limiting measured 'H2 + O2 -> H2O' H2=3 O2=1
+  input_source_class=measured
+  result_source_class=derived_from_measured
+  arithmetic_class=exact_over_supplied_values
+  equation=2 H2 + O2 -> 2 H2O
+  extent=1 mol
+  limiting_species=O2
+  co_limiting=false
+  remaining_reactants=H2:1,O2:0 mol
+  theoretical_products=H2O:2 mol
+  reaction_verified=true
+  scope=amount_of_substance_only
+
   $ ../../src/chemistry_main.exe spread g 10.01 10.04 9.98 10.03 9.99
   source_class=measured
   arithmetic_class=exact_over_reported_values
@@ -92,6 +105,9 @@
   $ ../../src/chemistry_main.exe --json stoich measured 'C2H6 + O2 -> CO2 + H2O' C2H6 3 CO2 | grep -o '"result_source_class":"derived_from_measured"'
   "result_source_class":"derived_from_measured"
 
+  $ ../../src/chemistry_main.exe --json limiting measured 'H2 + O2 -> H2O' O2=1 H2=3 | grep -o '"limiting_species":\["O2"\]'
+  "limiting_species":["O2"]
+
   $ ../../src/chemistry_main.exe --json spread g 1 3 | grep -o '"source_class":"measured"'
   "source_class":"measured"
 
@@ -108,6 +124,10 @@
 
   $ ../../src/chemistry_main.exe particles -1 2>&1
   centl-chem: amount of substance must be non-negative
+  [1]
+
+  $ ../../src/chemistry_main.exe limiting 'H2 + O2 -> H2O' H2=2 2>&1
+  centl-chem: missing reactant amount for O2
   [1]
 
   $ ../../src/chemistry_main.exe spread g 1/0 2 2>&1
