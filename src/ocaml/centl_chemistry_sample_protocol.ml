@@ -2,6 +2,14 @@ open Centl_chemistry_sample
 
 let q_string value = `String (Q.to_string value)
 
+let source_class summary = observation_class_to_string summary.observation_class
+
+let provenance_fields summary =
+  [
+    ("input_source_class", `String (source_class summary));
+    ("arithmetic_class", `String "exact_over_reported_values");
+  ]
+
 let root_to_yojson = function
   | Exact_rational value ->
       `Assoc
@@ -24,50 +32,39 @@ let derived_root_to_yojson = function
   | Undefined reason ->
       `Assoc [ ("status", `String "undefined"); ("reason", `String reason) ]
 
-let linear_stat name value unit_symbol =
+let linear_stat summary name value unit_symbol =
   ( name,
     `Assoc
-      [
-        ("value", q_string value);
-        ("unit", `String unit_symbol);
-        ("semantic_class", `String "exact");
-      ] )
+      ([ ("value", q_string value); ("unit", `String unit_symbol) ]
+      @ provenance_fields summary) )
 
-let variance_stat name value unit_symbol =
+let variance_stat summary name value unit_symbol =
   ( name,
     `Assoc
-      [
-        ("value", q_string value);
-        ("base_unit", `String unit_symbol);
-        ("unit_power", `Int 2);
-        ("semantic_class", `String "exact");
-      ] )
+      ([
+         ("value", q_string value);
+         ("base_unit", `String unit_symbol);
+         ("unit_power", `Int 2);
+       ]
+      @ provenance_fields summary) )
 
-let root_stat name root unit_symbol =
+let root_stat summary name root unit_symbol =
   let payload =
     match root_to_yojson root with
     | `Assoc fields ->
         `Assoc
-          (fields
-          @ [
-              ("unit", `String unit_symbol);
-              ("semantic_class", `String "exact");
-            ])
+          (fields @ [ ("unit", `String unit_symbol) ] @ provenance_fields summary)
     | _ -> assert false
   in
   (name, payload)
 
-let derived_root_stat name root unit_symbol =
+let derived_root_stat summary name root unit_symbol =
   let payload =
     match derived_root_to_yojson root with
     | `Assoc fields ->
         let extra =
           match root with
-          | Available _ ->
-              [
-                ("unit", `String unit_symbol);
-                ("semantic_class", `String "exact");
-              ]
+          | Available _ -> [ ("unit", `String unit_symbol) ] @ provenance_fields summary
           | Undefined _ -> []
         in
         `Assoc (fields @ extra)
@@ -86,13 +83,13 @@ let summary_to_yojson summary =
           ]
     | Some value ->
         `Assoc
-          [
-            ("status", `String "available");
-            ("value", q_string value);
-            ("base_unit", `String summary.unit_symbol);
-            ("unit_power", `Int 2);
-            ("semantic_class", `String "exact");
-          ]
+          ([
+             ("status", `String "available");
+             ("value", q_string value);
+             ("base_unit", `String summary.unit_symbol);
+             ("unit_power", `Int 2);
+           ]
+          @ provenance_fields summary)
   in
   let relative_standard_deviation =
     match derived_root_to_yojson summary.relative_standard_deviation with
@@ -102,9 +99,9 @@ let summary_to_yojson summary =
           | Available _ ->
               [
                 ("unit", `String "1");
-                ("semantic_class", `String "exact");
                 ("representation", `String "fraction_not_percent");
               ]
+              @ provenance_fields summary
           | Undefined _ -> []
         in
         `Assoc (fields @ extra)
@@ -115,6 +112,8 @@ let summary_to_yojson summary =
       ("version", `Int 1);
       ("kind", `String "chemistry_sample_spread");
       ("unit", `String summary.unit_symbol);
+      ("source_class", `String (source_class summary));
+      ("arithmetic_class", `String "exact_over_reported_values");
       ("n", `Int summary.n);
       ( "observations",
         `List
@@ -124,34 +123,36 @@ let summary_to_yojson summary =
                  [
                    ("value", q_string value);
                    ("unit", `String summary.unit_symbol);
-                   ("semantic_class", `String "exact_input");
+                   ("source_class", `String (source_class summary));
+                   ( "representation_class",
+                     `String "exact_rational_of_reported_value" );
                  ])
              summary.observations) );
-      linear_stat "sum" summary.sum summary.unit_symbol;
+      linear_stat summary "sum" summary.sum summary.unit_symbol;
       ( "sum_squares",
         `Assoc
-          [
-            ("value", q_string summary.sum_squares);
-            ("base_unit", `String summary.unit_symbol);
-            ("unit_power", `Int 2);
-            ("semantic_class", `String "exact");
-          ] );
-      linear_stat "mean" summary.mean summary.unit_symbol;
-      linear_stat "median" summary.median summary.unit_symbol;
-      linear_stat "minimum" summary.minimum summary.unit_symbol;
-      linear_stat "maximum" summary.maximum summary.unit_symbol;
-      linear_stat "range" summary.range summary.unit_symbol;
-      linear_stat "median_absolute_deviation" summary.median_absolute_deviation
+          ([
+             ("value", q_string summary.sum_squares);
+             ("base_unit", `String summary.unit_symbol);
+             ("unit_power", `Int 2);
+           ]
+          @ provenance_fields summary) );
+      linear_stat summary "mean" summary.mean summary.unit_symbol;
+      linear_stat summary "median" summary.median summary.unit_symbol;
+      linear_stat summary "minimum" summary.minimum summary.unit_symbol;
+      linear_stat summary "maximum" summary.maximum summary.unit_symbol;
+      linear_stat summary "range" summary.range summary.unit_symbol;
+      linear_stat summary "median_absolute_deviation"
+        summary.median_absolute_deviation summary.unit_symbol;
+      variance_stat summary "population_variance" summary.population_variance
         summary.unit_symbol;
-      variance_stat "population_variance" summary.population_variance
-        summary.unit_symbol;
-      root_stat "population_standard_deviation"
+      root_stat summary "population_standard_deviation"
         summary.population_standard_deviation summary.unit_symbol;
       ("sample_variance", sample_variance);
-      derived_root_stat "sample_standard_deviation"
+      derived_root_stat summary "sample_standard_deviation"
         summary.sample_standard_deviation summary.unit_symbol;
-      derived_root_stat "standard_error_of_mean" summary.standard_error_of_mean
-        summary.unit_symbol;
+      derived_root_stat summary "standard_error_of_mean"
+        summary.standard_error_of_mean summary.unit_symbol;
       ("relative_standard_deviation", relative_standard_deviation);
       ( "confidence_interval",
         `Assoc
@@ -190,7 +191,7 @@ let error_to_yojson error =
       ("error", `String (error_message error));
     ]
 
-let spread_request ~unit_symbol values =
-  match summarize_strings ~unit_symbol values with
+let spread_request ?(observation_class = Measured) ~unit_symbol values =
+  match summarize_strings ~observation_class ~unit_symbol values with
   | Ok summary -> Ok (summary_to_yojson summary)
   | Error error -> Error (error_to_yojson error)
