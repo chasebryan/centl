@@ -80,62 +80,67 @@ let divide state variable dividend divisor =
   Centl_polynomial_division.divide_with_state state ~variable dividend divisor
   |> lift_division
 
-let scale_bounded state scalar polynomial =
+let polynomial_error = function
+  | Ok value -> Ok value
+  | Error error -> Error (Polynomial_error error)
+
+let scale_bounded state label scalar polynomial =
   let ( let* ) result next = Result.bind result next in
   if Q.equal scalar Q.zero || is_zero polynomial then Ok zero
   else
     let rec loop result = function
-      | [] -> guard state "scaled witness" result
+      | [] -> guard state label result
       | (monomial, coefficient) :: rest ->
           let* () = checkpoint state in
           let* () = charge state 1 in
           let result = add_term (Q.mul scalar coefficient) monomial result in
-          let* result = guard state "scaled witness" result in
+          let* result = guard state label result in
           loop result rest
     in
     loop zero (bindings polynomial)
 
-let subtract_bounded state left right =
+let subtract_product state label minuend left right =
   let ( let* ) result next = Result.bind result next in
-  let* left = guard state "witness input" left in
-  let rec loop result = function
-    | [] -> guard state "witness difference" result
-    | (monomial, coefficient) :: rest ->
-        let* () = checkpoint state in
-        let* () = charge state 1 in
-        let result = add_term (Q.neg coefficient) monomial result in
-        let* result = guard state "witness difference" result in
-        loop result rest
-  in
-  loop left (bindings right)
-
-let multiply_bounded state left right =
-  let ( let* ) result next = Result.bind result next in
-  let left_terms = bindings left in
+  let* minuend = guard state label minuend in
   let right_terms = bindings right in
   let rec outer result = function
-    | [] -> guard state "witness product" result
-    | (left_monomial, left_coefficient) :: rest ->
-        let* () = checkpoint state in
+    | [] -> guard state label result
+    | (left_monomial, left_coefficient) :: left_rest ->
         let rec inner result = function
-          | [] -> Ok result
+          | [] -> outer result left_rest
           | (right_monomial, right_coefficient) :: right_rest ->
               let* () = checkpoint state in
               let* () = charge state 1 in
               let* monomial =
-                match monomial_multiply left_monomial right_monomial with
-                | Ok monomial -> Ok monomial
-                | Error error -> Error (Polynomial_error error)
+                monomial_multiply left_monomial right_monomial |> polynomial_error
               in
               let coefficient = Q.mul left_coefficient right_coefficient in
-              let result = add_term coefficient monomial result in
-              let* result = guard state "witness product" result in
+              let result = add_term (Q.neg coefficient) monomial result in
+              let* result = guard state label result in
               inner result right_rest
         in
-        let* result = inner result right_terms in
-        outer result rest
+        inner result right_terms
   in
-  outer zero left_terms
+  outer minuend (bindings left)
+
+let normalize_certificate state variable gcd left_coefficient right_coefficient =
+  let ( let* ) result next = Result.bind result next in
+  if is_zero gcd then
+    Ok { gcd = zero; left_coefficient = zero; right_coefficient = zero }
+  else
+    let* leading = leading_term state variable gcd in
+    match leading with
+    | None -> Ok { gcd = zero; left_coefficient = zero; right_coefficient = zero }
+    | Some (_, leading_coefficient) ->
+        let scalar = Q.inv leading_coefficient in
+        let* gcd = scale_bounded state "gcd" scalar gcd in
+        let* left_coefficient =
+          scale_bounded state "left Bezout coefficient" scalar left_coefficient
+        in
+        let* right_coefficient =
+          scale_bounded state "right Bezout coefficient" scalar right_coefficient
+        in
+        Ok { gcd; left_coefficient; right_coefficient }
 
 let valid_limits limits =
   limits.max_euclid_steps >= 0
@@ -156,34 +161,28 @@ let extended_gcd ?(limits = default_limits) ?(cancelled = never_cancelled)
     let* right = guard state "right input" right in
     let* left = validate_univariate state variable left in
     let* right = validate_univariate state variable right in
-    let rec euclid steps old_r r old_s s old_t t =
-      let* () = checkpoint state in
-      let* () = charge state 1 in
-      if is_zero r then
-        if is_zero old_r then
-          Ok { gcd = zero; left_coefficient = zero; right_coefficient = zero }
+    if is_zero left && is_zero right then
+      Ok { gcd = zero; left_coefficient = zero; right_coefficient = zero }
+    else
+      let rec euclid steps old_r r old_s s old_t t =
+        let* () = checkpoint state in
+        let* () = charge state 1 in
+        if is_zero r then
+          normalize_certificate state variable old_r old_s old_t
+        else if steps >= limits.max_euclid_steps then
+          Error
+            (Resource_limit
+               "polynomial extended gcd exceeds the Euclidean-step limit")
         else
-          let* leading = leading_term state variable old_r in
-          begin match leading with
-          | None ->
-              Ok { gcd = zero; left_coefficient = zero; right_coefficient = zero }
-          | Some (_, leading_coefficient) ->
-              let scalar = Q.inv leading_coefficient in
-              let* gcd = scale_bounded state scalar old_r in
-              let* left_coefficient = scale_bounded state scalar old_s in
-              let* right_coefficient = scale_bounded state scalar old_t in
-              Ok { gcd; left_coefficient; right_coefficient }
-          end
-      else if steps >= limits.max_euclid_steps then
-        Error
-          (Resource_limit
-             "polynomial extended gcd exceeds the Euclidean-step limit")
-      else
-        let* division = divide state variable old_r r in
-        let* quotient_times_s = multiply_bounded state division.quotient s in
-        let* next_s = subtract_bounded state old_s quotient_times_s in
-        let* quotient_times_t = multiply_bounded state division.quotient t in
-        let* next_t = subtract_bounded state old_t quotient_times_t in
-        euclid (steps + 1) r division.remainder s next_s t next_t
-    in
-    euclid 0 left right one zero zero one
+          let* division = divide state variable old_r r in
+          let* next_s =
+            subtract_product state "left Bezout coefficient" old_s
+              division.quotient s
+          in
+          let* next_t =
+            subtract_product state "right Bezout coefficient" old_t
+              division.quotient t
+          in
+          euclid (steps + 1) r division.remainder s next_s t next_t
+      in
+      euclid 0 left right one zero zero one
