@@ -12,6 +12,7 @@ type error =
 
 type species_input = {
   formula_text : string;
+  composition_key : string;
   atoms : (string * Z.t) list;
   moles : Q.t;
   entity_equivalent : Q.t;
@@ -35,13 +36,18 @@ let error_message = function
   | Invalid_assignment text ->
       Printf.sprintf "invalid CPS composition assignment %S; expected FORMULA=MOLES" text
   | Duplicate_species formula ->
-      Printf.sprintf "CPS composition contains duplicate species %s" formula
+      Printf.sprintf "CPS composition contains duplicate species %s under the current formula model" formula
   | Formula_error (formula, error) ->
       Printf.sprintf "invalid CPS species %s: %s" formula
         (Centl_chemistry.error_message error)
   | Amount_error (formula, error) ->
       Printf.sprintf "invalid CPS amount for %s: %s" formula
         (Centl_chemistry_amount.error_message error)
+
+let composition_key formula =
+  Centl_chemistry.formula_bindings formula
+  |> List.map (fun (element, count) -> element ^ ":" ^ Z.to_string count)
+  |> String.concat ";"
 
 let parse_assignment text =
   match String.split_on_char '=' text with
@@ -79,10 +85,18 @@ let preflight ?(source_class = Unspecified) assignments =
     | Ok (avogadro_value, avogadro_provenance) ->
         let rec build seen reversed total_moles elemental = function
           | [] ->
+              let species =
+                List.sort
+                  (fun left right ->
+                    let by_key = String.compare left.composition_key right.composition_key in
+                    if by_key <> 0 then by_key
+                    else String.compare left.formula_text right.formula_text)
+                  reversed
+              in
               Ok
                 {
                   source_class;
-                  species = List.rev reversed;
+                  species;
                   total_species_moles = total_moles;
                   elemental_moles = String_map.bindings elemental;
                   avogadro_value;
@@ -93,8 +107,8 @@ let preflight ?(source_class = Unspecified) assignments =
                 match parse_assignment assignment with
                 | Error _ as error -> error
                 | Ok (formula_text, formula, moles) ->
-                    if String_map.mem formula_text seen then
-                      Error (Duplicate_species formula_text)
+                    let key = composition_key formula in
+                    if String_map.mem key seen then Error (Duplicate_species formula_text)
                     else
                       let atoms = Centl_chemistry.formula_bindings formula in
                       let elemental =
@@ -108,6 +122,7 @@ let preflight ?(source_class = Unspecified) assignments =
                       let item =
                         {
                           formula_text;
+                          composition_key = key;
                           atoms;
                           moles;
                           entity_equivalent;
@@ -115,9 +130,8 @@ let preflight ?(source_class = Unspecified) assignments =
                             Z.equal (Q.den entity_equivalent) Z.one;
                         }
                       in
-                      build
-                        (String_map.add formula_text Q.zero seen)
-                        (item :: reversed) (Q.add total_moles moles) elemental rest
+                      build (String_map.add key Q.zero seen) (item :: reversed)
+                        (Q.add total_moles moles) elemental rest
               end
         in
         build String_map.empty [] Q.zero String_map.empty assignments
