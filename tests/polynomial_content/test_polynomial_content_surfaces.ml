@@ -1,0 +1,290 @@
+let assoc name = function
+  | `Assoc fields ->
+      begin match List.assoc_opt name fields with
+      | Some value -> value
+      | None -> Alcotest.fail ("missing JSON field " ^ name)
+      end
+  | _ -> Alcotest.fail "expected JSON object"
+
+let string name json =
+  match assoc name json with
+  | `String value -> value
+  | _ -> Alcotest.fail ("expected string field " ^ name)
+
+let bool name json =
+  match assoc name json with
+  | `Bool value -> value
+  | _ -> Alcotest.fail ("expected boolean field " ^ name)
+
+let int name json =
+  match assoc name json with
+  | `Int value -> value
+  | _ -> Alcotest.fail ("expected integer field " ^ name)
+
+let power variable exponent =
+  `Assoc [ ("variable", `String variable); ("exponent", `Int exponent) ]
+
+let term coefficient powers =
+  `Assoc
+    [
+      ("coefficient", `String coefficient);
+      ("powers", `List powers);
+    ]
+
+let polynomial terms = `Assoc [ ("terms", `List terms) ]
+
+let source () =
+  polynomial
+    [
+      term "6/35" [ power "x" 2 ];
+      term "-9/14" [ power "x" 1; power "y" 1 ];
+      term "3/10" [];
+    ]
+
+let public_math ?id ?(cancelled = Centl_engine.never_cancelled) state domain request =
+  let id_fields = match id with None -> [] | Some id -> [ ("id", id) ] in
+  Centl_protocol.handle_json ~cancelled state
+    (`Assoc
+       ([ ("version", `Int 1); ("op", `String "math") ] @ id_fields
+       @ [ ("domain", `String domain); ("request", `Assoc request) ]))
+
+let rec json_contains_string expected = function
+  | `String value -> String.equal expected value
+  | `Assoc fields ->
+      List.exists (fun (_, value) -> json_contains_string expected value) fields
+  | `List values -> List.exists (json_contains_string expected) values
+  | _ -> false
+
+let test_public_decompose () =
+  let state = Centl_protocol.create () in
+  let response =
+    public_math ~id:(`String "content-public") state "polynomial_content"
+      [
+        ("action", `String "decompose");
+        ("polynomial", source ());
+      ]
+  in
+  Alcotest.(check bool) "success" true (bool "ok" response);
+  Alcotest.(check string) "id" "content-public" (string "id" response);
+  Alcotest.(check string) "domain" "polynomial_content"
+    (string "domain" response);
+  Alcotest.(check string) "classification" "exact"
+    (string "classification" (assoc "provenance" response));
+  let result = assoc "result" response in
+  let content = assoc "content" result in
+  Alcotest.(check string) "content numerator" "3" (string "numerator" content);
+  Alcotest.(check string) "content denominator" "70"
+    (string "denominator" content);
+  Alcotest.(check int) "primitive term count" 3
+    (int "term_count" (assoc "primitive_part" result))
+
+let test_public_capabilities () =
+  let state = Centl_protocol.create () in
+  let response =
+    Centl_protocol.handle_json state
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("op", `String "math");
+           ("domain", `String "capabilities");
+         ])
+  in
+  Alcotest.(check bool) "success" true (bool "ok" response);
+  Alcotest.(check bool) "content domain advertised" true
+    (json_contains_string "polynomial_content" (assoc "result" response))
+
+let test_public_result_limit () =
+  let evaluation =
+    Centl_engine.{ default_evaluation_limits with max_result_bytes = 256 }
+  in
+  let limits = Centl_protocol.{ default_server_limits with evaluation } in
+  let state = Centl_protocol.create ~limits () in
+  let response =
+    public_math state "polynomial_content"
+      [
+        ("action", `String "decompose");
+        ("polynomial", source ());
+      ]
+  in
+  Alcotest.(check bool) "refused" false (bool "ok" response);
+  Alcotest.(check string) "resource code" "resource_limit"
+    (string "code" (assoc "error" response))
+
+let test_public_deep_cancellation () =
+  let state = Centl_protocol.create () in
+  let checks = ref 0 in
+  let cancelled () =
+    incr checks;
+    !checks >= 6
+  in
+  let response =
+    public_math ~id:(`String "content-cancel") ~cancelled state
+      "polynomial_content"
+      [
+        ("action", `String "decompose");
+        ("polynomial", source ());
+      ]
+  in
+  Alcotest.(check bool) "cancelled" false (bool "ok" response);
+  Alcotest.(check string) "id preserved" "content-cancel" (string "id" response);
+  Alcotest.(check string) "domain preserved" "polynomial_content"
+    (string "domain" response);
+  Alcotest.(check string) "cancel code" "cancelled"
+    (string "code" (assoc "error" response));
+  Alcotest.(check bool) "callback reached content core" true (!checks >= 6)
+
+let mcp_response = function
+  | Some response -> response
+  | None -> Alcotest.fail "expected MCP response"
+
+let mcp_request ?(cancelled = Centl_engine.never_cancelled) state id method_name params =
+  Centl_mcp.handle_json ~cancelled state
+    (`Assoc
+       [
+         ("jsonrpc", `String "2.0");
+         ("id", `Int id);
+         ("method", `String method_name);
+         ("params", params);
+       ])
+  |> mcp_response
+
+let initialize state =
+  ignore
+    (mcp_request state 1 "initialize"
+       (`Assoc
+          [
+            ("protocolVersion", `String "2025-11-25");
+            ("capabilities", `Assoc []);
+            ( "clientInfo",
+              `Assoc
+                [
+                  ("name", `String "polynomial-content-test");
+                  ("version", `String "1");
+                ] );
+          ]));
+  ignore
+    (Centl_mcp.handle_json state
+       (`Assoc
+          [
+            ("jsonrpc", `String "2.0");
+            ("method", `String "notifications/initialized");
+          ]))
+
+let mcp_call ?(cancelled = Centl_engine.never_cancelled) state id request =
+  mcp_request ~cancelled state id "tools/call"
+    (`Assoc
+       [
+         ("name", `String "centl_math");
+         ( "arguments",
+           `Assoc
+             [
+               ("domain", `String "polynomial_content");
+               ("request", `Assoc request);
+             ] );
+       ])
+
+let structured response = assoc "structuredContent" (assoc "result" response)
+let tool_is_error response = bool "isError" (assoc "result" response)
+
+let test_mcp_schema_and_decompose () =
+  let tool = Centl_math_mcp.tool () in
+  Alcotest.(check bool) "content present in closed tool schema" true
+    (json_contains_string "polynomial_content" (assoc "inputSchema" tool));
+  let state = Centl_mcp.create () in
+  initialize state;
+  let response =
+    mcp_call state 2
+      [
+        ("action", `String "decompose");
+        ("polynomial", source ());
+      ]
+  in
+  Alcotest.(check bool) "tool success" false (tool_is_error response);
+  let protocol = structured response in
+  Alcotest.(check bool) "protocol success" true (bool "ok" protocol);
+  Alcotest.(check string) "domain" "polynomial_content"
+    (string "domain" protocol);
+  let content = assoc "content" (assoc "result" protocol) in
+  Alcotest.(check string) "numerator" "3" (string "numerator" content);
+  Alcotest.(check string) "denominator" "70" (string "denominator" content)
+
+let test_mcp_nested_strictness () =
+  let state = Centl_mcp.create () in
+  initialize state;
+  let response =
+    mcp_call state 2
+      [
+        ("action", `String "decompose");
+        ("polynomial", source ());
+        ("approximate", `Bool true);
+      ]
+  in
+  Alcotest.(check bool) "tool error" true (tool_is_error response);
+  let protocol = structured response in
+  Alcotest.(check string) "invalid request" "invalid_request"
+    (string "code" (assoc "error" protocol))
+
+let test_mcp_deep_cancellation () =
+  let state = Centl_mcp.create () in
+  initialize state;
+  let checks = ref 0 in
+  let cancelled () =
+    incr checks;
+    !checks >= 6
+  in
+  let response =
+    mcp_call ~cancelled state 2
+      [
+        ("action", `String "decompose");
+        ("polynomial", source ());
+      ]
+  in
+  Alcotest.(check bool) "tool error" true (tool_is_error response);
+  let protocol = structured response in
+  Alcotest.(check string) "domain" "polynomial_content"
+    (string "domain" protocol);
+  Alcotest.(check string) "cancelled" "cancelled"
+    (string "code" (assoc "error" protocol));
+  Alcotest.(check bool) "callback reached content core" true (!checks >= 6)
+
+let test_mcp_result_limit_parity () =
+  let evaluation =
+    {
+      Centl_protocol.default_server_limits.evaluation with
+      max_result_bytes = 256;
+    }
+  in
+  let limits = { Centl_protocol.default_server_limits with evaluation } in
+  let state = Centl_mcp.create ~limits () in
+  initialize state;
+  let response =
+    mcp_call state 2
+      [
+        ("action", `String "decompose");
+        ("polynomial", source ());
+      ]
+  in
+  Alcotest.(check bool) "tool error" true (tool_is_error response);
+  Alcotest.(check string) "resource limit" "resource_limit"
+    (string "code" (assoc "error" (structured response)))
+
+let () =
+  Alcotest.run "centl polynomial content public surfaces"
+    [
+      ( "surfaces",
+        [
+          Alcotest.test_case "JSONL decompose" `Quick test_public_decompose;
+          Alcotest.test_case "JSONL capabilities" `Quick test_public_capabilities;
+          Alcotest.test_case "JSONL result limit" `Quick test_public_result_limit;
+          Alcotest.test_case "JSONL deep cancellation" `Quick
+            test_public_deep_cancellation;
+          Alcotest.test_case "MCP schema and decompose" `Quick
+            test_mcp_schema_and_decompose;
+          Alcotest.test_case "MCP nested strictness" `Quick
+            test_mcp_nested_strictness;
+          Alcotest.test_case "MCP deep cancellation" `Quick
+            test_mcp_deep_cancellation;
+          Alcotest.test_case "MCP result limit parity" `Quick
+            test_mcp_result_limit_parity;
+        ] );
+    ]
