@@ -128,12 +128,12 @@ threshold and cone relation form a small exact-rational certificate.
 ## B2. Polynomial algebra
 
 - [x] Canonical rational-coefficient univariate polynomials.
-- [ ] Canonical multivariate polynomials.
-- [ ] Coefficient extraction and coefficient arrays.
+- [x] Canonical multivariate polynomials.
+- [x] Coefficient extraction and coefficient arrays.
 - [x] Polynomial content and primitive-part decomposition.
 - [x] Polynomial quotient and remainder.
 - [x] Polynomial GCD and extended GCD.
-- [ ] Square-free factorization.
+- [x] Square-free factorization.
 - [ ] General exact factorization over the rationals.
 - [ ] Factorization over finite fields.
 - [ ] Factorization over algebraic extensions.
