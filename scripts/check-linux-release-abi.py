@@ -152,7 +152,10 @@ def safe_extract(archive: Path, destination: Path) -> Path:
                 raise PortabilityError(f"unsafe archive member: {member.name}")
             if not (member.isdir() or member.isreg()):
                 raise PortabilityError(f"unsupported archive member: {member.name}")
-        package.extractall(destination, members=members, filter="data")
+        # Python 3.8 is the ABI-floor build environment. The validation above
+        # rejects links and path traversal before extraction, so the newer
+        # tarfile extraction-filter API is not required here.
+        package.extractall(destination, members=members)
     root = destination / "centl"
     if not root.is_dir():
         raise PortabilityError("archive does not contain the centl release root")
