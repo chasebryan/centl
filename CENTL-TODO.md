@@ -70,35 +70,85 @@ that strategic inventory.
 
 ## CENTL Chemistry
 
-CENTL Chemistry is the planned exact-first chemistry domain described in
-[`docs/CHEMISTRY-PLAN.md`](docs/CHEMISTRY-PLAN.md). The first slice should stay
-small enough to verify completely before stoichiometry, measured data, or broader
-chemical models are admitted.
+CENTL Chemistry is the exact-first chemistry domain described in
+[`docs/CHEMISTRY-PLAN.md`](docs/CHEMISTRY-PLAN.md). Development implementation
+is currently isolated on `feature/centl-chem-phase1`; checked items below mean
+source/tests have been authored on that branch, not that the slice has passed
+admission or been merged.
 
-Immediate vertical-slice work:
+Deterministic chemistry foundation:
 
-- [ ] Define the chemistry value/AST types for elements, formulas, species, and
-  reactions without duplicating CENTL's rational arithmetic.
-- [ ] Implement a bounded formula parser with elemental symbols, integer
-  subscripts, and nested parenthesized groups.
-- [ ] Implement deterministic exact atom counting and canonical species
-  rendering.
-- [ ] Implement reaction parsing and construct the per-element stoichiometric
-  matrix exactly.
-- [ ] Solve the supported balancing domain through exact rational/integer linear
-  algebra and normalize to the least positive integer coefficient vector.
-- [ ] Independently verify every returned balance by recounting each element on
+- [x] Define chemistry value types for formulas, species, reactions,
+  conservation evidence, and balanced reactions without duplicating CENTL's
+  rational arithmetic.
+- [x] Implement a bounded formula parser with all 118 current element symbols,
+  positive integer subscripts, and nested parenthesized groups.
+- [x] Implement deterministic arbitrary-precision atom counting.
+- [x] Implement reaction parsing and exact per-element stoichiometric matrix
+  construction.
+- [x] Reuse `Centl_matrix.nullspace` to solve the supported balancing domain
+  over exact rationals and normalize to the primitive all-positive integer
+  coefficient vector.
+- [x] Independently verify every returned balance by recounting each element on
   both sides of the reaction.
-- [ ] Add explicit refusal for malformed formulas, unknown elements, impossible
-  balances, and underdetermined cases without a supported canonical result.
-- [ ] Expose the first `centl-chem` human CLI plus deterministic machine result
-  representation from the same authoritative implementation.
-- [ ] Add golden, adversarial, malformed-input, determinism, and conservation
-  tests for `Ca(OH)2`, `Fe + O2 -> Fe2O3`, ethane combustion, and the
-  `KMnO4 + HCl` reaction.
+- [x] Add explicit refusal for malformed formulas, unknown elements, impossible
+  balances, zero-coefficient solutions, mixed-sign solutions, and
+  underdetermined reactions without a supported canonical result.
+- [x] Expose `centl-chem atoms`, `centl-chem balance`, and deterministic JSON
+  evidence from the same authoritative implementation.
+- [x] Include exact stoichiometric matrices, stable machine error codes, original
+  supplied coefficients, and per-element conservation evidence in machine
+  results.
+- [x] Add golden, malformed-input, resource-bound, deterministic-replay, and
+  conservation tests for `Ca(OH)2`, `Fe + O2 -> Fe2O3`, ethane combustion,
+  and the `KMnO4 + HCl` reaction.
+
+Sample-spread / CPS evidence foundation:
+
+- [x] Add bounded replicate ingestion with a single explicit CENTL Physics unit
+  per spread request.
+- [x] Compute exact-over-reported-values mean, median, min/max, range, MAD,
+  population/sample variance, population/sample standard deviation, standard
+  error, and relative standard deviation.
+- [x] Preserve irrational standard deviations as exact radicals rather than
+  silently decimalizing them.
+- [x] Preserve raw replicate values in the machine result.
+- [x] Separate `source_class=measured` from
+  `arithmetic_class=exact_over_reported_values`; provide an explicit
+  `spread exact` declaration without making it the default.
+- [x] Keep confidence intervals uncomputed until a confidence model, level, and
+  method are declared.
+- [x] Keep measurement uncertainty explicitly separate from sample spread and
+  report it as not provided until an uncertainty budget exists.
+- [x] Add human and JSON spread surfaces plus measured/exact provenance tests.
+
+Immediate next chemistry work:
+
+- [ ] Run formatting, compilation, chemistry unit/protocol/Cram tests, and the
+  relevant repository quality gates; fix every failure before calling the slice
+  green.
+- [ ] Add exact amount-of-substance and specified-particle conversion using the
+  existing exact SI Avogadro constant rather than duplicating it.
+- [ ] Add reaction stoichiometric amount conversion using the verified canonical
+  coefficient vector.
+- [ ] Add limiting-reagent and theoretical-yield amount semantics while keeping
+  measured mass/molar-mass work blocked behind provenance-aware atomic-weight
+  data.
+- [ ] Define the measurement-uncertainty representation: uncertainty components,
+  standard/combined/expanded uncertainty, coverage factor/probability,
+  traceability, corrections, and provenance.
+- [ ] Define explicit confidence-interval and quantile methods before enabling
+  either output.
 - [ ] Keep atomic-weight/molar-mass work blocked until measured/interval
-  provenance semantics are specified; do not label chemical data exact merely
-  because it is decimal.
+  provenance semantics and source-versioning are implemented; do not label
+  chemical data exact merely because it is decimal.
+- [ ] Keep CPS thermodynamic, kinetic, phase/pressure, toxicology, volatility,
+  and broader predictive/hazard models blocked until their data sources,
+  assumptions, uncertainty contracts, and refusal boundaries are independently
+  specified and tested.
+
+No chemistry capability becomes an Oasis/public claim merely because source
+exists on the development branch.
 
 ## CENTLAMP
 
