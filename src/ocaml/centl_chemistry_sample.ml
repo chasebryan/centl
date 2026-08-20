@@ -4,12 +4,15 @@ type error =
   | Invalid_observation of string
   | Unknown_unit of string
 
+type observation_class = Measured | Declared_exact
+
 type root_value = Exact_rational of Q.t | Exact_sqrt_rational of Q.t
 
 type derived_root = Available of root_value | Undefined of string
 
 type summary = {
   unit_symbol : string;
+  observation_class : observation_class;
   observations : Q.t list;
   n : int;
   sum : Q.t;
@@ -30,10 +33,14 @@ type summary = {
 
 let max_observations = 10000
 
+let observation_class_to_string = function
+  | Measured -> "measured"
+  | Declared_exact -> "declared_exact"
+
 let error_message = function
   | Empty_sample -> "sample must contain at least one observation"
   | Too_many_observations -> "sample exceeds the bounded observation limit"
-  | Invalid_observation text -> Printf.sprintf "invalid exact observation %S" text
+  | Invalid_observation text -> Printf.sprintf "invalid reported observation %S" text
   | Unknown_unit symbol -> Printf.sprintf "unknown sample unit %s" symbol
 
 let parse_q text =
@@ -75,7 +82,7 @@ let variance_about ~center ~denominator values =
   in
   Q.div total (q_of_int denominator)
 
-let summarize_values ~unit_symbol values =
+let summarize_values ?(observation_class = Measured) ~unit_symbol values =
   let n = List.length values in
   if n = 0 then Error Empty_sample
   else if n > max_observations then Error Too_many_observations
@@ -126,6 +133,7 @@ let summarize_values ~unit_symbol values =
         Ok
           {
             unit_symbol;
+            observation_class;
             observations = values;
             n;
             sum;
@@ -144,12 +152,13 @@ let summarize_values ~unit_symbol values =
             relative_standard_deviation;
           }
 
-let summarize_strings ~unit_symbol texts =
+let summarize_strings ?(observation_class = Measured) ~unit_symbol texts =
   if texts = [] then Error Empty_sample
   else if List.length texts > max_observations then Error Too_many_observations
   else
     let rec parse reversed = function
-      | [] -> summarize_values ~unit_symbol (List.rev reversed)
+      | [] ->
+          summarize_values ~observation_class ~unit_symbol (List.rev reversed)
       | text :: rest ->
           let value =
             try Ok (parse_q text) with Invalid_argument _ -> Error (Invalid_observation text)
