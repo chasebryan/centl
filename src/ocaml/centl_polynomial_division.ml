@@ -45,6 +45,9 @@ type state = {
   mutable work : int;
 }
 
+let make_state ?(limits = default_limits) ?(cancelled = never_cancelled) () =
+  { limits; cancelled; work = 0 }
+
 let checkpoint state = if state.cancelled () then Error Cancelled else Ok ()
 
 let charge state amount =
@@ -65,6 +68,12 @@ let guard limits label polynomial =
       (Resource_limit
          ("polynomial division " ^ label ^ " exceeds the exact-bit limit"))
   else Ok polynomial
+
+let valid_limits limits =
+  limits.max_terms >= 1
+  && limits.max_exact_bits >= 1
+  && limits.max_steps >= 0
+  && limits.max_work >= 1
 
 let exponent_of_monomial state variable monomial =
   let ( let* ) result next = Result.bind result next in
@@ -134,18 +143,13 @@ let subtract_shifted state variable shift scalar divisor remainder =
   in
   loop remainder (bindings divisor)
 
-let divide ?(limits = default_limits) ?(cancelled = never_cancelled) ~variable
-    dividend divisor =
+let divide_with_state state ~variable dividend divisor =
   let ( let* ) result next = Result.bind result next in
+  let limits = state.limits in
   if String.equal variable "" then Error Empty_variable
-  else if
-    limits.max_terms < 1
-    || limits.max_exact_bits < 1
-    || limits.max_steps < 0
-    || limits.max_work < 1
-  then Error (Resource_limit "polynomial division limits are invalid")
+  else if not (valid_limits limits) then
+    Error (Resource_limit "polynomial division limits are invalid")
   else
-    let state = { limits; cancelled; work = 0 } in
     let* () = checkpoint state in
     let* dividend = guard limits "dividend" dividend in
     let* divisor = guard limits "divisor" divisor in
@@ -194,6 +198,11 @@ let divide ?(limits = default_limits) ?(cancelled = never_cancelled) ~variable
                   loop (steps + 1) quotient remainder
           in
           loop 0 zero dividend
+
+let divide ?(limits = default_limits) ?(cancelled = never_cancelled) ~variable
+    dividend divisor =
+  let state = make_state ~limits ~cancelled () in
+  divide_with_state state ~variable dividend divisor
 
 let quotient ?limits ?cancelled ~variable dividend divisor =
   match divide ?limits ?cancelled ~variable dividend divisor with
