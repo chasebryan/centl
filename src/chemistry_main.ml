@@ -13,13 +13,13 @@ let () =
       (match Centl_chemistry.balance reaction with
        | Error error -> print_error error; exit 2
        | Ok balanced ->
-           let reactants = balanced.Centl_chemistry.reaction.reactants in
-           let products = balanced.Centl_chemistry.reaction.products in
+           let reactants = balanced.reaction.reactants in
+           let products = balanced.reaction.products in
            let rec render species coefficients =
              match species, coefficients with
              | [], [] -> []
              | s :: species, c :: coefficients ->
-                 Printf.sprintf "%d %s" c s.Centl_chemistry.formula
+                 Printf.sprintf "%d %s" c s.formula
                  :: render species coefficients
              | _ -> []
            in
@@ -37,7 +37,7 @@ let () =
              (String.concat " + " (render products right));
            List.iter (fun evidence ->
              Printf.printf "conserve %s: %d=%d\n"
-               evidence.Centl_chemistry.element
+               evidence.element
                evidence.reactant_atoms evidence.product_atoms)
              balanced.evidence)
   | _ ->
