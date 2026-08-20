@@ -28,6 +28,7 @@ env:
   FLINT_VERSION: "3.0.1"
   FLINT_SHA256: "7b311a00503a863881eb8177dbeb84322f29399f3d7d72f3b1a4c9ba1d5794b4"
   PORTABLE_X86_CFLAGS: "-O2 -fomit-frame-pointer -m64 -march=x86-64 -mtune=generic"
+  CENTL_LINUX_GLIBC_BASELINE: "2.31"
 
 jobs:
   engine-self-test:
@@ -39,6 +40,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Compile engine, policy gates, and tests
         run: |
@@ -49,13 +51,18 @@ jobs:
             scripts/oasis-metadata-check.py \
             scripts/oasis_required_checks.py \
             scripts/oasis-security-state.py \
+            scripts/check-linux-release-abi.py \
             tests/test_oasis.py \
             tests/test_oasis_metadata.py \
             tests/test_oasis_required_checks.py \
-            tests/test_oasis_security_state.py
+            tests/test_oasis_security_state.py \
+            tests/test_linux_release_abi.py
 
       - name: Run adversarial Oasis tests
         run: python3 -m unittest discover -s tests -p 'test_oasis*.py'
+
+      - name: Run Linux release portability tests
+        run: python3 -m unittest discover -s tests -p 'test_linux_release_abi.py'
 
       - name: Validate live repository gate plan
         run: python3 scripts/oasis.py --root "$PWD" --no-repair --plan
@@ -64,6 +71,8 @@ jobs:
     name: Full stable-product convergence
     needs: engine-self-test
     runs-on: ubuntu-24.04
+    container:
+      image: ubuntu:20.04
     timeout-minutes: 90
     env:
       JULIA_NUM_THREADS: "1"
@@ -73,6 +82,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Configure runner paths
         shell: bash
@@ -87,10 +97,12 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Install build prerequisites
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends \
-            build-essential ca-certificates curl git libzstd1 m4 make opam patch \
+          apt-get update
+          apt-get install --yes --no-install-recommends \
+            binutils build-essential ca-certificates curl git libzstd1 m4 make opam patch \
             pkg-config python3 python3-venv tar xz-utils
 
       - name: Bootstrap pinned proof and native toolchain
@@ -151,6 +163,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Require clear release-blocking GitHub security state
         env:
