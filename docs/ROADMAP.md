@@ -155,6 +155,43 @@ text or mistaking an approximation for an exact result.
 Exit condition: every new domain has a documented value model, trust boundary,
 machine schema, and differential test suite.
 
+## 6A. CENTL Chemistry
+
+CENTL Chemistry is the planned exact-first chemistry domain. It extends the same
+scientific stack rather than creating a separate calculator: CENTL supplies exact
+mathematics, CENTL Physics supplies dimension-safe quantities and exact SI
+constants, and chemistry adds formulas, reactions, stoichiometry, and chemically
+specific provenance rules. The complete staged plan lives in
+[`CHEMISTRY-PLAN.md`](CHEMISTRY-PLAN.md).
+
+- Phase 1: parse chemical formulas, count atoms, parse reactions, solve balancing
+  as exact integer/rational linear algebra, normalize coefficients canonically,
+  and independently verify conservation of every represented element.
+- Phase 2: add mole/particle conversion, stoichiometric ratios, limiting reagent,
+  theoretical and percent yield, concentration, dilution, and exact dimensional
+  validation.
+- Phase 3: introduce chemistry data provenance so standard atomic weights,
+  isotope masses, intervals, and other measured values are never mislabeled as
+  exact; propagate those semantics into molar-mass calculations.
+- Phase 4: derive exact constants such as `R = N_A * k_B` and `F = N_A * e` from
+  their defining inputs, then add bounded ideal-gas, thermochemistry, and
+  electrochemistry calculations under explicit models.
+- Phase 5: add equilibrium, logarithmic chemistry, acid/base calculations, and
+  simple kinetic laws only after their approximation, activity, standard-state,
+  and provenance contracts are explicit.
+- Keep quantum chemistry, electronic-structure solvers, molecular dynamics,
+  reaction prediction, and measured-property prediction outside the public
+  surface until separate justified numerical and physical contracts exist.
+- Expose a direct `centl-chem` CLI and a deterministic machine representation;
+  allow CENTL-SCi chemistry/HYBRID interpretation only as a validated front end
+  to the authoritative chemistry engine.
+
+Exit condition: the first chemistry vertical slice balances representative
+reactions canonically, emits per-element conservation evidence, rejects malformed
+or non-canonical/underdetermined cases explicitly, and passes native, CLI,
+machine-schema, golden, and refusal tests without weakening CENTL's exact-first
+or provenance rules.
+
 ## 7. Hardening and release
 
 - Pull-request verification runs the pinned F*, OCaml, native, quality, seeded
