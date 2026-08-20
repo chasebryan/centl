@@ -1,0 +1,30 @@
+(test
+ (name test_polynomial_factorization)
+ (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_polynomial_factorization_oracle)
+ (libraries centl_lib alcotest zarith))
+
+(executable
+ (name factorization_probe)
+ (libraries centl_lib zarith yojson))
+
+(rule
+ (target flint_factor_oracle)
+ (deps flint_factor_oracle.c)
+ (action
+  (run cc -std=c11 -O2 -o %{target} %{dep:flint_factor_oracle.c} -lflint -lgmp)))
+
+(rule
+ (alias runtest)
+ (deps
+  test_polynomial_factorization_differential.py
+  factorization_probe.exe
+  flint_factor_oracle)
+ (action
+  (run
+   python3
+   %{dep:test_polynomial_factorization_differential.py}
+   %{dep:factorization_probe.exe}
+   %{dep:flint_factor_oracle})))
