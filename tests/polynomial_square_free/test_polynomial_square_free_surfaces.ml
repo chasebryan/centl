@@ -76,6 +76,10 @@ let test_public_factorize () =
   let result = assoc "result" response in
   Alcotest.(check string) "kind" "polynomial_square_free_factorization"
     (string "kind" result);
+  Alcotest.(check string) "factor semantics" "square_free_multiplicity_groups"
+    (string "factor_semantics" result);
+  Alcotest.(check bool) "not irreducible" false
+    (bool "irreducible_factorization" result);
   Alcotest.(check int) "factor count" 2 (int "factor_count" result);
   Alcotest.(check string) "unit" "2" (string "text" (assoc "unit" result));
   begin match assoc "factors" result with
@@ -247,6 +251,10 @@ let test_mcp_schema_and_factorization () =
   Alcotest.(check string) "domain" "polynomial_square_free"
     (string "domain" protocol);
   let result = assoc "result" protocol in
+  Alcotest.(check string) "factor semantics" "square_free_multiplicity_groups"
+    (string "factor_semantics" result);
+  Alcotest.(check bool) "not irreducible" false
+    (bool "irreducible_factorization" result);
   Alcotest.(check int) "factor count" 2 (int "factor_count" result)
 
 let test_mcp_nested_strictness () =
