@@ -317,23 +317,6 @@ ul, ol { margin-top: 8px; }
   color: var(--oasis-deep);
   font: 700 32px/1 Georgia, serif;
 }
-.x-money-card {
-  width: min(100%, 460px);
-  padding: 14px;
-  border: 1px solid var(--rule);
-  background: var(--panel);
-  text-align: center;
-}
-.x-money-qr,
-.x-money-image {
-  display: block;
-  width: min(100%, 420px);
-  height: auto;
-  margin: 0 auto 10px;
-  border: 1px solid #000;
-}
-.x-money-card p { margin-bottom: 0; }
-
 pre, code, kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 pre {
   overflow-x: auto;
@@ -983,4 +966,3 @@ footer {
   .shell, body, html { background: #fff; box-shadow: none; }
   .layout { display: block; }
 }
-

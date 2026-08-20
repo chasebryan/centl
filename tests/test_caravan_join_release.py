@@ -52,7 +52,6 @@ class CaravanJoinReleaseTests(unittest.TestCase):
         self.assertIn('client.enroll(receipt.to_dict())', text)
         self.assertIn("Welcome to the FCF CARAVAN", text)
         self.assertIn("https://github.com/sponsors/chasebryan", text)
-        self.assertIn("https://freecomputation.org/funding.html#x-money", text)
         self.assertNotIn("╭", text)
         self.assertNotIn("╰", text)
         for network_primitive in (

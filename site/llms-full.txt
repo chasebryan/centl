@@ -9,7 +9,7 @@ Open proposal: https://freecomputation.org/proposal.html
 JSON: https://freecomputation.org/pub/proposal.json
 
 Use is Apache-2.0. Contribute with DCO on draft PRs to mirage. Sponsor
-through GitHub Sponsors or X Money. Sponsorship does not buy Oasis.
+through GitHub Sponsors. Sponsorship does not buy Oasis.
 
 ## Invitation
 

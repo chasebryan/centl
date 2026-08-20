@@ -104,7 +104,6 @@ independently.
 | Route | How |
 | --- | --- |
 | GitHub Sponsors | <https://github.com/sponsors/chasebryan> |
-| X Money | Public recipient card on [funding.html](https://freecomputation.org/funding.html#x-money) for `@FreeSystemsDev` |
 
 Current public totals are on the funding page and in
 [`funding.json`](https://freecomputation.org/funding.json). Those figures are
