@@ -44,6 +44,8 @@
   Centl_chemistry_protocol
   Centl_chemistry_amount
   Centl_chemistry_amount_protocol
+  Centl_chemistry_limiting
+  Centl_chemistry_limiting_protocol
   Centl_chemistry_sample
   Centl_chemistry_sample_protocol
   Centl_multivariate_polynomial
