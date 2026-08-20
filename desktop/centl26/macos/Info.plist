@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleDisplayName</key>
+    <string>CentL26</string>
+    <key>CFBundleExecutable</key>
+    <string>CentL26</string>
+    <key>CFBundleIconFile</key>
+    <string>CentL26.icns</string>
+    <key>CFBundleIdentifier</key>
+    <string>org.freecomputation.centl</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>CentL26</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>26.0.0</string>
+    <key>CFBundleVersion</key>
+    <string>26.0.0</string>
+    <key>CentLBuildArchitecture</key>
+    <string>unknown</string>
+    <key>CentLBuildCommit</key>
+    <string>unknown</string>
+    <key>CentLBuildConfiguration</key>
+    <string>release</string>
+    <key>CentLProviderManifest</key>
+    <string>providers/providers.json</string>
+    <key>CentLSigningMode</key>
+    <string>unsigned</string>
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.developer-tools</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>13.0</string>
+    <key>LSMultipleInstancesProhibited</key>
+    <true/>
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsLocalNetworking</key>
+        <true/>
+    </dict>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright Free Computation Foundation. Apache-2.0 software; FCF names and marks are subject to repository trademark policy.</string>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+    <key>NSSupportsAutomaticGraphicsSwitching</key>
+    <true/>
+</dict>
+</plist>

@@ -79,6 +79,7 @@ STATIC_SITEMAP = [
     ("https://freecomputation.org/", "weekly", "1.0"),
     ("https://freecomputation.org/about.html", "monthly", "0.8"),
     ("https://freecomputation.org/centl.html", "weekly", "0.9"),
+    ("https://freecomputation.org/free-computation.html", "monthly", "0.9"),
     ("https://freecomputation.org/software.html", "weekly", "0.8"),
     ("https://freecomputation.org/docs.html", "weekly", "0.8"),
     ("https://freecomputation.org/research.html", "weekly", "0.9"),
@@ -616,6 +617,7 @@ def render_nav(depth: int) -> str:
       <h2>CENTL &amp; Hub</h2>
       <ul>
         <li><a href="{p}index.html#top">CENTL Work Area</a></li>
+        <li><a href="{p}free-computation.html#top">What is Free Computation?</a></li>
         <li><a href="{p}centl.html#top">About CENTL</a></li>
         <li><a href="{p}research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
         <li><a href="{p}software.html#top">Software Suite</a></li>

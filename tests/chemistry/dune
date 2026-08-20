@@ -1,0 +1,62 @@
+(test
+ (name test_chemistry)
+ (modules test_chemistry)
+ (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_chemistry_protocol)
+ (modules test_chemistry_protocol)
+ (libraries centl_lib alcotest zarith yojson))
+
+(test
+ (name test_chemistry_amount)
+ (modules test_chemistry_amount)
+ (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_chemistry_amount_protocol)
+ (modules test_chemistry_amount_protocol)
+ (libraries centl_lib alcotest zarith yojson))
+
+(test
+ (name test_chemistry_limiting)
+ (modules test_chemistry_limiting)
+ (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_chemistry_limiting_protocol)
+ (modules test_chemistry_limiting_protocol)
+ (libraries centl_lib alcotest zarith yojson))
+
+(test
+ (name test_chemistry_sample)
+ (modules test_chemistry_sample)
+ (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_chemistry_sample_protocol)
+ (modules test_chemistry_sample_protocol)
+ (libraries centl_lib alcotest zarith yojson))
+
+(test
+ (name test_chemistry_constants)
+ (modules test_chemistry_constants)
+ (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_chemistry_data)
+ (modules test_chemistry_data)
+ (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_chemistry_models)
+ (modules test_chemistry_models)
+ (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_chemistry_thermo)
+ (modules test_chemistry_thermo)
+ (libraries centl_lib alcotest zarith))
+
+(cram
+ (deps ../../src/chemistry_main.exe))

@@ -399,11 +399,6 @@
  (modules test_physics_mcp_cancellation)
  (libraries centl_lib alcotest zarith yojson))
 
-(test
- (name test_chemistry)
- (modules test_chemistry)
- (libraries centl_lib alcotest zarith))
-
 (cram
  (applies_to cli)
  (deps
@@ -436,3 +431,4 @@
  (deps
   ../install
   (source_tree fixtures/release)))
+

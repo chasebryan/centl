@@ -28,7 +28,8 @@ SCI_ASSIMILATION_FAST_REPEATS ?= 5
 SCI_ASSIMILATION_MODEL_REPEATS ?= 1
 SCI_ASSIMILATION_ARGS ?=
 
-.PHONY: all format format-fix fmt lint quality licensing-check install-interface-check integrity-self-test \
+.PHONY: all centl26-app centl26-app-verify centl26-app-package centl26-design-check centl26-design-contract-test centl26-design-approve \
+	format format-fix fmt lint quality licensing-check install-interface-check integrity-self-test \
 	integrity-source supply-chain-check supply-chain-sync supply-chain-audit \
 	supply-chain-snapshot-opam supply-chain-snapshot-julia supply-chain-preserve \
 	offline-rebuild capsule-build capsule-run release-sign release-verify verify \
@@ -38,6 +39,29 @@ SCI_ASSIMILATION_ARGS ?=
 	build test release clean
 
 all: build
+
+centl26-app: centl26-design-check
+	./scripts/build-centl26-macos
+
+centl26-app-verify:
+	CENTL26_RUN_SELF_TEST=1 CENTL26_RUN_CHEMISTRY_SMOKE=1 ./scripts/verify-centl26-macos
+
+centl26-app-package: centl26-app
+	./scripts/package-centl26-macos
+
+centl26-design-check:
+	$(PYTHON) scripts/centl26-design-contract.py check
+
+centl26-design-contract-test:
+	$(PYTHON) tests/test_centl26_design_contract.py
+
+centl26-design-approve:
+	test -n "$(DESIGN_VERSION)" || { echo "DESIGN_VERSION=CentL26 or CentL26.N is required" >&2; exit 2; }
+	test -n "$(DESIGN_REASON)" || { echo "DESIGN_REASON='approved change' is required" >&2; exit 2; }
+	$(PYTHON) scripts/centl26-design-contract.py approve \
+		--version "$(DESIGN_VERSION)" \
+		--reason "$(DESIGN_REASON)" \
+		--confirm-visual-review
 
 format:
 	$(DUNE) build @fmt
@@ -133,7 +157,7 @@ release-verify:
 	FCF_SIGNIFY_PUBLIC_KEY="$(FCF_SIGNIFY_PUBLIC_KEY)" \
 		sh scripts/release-verify "$(RELEASE_DIR)"
 
-quality: format lint licensing-check install-interface-check integrity-source supply-chain-check
+quality: centl26-design-check format lint licensing-check install-interface-check integrity-source supply-chain-check
 
 verify:
 	mkdir -p $(FSTAR_CACHE)
@@ -233,7 +257,7 @@ sci-assimilate-publish:
 
 build: extract native-build
 
-test: extract native-test
+test: centl26-design-contract-test extract native-test
 
 release: build
 	test -n "$(VERSION)"

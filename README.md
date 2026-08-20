@@ -9,7 +9,12 @@
 *Good maths should be free.*  
 *Never manufacture mathematical certainty.*
 
-**Oasis v0.15.0 · Al-Nur** · [freecomputation.org](https://freecomputation.org/) · Apache-2.0
+**CentL26 26.0.0 · Flagship main release** · [freecomputation.org](https://freecomputation.org/) · Apache-2.0
+
+> **CentL26 is now the flagship direction of CENTL.** Every new capability,
+> scientific backend, and product release is prepared for the standalone
+> CentL26 work environment. Oasis remains the quality lineage beneath this
+> release; CentL26 is the user-facing product train.
 
 ---
 
@@ -27,7 +32,45 @@ centl '0.1 + 0.2'                 # → 3/10
 centl 'approx(pi, 50)'            # justified digits only
 centl-physics convert 100 cm m    # exact unit conversion
 centl-sci                         # local scientific interpreter
+cargo run --bin centl26           # standalone graphical scientific work environment
 ```
+
+**CentL26** is the new standalone desktop product line: a calm, project-based
+scientific IDE that composes CENTL capabilities behind one local execution
+boundary. It is not part of the public website and it does not load the website
+at runtime. See [the CentL26 architecture](docs/CENTL26-ARCHITECTURE.md) for the
+desktop boundary, annual version scheme, project model, capability broker, and
+backend-unification plan. The former [CENTL Lab document](docs/CENTL-LAB.md) is
+retained only as a migration record. The user-approved interface is protected
+by the [CentL26 design contract](docs/CENTL26-DESIGN-CONTRACT.md); backend work
+cannot silently alter its visual sources or defining layout invariants.
+
+On macOS, build the actual standalone application bundle with:
+
+```sh
+./scripts/build-centl26-macos
+open build/centl26/macos/CentL26.app
+```
+
+This produces one locally signed `CentL26.app` containing its native AppKit /
+WebKit window and dedicated `centl26` computation service. The local host is an
+internal implementation boundary owned by the application; users do not need
+to operate a browser or manage a URL. See the
+[native packaging guide](desktop/centl26/macos/README.md) for build,
+self-test, signing, and current release limits.
+
+CentL26 now restores its default notebook across application restarts. Exact
+chemistry formula and conservation work is available from the same command
+surface:
+
+```text
+chem atoms Ca(OH)2
+chem balance Fe + O2 -> Fe2O3
+```
+
+These chemistry operations execute through the authoritative `centl-chem`
+machine protocol; the complete protocol evidence is retained in the local
+project instead of being reconstructed by the interface.
 
 ---
 
@@ -76,6 +119,7 @@ Both guides cover all three platforms and begin with the smallest useful install
 
 | Line | What it is |
 | --- | --- |
+| [`CentL26`](docs/CENTL26-ARCHITECTURE.md) | **Flagship standalone scientific IDE and main 2026 release (26.0.0)** |
 | [`oasis`](https://github.com/chasebryan/centl/tree/oasis) | Qualified stable product (v0.15.0 Al-Nur) |
 | [`main`](https://github.com/chasebryan/centl/tree/main) | Current Camp stay + developer distribution |
 | [`mirage`](https://github.com/chasebryan/centl/tree/mirage) | Laboratory |

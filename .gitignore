@@ -45,3 +45,4 @@ research/erdos-straus/findings/letters/*.md
 # Added by cargo
 
 /target
+/build/

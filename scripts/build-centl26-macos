@@ -1,0 +1,9 @@
+#!/bin/sh
+# SPDX-License-Identifier: Apache-2.0
+
+set -eu
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+PYTHON_COMMAND=${PYTHON:-python3}
+"$PYTHON_COMMAND" "$SCRIPT_DIR/centl26-design-contract.py" check
+exec "$SCRIPT_DIR/../desktop/centl26/macos/build.sh" "$@"

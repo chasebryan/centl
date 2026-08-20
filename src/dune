@@ -40,6 +40,23 @@
   Centl_complex_native
   Centl_matrix
   Centl_matrix_protocol
+  Centl_chemistry
+  Centl_chemistry_protocol
+  Centl_chemistry_constants
+  Centl_chemistry_constants_protocol
+  Centl_chemistry_data
+  Centl_chemistry_data_protocol
+  Centl_chemistry_models
+  Centl_chemistry_models_protocol
+  Centl_chemistry_thermo
+  Centl_chemistry_amount
+  Centl_chemistry_amount_protocol
+  Centl_chemistry_limiting
+  Centl_chemistry_limiting_protocol
+  Centl_chemistry_sample
+  Centl_chemistry_sample_protocol
+  Centl_cps
+  Centl_cps_protocol
   Centl_multivariate_polynomial
   Centl_multivariate_polynomial_protocol
   Centl_polynomial_composition
@@ -149,7 +166,6 @@
   Centl_sci_kernel
   Centl_sci_app
   Centl_physics
-  Centl_chemistry
   Centl_physics_cherenkov
   Centl_physics_collision
   Centl_physics_world
@@ -189,6 +205,20 @@
  (libraries centl_lib zarith yojson))
 
 (executable
+ (name chemistry_main)
+ (public_name centl-chem)
+ (package centl)
+ (modules Chemistry_main)
+ (libraries centl_lib zarith yojson))
+
+(executable
+ (name cps_main)
+ (public_name centl-cps)
+ (package centl)
+ (modules Cps_main)
+ (libraries centl_lib zarith yojson))
+
+(executable
  (name sci_main)
  (public_name centl-sci)
  (package centl)
@@ -201,10 +231,3 @@
  (package centl)
  (modules Mirage_main)
  (libraries centl_lib unix yojson))
-
-(executable
- (name chemistry_main)
- (public_name centl-chem)
- (package centl)
- (modules Chemistry_main)
- (libraries centl_lib zarith))

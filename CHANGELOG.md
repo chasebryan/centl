@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+### CentL26 26.0.0 product line
+
+- Introduces **CentL26**, the standalone, offline scientific work environment
+  and new annual desktop product line from the Free Computation Foundation.
+- Replaces the former CENTL Lab product name with a calm, white, progressively
+  disclosed IDE surface designed to keep the active work visible on a laptop.
+- Adds the `centl26` executable, embedded workbench assets, loopback-only local
+  host, asynchronous notebook execution, command palette, collapsible IDE
+  panes, exact mathematics, current physics and research kernels, and visible
+  result-assurance states.
+- Defines `26.0.0`, `26.1.0`, and future annual train identities separately
+  from historical CENTL core-engine versions and Oasis qualification.
+- Establishes the `centl.broker/1` capability-registry boundary so existing
+  CENTL product families can be integrated without confusing planned adapters
+  with currently available executors.
+- Adds the native macOS application-bundle path; the application owns and
+  terminates its private backend rather than asking the user to operate a
+  browser-hosted website.
+- Freezes the user-approved CentL26 visual system behind a deterministic design
+  contract covering the workbench sources, native icon, 37 semantic invariants,
+  CI enforcement, and an explicit reviewed-update workflow.
+- Adds the first durable `centl.project/1` notebook store. The default project
+  now survives application restarts through bounded, schema-validated,
+  owner-private, atomically replaced `project.centllab` records.
+- Integrates the qualified exact CENTL Chemistry slice through its versioned
+  JSON machine protocol. `chem atoms <formula>` and
+  `chem balance <reaction>` retain their complete provider evidence, and
+  reaction results are admitted only after conservation verification.
+
 - **cbis.kernel** now homes on
   `R = {hard p : p+4 and 4p+1 ∈ Sigma_1}` while the 0-to-infinity
   sweep still runs. `--home-only` / `--sweep-only`. W is split into

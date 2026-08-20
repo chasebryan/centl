@@ -1,0 +1,63 @@
+name: CentL26 approved design contract
+
+on:
+  pull_request:
+    paths:
+      - 'src-web/server/lab.css'
+      - 'src-web/server/lab.js'
+      - 'src-web/server/lab_template.rs'
+      - 'desktop/centl26/macos/Assets/CentL26Icon.png'
+      - 'desktop/centl26/macos/Assets/CentL26Icon.svg'
+      - 'design/centl26/approved-design.json'
+      - 'scripts/centl26-design-contract.py'
+      - 'tests/test_centl26_design_contract.py'
+      - 'docs/CENTL26-DESIGN-CONTRACT.md'
+      - 'Makefile'
+      - '.github/workflows/centl26-design-contract.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'src-web/server/lab.css'
+      - 'src-web/server/lab.js'
+      - 'src-web/server/lab_template.rs'
+      - 'desktop/centl26/macos/Assets/CentL26Icon.png'
+      - 'desktop/centl26/macos/Assets/CentL26Icon.svg'
+      - 'design/centl26/approved-design.json'
+      - 'scripts/centl26-design-contract.py'
+      - 'tests/test_centl26_design_contract.py'
+      - 'docs/CENTL26-DESIGN-CONTRACT.md'
+      - 'Makefile'
+      - '.github/workflows/centl26-design-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: centl26-design-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    name: Reject unapproved CentL26 visual drift
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Validate contract tooling syntax
+        run: |
+          python3 -m py_compile \
+            scripts/centl26-design-contract.py \
+            tests/test_centl26_design_contract.py
+
+      - name: Verify approved CentL26 design
+        run: make centl26-design-check
+
+      - name: Prove the design gate fails closed
+        run: make centl26-design-contract-test

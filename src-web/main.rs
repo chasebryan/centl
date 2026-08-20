@@ -9,12 +9,12 @@ pub mod server;
 use engine::{evaluate, Session};
 use erdos_straus::{run_hunt_window, solve_es};
 use physics::convert_units;
-use server::start_server;
+use server::{start_lab_server, start_server};
 use std::env;
 use std::path::Path;
 
 fn print_help() {
-    println!("CENTL v0.15.0 Al-Nur · Exact Mathematics, Physics & Zero-JS Web Hub");
+    println!("CentL26 · Free Computation Foundation scientific work environment");
     println!("Usage:");
     println!("  centl-web                     start the Zero-JS web server on port 8080");
     println!("  centl-web --serve [PORT]      start web server on specified port");
@@ -22,11 +22,16 @@ fn print_help() {
     println!("  centl-web es solve <PRIME>    solve 4/p = 1/x + 1/y + 1/z");
     println!("  centl-web es hunt [FROM]      run public Erdős–Straus hunt window");
     println!("  centl-web physics convert V F T convert units");
+    println!("  centl26 [PORT]                start the CentL26 local host (default: 2626)");
+    println!("  centl-web --lab [PORT]        compatibility entry point for CentL26");
+    println!("  centl-lab [PORT]              legacy compatibility alias");
     println!("  --version                     display version");
     println!();
     println!("Server environment:");
     println!("  CENTL_BIND_HOST               bind address (default: 127.0.0.1)");
     println!("  CENTL_SITE_DIR                static site directory (default: ./site or ../site)");
+    println!();
+    println!("CentL26 always binds to 127.0.0.1 and embeds its application assets.");
 }
 
 fn resolve_site_dir() -> Result<String, String> {
@@ -63,9 +68,32 @@ fn serve(port: u16) {
     }
 }
 
+fn serve_lab(port: u16) {
+    if let Err(error) = start_lab_server(port) {
+        eprintln!("Failed to start CentL26 on port {}: {}", port, error);
+        std::process::exit(1);
+    }
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     let mut session = Session::new();
+
+    let invoked_as_lab = args
+        .first()
+        .and_then(|value| Path::new(value).file_stem())
+        .and_then(|value| value.to_str())
+        .is_some_and(|value| value == "centl-lab" || value == "centl26");
+    if invoked_as_lab {
+        let port = args
+            .iter()
+            .skip(1)
+            .find(|argument| !argument.starts_with('-'))
+            .and_then(|argument| argument.parse::<u16>().ok())
+            .unwrap_or(2626);
+        serve_lab(port);
+        return;
+    }
 
     if args.len() <= 1 {
         serve(8080);
@@ -74,7 +102,7 @@ fn main() {
 
     match args[1].as_str() {
         "--help" | "-h" => print_help(),
-        "--version" | "-v" => println!("centl-web 0.15.0 (Oasis Al-Nur)"),
+        "--version" | "-v" => println!("CentL26 26.0.0 · backend compatibility 0.15 Al-Nur"),
         "--serve" | "serve" => {
             let port = if args.len() >= 3 {
                 args[2].parse::<u16>().unwrap_or(8080)
@@ -82,6 +110,14 @@ fn main() {
                 8080
             };
             serve(port);
+        }
+        "--lab" | "lab" => {
+            let port = if args.len() >= 3 {
+                args[2].parse::<u16>().unwrap_or(2626)
+            } else {
+                2626
+            };
+            serve_lab(port);
         }
         "--syntax" => {
             let result = evaluate(":syntax", &mut session).unwrap();
