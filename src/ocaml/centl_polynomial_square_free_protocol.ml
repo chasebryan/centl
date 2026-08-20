@@ -102,6 +102,8 @@ let factorization_json
       ("exact", `Bool true);
       ( "unit",
         Centl_multivariate_polynomial_protocol.rational_json factorization.unit );
+      ("factor_semantics", `String "square_free_multiplicity_groups");
+      ("irreducible_factorization", `Bool false);
       ("factors", `List (List.map factor_json factorization.factors));
       ("factor_count", `Int (List.length factorization.factors));
     ]
@@ -113,8 +115,10 @@ let capabilities limits =
       ("exact", `Bool true);
       ("univariate", `Bool true);
       ("explicit_variable", `Bool true);
+      ("characteristic_zero", `Bool true);
       ("monic_factors", `Bool true);
       ("multiplicity_groups", `Bool true);
+      ("irreducible_factorization", `Bool false);
       ("zero_polynomial_refused", `Bool true);
       ("cooperative_cancellation", `Bool true);
       ("actions", `List [ `String "capabilities"; `String "factorize" ]);
@@ -131,7 +135,7 @@ let capabilities limits =
           ] );
       ( "text",
         `String
-          "Exact characteristic-zero square-free multiplicity decomposition over explicit univariate Q[x]." );
+          "Exact characteristic-zero square-free multiplicity-group decomposition over explicit univariate Q[x]; returned groups are not claimed irreducible." );
     ]
 
 let factorize_action ?(cancelled = never_cancelled) limits fields =

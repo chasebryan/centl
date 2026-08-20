@@ -50,9 +50,13 @@ let test_capabilities () =
   let result = assoc "result" response in
   Alcotest.(check string) "kind" "polynomial_square_free_capabilities"
     (string "kind" result);
+  Alcotest.(check bool) "characteristic zero" true
+    (bool "characteristic_zero" result);
   Alcotest.(check bool) "monic factors" true (bool "monic_factors" result);
   Alcotest.(check bool) "multiplicity groups" true
     (bool "multiplicity_groups" result);
+  Alcotest.(check bool) "not irreducible factorization" false
+    (bool "irreducible_factorization" result);
   Alcotest.(check bool) "zero refused" true
     (bool "zero_polynomial_refused" result);
   Alcotest.(check bool) "cancellable" true
@@ -75,6 +79,10 @@ let test_factorize () =
   let result = assoc "result" response in
   Alcotest.(check string) "kind" "polynomial_square_free_factorization"
     (string "kind" result);
+  Alcotest.(check string) "factor semantics" "square_free_multiplicity_groups"
+    (string "factor_semantics" result);
+  Alcotest.(check bool) "not irreducible" false
+    (bool "irreducible_factorization" result);
   Alcotest.(check int) "factor count" 2 (int "factor_count" result);
   Alcotest.(check string) "unit numerator" "2"
     (string "numerator" (assoc "unit" result));

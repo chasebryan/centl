@@ -53,6 +53,32 @@ let test_repeated_multiplicities () =
   end;
   check_poly "reconstruction" polynomial (reconstruct result)
 
+let test_same_multiplicity_grouping () =
+  let x_minus_one = linear "-1" in
+  let x_plus_two = linear "2" in
+  let grouped = multiply_exn x_minus_one x_plus_two in
+  let polynomial = power_exn grouped 2 in
+  let result = unwrap_factorization (factorize ~variable:"x" polynomial) in
+  begin match result.factors with
+  | [ factor ] ->
+      Alcotest.(check int) "shared multiplicity" 2 factor.multiplicity;
+      check_poly "same-multiplicity factors stay grouped" grouped factor.polynomial
+  | _ -> Alcotest.fail "same-multiplicity irreducibles must form one square-free group"
+  end;
+  check_poly "grouped reconstruction" polynomial (reconstruct result)
+
+let test_repeated_irreducible_quadratic () =
+  let quadratic = add (power_exn x 2) one in
+  let polynomial = power_exn quadratic 2 in
+  let result = unwrap_factorization (factorize ~variable:"x" polynomial) in
+  begin match result.factors with
+  | [ factor ] ->
+      Alcotest.(check int) "quadratic multiplicity" 2 factor.multiplicity;
+      check_poly "irreducible quadratic group" quadratic factor.polynomial
+  | _ -> Alcotest.fail "repeated irreducible quadratic must remain one multiplicity group"
+  end;
+  check_poly "quadratic reconstruction" polynomial (reconstruct result)
+
 let test_mixed_single_and_repeated () =
   let x_plus_three = linear "3" in
   let x_minus_one = linear "-1" in
@@ -160,6 +186,10 @@ let () =
         [
           Alcotest.test_case "repeated multiplicities" `Quick
             test_repeated_multiplicities;
+          Alcotest.test_case "same multiplicity grouping" `Quick
+            test_same_multiplicity_grouping;
+          Alcotest.test_case "repeated irreducible quadratic" `Quick
+            test_repeated_irreducible_quadratic;
           Alcotest.test_case "mixed single and repeated" `Quick
             test_mixed_single_and_repeated;
           Alcotest.test_case "already square-free" `Quick test_square_free_input;
