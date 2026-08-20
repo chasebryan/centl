@@ -7,6 +7,21 @@ let unwrap = function
 let check_q label expected actual =
   Alcotest.(check string) label expected (Q.to_string actual)
 
+let test_default_source_is_measured () =
+  let summary = unwrap (summarize_strings ~unit_symbol:"g" [ "1"; "3" ]) in
+  Alcotest.(check string) "source class" "measured"
+    (observation_class_to_string summary.observation_class)
+
+let test_declared_exact_source () =
+  let summary =
+    unwrap
+      (summarize_strings ~observation_class:Declared_exact ~unit_symbol:"mol"
+         [ "1/3"; "2/3" ])
+  in
+  Alcotest.(check string) "source class" "declared_exact"
+    (observation_class_to_string summary.observation_class);
+  check_q "mean" "1/2" summary.mean
+
 let test_exact_and_radical_spread () =
   let summary = unwrap (summarize_strings ~unit_symbol:"g" [ "1"; "3" ]) in
   Alcotest.(check int) "n" 2 summary.n;
@@ -19,7 +34,8 @@ let test_exact_and_radical_spread () =
     match summary.population_standard_deviation with
     | Exact_rational value -> check_q "population sd" "1" value
     | Exact_sqrt_rational value ->
-        Alcotest.failf "population sd should be rational, got sqrt(%s)" (Q.to_string value)
+        Alcotest.failf "population sd should be rational, got sqrt(%s)"
+          (Q.to_string value)
   end;
   begin
     match summary.sample_variance with
@@ -37,7 +53,8 @@ let test_exact_and_radical_spread () =
     match summary.standard_error_of_mean with
     | Available (Exact_rational value) -> check_q "standard error" "1" value
     | Available (Exact_sqrt_rational value) ->
-        Alcotest.failf "standard error should be rational, got sqrt(%s)" (Q.to_string value)
+        Alcotest.failf "standard error should be rational, got sqrt(%s)"
+          (Q.to_string value)
     | Undefined reason -> Alcotest.failf "standard error undefined: %s" reason
   end
 
@@ -75,7 +92,9 @@ let test_single_observation_semantics () =
   begin
     match summary.sample_variance with
     | None -> ()
-    | Some value -> Alcotest.failf "sample variance should be undefined, got %s" (Q.to_string value)
+    | Some value ->
+        Alcotest.failf "sample variance should be undefined, got %s"
+          (Q.to_string value)
   end;
   begin
     match summary.sample_standard_deviation with
@@ -106,6 +125,11 @@ let test_observation_limit () =
 let () =
   Alcotest.run "CENTL Chemistry sample spread"
     [
+      ( "source semantics",
+        [
+          Alcotest.test_case "default measured" `Quick test_default_source_is_measured;
+          Alcotest.test_case "declared exact" `Quick test_declared_exact_source;
+        ] );
       ( "spread",
         [
           Alcotest.test_case "rational and radical" `Quick test_exact_and_radical_spread;
