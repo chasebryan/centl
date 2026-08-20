@@ -48,6 +48,8 @@
   Centl_chemistry_limiting_protocol
   Centl_chemistry_sample
   Centl_chemistry_sample_protocol
+  Centl_cps
+  Centl_cps_protocol
   Centl_multivariate_polynomial
   Centl_multivariate_polynomial_protocol
   Centl_polynomial_composition
@@ -200,6 +202,13 @@
  (public_name centl-chem)
  (package centl)
  (modules Chemistry_main)
+ (libraries centl_lib zarith yojson))
+
+(executable
+ (name cps_main)
+ (public_name centl-cps)
+ (package centl)
+ (modules Cps_main)
  (libraries centl_lib zarith yojson))
 
 (executable
