@@ -55,17 +55,30 @@ let command_balance reaction_text =
 
 let q_text = Q.to_string
 
+let amount_result_source_class = function
+  | Centl_chemistry_amount.Unspecified -> "derived_from_unspecified"
+  | Centl_chemistry_amount.Measured -> "derived_from_measured"
+  | Centl_chemistry_amount.Declared_exact -> "derived_exact"
+
+let print_amount_provenance source_class =
+  Printf.printf "input_source_class=%s\n"
+    (Centl_chemistry_amount.source_class_to_string source_class);
+  Printf.printf "result_source_class=%s\n"
+    (amount_result_source_class source_class);
+  Printf.printf "arithmetic_class=exact_over_supplied_values\n"
+
 let command_particles source_class moles_text =
   match Centl_chemistry_amount.entities_from_moles_text ~source_class moles_text with
   | Error error -> fail_amount error
   | Ok conversion ->
-      Printf.printf "source_class=%s\n"
-        (Centl_chemistry_amount.source_class_to_string conversion.source_class);
-      Printf.printf "arithmetic_class=exact_over_supplied_values\n";
+      print_amount_provenance conversion.source_class;
       Printf.printf "moles=%s mol\n" (q_text conversion.moles);
       Printf.printf "entities=%s\n" (q_text conversion.entities);
       Printf.printf "entities_integral=%s\n"
         (if conversion.entities_integral then "true" else "false");
+      Printf.printf "entity_count_status=%s\n"
+        (if conversion.entities_integral then "integral_count"
+         else "nonintegral_mathematical_equivalent");
       Printf.printf "N_A=%s 1/mol\n" (q_text conversion.avogadro_value);
       Printf.printf "N_A_provenance=%s\n" conversion.avogadro_provenance
 
@@ -73,9 +86,7 @@ let command_moles source_class entities_text =
   match Centl_chemistry_amount.moles_from_entities_text ~source_class entities_text with
   | Error error -> fail_amount error
   | Ok conversion ->
-      Printf.printf "source_class=%s\n"
-        (Centl_chemistry_amount.source_class_to_string conversion.source_class);
-      Printf.printf "arithmetic_class=exact_over_supplied_values\n";
+      print_amount_provenance conversion.source_class;
       Printf.printf "entities=%s\n" (Z.to_string conversion.entity_count);
       Printf.printf "moles=%s mol\n" (q_text conversion.moles);
       Printf.printf "N_A=%s 1/mol\n" (q_text conversion.avogadro_value);
@@ -89,9 +100,7 @@ let command_stoich source_class reaction_text source_species source_moles
   with
   | Error error -> fail_amount error
   | Ok conversion ->
-      Printf.printf "source_class=%s\n"
-        (Centl_chemistry_amount.source_class_to_string conversion.source_class);
-      Printf.printf "arithmetic_class=exact_over_supplied_values\n";
+      print_amount_provenance conversion.source_class;
       Printf.printf "equation=%s\n" (render_balanced conversion.balanced);
       Printf.printf "source=%s\n" conversion.source_species;
       Printf.printf "source_coefficient=%s\n"
