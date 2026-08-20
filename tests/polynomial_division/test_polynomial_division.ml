@@ -25,7 +25,7 @@ let reconstruct divisor division =
 let test_exact_factor_division () =
   let dividend = sub (xterm "1" 3) one in
   let divisor = sub (xterm "1" 1) one in
-  let division = unwrap_division (divide ~variable:"x" ~dividend ~divisor) in
+  let division = unwrap_division (divide ~variable:"x" dividend divisor) in
   let expected = add (xterm "1" 2) (add (xterm "1" 1) one) in
   check_poly "quotient" expected division.quotient;
   check_poly "remainder zero" zero division.remainder;
@@ -34,7 +34,7 @@ let test_exact_factor_division () =
 let test_nonzero_remainder () =
   let dividend = add (xterm "1" 3) (add (xterm "2" 1) one) in
   let divisor = add (xterm "1" 2) one in
-  let division = unwrap_division (divide ~variable:"x" ~dividend ~divisor) in
+  let division = unwrap_division (divide ~variable:"x" dividend divisor) in
   check_poly "quotient x" (xterm "1" 1) division.quotient;
   check_poly "remainder x+1" (add (xterm "1" 1) one) division.remainder;
   check_poly "reconstruction" dividend (reconstruct divisor division)
@@ -44,7 +44,7 @@ let test_rational_coefficients () =
     add (xterm "1/2" 2) (add (xterm "3/4" 1) (constant (q "1")))
   in
   let divisor = add (xterm "1/2" 1) (constant (q "1/4")) in
-  let division = unwrap_division (divide ~variable:"x" ~dividend ~divisor) in
+  let division = unwrap_division (divide ~variable:"x" dividend divisor) in
   check_poly "quotient x+1" (add (xterm "1" 1) one) division.quotient;
   check_poly "remainder 3/4" (constant (q "3/4")) division.remainder;
   check_poly "reconstruction" dividend (reconstruct divisor division)
@@ -52,18 +52,18 @@ let test_rational_coefficients () =
 let test_constant_divisor () =
   let dividend = add (xterm "3" 2) (add (xterm "-5" 1) (constant (q "7"))) in
   let divisor = constant (q "2") in
-  let division = unwrap_division (divide ~variable:"x" ~dividend ~divisor) in
+  let division = unwrap_division (divide ~variable:"x" dividend divisor) in
   check_poly "constant quotient" (scale (q "1/2") dividend) division.quotient;
   check_poly "constant remainder" zero division.remainder
 
 let test_zero_dividend () =
   let divisor = add (xterm "1" 1) one in
-  let division = unwrap_division (divide ~variable:"x" ~dividend:zero ~divisor) in
+  let division = unwrap_division (divide ~variable:"x" zero divisor) in
   check_poly "zero quotient" zero division.quotient;
   check_poly "zero remainder" zero division.remainder
 
 let test_zero_divisor () =
-  match divide ~variable:"x" ~dividend:one ~divisor:zero with
+  match divide ~variable:"x" one zero with
   | Error Division_by_zero -> ()
   | Error error -> Alcotest.fail (error_message error)
   | Ok _ -> Alcotest.fail "zero divisor must be rejected"
@@ -71,7 +71,7 @@ let test_zero_divisor () =
 let test_mixed_variable_rejection () =
   let dividend = add (xterm "1" 2) one in
   let divisor = unwrap_poly (term (q "1") [ ("y", 1) ]) in
-  match divide ~variable:"x" ~dividend ~divisor with
+  match divide ~variable:"x" dividend divisor with
   | Error (Mixed_variable "y") -> ()
   | Error error -> Alcotest.fail (error_message error)
   | Ok _ -> Alcotest.fail "mixed-variable divisor must be rejected"
@@ -80,7 +80,7 @@ let test_step_limit () =
   let dividend = add (xterm "1" 4) one in
   let divisor = add (xterm "1" 1) one in
   let limits = { default_limits with max_steps = 1 } in
-  match divide ~limits ~variable:"x" ~dividend ~divisor with
+  match divide ~limits ~variable:"x" dividend divisor with
   | Error (Resource_limit _) -> ()
   | Error error -> Alcotest.fail (error_message error)
   | Ok _ -> Alcotest.fail "multi-step division must hit max_steps=1"
@@ -89,7 +89,7 @@ let test_work_limit () =
   let dividend = add (xterm "1" 3) one in
   let divisor = add (xterm "1" 1) one in
   let limits = { default_limits with max_work = 1 } in
-  match divide ~limits ~variable:"x" ~dividend ~divisor with
+  match divide ~limits ~variable:"x" dividend divisor with
   | Error (Resource_limit _) -> ()
   | Error error -> Alcotest.fail (error_message error)
   | Ok _ -> Alcotest.fail "validation and leading scans must consume work"
@@ -98,7 +98,7 @@ let test_exact_bit_limit () =
   let huge = Z.shift_left Z.one 64 |> Q.of_bigint in
   let dividend = constant huge in
   let limits = { default_limits with max_exact_bits = 16 } in
-  match divide ~limits ~variable:"x" ~dividend ~divisor:one with
+  match divide ~limits ~variable:"x" dividend one with
   | Error (Resource_limit _) -> ()
   | Error error -> Alcotest.fail (error_message error)
   | Ok _ -> Alcotest.fail "oversized exact input must be refused"
@@ -111,7 +111,7 @@ let test_mid_work_cancellation () =
     incr checks;
     !checks >= 10
   in
-  begin match divide ~cancelled ~variable:"x" ~dividend ~divisor with
+  begin match divide ~cancelled ~variable:"x" dividend divisor with
   | Error Cancelled -> ()
   | Error error -> Alcotest.fail (error_message error)
   | Ok _ -> Alcotest.fail "division should cancel after work begins"
