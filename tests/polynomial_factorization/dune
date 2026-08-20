@@ -3,6 +3,14 @@
  (libraries centl_lib alcotest zarith))
 
 (test
+ (name test_polynomial_factorization_protocol)
+ (libraries centl_lib alcotest zarith yojson))
+
+(test
+ (name test_polynomial_factorization_surfaces)
+ (libraries centl_lib alcotest zarith yojson))
+
+(test
  (name test_polynomial_factorization_oracle)
  (libraries centl_lib alcotest zarith))
 
