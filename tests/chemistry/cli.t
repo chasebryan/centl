@@ -25,8 +25,30 @@
   O: 8 = 8
   verified=true
 
+  $ ../../src/chemistry_main.exe spread g 10.01 10.04 9.98 10.03 9.99
+  n=5
+  unit=g
+  observations=1001/100,251/25,499/50,1003/100,999/100
+  mean=1001/100 g
+  median=1001/100 g
+  minimum=499/50 g
+  maximum=251/25 g
+  range=3/50 g
+  mad=1/50 g
+  population_variance=13/25000 (g)^2
+  population_sd=sqrt(13/25000) g
+  sample_variance=13/20000 (g)^2
+  sample_sd=sqrt(13/20000) g
+  standard_error=sqrt(13/100000) g
+  rsd_fraction=sqrt(1/154154)
+  confidence_interval=not_computed(requires_declared_confidence_model_and_level)
+  measurement_uncertainty=not_provided
+
   $ ../../src/chemistry_main.exe --json balance 'Fe + O2 -> Fe2O3' | grep -o '"equation":"4 Fe + 3 O2 -> 2 Fe2O3"'
   "equation":"4 Fe + 3 O2 -> 2 Fe2O3"
+
+  $ ../../src/chemistry_main.exe --json spread g 1 3 | grep -o '"kind":"chemistry_sample_spread"'
+  "kind":"chemistry_sample_spread"
 
   $ ../../src/chemistry_main.exe balance 'H2 + O2 -> H2O + H2O2' 2>&1
   centl-chem: reaction balancing is underdetermined (nullspace dimension 2); no canonical result is admitted
@@ -34,4 +56,8 @@
 
   $ ../../src/chemistry_main.exe atoms 'Xx2' 2>&1
   centl-chem: unknown element symbol Xx
+  [1]
+
+  $ ../../src/chemistry_main.exe spread g 1/0 2 2>&1
+  centl-chem: invalid exact observation "1/0"
   [1]
