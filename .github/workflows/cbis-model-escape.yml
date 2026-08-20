@@ -1,0 +1,33 @@
+name: cbis model escape
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/cbis.kernel/**'
+      - 'research/erdos-straus/es'
+      - 'centl'
+      - '.github/workflows/cbis-model-escape.yml'
+  push:
+    branches:
+      - agent/cbis-model-escape
+    paths:
+      - 'research/erdos-straus/cbis.kernel/**'
+      - 'research/erdos-straus/es'
+      - 'centl'
+      - '.github/workflows/cbis-model-escape.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and test cbis model-escape
+        run: make -C research/erdos-straus/cbis.kernel check
+      - name: Test unified CENTL routing
+        run: |
+          ./centl es cbis audit 9658489 --k-max 400 | grep -q '"ab_unseen_through_K":true'
+          ./centl es cbis escape 9658489 --ab-k 400 --x-count 8 | grep -q 'GENERAL_ES_WITNESS_AB_UNSEEN_THROUGH_K'
+          ./centl es cbis observe 9658489 --ab-k 3000 --x-count 8 | grep -q 'AB_EXPLAINED_THROUGH_K'

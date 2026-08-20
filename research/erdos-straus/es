@@ -35,7 +35,10 @@ from bberviges.solve import Solver  # noqa: E402
 from bberviges.witness import verify_witness  # noqa: E402
 
 CBAP = ES_ROOT / "cbap.kernel" / "cbap"
-CBIS = ES_ROOT / "cbis.kernel" / "cbis"
+CBIS_ROOT = ES_ROOT / "cbis.kernel"
+CBIS = CBIS_ROOT / "cbis"
+CBIS_AUDIT = CBIS_ROOT / "cbis-audit"
+CBIS_ESCAPE = CBIS_ROOT / "cbis_escape.py"
 
 
 def cmd_cbap(argv: list[str]) -> int:
@@ -49,13 +52,32 @@ def cmd_cbap(argv: list[str]) -> int:
 
 
 def cmd_cbis(argv: list[str]) -> int:
+    """Route the cbis command family without changing live cover semantics."""
+    if argv and argv[0] == "audit":
+        if not CBIS_AUDIT.is_file():
+            print(
+                "cbis-audit binary missing; run: make -C research/erdos-straus/cbis.kernel",
+                file=sys.stderr,
+            )
+            return 2
+        return subprocess.call([str(CBIS_AUDIT), *argv[1:]], cwd=str(CBIS_ROOT))
+
+    if argv and argv[0] in {"escape", "observe"}:
+        if not CBIS_ESCAPE.is_file():
+            print("cbis model-escape observer missing", file=sys.stderr)
+            return 2
+        return subprocess.call(
+            [sys.executable, str(CBIS_ESCAPE), *argv[1:]],
+            cwd=str(CBIS_ROOT),
+        )
+
     if not CBIS.is_file():
         print(
             "cbis.kernel binary missing; run: make -C research/erdos-straus/cbis.kernel",
             file=sys.stderr,
         )
         return 2
-    return subprocess.call([str(CBIS), *argv])
+    return subprocess.call([str(CBIS), *argv], cwd=str(CBIS_ROOT))
 
 
 def emit(obj: dict) -> None:
@@ -293,7 +315,7 @@ def main() -> None:
 
     p_cbis = sub.add_parser(
         "cbis",
-        help="CB Inverse Sieve (ES+ letter spectrum)",
+        help="CB Inverse Sieve; subcommands audit and escape are non-cover observers",
     )
     p_cbis.add_argument("rest", nargs=argparse.REMAINDER)
 
