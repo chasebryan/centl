@@ -135,7 +135,7 @@ let subtract_shifted state variable shift scalar divisor remainder =
   loop remainder (bindings divisor)
 
 let divide ?(limits = default_limits) ?(cancelled = never_cancelled) ~variable
-    ~dividend ~divisor =
+    dividend divisor =
   let ( let* ) result next = Result.bind result next in
   if String.equal variable "" then Error Empty_variable
   else if
@@ -195,12 +195,12 @@ let divide ?(limits = default_limits) ?(cancelled = never_cancelled) ~variable
           in
           loop 0 zero dividend
 
-let quotient ?limits ?cancelled ~variable ~dividend ~divisor =
-  match divide ?limits ?cancelled ~variable ~dividend ~divisor with
+let quotient ?limits ?cancelled ~variable dividend divisor =
+  match divide ?limits ?cancelled ~variable dividend divisor with
   | Ok division -> Ok division.quotient
   | Error _ as error -> error
 
-let remainder ?limits ?cancelled ~variable ~dividend ~divisor =
-  match divide ?limits ?cancelled ~variable ~dividend ~divisor with
+let remainder ?limits ?cancelled ~variable dividend divisor =
+  match divide ?limits ?cancelled ~variable dividend divisor with
   | Ok division -> Ok division.remainder
   | Error _ as error -> error
