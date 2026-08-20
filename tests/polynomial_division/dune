@@ -9,3 +9,7 @@
 (test
  (name test_polynomial_division_protocol)
  (libraries centl_lib alcotest yojson zarith))
+
+(test
+ (name test_polynomial_division_surfaces)
+ (libraries centl_lib alcotest yojson zarith))
