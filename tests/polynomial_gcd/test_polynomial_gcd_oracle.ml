@@ -13,7 +13,7 @@ let q_int value = Q.of_int value
 let x = unwrap_poly (variable "x")
 let x2 = unwrap_poly (power x 2)
 
-let linear constant = add x (constant (q_int constant))
+let linear c = add x (constant (q_int c))
 
 let monic_quadratic a b =
   add x2 (add (scale (q_int a) x) (constant (q_int b)))
