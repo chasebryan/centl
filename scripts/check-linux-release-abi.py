@@ -11,6 +11,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+from typing import List, Optional, Set, Tuple
 
 DEFAULT_MAX_GLIBC = "2.31"
 ALLOWED_INTERPRETERS = {
@@ -36,7 +37,7 @@ class PortabilityError(RuntimeError):
     pass
 
 
-def parse_version(value: str) -> tuple[int, int]:
+def parse_version(value: str) -> Tuple[int, int]:
     match = re.fullmatch(r"(\d+)\.(\d+)", value.strip())
     if not match:
         raise PortabilityError(f"invalid glibc baseline: {value}")
@@ -59,17 +60,17 @@ def readelf(path: Path, *arguments: str) -> str:
     return completed.stdout
 
 
-def highest_glibc(text: str) -> tuple[int, int] | None:
+def highest_glibc(text: str) -> Optional[Tuple[int, int]]:
     versions = {(int(major), int(minor)) for major, minor in GLIBC_RE.findall(text)}
     return max(versions) if versions else None
 
 
-def interpreter(text: str) -> str | None:
+def interpreter(text: str) -> Optional[str]:
     match = INTERP_RE.search(text)
     return match.group(1).strip() if match else None
 
 
-def needed_libraries(text: str) -> set[str]:
+def needed_libraries(text: str) -> Set[str]:
     return set(NEEDED_RE.findall(text))
 
 
@@ -86,8 +87,8 @@ def require_elf(path: Path) -> None:
 def inspect_object(
     path: Path,
     *,
-    package_libraries: set[str],
-    max_glibc: tuple[int, int],
+    package_libraries: Set[str],
+    max_glibc: Tuple[int, int],
     executable: bool,
 ) -> None:
     require_elf(path)
@@ -114,7 +115,7 @@ def inspect_object(
         raise PortabilityError(f"{path.name} depends on unbundled runtime library {library}")
 
 
-def inspect_release_root(root: Path, max_glibc: tuple[int, int]) -> None:
+def inspect_release_root(root: Path, max_glibc: Tuple[int, int]) -> None:
     libexec = root / "libexec"
     library_dir = root / "lib"
     if not libexec.is_dir() or not library_dir.is_dir():
@@ -162,7 +163,7 @@ def safe_extract(archive: Path, destination: Path) -> Path:
     return root
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("release", type=Path, help="CENTL release root or .tar.gz archive")
     parser.add_argument(
