@@ -130,9 +130,9 @@ threshold and cone relation form a small exact-rational certificate.
 - [x] Canonical rational-coefficient univariate polynomials.
 - [ ] Canonical multivariate polynomials.
 - [ ] Coefficient extraction and coefficient arrays.
-- [ ] Polynomial content and primitive-part decomposition.
-- [ ] Polynomial quotient and remainder.
-- [ ] Polynomial GCD and extended GCD.
+- [x] Polynomial content and primitive-part decomposition.
+- [x] Polynomial quotient and remainder.
+- [x] Polynomial GCD and extended GCD.
 - [ ] Square-free factorization.
 - [ ] General exact factorization over the rationals.
 - [ ] Factorization over finite fields.
