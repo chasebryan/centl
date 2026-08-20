@@ -40,7 +40,7 @@ let check_case case a coefficients =
     polynomial_of_coefficients expected_quotient_coefficients
   in
   let expected_remainder = polynomial_of_coefficients [ expected_remainder ] in
-  let division = unwrap_division (divide ~variable:"x" ~dividend ~divisor) in
+  let division = unwrap_division (divide ~variable:"x" dividend divisor) in
   Alcotest.(check bool)
     (Printf.sprintf "oracle quotient case %d" case)
     true (equal expected_quotient division.quotient);
@@ -83,7 +83,7 @@ let test_large_exact_factor () =
   let dividend = unwrap_poly (multiply divisor quotient) in
   let limits = { default_limits with max_exact_bits = 20_000 } in
   let division =
-    unwrap_division (divide ~limits ~variable:"x" ~dividend ~divisor)
+    unwrap_division (divide ~limits ~variable:"x" dividend divisor)
   in
   Alcotest.(check bool) "large exact quotient" true
     (equal quotient division.quotient);
