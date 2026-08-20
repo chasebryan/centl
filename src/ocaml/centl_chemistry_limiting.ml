@@ -53,8 +53,8 @@ let parse_assignment text =
   | _ -> Error (Invalid_assignment text)
 
 let parse_assignments texts =
-  let rec loop map reversed = function
-    | [] -> Ok (map, List.rev reversed)
+  let rec loop map = function
+    | [] -> Ok map
     | text :: rest ->
         begin
           match parse_assignment text with
@@ -63,11 +63,10 @@ let parse_assignments texts =
               if String_map.mem input.species map then
                 Error (Duplicate_reactant_amount input.species)
               else
-                loop (String_map.add input.species input.moles map)
-                  (input :: reversed) rest
+                loop (String_map.add input.species input.moles map) rest
         end
   in
-  loop String_map.empty [] texts
+  loop String_map.empty texts
 
 let reactant_coefficients balanced =
   try
@@ -77,6 +76,17 @@ let reactant_coefficients balanced =
          balanced.reaction.reactants balanced.reactant_coefficients)
   with Invalid_argument _ ->
     Error (Reaction_error (Matrix_failure "reactant coefficient length mismatch"))
+
+let theoretical_products balanced extent_moles =
+  try
+    Ok
+      (List.map2
+         (fun species coefficient ->
+           ( species.formula_text,
+             Q.mul (Q.of_bigint coefficient) extent_moles ))
+         balanced.reaction.products balanced.product_coefficients)
+  with Invalid_argument _ ->
+    Error (Reaction_error (Matrix_failure "product coefficient length mismatch"))
 
 let ensure_unique_reactant_formulas pairs =
   let rec loop seen = function
@@ -101,7 +111,11 @@ let validate_assignments expected supplied =
   | Some (species, _) -> Error (Not_a_reactant species)
   | None ->
       begin
-        match List.find_opt (fun (species, _) -> not (String_map.mem species supplied)) expected with
+        match
+          List.find_opt
+            (fun (species, _) -> not (String_map.mem species supplied))
+            expected
+        with
         | Some (species, _) -> Error (Missing_reactant_amount species)
         | None -> Ok ()
       end
@@ -110,7 +124,9 @@ let minimum values =
   match values with
   | [] -> invalid_arg "minimum"
   | first :: rest ->
-      List.fold_left (fun current value -> if Q.compare value current < 0 then value else current) first rest
+      List.fold_left
+        (fun current value -> if Q.compare value current < 0 then value else current)
+        first rest
 
 let solve ?(source_class = Unspecified) ~reaction_text assignments =
   match Centl_chemistry.balance reaction_text with
@@ -127,11 +143,20 @@ let solve ?(source_class = Unspecified) ~reaction_text assignments =
                   begin
                     match parse_assignments assignments with
                     | Error _ as error -> error
-                    | Ok (supplied, inputs) ->
+                    | Ok supplied ->
                         begin
                           match validate_assignments coefficients supplied with
                           | Error _ as error -> error
                           | Ok () ->
+                              let inputs =
+                                List.map
+                                  (fun (species, _) ->
+                                    {
+                                      species;
+                                      moles = String_map.find species supplied;
+                                    })
+                                  coefficients
+                              in
                               let candidate_extents =
                                 List.map
                                   (fun (species, coefficient) ->
@@ -159,30 +184,21 @@ let solve ?(source_class = Unspecified) ~reaction_text assignments =
                                     (species, Q.sub initial consumed))
                                   coefficients
                               in
-                              let theoretical_products =
-                                try
-                                  List.map2
-                                    (fun species coefficient ->
-                                      ( species.formula_text,
-                                        Q.mul (Q.of_bigint coefficient) extent_moles ))
-                                    balanced.reaction.products
-                                    balanced.product_coefficients
-                                with Invalid_argument _ ->
-                                  raise
-                                    (Chemistry_error
-                                       (Matrix_failure
-                                          "product coefficient length mismatch"))
-                              in
-                              Ok
-                                {
-                                  source_class;
-                                  balanced;
-                                  inputs;
-                                  extent_moles;
-                                  limiting_species;
-                                  remaining_reactants;
-                                  theoretical_products;
-                                }
+                              begin
+                                match theoretical_products balanced extent_moles with
+                                | Error _ as error -> error
+                                | Ok theoretical_products ->
+                                    Ok
+                                      {
+                                        source_class;
+                                        balanced;
+                                        inputs;
+                                        extent_moles;
+                                        limiting_species;
+                                        remaining_reactants;
+                                        theoretical_products;
+                                      }
+                              end
                         end
                   end
             end
