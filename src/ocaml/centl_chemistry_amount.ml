@@ -1,5 +1,7 @@
 open Centl_chemistry
 
+type source_class = Unspecified | Measured | Declared_exact
+
 type error =
   | Invalid_amount of string
   | Negative_amount
@@ -12,6 +14,7 @@ type error =
   | Species_ambiguous of string
 
 type entity_conversion = {
+  source_class : source_class;
   moles : Q.t;
   entities : Q.t;
   entities_integral : bool;
@@ -20,6 +23,7 @@ type entity_conversion = {
 }
 
 type mole_conversion = {
+  source_class : source_class;
   entity_count : Z.t;
   moles : Q.t;
   avogadro_value : Q.t;
@@ -27,6 +31,7 @@ type mole_conversion = {
 }
 
 type stoichiometric_amount = {
+  source_class : source_class;
   balanced : balanced_reaction;
   source_species : string;
   target_species : string;
@@ -35,6 +40,11 @@ type stoichiometric_amount = {
   source_moles : Q.t;
   target_moles : Q.t;
 }
+
+let source_class_to_string = function
+  | Unspecified -> "unspecified"
+  | Measured -> "measured"
+  | Declared_exact -> "declared_exact"
 
 let error_message = function
   | Invalid_amount text -> Printf.sprintf "invalid amount-of-substance value %S" text
@@ -82,7 +92,7 @@ let avogadro () =
   with Centl_physics.Physics_error message ->
     Error (Avogadro_constant_unavailable message)
 
-let entities_from_moles moles =
+let entities_from_moles ?(source_class = Unspecified) moles =
   if Q.compare moles Q.zero < 0 then Error Negative_amount
   else
     match avogadro () with
@@ -91,6 +101,7 @@ let entities_from_moles moles =
         let entities = Q.mul moles avogadro_value in
         Ok
           {
+            source_class;
             moles;
             entities;
             entities_integral = Z.equal (Q.den entities) Z.one;
@@ -98,12 +109,12 @@ let entities_from_moles moles =
             avogadro_provenance;
           }
 
-let entities_from_moles_text text =
+let entities_from_moles_text ?(source_class = Unspecified) text =
   match parse_nonnegative_q text with
   | Error _ as error -> error
-  | Ok moles -> entities_from_moles moles
+  | Ok moles -> entities_from_moles ~source_class moles
 
-let moles_from_entities entity_count =
+let moles_from_entities ?(source_class = Unspecified) entity_count =
   if Z.sign entity_count < 0 then Error Negative_entity_count
   else
     match avogadro () with
@@ -111,16 +122,17 @@ let moles_from_entities entity_count =
     | Ok (avogadro_value, avogadro_provenance) ->
         Ok
           {
+            source_class;
             entity_count;
             moles = Q.div (Q.of_bigint entity_count) avogadro_value;
             avogadro_value;
             avogadro_provenance;
           }
 
-let moles_from_entities_text text =
+let moles_from_entities_text ?(source_class = Unspecified) text =
   match parse_nonnegative_z text with
   | Error _ as error -> error
-  | Ok count -> moles_from_entities count
+  | Ok count -> moles_from_entities ~source_class count
 
 let coefficient_matches balanced formula =
   let add_side species coefficients reversed =
@@ -142,8 +154,8 @@ let unique_coefficient balanced formula =
   | [ coefficient ] -> Ok coefficient
   | _ -> Error (Species_ambiguous formula)
 
-let stoichiometric_moles ~reaction_text ~source_species ~source_moles
-    ~target_species =
+let stoichiometric_moles ?(source_class = Unspecified) ~reaction_text
+    ~source_species ~source_moles ~target_species =
   if Q.compare source_moles Q.zero < 0 then Error Negative_amount
   else
     match Centl_chemistry.balance reaction_text with
@@ -163,6 +175,7 @@ let stoichiometric_moles ~reaction_text ~source_species ~source_moles
                     in
                     Ok
                       {
+                        source_class;
                         balanced;
                         source_species;
                         target_species;
@@ -174,10 +187,10 @@ let stoichiometric_moles ~reaction_text ~source_species ~source_moles
               end
         end
 
-let stoichiometric_moles_text ~reaction_text ~source_species ~source_moles
-    ~target_species =
+let stoichiometric_moles_text ?(source_class = Unspecified) ~reaction_text
+    ~source_species ~source_moles ~target_species =
   match parse_nonnegative_q source_moles with
   | Error _ as error -> error
   | Ok amount ->
-      stoichiometric_moles ~reaction_text ~source_species ~source_moles:amount
-        ~target_species
+      stoichiometric_moles ~source_class ~reaction_text ~source_species
+        ~source_moles:amount ~target_species
