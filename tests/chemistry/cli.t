@@ -26,16 +26,19 @@
   verified=true
 
   $ ../../src/chemistry_main.exe particles exact 1
-  source_class=declared_exact
+  input_source_class=declared_exact
+  result_source_class=derived_exact
   arithmetic_class=exact_over_supplied_values
   moles=1 mol
   entities=602214076000000000000000
   entities_integral=true
+  entity_count_status=integral_count
   N_A=602214076000000000000000 1/mol
   N_A_provenance=SI defining constant
 
   $ ../../src/chemistry_main.exe moles 602214076000000000000000
-  source_class=unspecified
+  input_source_class=unspecified
+  result_source_class=derived_from_unspecified
   arithmetic_class=exact_over_supplied_values
   entities=602214076000000000000000
   moles=1 mol
@@ -43,7 +46,8 @@
   N_A_provenance=SI defining constant
 
   $ ../../src/chemistry_main.exe stoich measured 'C2H6 + O2 -> CO2 + H2O' C2H6 3 CO2
-  source_class=measured
+  input_source_class=measured
+  result_source_class=derived_from_measured
   arithmetic_class=exact_over_supplied_values
   equation=2 C2H6 + 7 O2 -> 4 CO2 + 6 H2O
   source=C2H6
@@ -82,11 +86,11 @@
   $ ../../src/chemistry_main.exe --json balance 'Fe + O2 -> Fe2O3' | grep -o '"equation":"4 Fe + 3 O2 -> 2 Fe2O3"'
   "equation":"4 Fe + 3 O2 -> 2 Fe2O3"
 
-  $ ../../src/chemistry_main.exe --json particles exact 1 | grep -o '"entities":"602214076000000000000000"'
-  "entities":"602214076000000000000000"
+  $ ../../src/chemistry_main.exe --json particles exact 1 | grep -o '"result_source_class":"derived_exact"'
+  "result_source_class":"derived_exact"
 
-  $ ../../src/chemistry_main.exe --json stoich measured 'C2H6 + O2 -> CO2 + H2O' C2H6 3 CO2 | grep -o '"target_moles":"6"'
-  "target_moles":"6"
+  $ ../../src/chemistry_main.exe --json stoich measured 'C2H6 + O2 -> CO2 + H2O' C2H6 3 CO2 | grep -o '"result_source_class":"derived_from_measured"'
+  "result_source_class":"derived_from_measured"
 
   $ ../../src/chemistry_main.exe --json spread g 1 3 | grep -o '"source_class":"measured"'
   "source_class":"measured"
