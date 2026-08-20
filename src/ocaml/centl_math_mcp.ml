@@ -198,6 +198,30 @@ let polynomial_composition_request_schema =
         [ "action"; "polynomial"; "substitutions" ];
     ]
 
+let polynomial_content_request_schema =
+  one_of
+    [
+      strict_object [ ("action", const_string "capabilities") ] [ "action" ];
+      strict_object
+        [
+          ("action", const_string "content");
+          ("polynomial", polynomial_schema);
+        ]
+        [ "action"; "polynomial" ];
+      strict_object
+        [
+          ("action", const_string "primitive_part");
+          ("polynomial", polynomial_schema);
+        ]
+        [ "action"; "polynomial" ];
+      strict_object
+        [
+          ("action", const_string "decompose");
+          ("polynomial", polynomial_schema);
+        ]
+        [ "action"; "polynomial" ];
+    ]
+
 let algebraic_request_schema =
   one_of
     [
@@ -255,6 +279,12 @@ let input_schema =
         [
           ("domain", const_string "polynomial_composition");
           ("request", polynomial_composition_request_schema);
+        ]
+        [ "domain"; "request" ];
+      strict_object
+        [
+          ("domain", const_string "polynomial_content");
+          ("request", polynomial_content_request_schema);
         ]
         [ "domain"; "request" ];
       strict_object
@@ -327,7 +357,7 @@ let read_only_annotations =
     ]
 
 let tool_description =
-  "Use CENTL's canonical exact-first P0 mathematics gateway. Compute exact complex-rational arithmetic, exact dense rational matrix and linear-system operations, canonical sparse multivariate polynomial operations and exact simultaneous polynomial composition over Q, or Sturm-certified real algebraic root isolation. Unsupported inputs and resource boundaries remain explicit; the tool never silently falls back from exact mathematics to floating point."
+  "Use CENTL's canonical exact-first P0 mathematics gateway. Compute exact complex-rational arithmetic, exact dense rational matrix and linear-system operations, canonical sparse multivariate polynomial operations, exact simultaneous polynomial composition, exact polynomial content and primitive-part decomposition over Q, or Sturm-certified real algebraic root isolation. Unsupported inputs and resource boundaries remain explicit; the tool never silently falls back from exact mathematics to floating point."
 
 let tool () =
   `Assoc
@@ -370,6 +400,7 @@ let request_of_arguments arguments =
                    "matrix";
                    "multivariate_polynomial";
                    "polynomial_composition";
+                   "polynomial_content";
                    "real_algebraic";
                  ])
           then Error ("unknown centl_math domain " ^ domain)
