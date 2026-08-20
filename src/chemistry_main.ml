@@ -5,11 +5,17 @@ let usage () =
     "Usage:\n\
     \  centl-chem atoms FORMULA\n\
     \  centl-chem balance 'REACTION'\n\
+    \  centl-chem particles [measured|exact] MOLES\n\
+    \  centl-chem moles [measured|exact] ENTITY_COUNT\n\
+    \  centl-chem stoich [measured|exact] 'REACTION' SOURCE_SPECIES SOURCE_MOLES TARGET_SPECIES\n\
     \  centl-chem spread UNIT VALUE [VALUE ...]\n\
     \  centl-chem spread measured UNIT VALUE [VALUE ...]\n\
     \  centl-chem spread exact UNIT VALUE [VALUE ...]\n\
     \  centl-chem --json atoms FORMULA\n\
     \  centl-chem --json balance 'REACTION'\n\
+    \  centl-chem --json particles [measured|exact] MOLES\n\
+    \  centl-chem --json moles [measured|exact] ENTITY_COUNT\n\
+    \  centl-chem --json stoich [measured|exact] 'REACTION' SOURCE_SPECIES SOURCE_MOLES TARGET_SPECIES\n\
     \  centl-chem --json spread UNIT VALUE [VALUE ...]\n\
     \  centl-chem --json spread measured UNIT VALUE [VALUE ...]\n\
     \  centl-chem --json spread exact UNIT VALUE [VALUE ...]\n";
@@ -21,6 +27,10 @@ let fail error =
 
 let fail_sample error =
   Printf.eprintf "centl-chem: %s\n" (Centl_chemistry_sample.error_message error);
+  exit 1
+
+let fail_amount error =
+  Printf.eprintf "centl-chem: %s\n" (Centl_chemistry_amount.error_message error);
   exit 1
 
 let command_atoms formula_text =
@@ -44,6 +54,55 @@ let command_balance reaction_text =
       Printf.printf "verified=%s\n" (if balanced.verified then "true" else "false")
 
 let q_text = Q.to_string
+
+let command_particles source_class moles_text =
+  match Centl_chemistry_amount.entities_from_moles_text ~source_class moles_text with
+  | Error error -> fail_amount error
+  | Ok conversion ->
+      Printf.printf "source_class=%s\n"
+        (Centl_chemistry_amount.source_class_to_string conversion.source_class);
+      Printf.printf "arithmetic_class=exact_over_supplied_values\n";
+      Printf.printf "moles=%s mol\n" (q_text conversion.moles);
+      Printf.printf "entities=%s\n" (q_text conversion.entities);
+      Printf.printf "entities_integral=%s\n"
+        (if conversion.entities_integral then "true" else "false");
+      Printf.printf "N_A=%s 1/mol\n" (q_text conversion.avogadro_value);
+      Printf.printf "N_A_provenance=%s\n" conversion.avogadro_provenance
+
+let command_moles source_class entities_text =
+  match Centl_chemistry_amount.moles_from_entities_text ~source_class entities_text with
+  | Error error -> fail_amount error
+  | Ok conversion ->
+      Printf.printf "source_class=%s\n"
+        (Centl_chemistry_amount.source_class_to_string conversion.source_class);
+      Printf.printf "arithmetic_class=exact_over_supplied_values\n";
+      Printf.printf "entities=%s\n" (Z.to_string conversion.entity_count);
+      Printf.printf "moles=%s mol\n" (q_text conversion.moles);
+      Printf.printf "N_A=%s 1/mol\n" (q_text conversion.avogadro_value);
+      Printf.printf "N_A_provenance=%s\n" conversion.avogadro_provenance
+
+let command_stoich source_class reaction_text source_species source_moles
+    target_species =
+  match
+    Centl_chemistry_amount.stoichiometric_moles_text ~source_class ~reaction_text
+      ~source_species ~source_moles ~target_species
+  with
+  | Error error -> fail_amount error
+  | Ok conversion ->
+      Printf.printf "source_class=%s\n"
+        (Centl_chemistry_amount.source_class_to_string conversion.source_class);
+      Printf.printf "arithmetic_class=exact_over_supplied_values\n";
+      Printf.printf "equation=%s\n" (render_balanced conversion.balanced);
+      Printf.printf "source=%s\n" conversion.source_species;
+      Printf.printf "source_coefficient=%s\n"
+        (Z.to_string conversion.source_coefficient);
+      Printf.printf "source_moles=%s mol\n" (q_text conversion.source_moles);
+      Printf.printf "target=%s\n" conversion.target_species;
+      Printf.printf "target_coefficient=%s\n"
+        (Z.to_string conversion.target_coefficient);
+      Printf.printf "target_moles=%s mol\n" (q_text conversion.target_moles);
+      Printf.printf "reaction_verified=%s\n"
+        (if conversion.balanced.verified then "true" else "false")
 
 let command_spread observation_class unit_symbol values =
   match
@@ -107,6 +166,25 @@ let () =
   match Array.to_list Sys.argv with
   | [ _; "atoms"; formula ] -> command_atoms formula
   | [ _; "balance"; reaction ] -> command_balance reaction
+  | [ _; "particles"; "measured"; moles ] ->
+      command_particles Centl_chemistry_amount.Measured moles
+  | [ _; "particles"; "exact"; moles ] ->
+      command_particles Centl_chemistry_amount.Declared_exact moles
+  | [ _; "particles"; moles ] ->
+      command_particles Centl_chemistry_amount.Unspecified moles
+  | [ _; "moles"; "measured"; entities ] ->
+      command_moles Centl_chemistry_amount.Measured entities
+  | [ _; "moles"; "exact"; entities ] ->
+      command_moles Centl_chemistry_amount.Declared_exact entities
+  | [ _; "moles"; entities ] ->
+      command_moles Centl_chemistry_amount.Unspecified entities
+  | [ _; "stoich"; "measured"; reaction; source; amount; target ] ->
+      command_stoich Centl_chemistry_amount.Measured reaction source amount target
+  | [ _; "stoich"; "exact"; reaction; source; amount; target ] ->
+      command_stoich Centl_chemistry_amount.Declared_exact reaction source amount
+        target
+  | [ _; "stoich"; reaction; source; amount; target ] ->
+      command_stoich Centl_chemistry_amount.Unspecified reaction source amount target
   | _ :: "spread" :: "measured" :: unit_symbol :: values when values <> [] ->
       command_spread Centl_chemistry_sample.Measured unit_symbol values
   | _ :: "spread" :: "exact" :: unit_symbol :: values when values <> [] ->
@@ -117,6 +195,42 @@ let () =
       command_json (Centl_chemistry_protocol.atoms_request formula)
   | [ _; "--json"; "balance"; reaction ] ->
       command_json (Centl_chemistry_protocol.balance_request reaction)
+  | [ _; "--json"; "particles"; "measured"; moles ] ->
+      command_json
+        (Centl_chemistry_amount_protocol.entities_request
+           ~source_class:Centl_chemistry_amount.Measured moles)
+  | [ _; "--json"; "particles"; "exact"; moles ] ->
+      command_json
+        (Centl_chemistry_amount_protocol.entities_request
+           ~source_class:Centl_chemistry_amount.Declared_exact moles)
+  | [ _; "--json"; "particles"; moles ] ->
+      command_json (Centl_chemistry_amount_protocol.entities_request moles)
+  | [ _; "--json"; "moles"; "measured"; entities ] ->
+      command_json
+        (Centl_chemistry_amount_protocol.moles_request
+           ~source_class:Centl_chemistry_amount.Measured entities)
+  | [ _; "--json"; "moles"; "exact"; entities ] ->
+      command_json
+        (Centl_chemistry_amount_protocol.moles_request
+           ~source_class:Centl_chemistry_amount.Declared_exact entities)
+  | [ _; "--json"; "moles"; entities ] ->
+      command_json (Centl_chemistry_amount_protocol.moles_request entities)
+  | [ _; "--json"; "stoich"; "measured"; reaction; source; amount; target ] ->
+      command_json
+        (Centl_chemistry_amount_protocol.stoichiometry_request
+           ~source_class:Centl_chemistry_amount.Measured ~reaction_text:reaction
+           ~source_species:source ~source_moles:amount ~target_species:target)
+  | [ _; "--json"; "stoich"; "exact"; reaction; source; amount; target ] ->
+      command_json
+        (Centl_chemistry_amount_protocol.stoichiometry_request
+           ~source_class:Centl_chemistry_amount.Declared_exact
+           ~reaction_text:reaction ~source_species:source ~source_moles:amount
+           ~target_species:target)
+  | [ _; "--json"; "stoich"; reaction; source; amount; target ] ->
+      command_json
+        (Centl_chemistry_amount_protocol.stoichiometry_request
+           ~reaction_text:reaction ~source_species:source ~source_moles:amount
+           ~target_species:target)
   | _ :: "--json" :: "spread" :: "measured" :: unit_symbol :: values
     when values <> [] ->
       command_json
