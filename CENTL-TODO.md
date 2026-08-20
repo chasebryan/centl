@@ -68,6 +68,38 @@ that strategic inventory.
 - [x] Reviewed publish path: scope gate, contributor/owner grants, local
   pack, draft PR to mirage only, no stored tokens.
 
+## CENTL Chemistry
+
+CENTL Chemistry is the planned exact-first chemistry domain described in
+[`docs/CHEMISTRY-PLAN.md`](docs/CHEMISTRY-PLAN.md). The first slice should stay
+small enough to verify completely before stoichiometry, measured data, or broader
+chemical models are admitted.
+
+Immediate vertical-slice work:
+
+- [ ] Define the chemistry value/AST types for elements, formulas, species, and
+  reactions without duplicating CENTL's rational arithmetic.
+- [ ] Implement a bounded formula parser with elemental symbols, integer
+  subscripts, and nested parenthesized groups.
+- [ ] Implement deterministic exact atom counting and canonical species
+  rendering.
+- [ ] Implement reaction parsing and construct the per-element stoichiometric
+  matrix exactly.
+- [ ] Solve the supported balancing domain through exact rational/integer linear
+  algebra and normalize to the least positive integer coefficient vector.
+- [ ] Independently verify every returned balance by recounting each element on
+  both sides of the reaction.
+- [ ] Add explicit refusal for malformed formulas, unknown elements, impossible
+  balances, and underdetermined cases without a supported canonical result.
+- [ ] Expose the first `centl-chem` human CLI plus deterministic machine result
+  representation from the same authoritative implementation.
+- [ ] Add golden, adversarial, malformed-input, determinism, and conservation
+  tests for `Ca(OH)2`, `Fe + O2 -> Fe2O3`, ethane combustion, and the
+  `KMnO4 + HCl` reaction.
+- [ ] Keep atomic-weight/molar-mass work blocked until measured/interval
+  provenance semantics are specified; do not label chemical data exact merely
+  because it is decimal.
+
 ## CENTLAMP
 
 CENTLAMP is the **CENTL Authority & Metric Protocol**, the open search-ranking
