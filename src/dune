@@ -149,6 +149,7 @@
   Centl_sci_kernel
   Centl_sci_app
   Centl_physics
+  Centl_chemistry
   Centl_physics_cherenkov
   Centl_physics_collision
   Centl_physics_world
@@ -200,3 +201,10 @@
  (package centl)
  (modules Mirage_main)
  (libraries centl_lib unix yojson))
+
+(executable
+ (name chemistry_main)
+ (public_name centl-chem)
+ (package centl)
+ (modules Chemistry_main)
+ (libraries centl_lib zarith))
