@@ -30,7 +30,7 @@ class LinuxReleaseAbiTests(unittest.TestCase):
         self.assertEqual(ABI.interpreter(program_headers), "/lib64/ld-linux-x86-64.so.2")
         self.assertEqual(ABI.needed_libraries(dynamic), {"libc.so.6", "libgmp.so.10"})
 
-    def _elf(self) -> tuple[tempfile.TemporaryDirectory[str], Path]:
+    def _elf(self):
         temporary = tempfile.TemporaryDirectory()
         path = Path(temporary.name) / "centl"
         path.write_bytes(b"\x7fELF" + b"\x00" * 32)
