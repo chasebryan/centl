@@ -1,0 +1,15 @@
+(test
+ (name test_polynomial_division)
+ (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_polynomial_division_oracle)
+ (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_polynomial_division_protocol)
+ (libraries centl_lib alcotest yojson zarith))
+
+(test
+ (name test_polynomial_division_surfaces)
+ (libraries centl_lib alcotest yojson zarith))

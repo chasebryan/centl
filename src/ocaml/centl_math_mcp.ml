@@ -222,6 +222,25 @@ let polynomial_content_request_schema =
         [ "action"; "polynomial" ];
     ]
 
+let polynomial_division_request_schema =
+  let operation action =
+    strict_object
+      [
+        ("action", const_string action);
+        ("variable", string_schema);
+        ("dividend", polynomial_schema);
+        ("divisor", polynomial_schema);
+      ]
+      [ "action"; "variable"; "dividend"; "divisor" ]
+  in
+  one_of
+    [
+      strict_object [ ("action", const_string "capabilities") ] [ "action" ];
+      operation "divide";
+      operation "quotient";
+      operation "remainder";
+    ]
+
 let algebraic_request_schema =
   one_of
     [
@@ -285,6 +304,12 @@ let input_schema =
         [
           ("domain", const_string "polynomial_content");
           ("request", polynomial_content_request_schema);
+        ]
+        [ "domain"; "request" ];
+      strict_object
+        [
+          ("domain", const_string "polynomial_division");
+          ("request", polynomial_division_request_schema);
         ]
         [ "domain"; "request" ];
       strict_object
@@ -357,7 +382,7 @@ let read_only_annotations =
     ]
 
 let tool_description =
-  "Use CENTL's canonical exact-first P0 mathematics gateway. Compute exact complex-rational arithmetic, exact dense rational matrix and linear-system operations, canonical sparse multivariate polynomial operations, exact simultaneous polynomial composition, exact polynomial content and primitive-part decomposition over Q, or Sturm-certified real algebraic root isolation. Unsupported inputs and resource boundaries remain explicit; the tool never silently falls back from exact mathematics to floating point."
+  "Use CENTL's canonical exact-first P0 mathematics gateway. Compute exact complex-rational arithmetic, exact dense rational matrix and linear-system operations, canonical sparse multivariate polynomial operations, exact simultaneous polynomial composition, exact polynomial content and primitive-part decomposition, exact univariate polynomial quotient and remainder over Q, or Sturm-certified real algebraic root isolation. Unsupported inputs and resource boundaries remain explicit; the tool never silently falls back from exact mathematics to floating point."
 
 let tool () =
   `Assoc
@@ -401,6 +426,7 @@ let request_of_arguments arguments =
                    "multivariate_polynomial";
                    "polynomial_composition";
                    "polynomial_content";
+                   "polynomial_division";
                    "real_algebraic";
                  ])
           then Error ("unknown centl_math domain " ^ domain)

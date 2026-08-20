@@ -171,6 +171,37 @@ let polynomial_content_resource_limits limits =
       ("cooperative_cancellation", `Bool true);
     ]
 
+let polynomial_division_limits limits =
+  let defaults = Centl_polynomial_division.default_limits in
+  let polynomial = limits.polynomial in
+  let division =
+    Centl_polynomial_division.
+      {
+        max_terms = min defaults.max_terms polynomial.max_terms;
+        max_exact_bits = min defaults.max_exact_bits polynomial.max_exact_bits;
+        max_steps = min defaults.max_steps polynomial.max_work;
+        max_work = min defaults.max_work polynomial.max_work;
+      }
+  in
+  Centl_polynomial_division_protocol.
+    {
+      polynomial;
+      division;
+      max_result_bytes = min polynomial.max_result_bytes limits.max_result_bytes;
+    }
+
+let polynomial_division_resource_limits limits =
+  let limits = polynomial_division_limits limits in
+  `Assoc
+    [
+      ("max_terms", `Int limits.division.max_terms);
+      ("max_exact_bits", `Int limits.division.max_exact_bits);
+      ("max_steps", `Int limits.division.max_steps);
+      ("max_work", `Int limits.division.max_work);
+      ("max_result_bytes", `Int limits.max_result_bytes);
+      ("cooperative_cancellation", `Bool true);
+    ]
+
 let capabilities limits =
   `Assoc
     [
@@ -260,6 +291,14 @@ let capabilities limits =
               ];
             `Assoc
               [
+                ("name", `String "polynomial_division");
+                ("classification", `String "exact");
+                ("input", `String "univariate sparse Q-polynomials plus explicit variable");
+                ("operations", strings [ "divide"; "quotient"; "remainder" ]);
+                ("limits", polynomial_division_resource_limits limits);
+              ];
+            `Assoc
+              [
                 ("name", `String "real_algebraic");
                 ("classification", `String "algebraic_exact");
                 ("input", `String "integer polynomial plus rational interval");
@@ -320,6 +359,9 @@ let dispatch_domain limits ~cancelled id domain request =
       | "polynomial_content" ->
           Centl_polynomial_content_protocol.handle_json
             ~limits:(polynomial_content_limits limits) ~cancelled request
+      | "polynomial_division" ->
+          Centl_polynomial_division_protocol.handle_json
+            ~limits:(polynomial_division_limits limits) ~cancelled request
       | "real_algebraic" ->
           Centl_real_algebraic_protocol.handle_json ~limits:limits.algebraic
             ~cancelled request
