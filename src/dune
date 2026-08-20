@@ -47,6 +47,7 @@
   Centl_polynomial_content
   Centl_polynomial_content_protocol
   Centl_polynomial_division
+  Centl_polynomial_division_protocol
   Centl_real_algebraic
   Centl_real_algebraic_protocol
   Centl_math_gateway
