@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Free Computation Foundation: CENTL exact calculator, scientific computation, zero-JavaScript web hub, and public research.">
-  <title>Free Computation Foundation — CENTL Hub</title>
+  <meta name="description" content="Free computation for science: CENTL is an exact-first calculator and scientific computing system for mathematics, physics, symbolic calculus, and research.">
+  <title>Free Computation for Science — CENTL | Free Computation Foundation</title>
   <link rel="canonical" href="https://freecomputation.org/">
   <meta name="robots" content="index,follow,max-image-preview:large">
   <meta name="author" content="Free Computation Foundation">
   <meta name="keywords" content="Free Computation Foundation, FCF, CENTL, exact calculator, exact mathematics, interval arithmetic, scientific computation, Erdős-Straus, Type A, Type B, congruence shadow, Bryan Recursive Entanglement Calculus, BREC, MCP math, computer algebra, Oasis release, zero javascript">
+  <meta name="theme-color" content="#0b1020">
   <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
   <link rel="me" href="https://github.com/chasebryan/centl">
   <meta property="og:type" content="website">
@@ -20,6 +21,16 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Free Computation Foundation — CENTL Hub">
   <meta name="twitter:description" content="Free for science. CENTL v0.15.0 Al-Nur exact mathematics and FCF research publications.">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@graph":[
+      {"@type":"Organization","@id":"https://freecomputation.org/#organization","name":"Free Computation Foundation","alternateName":"FCF","url":"https://freecomputation.org/","logo":"https://freecomputation.org/assets/fcf-centl-banner.png","sameAs":["https://github.com/chasebryan/centl"]},
+      {"@type":"WebSite","@id":"https://freecomputation.org/#website","url":"https://freecomputation.org/","name":"Free Computation Foundation","alternateName":"Free Computation","publisher":{"@id":"https://freecomputation.org/#organization"},"inLanguage":"en"},
+      {"@type":"SoftwareApplication","@id":"https://freecomputation.org/#centl","name":"CENTL","alternateName":"CENTL exact-first scientific computation system","url":"https://freecomputation.org/centl.html","applicationCategory":"DeveloperApplication","operatingSystem":"GNU/Linux","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://freecomputation.org/#organization"}}
+    ]
+  }
+  </script>
   <link rel="stylesheet" href="style.css?v=3">
   <link rel="stylesheet" href="library-layout.css?v=2">
 </head>
@@ -34,6 +45,7 @@
       <h2>CENTL &amp; Hub</h2>
       <ul>
         <li><a href="index.html#top">CENTL Work Area</a></li>
+        <li><a href="free-computation.html#top">What is Free Computation?</a></li>
         <li><a href="centl.html#top">About CENTL</a></li>
         <li><a href="research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
         <li><a href="software.html#top">Software Suite</a></li>
@@ -63,8 +75,11 @@
     <main id="content">
       <img class="banner" src="assets/fcf-centl-banner.png" alt="Free Computation Foundation and CENTL camel banner">
 
+      <h1>Free Computation for Science</h1>
+      <p>CENTL is the Free Computation Foundation's exact-first calculator and scientific computation system. Use it for exact mathematics, symbolic calculus, physics, numerical enclosures, and reproducible research. Exact values stay exact; approximations carry justified enclosures. This work area runs with <strong>zero JavaScript</strong>.</p>
+      <p class="card-links"><a href="free-computation.html">Learn what free computation means</a> · <a href="centl.html">Explore CENTL</a> · <a href="software.html">Install the software</a></p>
+
       <h2>CENTL Exact Work Area</h2>
-      <p>CENTL computes exact mathematics, symbolic calculus, and physics directly. Exact values stay exact; approximations carry justified enclosures. This work area runs with <strong>zero JavaScript</strong>.</p>
 
       <div class="centl-work-area" id="centl-console">
         <div class="centl-work-header">

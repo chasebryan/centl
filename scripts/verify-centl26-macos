@@ -1,0 +1,453 @@
+#!/bin/bash
+# SPDX-License-Identifier: Apache-2.0
+# Verify a CentL26.app composition without modifying it.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+REPOSITORY_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
+APPLICATION="${1:-$REPOSITORY_ROOT/build/centl26/macos/CentL26.app}"
+EXPECTED_VERSION="${CENTL26_EXPECTED_VERSION:-}"
+EXPECTED_ARCHITECTURE="${CENTL26_EXPECTED_ARCHITECTURE:-}"
+EXPECTED_TEAM_ID="${CENTL26_EXPECTED_TEAM_ID:-}"
+RUN_SELF_TEST="${CENTL26_RUN_SELF_TEST:-0}"
+RUN_CHEMISTRY_SMOKE="${CENTL26_RUN_CHEMISTRY_SMOKE:-0}"
+RUN_STATE_SECURITY_TEST="${CENTL26_RUN_STATE_SECURITY_TEST:-$RUN_SELF_TEST}"
+REQUIRE_NOTARIZATION="${CENTL26_REQUIRE_NOTARIZATION:-0}"
+
+for boolean_name in RUN_SELF_TEST RUN_CHEMISTRY_SMOKE RUN_STATE_SECURITY_TEST REQUIRE_NOTARIZATION; do
+    boolean_value="${!boolean_name}"
+    case "$boolean_value" in 0|1) ;; *) echo "CentL26 verification failed: $boolean_name must be 0 or 1" >&2; exit 2 ;; esac
+done
+
+fail() {
+    echo "CentL26 verification failed: $*" >&2
+    exit 1
+}
+
+plist_value() {
+    plutil -extract "$1" raw "$2"
+}
+
+sha256_file() {
+    shasum -a 256 "$1" | awk '{print $1}'
+}
+
+architectures() {
+    lipo -archs "$1" | tr ' ' '\n' | LC_ALL=C sort | tr '\n' ' ' | sed 's/ $//'
+}
+
+check_system_dependencies() {
+    local executable="$1"
+    local dependency
+    while IFS= read -r dependency; do
+        dependency="${dependency#${dependency%%[![:space:]]*}}"
+        dependency="${dependency%% *}"
+        [ -n "$dependency" ] || continue
+        case "$dependency" in
+            /System/Library/*|/usr/lib/*) ;;
+            *) fail "$executable depends on non-system library $dependency" ;;
+        esac
+    done < <(otool -L "$executable" | tail -n +2)
+}
+
+check_provider_dependencies() {
+    local executable="$1"
+    local dependency
+    while IFS= read -r dependency; do
+        dependency="${dependency#${dependency%%[![:space:]]*}}"
+        dependency="${dependency%% *}"
+        [ -n "$dependency" ] || continue
+        case "$dependency" in
+            /System/Library/*|/usr/lib/*) ;;
+            @executable_path/../../../Frameworks/*.dylib)
+                local name="${dependency#@executable_path/../../../Frameworks/}"
+                [ "$name" = "$(basename -- "$name")" ] || fail "unsafe provider dependency path: $dependency"
+                [ -f "$APPLICATION/Contents/Frameworks/$name" ] \
+                    || fail "$executable references missing runtime library $name"
+                ;;
+            *) fail "$executable has an unrelocated dependency: $dependency" ;;
+        esac
+    done < <(otool -L "$executable" | tail -n +2)
+}
+
+check_runtime_library_dependencies() {
+    local executable="$1"
+    local own_name="$(basename -- "$executable")"
+    local dependency
+    while IFS= read -r dependency; do
+        dependency="${dependency#${dependency%%[![:space:]]*}}"
+        dependency="${dependency%% *}"
+        [ -n "$dependency" ] || continue
+        case "$dependency" in
+            /System/Library/*|/usr/lib/*) ;;
+            "@rpath/$own_name") ;;
+            @loader_path/*.dylib)
+                local name="${dependency#@loader_path/}"
+                [ "$name" = "$(basename -- "$name")" ] || fail "unsafe runtime-library dependency path: $dependency"
+                [ -f "$APPLICATION/Contents/Frameworks/$name" ] \
+                    || fail "$executable references missing runtime library $name"
+                ;;
+            *) fail "$executable has an unrelocated dependency: $dependency" ;;
+        esac
+    done < <(otool -L "$executable" | tail -n +2)
+}
+
+for required in plutil shasum lipo otool codesign; do
+    command -v "$required" >/dev/null 2>&1 || fail "required verification tool is missing: $required"
+done
+
+[ "$(uname -s)" = "Darwin" ] || fail "macOS is required"
+[ -d "$APPLICATION/Contents" ] || fail "application bundle not found: $APPLICATION"
+
+INFO="$APPLICATION/Contents/Info.plist"
+LAUNCHER="$APPLICATION/Contents/MacOS/CentL26"
+SUPERVISOR="$APPLICATION/Contents/Helpers/centl26-supervisor"
+BACKEND="$APPLICATION/Contents/Resources/bin/centl26"
+ICON="$APPLICATION/Contents/Resources/CentL26.icns"
+BUILD_MANIFEST="$APPLICATION/Contents/Resources/build-manifest.json"
+PROVIDER_MANIFEST="$APPLICATION/Contents/Resources/providers/providers.json"
+LICENSE_NOTICE="$APPLICATION/Contents/Resources/licenses/THIRD_PARTY_NOTICES.md"
+PRODUCT_LICENSE="$APPLICATION/Contents/Resources/licenses/CentL26-Apache-2.0.txt"
+
+for file in "$INFO" "$LAUNCHER" "$SUPERVISOR" "$BACKEND" "$ICON" "$BUILD_MANIFEST" "$PROVIDER_MANIFEST" "$LICENSE_NOTICE" "$PRODUCT_LICENSE"; do
+    [ -f "$file" ] || fail "required bundle file is missing: $file"
+done
+for executable in "$LAUNCHER" "$SUPERVISOR" "$BACKEND"; do
+    [ -x "$executable" ] || fail "bundle executable is not executable: $executable"
+done
+
+if [ -n "$(find "$APPLICATION" -type l -print -quit)" ]; then
+    fail "application bundle contains a symbolic link"
+fi
+if xattr -r -p com.apple.quarantine "$APPLICATION" >/dev/null 2>&1; then
+    fail "application bundle contains quarantine metadata"
+fi
+
+plutil -lint "$INFO" >/dev/null
+plutil -convert json -o /dev/null -- "$BUILD_MANIFEST"
+plutil -convert json -o /dev/null -- "$PROVIDER_MANIFEST"
+[ "$(plist_value CFBundleIdentifier "$INFO")" = "org.freecomputation.centl" ] \
+    || fail "unexpected bundle identifier"
+[ "$(plist_value CFBundleExecutable "$INFO")" = "CentL26" ] \
+    || fail "unexpected bundle executable"
+[ "$(plist_value CFBundlePackageType "$INFO")" = "APPL" ] \
+    || fail "unexpected bundle package type"
+
+VERSION="$(plist_value CFBundleShortVersionString "$INFO")"
+BUNDLE_VERSION="$(plist_value CFBundleVersion "$INFO")"
+[ "$VERSION" = "$BUNDLE_VERSION" ] || fail "short version and bundle version differ"
+[[ "$VERSION" =~ ^26(\.[0-9]+){0,2}$ ]] || fail "bundle is not on the CentL26 version train"
+if [ -n "$EXPECTED_VERSION" ] && [ "$VERSION" != "$EXPECTED_VERSION" ]; then
+    fail "expected version $EXPECTED_VERSION, found $VERSION"
+fi
+
+LAUNCHER_ARCHS="$(architectures "$LAUNCHER")"
+SUPERVISOR_ARCHS="$(architectures "$SUPERVISOR")"
+BACKEND_ARCHS="$(architectures "$BACKEND")"
+[ "$LAUNCHER_ARCHS" = "$SUPERVISOR_ARCHS" ] || fail "launcher and supervisor architectures differ"
+[ "$LAUNCHER_ARCHS" = "$BACKEND_ARCHS" ] || fail "launcher and backend architectures differ"
+if [ -n "$EXPECTED_ARCHITECTURE" ] && ! grep -Eq "(^| )$EXPECTED_ARCHITECTURE( |$)" <<<"$LAUNCHER_ARCHS"; then
+    fail "expected architecture $EXPECTED_ARCHITECTURE, found $LAUNCHER_ARCHS"
+fi
+
+check_system_dependencies "$LAUNCHER"
+check_system_dependencies "$SUPERVISOR"
+check_system_dependencies "$BACKEND"
+
+SIGNING_MODE="$(plist_value CentLSigningMode "$INFO")"
+case "$SIGNING_MODE" in unsigned|adhoc|developer-id) ;; *) fail "unknown signing mode: $SIGNING_MODE" ;; esac
+if [ "$SIGNING_MODE" = "unsigned" ]; then
+    [ "${CENTL26_REQUIRE_SIGNING:-0}" != "1" ] || fail "signed bundle required"
+else
+    codesign --verify --deep --strict "$APPLICATION"
+    for executable in "$LAUNCHER" "$SUPERVISOR" "$BACKEND"; do
+        codesign --verify --strict "$executable"
+    done
+fi
+
+if [ "$SIGNING_MODE" = "developer-id" ]; then
+    SIGNING_DETAIL="$(codesign --display --verbose=4 "$APPLICATION" 2>&1)"
+    grep -Eq 'flags=.*runtime' <<<"$SIGNING_DETAIL" || fail "Developer ID build lacks hardened runtime"
+    grep -Eq '^Authority=Developer ID Application:' <<<"$SIGNING_DETAIL" \
+        || fail "bundle is not signed by a Developer ID Application certificate"
+    TEAM_ID="$(awk -F= '/^TeamIdentifier=/{print $2; exit}' <<<"$SIGNING_DETAIL")"
+    [ -n "$TEAM_ID" ] || fail "Developer ID build has no TeamIdentifier"
+    if [ -n "$EXPECTED_TEAM_ID" ] && [ "$TEAM_ID" != "$EXPECTED_TEAM_ID" ]; then
+        fail "expected signing team $EXPECTED_TEAM_ID, found $TEAM_ID"
+    fi
+elif [ -n "$EXPECTED_TEAM_ID" ]; then
+    fail "a signing team was expected but the bundle is not Developer ID signed"
+fi
+
+[ "$(plist_value schema "$BUILD_MANIFEST")" = "org.freecomputation.centl.build/1" ] \
+    || fail "unexpected build-manifest schema"
+[ "$(plist_value product_version "$BUILD_MANIFEST")" = "$VERSION" ] \
+    || fail "build manifest version differs from Info.plist"
+[ "$(plist_value bundle_identifier "$BUILD_MANIFEST")" = "org.freecomputation.centl" ] \
+    || fail "build manifest bundle identifier differs"
+[ "$(plist_value architecture "$BUILD_MANIFEST")" = "$LAUNCHER_ARCHS" ] \
+    || fail "build manifest architecture differs"
+[ "$(plist_value deployment_target "$BUILD_MANIFEST")" = "$(plist_value LSMinimumSystemVersion "$INFO")" ] \
+    || fail "deployment target differs between build manifest and Info.plist"
+[ "$(plist_value build_commit "$BUILD_MANIFEST")" = "$(plist_value CentLBuildCommit "$INFO")" ] \
+    || fail "build commit differs between build manifest and Info.plist"
+[ "$(plist_value configuration "$BUILD_MANIFEST")" = "$(plist_value CentLBuildConfiguration "$INFO")" ] \
+    || fail "configuration differs between build manifest and Info.plist"
+[ "$(plist_value signing "$BUILD_MANIFEST")" = "$SIGNING_MODE" ] \
+    || fail "signing mode differs between build manifest and Info.plist"
+[ "$(plist_value CentLBuildArchitecture "$INFO")" = "$LAUNCHER_ARCHS" ] \
+    || fail "architecture differs between Info.plist and executables"
+[ "$(plist_value CentLProviderManifest "$INFO")" = "providers/providers.json" ] \
+    || fail "provider-manifest path differs in Info.plist"
+[ "$(plist_value provider_manifest "$BUILD_MANIFEST")" = "providers/providers.json" ] \
+    || fail "provider-manifest path differs in build manifest"
+BUILD_SOURCE_STATE="$(plist_value source_state "$BUILD_MANIFEST")"
+case "$BUILD_SOURCE_STATE" in clean|dirty|unknown) ;; *) fail "unknown build source state" ;; esac
+BUILD_COMMIT="$(plist_value build_commit "$BUILD_MANIFEST")"
+[[ "$BUILD_COMMIT" =~ ^[A-Za-z0-9_-]{1,64}$ ]] || fail "invalid build commit metadata"
+
+NATIVE_POLICY="$(plist_value native_runtime.policy "$BUILD_MANIFEST")"
+NATIVE_QUALIFICATION="$(plist_value native_runtime.qualification "$BUILD_MANIFEST")"
+case "$NATIVE_POLICY" in permissive|pinned) ;; *) fail "unknown native-runtime policy" ;; esac
+case "$NATIVE_QUALIFICATION" in
+    pinned-match|permissive-unqualified|external-unqualified|not-applicable) ;;
+    *) fail "unknown native-runtime qualification: $NATIVE_QUALIFICATION" ;;
+esac
+for native_family in gmp mpfr flint; do
+    native_version="$(plist_value "native_runtime.$native_family.version" "$BUILD_MANIFEST")"
+    pinned_version="$(plist_value "native_runtime.$native_family.pinned_version" "$BUILD_MANIFEST")"
+    native_source_hash="$(plist_value "native_runtime.$native_family.source_sha256" "$BUILD_MANIFEST")"
+    [[ "$pinned_version" =~ ^[0-9]+(\.[0-9]+){1,3}$ ]] \
+        || fail "invalid pinned native version: $native_family"
+    if [ "$NATIVE_QUALIFICATION" = "not-applicable" ]; then
+        [ "$native_version" = "not-bundled" ] && [ "$native_source_hash" = "not-bundled" ] \
+            || fail "non-bundled native metadata differs: $native_family"
+    else
+        if [ "$NATIVE_QUALIFICATION" != "external-unqualified" ]; then
+            [[ "$native_version" =~ ^[0-9]+(\.[0-9]+){1,3}$ ]] \
+                || fail "invalid native version: $native_family"
+        fi
+        [[ "$native_source_hash" =~ ^[0-9a-f]{64}$ ]] \
+            || fail "invalid native source hash: $native_family"
+        if [ "$NATIVE_QUALIFICATION" = "pinned-match" ]; then
+            [ "$native_version" = "$pinned_version" ] \
+                || fail "qualified native version differs from pin: $native_family"
+        fi
+    fi
+done
+
+for component in supervisor backend; do
+    case "$component" in
+        supervisor) component_file="$SUPERVISOR" ;;
+        backend) component_file="$BACKEND" ;;
+    esac
+    expected_hash="$(plist_value "components.$component.sha256" "$BUILD_MANIFEST")"
+    actual_hash="$(sha256_file "$component_file")"
+    [ "$expected_hash" = "$actual_hash" ] || fail "$component hash differs: $component"
+done
+[ "$(plist_value components.launcher.path "$BUILD_MANIFEST")" = "MacOS/CentL26" ] \
+    || fail "launcher path differs in build manifest"
+EXPECTED_LAUNCHER_INTEGRITY="code-signature"
+if [ "$SIGNING_MODE" = "unsigned" ]; then
+    EXPECTED_LAUNCHER_INTEGRITY="architecture-only"
+fi
+[ "$(plist_value components.launcher.integrity "$BUILD_MANIFEST")" = "$EXPECTED_LAUNCHER_INTEGRITY" ] \
+    || fail "launcher integrity contract differs in build manifest"
+
+RUNTIME_LIBRARY_COUNT=0
+while library_name="$(plist_value "runtime_libraries.$RUNTIME_LIBRARY_COUNT.name" "$BUILD_MANIFEST" 2>/dev/null)"; do
+    library_path="$(plist_value "runtime_libraries.$RUNTIME_LIBRARY_COUNT.path" "$BUILD_MANIFEST")"
+    expected_hash="$(plist_value "runtime_libraries.$RUNTIME_LIBRARY_COUNT.sha256" "$BUILD_MANIFEST")"
+    library_family="$(plist_value "runtime_libraries.$RUNTIME_LIBRARY_COUNT.family" "$BUILD_MANIFEST")"
+    [[ "$library_name" =~ ^[A-Za-z0-9._-]{1,128}$ ]] \
+        || fail "unsafe runtime library name: $library_name"
+    case "$library_name" in
+        libflint.*.dylib) [ "$library_family" = "flint" ] || fail "FLINT family metadata differs" ;;
+        libmpfr.*.dylib) [ "$library_family" = "mpfr" ] || fail "MPFR family metadata differs" ;;
+        libgmp.*.dylib) [ "$library_family" = "gmp" ] || fail "GMP family metadata differs" ;;
+        *) fail "unknown runtime library in build manifest: $library_name" ;;
+    esac
+    [ "$library_path" = "Frameworks/$library_name" ] || fail "runtime library path differs: $library_name"
+    library_file="$APPLICATION/Contents/$library_path"
+    [ -f "$library_file" ] || fail "runtime library is missing: $library_file"
+    [ "$(architectures "$library_file")" = "$LAUNCHER_ARCHS" ] \
+        || fail "runtime library architecture differs: $library_name"
+    [ "$(sha256_file "$library_file")" = "$expected_hash" ] \
+        || fail "runtime library hash differs: $library_name"
+    check_runtime_library_dependencies "$library_file"
+    [ -d "$APPLICATION/Contents/Resources/licenses/$library_family" ] \
+        || fail "runtime-library license directory is missing: $library_family"
+    [ -n "$(find "$APPLICATION/Contents/Resources/licenses/$library_family" -type f -size +0 -print -quit)" ] \
+        || fail "runtime-library license text is missing: $library_family"
+    if [ "$SIGNING_MODE" != "unsigned" ]; then
+        codesign --verify --strict "$library_file"
+    fi
+    RUNTIME_LIBRARY_COUNT=$((RUNTIME_LIBRARY_COUNT + 1))
+done
+
+ACTUAL_RUNTIME_LIBRARY_COUNT="$(find "$APPLICATION/Contents/Frameworks" -maxdepth 1 -type f -name '*.dylib' | wc -l | tr -d ' ')"
+[ "$ACTUAL_RUNTIME_LIBRARY_COUNT" = "$RUNTIME_LIBRARY_COUNT" ] \
+    || fail "runtime-library inventory does not match Contents/Frameworks"
+if [ "$RUNTIME_LIBRARY_COUNT" = "0" ]; then
+    [ "$NATIVE_QUALIFICATION" = "not-applicable" ] \
+        || fail "native-runtime qualification exists without runtime libraries"
+else
+    [ "$NATIVE_QUALIFICATION" != "not-applicable" ] \
+        || fail "runtime libraries lack native-runtime qualification metadata"
+fi
+
+[ "$(plist_value schema "$PROVIDER_MANIFEST")" = "org.freecomputation.centl.provider-inventory/1" ] \
+    || fail "unexpected provider-manifest schema"
+[ "$(plist_value integration "$PROVIDER_MANIFEST")" = "explicit-environment" ] \
+    || fail "unexpected provider integration contract"
+[ "$(plist_value product_version "$PROVIDER_MANIFEST")" = "$VERSION" ] \
+    || fail "provider manifest version differs"
+[ "$(plist_value build_commit "$PROVIDER_MANIFEST")" = "$(plist_value build_commit "$BUILD_MANIFEST")" ] \
+    || fail "provider manifest build commit differs"
+PROVIDER_COUNT=0
+SEEN_PROVIDER_IDS=","
+SEEN_PROVIDER_PATHS=","
+PROVIDER_BIN_DIRECTORY="$APPLICATION/Contents/Resources/providers/bin"
+[ -d "$PROVIDER_BIN_DIRECTORY" ] || fail "provider bin directory is missing"
+[ -z "$(find "$PROVIDER_BIN_DIRECTORY" -mindepth 1 -maxdepth 1 ! -type f -print -quit)" ] \
+    || fail "provider bin directory contains a non-regular entry"
+while provider_id="$(plist_value "providers.$PROVIDER_COUNT.id" "$PROVIDER_MANIFEST" 2>/dev/null)"; do
+    index="$PROVIDER_COUNT"
+    provider_path="$(plist_value "providers.$index.path" "$PROVIDER_MANIFEST")"
+    expected_hash="$(plist_value "providers.$index.sha256" "$PROVIDER_MANIFEST")"
+    provider_source="$(plist_value "providers.$index.source" "$PROVIDER_MANIFEST")"
+    provider_provenance="$(plist_value "providers.$index.provenance" "$PROVIDER_MANIFEST")"
+    case "$provider_id" in
+        centl|centl-sci|centl-chem|centl-cps|centl-mirage) ;;
+        *) fail "unknown bundled provider identifier: $provider_id" ;;
+    esac
+    [[ "$SEEN_PROVIDER_IDS" != *",$provider_id,"* ]] \
+        || fail "duplicate provider identifier: $provider_id"
+    [[ "$SEEN_PROVIDER_PATHS" != *",$provider_path,"* ]] \
+        || fail "duplicate provider path: $provider_path"
+    SEEN_PROVIDER_IDS+="$provider_id,"
+    SEEN_PROVIDER_PATHS+="$provider_path,"
+    case "$provider_path" in
+        bin/*) ;;
+        *) fail "provider path is not confined to providers/bin: $provider_path" ;;
+    esac
+    [[ "$provider_path" != *".."* ]] || fail "provider path contains traversal: $provider_path"
+    [ "$provider_path" = "bin/$provider_id" ] \
+        || fail "provider path must be the canonical bin/id mapping: $provider_id"
+    provider_file="$APPLICATION/Contents/Resources/providers/$provider_path"
+    [ -x "$provider_file" ] || fail "provider executable is missing: $provider_file"
+    [ "$(architectures "$provider_file")" = "$LAUNCHER_ARCHS" ] \
+        || fail "provider architecture differs: $provider_id"
+    [ "$(sha256_file "$provider_file")" = "$expected_hash" ] \
+        || fail "provider hash differs: $provider_id"
+    case "$provider_source" in
+        repository-offline-build)
+            [ "$provider_provenance" = "repository:$(plist_value build_commit "$BUILD_MANIFEST")" ] \
+                || fail "repository provider provenance differs: $provider_id"
+            ;;
+        external-prebuilt)
+            [[ "$provider_provenance" =~ ^[A-Za-z0-9._:-]{1,128}$ ]] \
+                || fail "external provider provenance is invalid: $provider_id"
+            ;;
+        *) fail "unknown provider source mode: $provider_source" ;;
+    esac
+    check_provider_dependencies "$provider_file"
+    if [ "$provider_id" = "centl-chem" ]; then
+        [ "$(plist_value "providers.$index.activation" "$PROVIDER_MANIFEST")" = "backend-adapter" ] \
+            || fail "centl-chem is not marked for backend-adapter activation"
+        [ "$(plist_value "providers.$index.capabilities.0" "$PROVIDER_MANIFEST")" = "org.fcf.centl.chemistry.compute" ] \
+            || fail "centl-chem canonical compute capability is absent"
+        [ "$(plist_value "providers.$index.operations.0" "$PROVIDER_MANIFEST")" = "atoms" ] \
+            || fail "centl-chem atoms operation is absent"
+        [ "$(plist_value "providers.$index.operations.1" "$PROVIDER_MANIFEST")" = "balance" ] \
+            || fail "centl-chem balance operation is absent"
+    fi
+    if [ "$SIGNING_MODE" != "unsigned" ]; then
+        codesign --verify --strict "$provider_file"
+    fi
+    PROVIDER_COUNT=$((PROVIDER_COUNT + 1))
+done
+ACTUAL_PROVIDER_COUNT="$(find "$PROVIDER_BIN_DIRECTORY" -mindepth 1 -maxdepth 1 -type f | wc -l | tr -d ' ')"
+[ "$ACTUAL_PROVIDER_COUNT" = "$PROVIDER_COUNT" ] \
+    || fail "provider manifest does not exactly match providers/bin"
+
+if [ "$REQUIRE_NOTARIZATION" = "1" ]; then
+    xcrun stapler validate "$APPLICATION" >/dev/null
+fi
+
+if [ "$RUN_SELF_TEST" = "1" ] || [ "$RUN_CHEMISTRY_SMOKE" = "1" ] || [ "$RUN_STATE_SECURITY_TEST" = "1" ]; then
+    # The backend intentionally refuses project roots anywhere under a shared
+    # temporary tree. Keep the ephemeral verification project inside the
+    # repository's private build area instead.
+    SELF_TEST_STATE="$(mktemp -d "$REPOSITORY_ROOT/build/centl26/.verification-state.XXXXXX")"
+    STATE_GUARD_ROOT=""
+    cleanup_self_test() {
+        if [ -n "$STATE_GUARD_ROOT" ]; then
+            rm -rf -- "$STATE_GUARD_ROOT"
+        fi
+        rm -rf -- "$SELF_TEST_STATE"
+    }
+    trap cleanup_self_test EXIT INT TERM
+    if [ "$RUN_STATE_SECURITY_TEST" = "1" ]; then
+        STATE_GUARD_ROOT="$(mktemp -d "/private/tmp/centl26-state-guard.XXXXXX")"
+        mkdir -m 0700 "$STATE_GUARD_ROOT/real"
+        ln -s real "$STATE_GUARD_ROOT/link"
+        if CENTL26_STATE_DIR="$STATE_GUARD_ROOT/link" "$LAUNCHER" --diagnostics >/dev/null 2>&1; then
+            fail "diagnostics mode accepted a symlinked state directory"
+        fi
+        [ ! -e "$STATE_GUARD_ROOT/real/Logs" ] \
+            || fail "symlinked state rejection wrote through to its target"
+
+        mkdir "$STATE_GUARD_ROOT/world-writable"
+        chmod 0777 "$STATE_GUARD_ROOT/world-writable"
+        if CENTL26_STATE_DIR="$STATE_GUARD_ROOT/world-writable" "$LAUNCHER" --diagnostics >/dev/null 2>&1; then
+            fail "diagnostics mode accepted a world-writable state directory"
+        fi
+        [ "$(stat -f '%Lp' "$STATE_GUARD_ROOT/world-writable")" = "777" ] \
+            || fail "state validation changed permissions on an existing target"
+        [ ! -e "$STATE_GUARD_ROOT/world-writable/Logs" ] \
+            || fail "unsafe state rejection created a Logs directory"
+
+        if CENTL26_STATE_DIR="/private/tmp" "$LAUNCHER" --diagnostics >/dev/null 2>&1; then
+            fail "diagnostics mode accepted a broad state directory"
+        fi
+
+        mkdir -m 0700 "$STATE_GUARD_ROOT/safe" "$STATE_GUARD_ROOT/safe/Logs"
+        touch "$STATE_GUARD_ROOT/log-target"
+        chmod 0600 "$STATE_GUARD_ROOT/log-target"
+        ln -s ../../log-target "$STATE_GUARD_ROOT/safe/Logs/launcher.log"
+        if CENTL26_STATE_DIR="$STATE_GUARD_ROOT/safe" "$LAUNCHER" --diagnostics >/dev/null 2>&1; then
+            fail "diagnostics mode accepted a symlinked launcher log"
+        fi
+        [ ! -s "$STATE_GUARD_ROOT/log-target" ] \
+            || fail "diagnostics mode wrote through a symlinked launcher log"
+    fi
+    if [ "$RUN_SELF_TEST" = "1" ]; then
+        SELF_TEST_OUTPUT="$(CENTL26_STATE_DIR="$SELF_TEST_STATE" "$LAUNCHER" --self-test)" \
+            || fail "packaged lifecycle self-test failed"
+        echo "$SELF_TEST_OUTPUT"
+        SELF_TEST_PORT="$(sed -n 's|.*127\.0\.0\.1:\([0-9][0-9]*\)/.*|\1|p' <<<"$SELF_TEST_OUTPUT" | head -n 1)"
+        [ -n "$SELF_TEST_PORT" ] || fail "self-test did not report its loopback port"
+        if nc -z -w 1 127.0.0.1 "$SELF_TEST_PORT" >/dev/null 2>&1; then
+            fail "self-test left loopback port $SELF_TEST_PORT open"
+        fi
+    fi
+    if [ "$RUN_CHEMISTRY_SMOKE" = "1" ]; then
+        [ -x "$APPLICATION/Contents/Resources/providers/bin/centl-chem" ] \
+            || fail "chemistry smoke requested but centl-chem is not bundled"
+        CENTL26_STATE_DIR="$SELF_TEST_STATE" "$LAUNCHER" --self-test-chemistry \
+            || fail "packaged chemistry smoke failed"
+    fi
+    cleanup_self_test
+    trap - EXIT INT TERM
+fi
+
+echo "CentL26 bundle verified"
+echo "  app: $APPLICATION"
+echo "  version: $VERSION"
+echo "  architecture: $LAUNCHER_ARCHS"
+echo "  signing: $SIGNING_MODE"
+echo "  providers: $PROVIDER_COUNT"
+echo "  runtime libraries: $RUNTIME_LIBRARY_COUNT"
+echo "  native qualification: $NATIVE_QUALIFICATION"

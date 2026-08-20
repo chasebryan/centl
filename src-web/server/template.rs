@@ -31,7 +31,9 @@ pub fn render_centl_work_area(
     html.push_str(r#"<div class="centl-work-header">"#);
     html.push_str(r#"<div class="work-header-left">"#);
     html.push_str(r#"<span class="status-dot"></span>"#);
-    html.push_str(r#"<strong class="terminal-title">CENTL v0.15.0 Al-Nur · Exact Calculation Hub</strong>"#);
+    html.push_str(
+        r#"<strong class="terminal-title">CENTL v0.15.0 Al-Nur · Exact Calculation Hub</strong>"#,
+    );
     html.push_str(r#"</div>"#);
     html.push_str(r#"<div class="work-header-right">"#);
     html.push_str(r#"<span class="badge-oasis">Oasis Standard</span>"#);
@@ -41,7 +43,10 @@ pub fn render_centl_work_area(
 
     // Quick Operation Category Tabs (Pure HTML form submissions)
     html.push_str(r#"<div class="quick-op-bar" aria-label="Quick operations">"#);
-    html.push_str(&format!(r#"<form method="POST" action="{}#centl-console" class="quick-form">"#, action_url));
+    html.push_str(&format!(
+        r#"<form method="POST" action="{}#centl-console" class="quick-form">"#,
+        action_url
+    ));
     html.push_str(r#"<span class="quick-label">Presets:</span>"#);
     html.push_str(r#"<button type="submit" name="cmd" value="diff(x^3 * sin(x), x)" class="btn-preset">d/dx(x³·sin x)</button>"#);
     html.push_str(r#"<button type="submit" name="cmd" value="integrate(3*x^2 + 2*x + 1, x, 0, 5)" class="btn-preset">∫(3x²+2x+1)dx</button>"#);
@@ -57,7 +62,12 @@ pub fn render_centl_work_area(
     // The screen has a fixed viewport. History scrolls inside it instead of growing the page.
     html.push_str(r#"<div class="terminal-screen" role="region" aria-label="CENTL Terminal Output" style="height:clamp(360px,52vh,520px);min-height:0;max-height:none;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;">"#);
 
-    if session.history.is_empty() && last_result.is_none() && last_error.is_none() && last_physics.is_none() && last_hunt.is_none() {
+    if session.history.is_empty()
+        && last_result.is_none()
+        && last_error.is_none()
+        && last_physics.is_none()
+        && last_hunt.is_none()
+    {
         html.push_str(r#"<div class="terminal-welcome">"#);
         html.push_str(r#"<p class="welcome-text"><strong>CENTL exact mathematical interpreter ready.</strong></p>"#);
         html.push_str(r#"<p class="welcome-hint">Type any mathematics, scientific expression, or hunt command below. Exact values remain exact. Approximations carry justified enclosures.</p>"#);
@@ -70,43 +80,74 @@ pub fn render_centl_work_area(
     for entry in &session.history {
         html.push_str(r#"<div class="history-item">"#);
         html.push_str(&format!(r#"<div class="history-cmd"><span class="prompt-symbol">centl&gt;</span> <code>{}</code></div>"#, escape_html(&entry.command)));
-        html.push_str(&format!(r#"<div class="history-output"><pre>{}</pre>"#, escape_html(&entry.result)));
+        html.push_str(&format!(
+            r#"<div class="history-output"><pre>{}</pre>"#,
+            escape_html(&entry.result)
+        ));
         if let Some(approx) = &entry.approximate_repr {
-            html.push_str(&format!(r#"<div class="enclosure-badge">{}</div>"#, escape_html(approx)));
+            html.push_str(&format!(
+                r#"<div class="enclosure-badge">{}</div>"#,
+                escape_html(approx)
+            ));
         }
         let receipt_kind = if entry.approximate_repr.is_some() {
             "rigorous enclosure"
         } else {
             "exact"
         };
-        html.push_str(&format!(r#"<div class="history-meta">receipt: {} · schema: 1 · {} µs</div>"#, receipt_kind, entry.execution_micros));
+        html.push_str(&format!(
+            r#"<div class="history-meta">receipt: {} · schema: 1 · {} µs</div>"#,
+            receipt_kind, entry.execution_micros
+        ));
         html.push_str(r#"</div>"#);
         html.push_str(r#"</div>"#);
     }
 
     if let Some(err) = last_error {
         html.push_str(r#"<div class="output-block output-error">"#);
-        html.push_str(&format!(r#"<div class="error-title"><strong>Computation Error:</strong></div><pre>{}</pre>"#, escape_html(err)));
+        html.push_str(&format!(
+            r#"<div class="error-title"><strong>Computation Error:</strong></div><pre>{}</pre>"#,
+            escape_html(err)
+        ));
         html.push_str(r#"</div>"#);
     } else if let Some(phys) = last_physics {
         html.push_str(r#"<div class="output-block output-physics">"#);
         html.push_str(&format!(r#"<div class="phys-title"><strong>{}</strong> <span class="badge-verified">VERIFIED</span></div>"#, escape_html(&phys.title)));
         html.push_str(r#"<table class="phys-table">"#);
         for (key, value) in &phys.details {
-            html.push_str(&format!(r#"<tr><th>{}</th><td>{}</td></tr>"#, escape_html(key), escape_html(value)));
+            html.push_str(&format!(
+                r#"<tr><th>{}</th><td>{}</td></tr>"#,
+                escape_html(key),
+                escape_html(value)
+            ));
         }
         html.push_str(r#"</table>"#);
-        html.push_str(&format!(r#"<div class="phys-summary"><strong>Result:</strong> {}</div>"#, escape_html(&phys.summary)));
+        html.push_str(&format!(
+            r#"<div class="phys-summary"><strong>Result:</strong> {}</div>"#,
+            escape_html(&phys.summary)
+        ));
         html.push_str(r#"</div>"#);
     } else if let Some(hunt) = last_hunt {
         html.push_str(r#"<div class="output-block output-hunt">"#);
         html.push_str(r#"<div class="hunt-title"><strong>Erdős–Straus Public Hunt Window Summary</strong> <span class="badge-hunt">ACTIVE HUNT</span></div>"#);
         html.push_str(&format!(r#"<p>Scanned interval: <strong>({}, {}]</strong> · Primes checked: <strong>{}</strong></p>"#, hunt.start_bound, hunt.end_bound, hunt.primes_checked));
         html.push_str(r#"<div class="hunt-stats">"#);
-        html.push_str(&format!(r#"<span class="stat-pill stat-great">GREAT: {}</span>"#, hunt.great_count));
-        html.push_str(&format!(r#"<span class="stat-pill stat-good">GOOD: {}</span>"#, hunt.good_count));
-        html.push_str(&format!(r#"<span class="stat-pill stat-letter">LETTER: {}</span>"#, hunt.letter_count));
-        html.push_str(&format!(r#"<span class="stat-pill stat-unsolved">UNSOLVED: {}</span>"#, hunt.unsolved_count));
+        html.push_str(&format!(
+            r#"<span class="stat-pill stat-great">GREAT: {}</span>"#,
+            hunt.great_count
+        ));
+        html.push_str(&format!(
+            r#"<span class="stat-pill stat-good">GOOD: {}</span>"#,
+            hunt.good_count
+        ));
+        html.push_str(&format!(
+            r#"<span class="stat-pill stat-letter">LETTER: {}</span>"#,
+            hunt.letter_count
+        ));
+        html.push_str(&format!(
+            r#"<span class="stat-pill stat-unsolved">UNSOLVED: {}</span>"#,
+            hunt.unsolved_count
+        ));
         html.push_str(r#"</div>"#);
         if !hunt.findings.is_empty() {
             html.push_str(r#"<div class="hunt-findings-list">"#);
@@ -146,8 +187,14 @@ pub fn render_centl_work_area(
     // Keep Clear on its own form so the text input cannot submit a competing cmd field.
     // The old shared-form layout submitted cmd=<input>&cmd=:clear; the server correctly
     // consumed the first value, so Clear silently re-ran (or no-op'd) the input instead.
-    html.push_str(&format!(r#"<form id="centl-clear-form" method="POST" action="{}#centl-console"></form>"#, action_url));
-    html.push_str(&format!(r#"<form method="POST" action="{}#centl-console" class="centl-prompt-form">"#, action_url));
+    html.push_str(&format!(
+        r#"<form id="centl-clear-form" method="POST" action="{}#centl-console"></form>"#,
+        action_url
+    ));
+    html.push_str(&format!(
+        r#"<form method="POST" action="{}#centl-console" class="centl-prompt-form">"#,
+        action_url
+    ));
     html.push_str(r#"<div class="input-row">"#);
     html.push_str(r#"<span class="input-prompt">centl&gt;</span>"#);
     html.push_str(&format!(

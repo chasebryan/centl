@@ -1,0 +1,267 @@
+#!/bin/bash
+# SPDX-License-Identifier: Apache-2.0
+# Verify and archive an existing CentL26.app; optionally notarize and staple it.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+REPOSITORY_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
+APPLICATION="${1:-$REPOSITORY_ROOT/build/centl26/macos/CentL26.app}"
+DIST_DIRECTORY="${CENTL26_DIST_DIR:-$REPOSITORY_ROOT/dist/centl26/macos}"
+VERIFY_SCRIPT="$SCRIPT_DIR/verify-centl26-macos"
+ATOMIC_PUBLISH_SOURCE="$REPOSITORY_ROOT/desktop/centl26/macos/Sources/CentL26AtomicPublish.c"
+NOTARIZE="${CENTL26_NOTARIZE:-0}"
+REQUIRE_DEVELOPER_ID="${CENTL26_REQUIRE_DEVELOPER_ID:-$NOTARIZE}"
+ALLOW_UNQUALIFIED="${CENTL26_ALLOW_UNQUALIFIED_PACKAGE:-0}"
+SOURCE_DATE_EPOCH_VALUE="${SOURCE_DATE_EPOCH:-${CENTL26_SOURCE_DATE_EPOCH:-}}"
+PYTHON_COMMAND="${PYTHON:-python3}"
+
+fail() {
+    echo "CentL26 packaging failed: $*" >&2
+    exit 1
+}
+
+for required in cmp ditto plutil lipo shasum xcrun codesign; do
+    command -v "$required" >/dev/null 2>&1 || fail "required packaging tool is missing: $required"
+done
+[ "$(uname -s)" = "Darwin" ] || fail "macOS is required"
+[ -d "$APPLICATION/Contents" ] || fail "application bundle not found: $APPLICATION"
+[ -x "$VERIFY_SCRIPT" ] || fail "bundle verifier is unavailable: $VERIFY_SCRIPT"
+[ -f "$ATOMIC_PUBLISH_SOURCE" ] || fail "atomic publication helper source is unavailable"
+case "$NOTARIZE" in 0|1) ;; *) fail "CENTL26_NOTARIZE must be 0 or 1" ;; esac
+case "$REQUIRE_DEVELOPER_ID" in 0|1) ;; *) fail "CENTL26_REQUIRE_DEVELOPER_ID must be 0 or 1" ;; esac
+case "$ALLOW_UNQUALIFIED" in 0|1) ;; *) fail "CENTL26_ALLOW_UNQUALIFIED_PACKAGE must be 0 or 1" ;; esac
+"$PYTHON_COMMAND" "$SCRIPT_DIR/centl26-design-contract.py" check
+
+VERSION="$(plutil -extract CFBundleShortVersionString raw "$APPLICATION/Contents/Info.plist")"
+SIGNING_MODE="$(plutil -extract CentLSigningMode raw "$APPLICATION/Contents/Info.plist")"
+ARCHITECTURES="$(lipo -archs "$APPLICATION/Contents/MacOS/CentL26" | tr ' ' '-')"
+DEPLOYMENT_TARGET="$(plutil -extract deployment_target raw "$APPLICATION/Contents/Resources/build-manifest.json")"
+BUILD_COMMIT="$(plutil -extract build_commit raw "$APPLICATION/Contents/Resources/build-manifest.json")"
+SOURCE_STATE="$(plutil -extract source_state raw "$APPLICATION/Contents/Resources/build-manifest.json")"
+NATIVE_QUALIFICATION="$(plutil -extract native_runtime.qualification raw "$APPLICATION/Contents/Resources/build-manifest.json")"
+case "$VERSION" in
+    *[!0-9.]*|'') fail "bundle version is not safe for an archive name: $VERSION" ;;
+esac
+case "$ARCHITECTURES" in
+    *[!A-Za-z0-9_-]*|'') fail "bundle architecture is not safe for an archive name: $ARCHITECTURES" ;;
+esac
+[[ "$DEPLOYMENT_TARGET" =~ ^[0-9]+(\.[0-9]+){1,2}$ ]] \
+    || fail "invalid deployment target in build manifest: $DEPLOYMENT_TARGET"
+case "$BUILD_COMMIT" in
+    *[!A-Za-z0-9_-]*|'') fail "build commit is not safe for release metadata: $BUILD_COMMIT" ;;
+esac
+case "$SOURCE_STATE" in clean|dirty|unknown) ;; *) fail "invalid source state: $SOURCE_STATE" ;; esac
+case "$NATIVE_QUALIFICATION" in
+    pinned-match|permissive-unqualified|external-unqualified|not-applicable) ;;
+    *) fail "invalid native-runtime qualification: $NATIVE_QUALIFICATION" ;;
+esac
+
+PACKAGE_QUALIFICATION="release-qualified"
+if [ "$SIGNING_MODE" != "developer-id" ] \
+    || [ "$NATIVE_QUALIFICATION" != "pinned-match" ] \
+    || [ "$SOURCE_STATE" != "clean" ] \
+    || [ "$BUILD_COMMIT" = "unknown" ]
+then
+    PACKAGE_QUALIFICATION="local-unqualified"
+fi
+if [ "$PACKAGE_QUALIFICATION" != "release-qualified" ] && [ "$ALLOW_UNQUALIFIED" != "1" ]; then
+    echo "This application is not release-qualified:" >&2
+    echo "  signing: $SIGNING_MODE (requires developer-id)" >&2
+    echo "  native runtime: $NATIVE_QUALIFICATION (requires pinned-match)" >&2
+    echo "  source state: $SOURCE_STATE (requires clean)" >&2
+    echo "  build commit: $BUILD_COMMIT (requires immutable identity)" >&2
+    fail "set CENTL26_ALLOW_UNQUALIFIED_PACKAGE=1 only for a clearly labeled local archive"
+fi
+if [ "$NOTARIZE" = "1" ] && [ "$PACKAGE_QUALIFICATION" != "release-qualified" ]; then
+    fail "notarization is forbidden for a locally unqualified build"
+fi
+
+if [ "$REQUIRE_DEVELOPER_ID" = "1" ] && [ "$SIGNING_MODE" != "developer-id" ]; then
+    fail "a Developer ID signed build is required (found signing mode: $SIGNING_MODE)"
+fi
+if [ "$NOTARIZE" = "1" ] && [ -z "${CENTL26_NOTARY_KEYCHAIN_PROFILE:-}" ]; then
+    fail "CENTL26_NOTARY_KEYCHAIN_PROFILE is required when CENTL26_NOTARIZE=1"
+fi
+if [ "$NOTARIZE" = "1" ]; then
+    command -v spctl >/dev/null 2>&1 || fail "spctl is required for notarized packaging"
+    xcrun --find notarytool >/dev/null 2>&1 || fail "notarytool is unavailable"
+    xcrun --find stapler >/dev/null 2>&1 || fail "stapler is unavailable"
+fi
+
+CENTL26_REQUIRE_SIGNING="$REQUIRE_DEVELOPER_ID" \
+CENTL26_RUN_SELF_TEST="${CENTL26_PACKAGE_SELF_TEST:-0}" \
+CENTL26_RUN_CHEMISTRY_SMOKE="${CENTL26_PACKAGE_CHEMISTRY_SMOKE:-0}" \
+    "$VERIFY_SCRIPT" "$APPLICATION"
+
+mkdir -p "$DIST_DIRECTORY"
+STAGING_DIRECTORY="$(mktemp -d "$DIST_DIRECTORY/.centl26-package.XXXXXX")"
+STAGED_APPLICATION="$STAGING_DIRECTORY/CentL26.app"
+SUBMISSION_ARCHIVE="$STAGING_DIRECTORY/CentL26-notary.zip"
+ATOMIC_PUBLISH_HELPER="$STAGING_DIRECTORY/centl26-atomic-publish"
+RELEASE_NAME="CentL26-$VERSION-macos-$ARCHITECTURES"
+if [ "$PACKAGE_QUALIFICATION" != "release-qualified" ]; then
+    RELEASE_NAME="$RELEASE_NAME-local"
+fi
+FINAL_RELEASE_DIRECTORY="$DIST_DIRECTORY/$RELEASE_NAME.release"
+PUBLISH_STAGE="$STAGING_DIRECTORY/$RELEASE_NAME.release"
+ARCHIVE_NAME="$RELEASE_NAME.zip"
+CHECKSUM_NAME="$ARCHIVE_NAME.sha256"
+MANIFEST_NAME="$RELEASE_NAME.release.json"
+mkdir -p "$PUBLISH_STAGE"
+PUBLICATION_LOCK="$DIST_DIRECTORY/.$RELEASE_NAME.publish.lock"
+LOCK_ACQUIRED=0
+
+cleanup() {
+    if [ "$LOCK_ACQUIRED" = "1" ]; then
+        rmdir "$PUBLICATION_LOCK" 2>/dev/null || true
+    fi
+    rm -rf -- "$STAGING_DIRECTORY"
+}
+trap cleanup EXIT INT TERM
+if mkdir "$PUBLICATION_LOCK"; then
+    LOCK_ACQUIRED=1
+else
+    fail "another process is packaging this immutable release: $PUBLICATION_LOCK"
+fi
+
+PUBLISH_SDK_CANDIDATES=()
+if [ -n "${CENTL26_MACOS_SDK:-}" ]; then
+    PUBLISH_SDK_CANDIDATES+=("$CENTL26_MACOS_SDK")
+else
+    PUBLISH_SDK_CANDIDATES+=("$(xcrun --sdk macosx --show-sdk-path)")
+    DEVELOPER_DIRECTORY="$(xcode-select -p 2>/dev/null || true)"
+    if [ -n "$DEVELOPER_DIRECTORY" ]; then
+        for sdk_directory in \
+            "$DEVELOPER_DIRECTORY/SDKs" \
+            "$DEVELOPER_DIRECTORY/Platforms/MacOSX.platform/Developer/SDKs"
+        do
+            for candidate in "$sdk_directory"/MacOSX*.sdk; do
+                [ -d "$candidate" ] || continue
+                PUBLISH_SDK_CANDIDATES+=("$candidate")
+            done
+        done
+    fi
+fi
+PUBLISH_HELPER_BUILT=0
+for candidate in "${PUBLISH_SDK_CANDIDATES[@]}"; do
+    [ -d "$candidate" ] || continue
+    if "$(xcrun --find clang)" -std=c11 -Wall -Wextra -Werror \
+        -arch "$(uname -m)" \
+        -isysroot "$candidate" \
+        "-mmacosx-version-min=$DEPLOYMENT_TARGET" \
+        "$ATOMIC_PUBLISH_SOURCE" -o "$ATOMIC_PUBLISH_HELPER"
+    then
+        PUBLISH_HELPER_BUILT=1
+        break
+    fi
+done
+[ "$PUBLISH_HELPER_BUILT" = "1" ] \
+    || fail "the installed compiler could not build the exclusive publication helper"
+
+ditto --norsrc --noextattr "$APPLICATION" "$STAGED_APPLICATION"
+
+if [ "$NOTARIZE" = "1" ]; then
+    echo "Submitting CentL26 $VERSION for Apple notarization"
+    ditto -c -k --keepParent "$STAGED_APPLICATION" "$SUBMISSION_ARCHIVE"
+    xcrun notarytool submit "$SUBMISSION_ARCHIVE" \
+        --keychain-profile "$CENTL26_NOTARY_KEYCHAIN_PROFILE" \
+        --wait
+    xcrun stapler staple "$STAGED_APPLICATION"
+    xcrun stapler validate "$STAGED_APPLICATION"
+    spctl -a -t exec -vv "$STAGED_APPLICATION"
+fi
+
+if [ -n "$SOURCE_DATE_EPOCH_VALUE" ]; then
+    if [[ ! "$SOURCE_DATE_EPOCH_VALUE" =~ ^[0-9]+$ ]] || [ "$SOURCE_DATE_EPOCH_VALUE" -lt 315532800 ]; then
+        fail "SOURCE_DATE_EPOCH must be an integer at or after 1980-01-01"
+    fi
+    NORMALIZED_TIME="$(TZ=UTC date -r "$SOURCE_DATE_EPOCH_VALUE" '+%Y%m%d%H%M.%S')"
+    find "$STAGED_APPLICATION" -exec touch -h -t "$NORMALIZED_TIME" {} +
+fi
+
+CENTL26_REQUIRE_SIGNING="$REQUIRE_DEVELOPER_ID" \
+CENTL26_REQUIRE_NOTARIZATION="$NOTARIZE" \
+    "$VERIFY_SCRIPT" "$STAGED_APPLICATION"
+
+# Verification reads executable and manifest bytes. Reapply normalized access
+# and modification times immediately before archiving so ditto's ZIP metadata
+# cannot make an otherwise identical rerun diverge.
+if [ -n "$SOURCE_DATE_EPOCH_VALUE" ]; then
+    find "$STAGED_APPLICATION" -exec touch -a -m -h -t "$NORMALIZED_TIME" {} +
+fi
+
+ARCHIVE_STAGE="$PUBLISH_STAGE/$ARCHIVE_NAME"
+ditto -c -k --keepParent "$STAGED_APPLICATION" "$ARCHIVE_STAGE"
+ARCHIVE_HASH="$(shasum -a 256 "$ARCHIVE_STAGE" | awk '{print $1}')"
+MANIFEST_STAGE="$PUBLISH_STAGE/$MANIFEST_NAME"
+{
+    printf '{\n'
+    printf '  "schema": "org.freecomputation.centl.macos-release/1",\n'
+    printf '  "product": "CentL26",\n'
+    printf '  "product_version": "%s",\n' "$VERSION"
+    printf '  "bundle_identifier": "org.freecomputation.centl",\n'
+    printf '  "architecture": "%s",\n' "$ARCHITECTURES"
+    printf '  "build_commit": "%s",\n' "$BUILD_COMMIT"
+    printf '  "source_state": "%s",\n' "$SOURCE_STATE"
+    printf '  "qualification": "%s",\n' "$PACKAGE_QUALIFICATION"
+    printf '  "native_runtime_qualification": "%s",\n' "$NATIVE_QUALIFICATION"
+    printf '  "signing": "%s",\n' "$SIGNING_MODE"
+    printf '  "notarized": %s,\n' "$([ "$NOTARIZE" = "1" ] && echo true || echo false)"
+    printf '  "archive": "%s",\n' "$ARCHIVE_NAME"
+    printf '  "sha256": "%s"\n' "$ARCHIVE_HASH"
+    printf '}\n'
+} >"$MANIFEST_STAGE"
+plutil -convert json -o /dev/null -- "$MANIFEST_STAGE"
+
+CHECKSUM_STAGE="$PUBLISH_STAGE/$CHECKSUM_NAME"
+printf '%s  %s\n' "$ARCHIVE_HASH" "$ARCHIVE_NAME" >"$CHECKSUM_STAGE"
+
+if [ -e "$FINAL_RELEASE_DIRECTORY" ]; then
+    [ -d "$FINAL_RELEASE_DIRECTORY" ] || fail "release path already exists and is not a directory: $FINAL_RELEASE_DIRECTORY"
+    [ ! -L "$FINAL_RELEASE_DIRECTORY" ] || fail "immutable release directory may not be a symbolic link"
+    for artifact_name in "$ARCHIVE_NAME" "$CHECKSUM_NAME" "$MANIFEST_NAME"; do
+        [ -f "$FINAL_RELEASE_DIRECTORY/$artifact_name" ] \
+            || fail "immutable release already exists with an incomplete artifact set: $FINAL_RELEASE_DIRECTORY"
+        [ ! -L "$FINAL_RELEASE_DIRECTORY/$artifact_name" ] \
+            || fail "immutable release artifact may not be a symbolic link: $artifact_name"
+        cmp -s "$PUBLISH_STAGE/$artifact_name" "$FINAL_RELEASE_DIRECTORY/$artifact_name" \
+            || fail "immutable release already exists with different bytes: $FINAL_RELEASE_DIRECTORY/$artifact_name"
+    done
+    EXISTING_FILE_COUNT="$(find "$FINAL_RELEASE_DIRECTORY" -maxdepth 1 -type f | wc -l | tr -d ' ')"
+    EXISTING_DIRECTORY_COUNT="$(find "$FINAL_RELEASE_DIRECTORY" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
+    [ "$EXISTING_FILE_COUNT" = "3" ] && [ "$EXISTING_DIRECTORY_COUNT" = "0" ] \
+        || fail "immutable release directory contains unexpected artifacts: $FINAL_RELEASE_DIRECTORY"
+    rm -rf -- "$PUBLISH_STAGE"
+    echo "CentL26 release already exists with identical bytes"
+else
+    # Publishing one directory rename prevents interruption from exposing a
+    # ZIP/checksum/manifest assembled from different generations.
+    "$ATOMIC_PUBLISH_HELPER" "$PUBLISH_STAGE" "$FINAL_RELEASE_DIRECTORY" \
+        || fail "exclusive release publication failed; the destination was not modified"
+fi
+
+[ -d "$FINAL_RELEASE_DIRECTORY" ] || fail "published release directory is absent"
+[ ! -L "$FINAL_RELEASE_DIRECTORY" ] || fail "published release directory is a symbolic link"
+[ ! -e "$PUBLISH_STAGE" ] || fail "publication did not consume the staged artifact set"
+for artifact_name in "$ARCHIVE_NAME" "$CHECKSUM_NAME" "$MANIFEST_NAME"; do
+    [ -f "$FINAL_RELEASE_DIRECTORY/$artifact_name" ] \
+        || fail "published release topology is incomplete: $artifact_name"
+    [ ! -L "$FINAL_RELEASE_DIRECTORY/$artifact_name" ] \
+        || fail "published release artifact is a symbolic link: $artifact_name"
+done
+FINAL_FILE_COUNT="$(find "$FINAL_RELEASE_DIRECTORY" -maxdepth 1 -type f | wc -l | tr -d ' ')"
+FINAL_DIRECTORY_COUNT="$(find "$FINAL_RELEASE_DIRECTORY" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
+[ "$FINAL_FILE_COUNT" = "3" ] && [ "$FINAL_DIRECTORY_COUNT" = "0" ] \
+    || fail "published release topology contains unexpected entries"
+
+rmdir "$PUBLICATION_LOCK"
+LOCK_ACQUIRED=0
+trap - EXIT INT TERM
+rm -rf -- "$STAGING_DIRECTORY"
+
+echo "CentL26 release archive is ready"
+echo "  release: $FINAL_RELEASE_DIRECTORY"
+echo "  archive: $FINAL_RELEASE_DIRECTORY/$ARCHIVE_NAME"
+echo "  sha256: $ARCHIVE_HASH"
+echo "  manifest: $FINAL_RELEASE_DIRECTORY/$MANIFEST_NAME"

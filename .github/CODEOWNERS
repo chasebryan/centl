@@ -9,3 +9,12 @@
 /install.ps1 @chasebryan
 /scripts/ @chasebryan
 /toolchain.lock @chasebryan
+
+# User-approved CentL26 visual source and its enforceable baseline.
+/src-web/server/lab.css @chasebryan
+/src-web/server/lab.js @chasebryan
+/src-web/server/lab_template.rs @chasebryan
+/desktop/centl26/macos/Assets/ @chasebryan
+/design/centl26/ @chasebryan
+/docs/CENTL26-DESIGN-CONTRACT.md @chasebryan
+/tests/test_centl26_design_contract.py @chasebryan

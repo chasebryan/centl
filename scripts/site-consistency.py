@@ -31,6 +31,7 @@ def nav_html(depth: int) -> str:
       <h2>CENTL &amp; Hub</h2>
       <ul>
         <li><a href="{p}index.html#top">CENTL Work Area</a></li>
+        <li><a href="{p}free-computation.html#top">What is Free Computation?</a></li>
         <li><a href="{p}centl.html#top">About CENTL</a></li>
         <li><a href="{p}research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
         <li><a href="{p}software.html#top">Software Suite</a></li>
@@ -114,6 +115,7 @@ def publisher_nav_function() -> str:
       <h2>CENTL &amp; Hub</h2>
       <ul>
         <li><a href="{p}index.html#top">CENTL Work Area</a></li>
+        <li><a href="{p}free-computation.html#top">What is Free Computation?</a></li>
         <li><a href="{p}centl.html#top">About CENTL</a></li>
         <li><a href="{p}research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
         <li><a href="{p}software.html#top">Software Suite</a></li>

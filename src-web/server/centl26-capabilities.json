@@ -1,0 +1,95 @@
+{
+  "schema": "centl.capability-registry/1",
+  "product": {
+    "name": "CentL26",
+    "version": "26.0.0",
+    "organization": "Free Computation Foundation",
+    "organization_abbreviation": "FCF",
+    "runtime": "offline-local"
+  },
+  "broker_protocol": "centl.broker/1",
+  "capabilities": [
+    {
+      "id": "org.fcf.centl.math.evaluate",
+      "contract": 1,
+      "status": "available",
+      "provider": "centl26.rust-core",
+      "assurance": ["exact", "symbolic", "unsupported-visible"]
+    },
+    {
+      "id": "org.fcf.centl.math.symbolic",
+      "contract": 1,
+      "status": "available",
+      "provider": "centl26.rust-core",
+      "assurance": ["exact", "symbolic", "unsupported-visible"]
+    },
+    {
+      "id": "org.fcf.centl.numerics.enclose",
+      "contract": 1,
+      "status": "adapter-dependent",
+      "provider": "centl.canonical-core",
+      "assurance": ["rigorous-bound"]
+    },
+    {
+      "id": "org.fcf.centl.physics.compute",
+      "contract": 1,
+      "status": "available",
+      "provider": "centl26.physics",
+      "assurance": ["deterministic", "dimension-checked"]
+    },
+    {
+      "id": "org.fcf.centl.research.erdos_straus",
+      "contract": 1,
+      "status": "available",
+      "provider": "centl26.research",
+      "assurance": ["bounded-search", "exact-witness"]
+    },
+    {
+      "id": "org.fcf.centl.sci.interpret",
+      "contract": 1,
+      "status": "integration-planned",
+      "provider": "centl-sci"
+    },
+    {
+      "id": "org.fcf.centl.chemistry.compute",
+      "contract": 1,
+      "status": "available",
+      "provider": "centl26.chemistry-adapter",
+      "operations": ["atoms", "balance"],
+      "assurance": ["exact", "conservation-verified", "machine-protocol"]
+    },
+    {
+      "id": "org.fcf.centl.project.persist",
+      "contract": 1,
+      "status": "available",
+      "provider": "centl26.project-store",
+      "persisted_capabilities": [
+        "org.fcf.centl.math.evaluate",
+        "org.fcf.centl.math.symbolic",
+        "org.fcf.centl.numerics.enclose",
+        "org.fcf.centl.chemistry.compute",
+        "org.fcf.centl.physics.compute",
+        "org.fcf.centl.research.erdos_straus"
+      ],
+      "assurance": ["atomic-write", "bounded", "offline", "restart-recovery", "typed-domain-evidence"]
+    },
+    {
+      "id": "org.fcf.centl.mirage.develop",
+      "contract": 1,
+      "status": "integration-planned",
+      "provider": "mirage"
+    },
+    {
+      "id": "org.fcf.centl.caravan.retrieve",
+      "contract": 1,
+      "status": "integration-planned",
+      "provider": "caravan"
+    },
+    {
+      "id": "org.fcf.centl.search.rank",
+      "contract": 1,
+      "status": "integration-planned",
+      "provider": "centlamp"
+    }
+  ]
+}

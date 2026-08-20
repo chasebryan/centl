@@ -8,6 +8,17 @@ The repository remains canonical.
 
 ## Start here
 
+### CentL26 — flagship main release
+
+[CentL26](CENTL26-ARCHITECTURE.md) is now the main product direction of CENTL:
+the standalone, offline scientific IDE where all future computation, research,
+and capability work is assembled for users. The 26.0.0 release combines the
+approved visual system, durable project notebooks, exact-first computation,
+authenticated local execution, and the native macOS application shell.
+
+Public release documentation: [CentL26 release architecture](CENTL26-ARCHITECTURE.md) ·
+[design contract](CENTL26-DESIGN-CONTRACT.md) · [native packaging guide](../desktop/centl26/macos/README.md).
+
 | Document | When to open it |
 | --- | --- |
 | [INSTALL.md](INSTALL.md) · [hosted](https://freecomputation.org/manuals/install.html) | GNU/Linux install |
@@ -16,6 +27,10 @@ The repository remains canonical.
 | [SYNTAX.md](SYNTAX.md) · [hosted](https://freecomputation.org/manuals/syntax.html) | language |
 | [MATHEMATICIANS.md](MATHEMATICIANS.md) · [hosted](https://freecomputation.org/manuals/mathematicians.html) | mathematics only |
 | [PHYSICISTS.md](PHYSICISTS.md) · [hosted](https://freecomputation.org/manuals/physicists.html) | typed physics only |
+| [SCIENCE-DOMAINS-PLAN.md](SCIENCE-DOMAINS-PLAN.md) | full multi-domain science scheme |
+| [CENTL26-ARCHITECTURE.md](CENTL26-ARCHITECTURE.md) | standalone CentL26 product and backend architecture |
+| [CENTL26-DESIGN-CONTRACT.md](CENTL26-DESIGN-CONTRACT.md) | approved interface freeze and review gate |
+| [releases/26.0.0.md](releases/26.0.0.md) | CentL26 flagship main-release notes |
 
 ## Use
 
