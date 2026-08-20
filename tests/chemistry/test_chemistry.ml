@@ -42,6 +42,34 @@ let test_unclosed_group () =
   | Error error -> Alcotest.failf "wrong error: %s" (error_message error)
   | Ok _ -> Alcotest.fail "unclosed group was accepted"
 
+let test_formula_length_limit () =
+  let formula = String.make (max_formula_length + 1) 'H' in
+  match parse_formula formula with
+  | Error Formula_too_long -> ()
+  | Error error -> Alcotest.failf "wrong error: %s" (error_message error)
+  | Ok _ -> Alcotest.fail "overlong formula was accepted"
+
+let test_subscript_digit_limit () =
+  let formula = "H" ^ String.make (max_subscript_digits + 1) '9' in
+  match parse_formula formula with
+  | Error (Invalid_subscript _) -> ()
+  | Error error -> Alcotest.failf "wrong error: %s" (error_message error)
+  | Ok _ -> Alcotest.fail "overlong subscript was accepted"
+
+let test_nesting_limit () =
+  let depth = max_nesting_depth + 1 in
+  let formula = String.make depth '(' ^ "H" ^ String.make depth ')' in
+  match parse_formula formula with
+  | Error Nesting_too_deep -> ()
+  | Error error -> Alcotest.failf "wrong error: %s" (error_message error)
+  | Ok _ -> Alcotest.fail "overdeep formula was accepted"
+
+let test_multiple_arrows () =
+  match parse_reaction "H2 -> H2 -> H2" with
+  | Error Multiple_arrows -> ()
+  | Error error -> Alcotest.failf "wrong error: %s" (error_message error)
+  | Ok _ -> Alcotest.fail "multiple reaction arrows were accepted"
+
 let check_balance input expected =
   let balanced = unwrap (balance input) in
   Alcotest.(check string) "canonical equation" expected (render_balanced balanced);
@@ -83,6 +111,12 @@ let test_underdetermined_balance () =
       Alcotest.failf "underdetermined reaction was admitted as %s"
         (render_balanced balanced)
 
+let test_deterministic_replay () =
+  let input = "KMnO4 + HCl -> KCl + MnCl2 + H2O + Cl2" in
+  let first = unwrap (balance input) |> render_balanced in
+  let second = unwrap (balance input) |> render_balanced in
+  Alcotest.(check string) "repeat result" first second
+
 let () =
   Alcotest.run "CENTL Chemistry"
     [
@@ -94,7 +128,12 @@ let () =
           Alcotest.test_case "unknown element refusal" `Quick test_unknown_element;
           Alcotest.test_case "zero subscript refusal" `Quick test_zero_subscript;
           Alcotest.test_case "unclosed group refusal" `Quick test_unclosed_group;
+          Alcotest.test_case "formula length limit" `Quick test_formula_length_limit;
+          Alcotest.test_case "subscript digit limit" `Quick test_subscript_digit_limit;
+          Alcotest.test_case "nesting limit" `Quick test_nesting_limit;
         ] );
+      ( "reaction parser",
+        [ Alcotest.test_case "multiple arrows" `Quick test_multiple_arrows ] );
       ( "balancing",
         [
           Alcotest.test_case "iron oxide" `Quick test_balance_iron_oxide;
@@ -106,5 +145,6 @@ let () =
           Alcotest.test_case "impossible refusal" `Quick test_impossible_balance;
           Alcotest.test_case "underdetermined refusal" `Quick
             test_underdetermined_balance;
+          Alcotest.test_case "deterministic replay" `Quick test_deterministic_replay;
         ] );
     ]
