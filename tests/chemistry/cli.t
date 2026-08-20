@@ -26,6 +26,8 @@
   verified=true
 
   $ ../../src/chemistry_main.exe spread g 10.01 10.04 9.98 10.03 9.99
+  source_class=measured
+  arithmetic_class=exact_over_reported_values
   n=5
   unit=g
   observations=1001/100,251/25,499/50,1003/100,999/100
@@ -44,11 +46,18 @@
   confidence_interval=not_computed(requires_declared_confidence_model_and_level)
   measurement_uncertainty=not_provided
 
+  $ ../../src/chemistry_main.exe spread exact mol 1/3 2/3 | head -2
+  source_class=declared_exact
+  arithmetic_class=exact_over_reported_values
+
   $ ../../src/chemistry_main.exe --json balance 'Fe + O2 -> Fe2O3' | grep -o '"equation":"4 Fe + 3 O2 -> 2 Fe2O3"'
   "equation":"4 Fe + 3 O2 -> 2 Fe2O3"
 
-  $ ../../src/chemistry_main.exe --json spread g 1 3 | grep -o '"kind":"chemistry_sample_spread"'
-  "kind":"chemistry_sample_spread"
+  $ ../../src/chemistry_main.exe --json spread g 1 3 | grep -o '"source_class":"measured"'
+  "source_class":"measured"
+
+  $ ../../src/chemistry_main.exe --json spread exact mol 1/3 2/3 | grep -o '"source_class":"declared_exact"'
+  "source_class":"declared_exact"
 
   $ ../../src/chemistry_main.exe balance 'H2 + O2 -> H2O + H2O2' 2>&1
   centl-chem: reaction balancing is underdetermined (nullspace dimension 2); no canonical result is admitted
@@ -59,5 +68,5 @@
   [1]
 
   $ ../../src/chemistry_main.exe spread g 1/0 2 2>&1
-  centl-chem: invalid exact observation "1/0"
+  centl-chem: invalid reported observation "1/0"
   [1]
