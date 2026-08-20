@@ -19,6 +19,16 @@
  (libraries centl_lib alcotest zarith yojson))
 
 (test
+ (name test_chemistry_limiting)
+ (modules test_chemistry_limiting)
+ (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_chemistry_limiting_protocol)
+ (modules test_chemistry_limiting_protocol)
+ (libraries centl_lib alcotest zarith yojson))
+
+(test
  (name test_chemistry_sample)
  (modules test_chemistry_sample)
  (libraries centl_lib alcotest zarith))
