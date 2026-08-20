@@ -1,0 +1,7 @@
+(test
+ (name test_polynomial_square_free)
+ (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_polynomial_square_free_oracle)
+ (libraries centl_lib alcotest zarith))
