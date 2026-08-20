@@ -37,7 +37,14 @@ let test_balance_json () =
     |> List.map to_string
   in
   Alcotest.(check (list string)) "reactant coefficients" [ "4"; "3" ] reactants;
-  Alcotest.(check (list string)) "product coefficients" [ "2" ] products
+  Alcotest.(check (list string)) "product coefficients" [ "2" ] products;
+  let evidence = json |> member "stoichiometric_evidence" in
+  let elements = evidence |> member "elements" |> to_list |> List.map to_string in
+  Alcotest.(check (list string)) "element rows" [ "Fe"; "O" ] elements;
+  let rows = evidence |> member "matrix" |> to_list in
+  let matrix = List.map (fun row -> row |> to_list |> List.map to_string) rows in
+  Alcotest.(check (list (list string))) "exact matrix"
+    [ [ "1"; "0"; "-2" ]; [ "0"; "2"; "-3" ] ] matrix
 
 let test_error_json () =
   match balance_request "H2 + O2 -> H2O + H2O2" with
@@ -45,9 +52,8 @@ let test_error_json () =
   | Error json ->
       Alcotest.(check string) "kind" "chemistry_error"
         (json |> member "kind" |> to_string);
-      let message = json |> member "error" |> to_string in
-      Alcotest.(check bool) "mentions underdetermined" true
-        (String.length message > 0 && String.contains message 'u')
+      Alcotest.(check string) "stable code" "underdetermined_balance"
+        (json |> member "code" |> to_string)
 
 let () =
   Alcotest.run "CENTL Chemistry protocol"
