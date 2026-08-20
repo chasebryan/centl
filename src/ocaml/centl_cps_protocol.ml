@@ -20,6 +20,7 @@ let species_to_yojson item =
   `Assoc
     [
       ("formula", `String item.formula_text);
+      ("composition_key", `String item.composition_key);
       ("moles", q_string item.moles);
       ("unit", `String "mol");
       ("atoms_per_entity", `List (List.map atom_to_yojson item.atoms));
