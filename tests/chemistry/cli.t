@@ -25,6 +25,35 @@
   O: 8 = 8
   verified=true
 
+  $ ../../src/chemistry_main.exe particles exact 1
+  source_class=declared_exact
+  arithmetic_class=exact_over_supplied_values
+  moles=1 mol
+  entities=602214076000000000000000
+  entities_integral=true
+  N_A=602214076000000000000000 1/mol
+  N_A_provenance=SI defining constant
+
+  $ ../../src/chemistry_main.exe moles 602214076000000000000000
+  source_class=unspecified
+  arithmetic_class=exact_over_supplied_values
+  entities=602214076000000000000000
+  moles=1 mol
+  N_A=602214076000000000000000 1/mol
+  N_A_provenance=SI defining constant
+
+  $ ../../src/chemistry_main.exe stoich measured 'C2H6 + O2 -> CO2 + H2O' C2H6 3 CO2
+  source_class=measured
+  arithmetic_class=exact_over_supplied_values
+  equation=2 C2H6 + 7 O2 -> 4 CO2 + 6 H2O
+  source=C2H6
+  source_coefficient=2
+  source_moles=3 mol
+  target=CO2
+  target_coefficient=4
+  target_moles=6 mol
+  reaction_verified=true
+
   $ ../../src/chemistry_main.exe spread g 10.01 10.04 9.98 10.03 9.99
   source_class=measured
   arithmetic_class=exact_over_reported_values
@@ -53,6 +82,12 @@
   $ ../../src/chemistry_main.exe --json balance 'Fe + O2 -> Fe2O3' | grep -o '"equation":"4 Fe + 3 O2 -> 2 Fe2O3"'
   "equation":"4 Fe + 3 O2 -> 2 Fe2O3"
 
+  $ ../../src/chemistry_main.exe --json particles exact 1 | grep -o '"entities":"602214076000000000000000"'
+  "entities":"602214076000000000000000"
+
+  $ ../../src/chemistry_main.exe --json stoich measured 'C2H6 + O2 -> CO2 + H2O' C2H6 3 CO2 | grep -o '"target_moles":"6"'
+  "target_moles":"6"
+
   $ ../../src/chemistry_main.exe --json spread g 1 3 | grep -o '"source_class":"measured"'
   "source_class":"measured"
 
@@ -65,6 +100,10 @@
 
   $ ../../src/chemistry_main.exe atoms 'Xx2' 2>&1
   centl-chem: unknown element symbol Xx
+  [1]
+
+  $ ../../src/chemistry_main.exe particles -1 2>&1
+  centl-chem: amount of substance must be non-negative
   [1]
 
   $ ../../src/chemistry_main.exe spread g 1/0 2 2>&1
