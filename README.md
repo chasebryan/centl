@@ -9,7 +9,7 @@
 *Good maths should be free.*  
 *Never manufacture mathematical certainty.*
 
-**CentL26 26.0.0 · Flagship main release** · [freecomputation.org](https://freecomputation.org/) · Apache-2.0
+**CentL26 · Flagship main release** · [freecomputation.org](https://freecomputation.org/) · Apache-2.0
 
 > **CentL26 is now the flagship direction of CENTL.** Every new capability,
 > scientific backend, and product release is prepared for the standalone
