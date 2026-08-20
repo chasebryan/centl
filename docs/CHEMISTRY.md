@@ -2,9 +2,12 @@
 
 Status: **development implementation on `feature/centl-chem-phase1`**. This document does not claim that `centl-chem` has been merged, released, or Oasis-qualified.
 
-CENTL Chemistry is the exact-first chemical-computation layer of CENTL. The first vertical slice is deliberately narrow: chemical formula parsing, exact atom counting, reaction parsing, exact stoichiometric balancing, canonical coefficient normalization, and independent conservation verification.
+CENTL Chemistry is the exact-first chemical-computation layer of CENTL. The first development slice now contains two foundations:
 
-The implementation reuses CENTL's existing arbitrary-precision rational matrix machinery. It does not introduce a floating-point balancing solver or a second arithmetic system.
+1. deterministic formula/reaction chemistry: formula parsing, atom counting, exact reaction balancing, canonical coefficient normalization, and independent conservation verification;
+2. exact-over-reported-values sample spread: bounded replicate ingestion, descriptive spread statistics, and exact symbolic preservation of irrational standard deviations without confusing sample spread with measurement uncertainty.
+
+The implementation reuses CENTL's existing arbitrary-precision rational matrix and physical-unit machinery. It does not introduce floating-point balancing or a second arithmetic system.
 
 ## Command surface
 
@@ -19,9 +22,18 @@ Current commands:
 ```sh
 centl-chem atoms FORMULA
 centl-chem balance 'REACTION'
+centl-chem spread UNIT VALUE [VALUE ...]
+centl-chem spread measured UNIT VALUE [VALUE ...]
+centl-chem spread exact UNIT VALUE [VALUE ...]
+
 centl-chem --json atoms FORMULA
 centl-chem --json balance 'REACTION'
+centl-chem --json spread UNIT VALUE [VALUE ...]
+centl-chem --json spread measured UNIT VALUE [VALUE ...]
+centl-chem --json spread exact UNIT VALUE [VALUE ...]
 ```
+
+Plain `spread` defaults to `measured` input semantics. `spread exact` is an explicit caller declaration and must not be inferred merely because an input was written as a terminating decimal.
 
 ## Formula syntax
 
@@ -167,7 +179,7 @@ A nullspace of dimension greater than one returns `underdetermined_balance` rath
 
 A vector requiring a zero species coefficient is refused rather than quietly deleting the species.
 
-## Examples
+## Balancing examples
 
 ```sh
 centl-chem balance 'Fe + O2 -> Fe2O3'
@@ -206,9 +218,112 @@ O: 8 = 8
 verified=true
 ```
 
+## Sample spread foundation
+
+Chemists often need the observations and their spread, not a collapsed number. The development `spread` surface therefore preserves the replicate values and computes descriptive statistics exactly over the values as reported.
+
+Example:
+
+```sh
+centl-chem spread g 10.01 10.04 9.98 10.03 9.99
+```
+
+The first two lines state the two independent semantic axes:
+
+```text
+source_class=measured
+arithmetic_class=exact_over_reported_values
+```
+
+This distinction is mandatory.
+
+`source_class=measured` means the reported numbers are observations of the physical world. Parsing `10.01` as the rational number `1001/100` does not claim that the underlying physical measurand is mathematically exact.
+
+`arithmetic_class=exact_over_reported_values` means CENTL performs the descriptive calculation without adding binary floating-point rounding to the supplied decimal/rational reports.
+
+A caller may intentionally declare mathematical data exact:
+
+```sh
+centl-chem spread exact mol 1/3 2/3
+```
+
+which changes the source class to:
+
+```text
+source_class=declared_exact
+```
+
+The default remains measured.
+
+### Current spread statistics
+
+For one common unit shared by all observations, the current exact spread layer returns:
+
+- raw reported observations, represented as exact rationals;
+- `n`;
+- sum and sum of squares;
+- arithmetic mean;
+- median;
+- minimum and maximum;
+- range;
+- median absolute deviation (MAD);
+- population variance;
+- population standard deviation;
+- sample variance when `n >= 2`;
+- sample standard deviation when `n >= 2`;
+- standard error of the mean when `n >= 2`;
+- relative standard deviation as a dimensionless fraction when defined.
+
+The sample request is bounded to 10,000 observations.
+
+The unit must already be known to CENTL Physics. All values in one spread request currently share that one unit. Mixed-unit replicate ingestion is not yet admitted.
+
+### Exact radicals instead of fake decimals
+
+A standard deviation need not be rational even when every observation is rational. CENTL preserves that exact structure.
+
+For example, for observations `1 g` and `3 g`, the sample variance is exactly:
+
+```text
+2 g^2
+```
+
+so the sample standard deviation is represented as:
+
+```text
+sqrt(2) g
+```
+
+rather than an unjustified decimal pretending to be exact.
+
+The JSON representation distinguishes `exact_rational` from `exact_radical` and carries the radical's rational radicand explicitly.
+
+### Spread is not measurement uncertainty
+
+The current spread command deliberately emits:
+
+```text
+confidence_interval=not_computed(requires_declared_confidence_model_and_level)
+measurement_uncertainty=not_provided
+```
+
+CENTL does not infer a confidence interval without a declared confidence model, level, and method. It does not treat sample standard deviation or standard error as a complete measurement-uncertainty budget.
+
+The machine result similarly keeps these concepts explicit:
+
+```text
+source_class
+arithmetic_class
+sample spread
+confidence_interval.status=not_computed
+measurement_uncertainty.status=not_provided
+```
+
+Future metrology work must introduce its own uncertainty components, traceability, coverage rules, corrections, and provenance rather than overloading the descriptive spread.
+
 ## Machine evidence
 
-The version-1 development JSON result includes:
+The version-1 development reaction JSON result includes:
 
 - canonical balanced equation;
 - arbitrary-precision coefficient strings;
@@ -220,7 +335,7 @@ The version-1 development JSON result includes:
 - independent per-element conservation evidence;
 - final `verified` flag.
 
-Representative shape:
+Representative reaction shape:
 
 ```json
 {
@@ -244,6 +359,19 @@ Representative shape:
 }
 ```
 
+The sample-spread JSON carries both provenance and exact-arithmetic semantics. A measured observation is represented conceptually as:
+
+```json
+{
+  "value": "1001/100",
+  "unit": "g",
+  "source_class": "measured",
+  "representation_class": "exact_rational_of_reported_value"
+}
+```
+
+A derived statistic records both the source class of its inputs and that its arithmetic was exact over the reported values.
+
 Machine errors use stable codes such as:
 
 ```text
@@ -254,13 +382,16 @@ impossible_balance
 underdetermined_balance
 zero_coefficient
 mixed_sign_coefficients
+invalid_observation
+unknown_unit
+too_many_observations
 ```
 
 Human error messages may improve without changing those machine identifiers.
 
 ## What `verified=true` means
 
-In this first slice, `verified=true` has a narrow meaning:
+In this first reaction slice, `verified=true` has a narrow meaning:
 
 > the returned canonical coefficient vector independently conserves every element represented by the parsed reaction under the admitted formula grammar.
 
@@ -276,11 +407,13 @@ It does **not** mean:
 
 Those require later contracts.
 
+Likewise, an exact sample-spread calculation means only that the descriptive arithmetic over the reported values is exact. It is not a claim that the physical measurements, calibration, sampling process, or measurand are exact.
+
 ## CPS relationship
 
 Composition Predictive Simulation is a later layer, documented in [`CPS.md`](CPS.md) and [`CPS-RESULT-CONTRACT.md`](CPS-RESULT-CONTRACT.md).
 
-CPS must consume deterministic chemistry evidence from this engine rather than reimplement balancing. Predictive chemistry remains blocked behind provenance-aware measured data, uncertainty semantics, explicit thermodynamic/kinetic models, and multidimensional hazard evidence.
+CPS must consume deterministic chemistry and sample-evidence structures from this engine rather than reimplementing them. Predictive chemistry remains blocked behind provenance-aware chemical reference data, measurement-uncertainty semantics, explicit thermodynamic/kinetic models, and multidimensional hazard evidence.
 
 The governing boundary remains:
 
@@ -288,4 +421,4 @@ The governing boundary remains:
 
 ## Validation status
 
-The development branch includes unit, protocol, refusal, and Cram CLI tests for the first slice. Until the branch has passed the repository's actual build/format/test gates, this implementation must be described as **implemented but not yet validated green**.
+The development branch contains unit, protocol, refusal, adversarial-limit, deterministic-replay, sample-spread, and Cram CLI tests for the implemented slices. Until the branch has passed the repository's actual build/format/test gates, this implementation must be described as **implemented but not yet validated green**.
