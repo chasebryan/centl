@@ -1,0 +1,7 @@
+(test
+ (name test_polynomial_extended_gcd)
+ (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_polynomial_extended_gcd_oracle)
+ (libraries centl_lib alcotest zarith))
