@@ -1,314 +1,363 @@
+module Element_map = Map.Make (String)
+module Element_set = Set.Make (String)
+
 type error =
   | Empty_formula
-  | Malformed_formula of string
+  | Formula_too_long
+  | Nesting_too_deep
+  | Unexpected_character of int * char
+  | Unclosed_group
+  | Empty_group
+  | Invalid_subscript of string
   | Unknown_element of string
+  | Empty_species
   | Invalid_coefficient of string
-  | Missing_reaction_arrow
-  | Empty_reaction_side
-  | Duplicate_species of string
+  | Reaction_too_long
+  | Missing_arrow
+  | Multiple_arrows
+  | Empty_reaction_side of string
+  | Too_many_species
+  | No_elements
   | Impossible_balance
-  | Underdetermined_balance
+  | Underdetermined_balance of int
+  | Zero_coefficient
+  | Mixed_sign_coefficients
+  | Matrix_failure of string
+
+exception Chemistry_error of error
+
+type formula = Z.t Element_map.t
+
+type species = {
+  formula_text : string;
+  atoms : formula;
+  input_coefficient : Z.t;
+}
+
+type reaction = { reactants : species list; products : species list }
+
+type conservation = {
+  element : string;
+  reactants : Z.t;
+  products : Z.t;
+  conserved : bool;
+}
+
+type balanced_reaction = {
+  reaction : reaction;
+  reactant_coefficients : Z.t list;
+  product_coefficients : Z.t list;
+  conservation : conservation list;
+  verified : bool;
+}
+
+let max_formula_length = 4096
+let max_reaction_length = 16384
+let max_nesting_depth = 64
+let max_subscript_digits = 128
+let max_species = 128
 
 let error_message = function
   | Empty_formula -> "chemical formula must not be empty"
-  | Malformed_formula s -> "malformed chemical formula: " ^ s
-  | Unknown_element s -> "unknown element symbol: " ^ s
-  | Invalid_coefficient s -> "invalid stoichiometric coefficient: " ^ s
-  | Missing_reaction_arrow -> "reaction must contain exactly one -> arrow"
-  | Empty_reaction_side -> "reaction side must contain at least one species"
-  | Duplicate_species s -> "species appears more than once on a reaction side: " ^ s
-  | Impossible_balance -> "reaction has no positive stoichiometric balance"
-  | Underdetermined_balance ->
-      "reaction balance is not canonical: null space is not one-dimensional"
+  | Formula_too_long -> "chemical formula exceeds the bounded parser limit"
+  | Nesting_too_deep -> "chemical formula nesting exceeds the parser limit"
+  | Unexpected_character (position, ch) ->
+      Printf.sprintf "unexpected character %C at formula index %d" ch position
+  | Unclosed_group -> "chemical formula contains an unclosed parenthesized group"
+  | Empty_group -> "chemical formula contains an empty parenthesized group"
+  | Invalid_subscript text ->
+      Printf.sprintf "invalid chemical subscript %S (must be a positive integer)" text
+  | Unknown_element symbol -> Printf.sprintf "unknown element symbol %s" symbol
+  | Empty_species -> "reaction contains an empty species"
+  | Invalid_coefficient text ->
+      Printf.sprintf "invalid stoichiometric coefficient %S" text
+  | Reaction_too_long -> "reaction exceeds the bounded parser limit"
+  | Missing_arrow -> "reaction must contain exactly one -> arrow"
+  | Multiple_arrows -> "reaction contains more than one -> arrow"
+  | Empty_reaction_side side -> Printf.sprintf "reaction %s side is empty" side
+  | Too_many_species -> "reaction contains too many species for one request"
+  | No_elements -> "reaction contains no chemical elements"
+  | Impossible_balance ->
+      "reaction has no nonzero stoichiometric nullspace in the supported model"
+  | Underdetermined_balance dimension ->
+      Printf.sprintf
+        "reaction balancing is underdetermined (nullspace dimension %d); no canonical result is admitted"
+        dimension
+  | Zero_coefficient ->
+      "canonical balancing would require a zero coefficient; remove the unused species"
+  | Mixed_sign_coefficients ->
+      "stoichiometric nullspace does not admit one all-positive coefficient orientation"
+  | Matrix_failure message -> "stoichiometric matrix failure: " ^ message
+
+let protect f = try Ok (f ()) with Chemistry_error error -> Error error
+let fail error = raise (Chemistry_error error)
+
+let element_symbols =
+  [
+    "H"; "He"; "Li"; "Be"; "B"; "C"; "N"; "O"; "F"; "Ne"; "Na";
+    "Mg"; "Al"; "Si"; "P"; "S"; "Cl"; "Ar"; "K"; "Ca"; "Sc"; "Ti";
+    "V"; "Cr"; "Mn"; "Fe"; "Co"; "Ni"; "Cu"; "Zn"; "Ga"; "Ge"; "As";
+    "Se"; "Br"; "Kr"; "Rb"; "Sr"; "Y"; "Zr"; "Nb"; "Mo"; "Tc"; "Ru";
+    "Rh"; "Pd"; "Ag"; "Cd"; "In"; "Sn"; "Sb"; "Te"; "I"; "Xe"; "Cs";
+    "Ba"; "La"; "Ce"; "Pr"; "Nd"; "Pm"; "Sm"; "Eu"; "Gd"; "Tb"; "Dy";
+    "Ho"; "Er"; "Tm"; "Yb"; "Lu"; "Hf"; "Ta"; "W"; "Re"; "Os"; "Ir";
+    "Pt"; "Au"; "Hg"; "Tl"; "Pb"; "Bi"; "Po"; "At"; "Rn"; "Fr"; "Ra";
+    "Ac"; "Th"; "Pa"; "U"; "Np"; "Pu"; "Am"; "Cm"; "Bk"; "Cf"; "Es";
+    "Fm"; "Md"; "No"; "Lr"; "Rf"; "Db"; "Sg"; "Bh"; "Hs"; "Mt"; "Ds";
+    "Rg"; "Cn"; "Nh"; "Fl"; "Mc"; "Lv"; "Ts"; "Og";
+  ]
 
 let known_elements =
-  [ "H"; "He"; "Li"; "Be"; "B"; "C"; "N"; "O"; "F"; "Ne"; "Na"; "Mg";
-    "Al"; "Si"; "P"; "S"; "Cl"; "Ar"; "K"; "Ca"; "Sc"; "Ti"; "V"; "Cr";
-    "Mn"; "Fe"; "Co"; "Ni"; "Cu"; "Zn"; "Ga"; "Ge"; "As"; "Se"; "Br";
-    "Kr"; "Rb"; "Sr"; "Y"; "Zr"; "Nb"; "Mo"; "Tc"; "Ru"; "Rh"; "Pd";
-    "Ag"; "Cd"; "In"; "Sn"; "Sb"; "Te"; "I"; "Xe"; "Cs"; "Ba"; "La";
-    "Ce"; "Pr"; "Nd"; "Pm"; "Sm"; "Eu"; "Gd"; "Tb"; "Dy"; "Ho"; "Er";
-    "Tm"; "Yb"; "Lu"; "Hf"; "Ta"; "W"; "Re"; "Os"; "Ir"; "Pt"; "Au";
-    "Hg"; "Tl"; "Pb"; "Bi"; "Po"; "At"; "Rn"; "Fr"; "Ra"; "Ac"; "Th";
-    "Pa"; "U"; "Np"; "Pu"; "Am"; "Cm"; "Bk"; "Cf"; "Es"; "Fm"; "Md";
-    "No"; "Lr"; "Rf"; "Db"; "Sg"; "Bh"; "Hs"; "Mt"; "Ds"; "Rg"; "Cn";
-    "Nh"; "Fl"; "Mc"; "Lv"; "Ts"; "Og" ]
+  List.fold_left (fun set symbol -> Element_set.add symbol set) Element_set.empty
+    element_symbols
 
-let is_known symbol = List.mem symbol known_elements
+let is_uppercase ch = ch >= 'A' && ch <= 'Z'
+let is_lowercase ch = ch >= 'a' && ch <= 'z'
+let is_digit ch = ch >= '0' && ch <= '9'
 
-let parse_formula text =
-  if String.trim text = "" then Error Empty_formula
-  else
-    let length = String.length text in
-    let parse_number index =
-      if index < length && text.[index] >= '0' && text.[index] <= '9' then
-        let stop = ref index in
-        while !stop < length && text.[!stop] >= '0' && text.[!stop] <= '9' do
-          incr stop
-        done;
-        try
-          let value = int_of_string (String.sub text index (!stop - index)) in
-          if value <= 0 then Error (Malformed_formula text)
-          else Ok (value, !stop)
-        with Failure _ -> Error (Malformed_formula text)
-      else Ok (1, index)
-    in
-    let add_atom count symbol atoms =
-      let previous = try List.assoc symbol atoms with Not_found -> 0 in
-      (symbol, previous + count) :: List.remove_assoc symbol atoms
-    in
-    let rec parse_group index parenthesized =
-      let rec loop index atoms =
-        if index >= length then
-          if parenthesized then Error (Malformed_formula text)
-          else Ok (atoms, index)
-        else if parenthesized && text.[index] = ')' then
-          (match parse_number (index + 1) with
-           | Error e -> Error e
-           | Ok (multiplier, next) ->
-               Ok (List.map (fun (s, n) -> (s, n * multiplier)) atoms, next))
-        else if text.[index] = '(' then
-          (match parse_group (index + 1) true with
-           | Error e -> Error e
-           | Ok (inner, next) ->
-               let atoms =
-                 List.fold_left
-                   (fun result (s, n) -> add_atom n s result) atoms inner
-               in
-               loop next atoms)
-        else if text.[index] = ')' then Error (Malformed_formula text)
-        else if text.[index] >= 'A' && text.[index] <= 'Z' then
-          let next = ref (index + 1) in
-          if !next < length && text.[!next] >= 'a' && text.[!next] <= 'z' then
-            incr next;
-          let symbol = String.sub text index (!next - index) in
-          if not (is_known symbol) then Error (Unknown_element symbol)
-          else
-            (match parse_number !next with
-             | Error e -> Error e
-             | Ok (count, after_count) ->
-                 loop after_count (add_atom count symbol atoms))
-        else Error (Malformed_formula text)
-      in
-      loop index []
-    in
-    match parse_group 0 false with
-    | Error e -> Error e
-    | Ok (atoms, index) when index <> length -> Error (Malformed_formula text)
-    | Ok (atoms, _) -> Ok (List.sort compare atoms)
-
-type species = { formula : string; atoms : (string * int) list }
-type reaction = { reactants : species list; products : species list }
-type evidence = { element : string; reactant_atoms : int; product_atoms : int }
-type balanced = { reaction : reaction; coefficients : int list; evidence : evidence list }
-
-let parse_species formula =
-  match parse_formula formula with
-  | Error e -> Error e
-  | Ok atoms -> Ok { formula; atoms }
-
-let split_on_char character text =
-  let rec loop index start pieces =
-    if index = String.length text then
-      List.rev (String.sub text start (index - start) :: pieces)
-    else if text.[index] = character then
-      loop (index + 1) (index + 1)
-        (String.sub text start (index - start) :: pieces)
-    else loop (index + 1) start pieces
+let add_atom atoms symbol count =
+  let previous =
+    match Element_map.find_opt symbol atoms with Some value -> value | None -> Z.zero
   in
-  loop 0 0 []
+  Element_map.add symbol (Z.add previous count) atoms
 
-let parse_side side =
-  let terms = List.map String.trim (split_on_char '+' side) in
-  if terms = [] || List.exists (( = ) "") terms then Error Empty_reaction_side
+let merge_formula left right =
+  Element_map.fold (fun symbol count acc -> add_atom acc symbol count) right left
+
+let scale_formula multiplier atoms =
+  Element_map.map (fun count -> Z.mul multiplier count) atoms
+
+let parse_positive_integer text =
+  if String.length text = 0 || String.length text > max_subscript_digits then
+    fail (Invalid_subscript text);
+  let value =
+    try Z.of_string text with Invalid_argument _ -> fail (Invalid_subscript text)
+  in
+  if Z.sign value <= 0 then fail (Invalid_subscript text);
+  value
+
+let parse_count text index =
+  let length = String.length text in
+  let rec scan i =
+    if i < length && is_digit text.[i] then scan (i + 1) else i
+  in
+  let stop = scan index in
+  if stop = index then (Z.one, index)
   else
-    let parse_term term =
-      let index = ref 0 in
-      while !index < String.length term && term.[!index] >= '0'
-            && term.[!index] <= '9' do
-        incr index
-      done;
-      let coefficient =
-        if !index = 0 then 1
-        else
-          try int_of_string (String.sub term 0 !index)
-          with Failure _ -> 0
-      in
-      if coefficient <= 0 then Error (Invalid_coefficient term)
+    let raw = String.sub text index (stop - index) in
+    (parse_positive_integer raw, stop)
+
+let parse_formula_exn input =
+  let text = String.trim input in
+  let length = String.length text in
+  if length = 0 then fail Empty_formula;
+  if length > max_formula_length then fail Formula_too_long;
+  let rec sequence depth index stop_on_close =
+    if depth > max_nesting_depth then fail Nesting_too_deep;
+    let rec loop i atoms saw_term =
+      if i >= length then
+        if stop_on_close then fail Unclosed_group
+        else if not saw_term then fail Empty_formula
+        else (atoms, i)
       else
-        match
-          parse_species
-            (String.trim
-               (String.sub term !index (String.length term - !index)))
-        with
-        | Error e -> Error e
-        | Ok species -> Ok (coefficient, species)
+        match text.[i] with
+        | ')' ->
+            if stop_on_close then
+              if saw_term then (atoms, i + 1) else fail Empty_group
+            else fail (Unexpected_character (i, ')'))
+        | '(' ->
+            let group, after_group = sequence (depth + 1) (i + 1) true in
+            let multiplier, after_count = parse_count text after_group in
+            loop after_count
+              (merge_formula atoms (scale_formula multiplier group))
+              true
+        | ch when is_uppercase ch ->
+            let symbol_end =
+              if i + 1 < length && is_lowercase text.[i + 1] then i + 2 else i + 1
+            in
+            let symbol = String.sub text i (symbol_end - i) in
+            if not (Element_set.mem symbol known_elements) then fail (Unknown_element symbol);
+            let count, after_count = parse_count text symbol_end in
+            loop after_count (add_atom atoms symbol count) true
+        | ch -> fail (Unexpected_character (i, ch))
     in
-    let rec collect seen result = function
-      | [] -> Ok (List.rev result)
-      | term :: rest ->
-          (match parse_term term with
-           | Error e -> Error e
-           | Ok (coefficient, species) ->
-               if List.mem species.formula seen then
-                 Error (Duplicate_species species.formula)
-               else
-                 collect (species.formula :: seen)
-                   ((coefficient, species) :: result) rest)
+    loop index Element_map.empty false
+  in
+  let atoms, final_index = sequence 0 0 false in
+  if final_index <> length then fail (Unexpected_character (final_index, text.[final_index]));
+  atoms
+
+let parse_formula text = protect (fun () -> parse_formula_exn text)
+let formula_bindings formula = Element_map.bindings formula
+let atom_count formula symbol = match Element_map.find_opt symbol formula with Some n -> n | None -> Z.zero
+
+let parse_input_coefficient text =
+  let length = String.length text in
+  let rec scan i = if i < length && is_digit text.[i] then scan (i + 1) else i in
+  let stop = scan 0 in
+  if stop = 0 then (Z.one, text)
+  else
+    let raw = String.sub text 0 stop in
+    let coefficient =
+      try Z.of_string raw with Invalid_argument _ -> fail (Invalid_coefficient raw)
     in
-    collect [] [] terms
+    if Z.sign coefficient <= 0 then fail (Invalid_coefficient raw);
+    let formula_text = String.sub text stop (length - stop) |> String.trim in
+    if formula_text = "" then fail Empty_species;
+    (coefficient, formula_text)
 
-let split_arrow text =
-  match split_on_char '>' text with
-  | [left; right] when String.length left > 0
-                       && left.[String.length left - 1] = '-' ->
-      Ok (String.sub left 0 (String.length left - 1), right)
-  | _ -> Error Missing_reaction_arrow
+let parse_species_exn input =
+  let text = String.trim input in
+  if text = "" then fail Empty_species;
+  let input_coefficient, formula_text = parse_input_coefficient text in
+  let atoms = parse_formula_exn formula_text in
+  { formula_text; atoms; input_coefficient }
 
-let gcd_z a b = Z.gcd a b
-let lcm_z a b = Z.div (Z.mul a b) (gcd_z a b)
+let parse_species text = protect (fun () -> parse_species_exn text)
+
+let arrow_positions text =
+  let length = String.length text in
+  let rec loop i reversed =
+    if i + 1 >= length then List.rev reversed
+    else if text.[i] = '-' && text.[i + 1] = '>' then loop (i + 2) (i :: reversed)
+    else loop (i + 1) reversed
+  in
+  loop 0 []
+
+let parse_side_exn name text =
+  let trimmed = String.trim text in
+  if trimmed = "" then fail (Empty_reaction_side name);
+  let parts = String.split_on_char '+' trimmed in
+  if List.length parts > max_species then fail Too_many_species;
+  List.map parse_species_exn parts
+
+let parse_reaction_exn input =
+  let text = String.trim input in
+  if String.length text > max_reaction_length then fail Reaction_too_long;
+  match arrow_positions text with
+  | [] -> fail Missing_arrow
+  | [ arrow ] ->
+      let left = String.sub text 0 arrow in
+      let right = String.sub text (arrow + 2) (String.length text - arrow - 2) in
+      let reactants = parse_side_exn "reactant" left in
+      let products = parse_side_exn "product" right in
+      if List.length reactants + List.length products > max_species then fail Too_many_species;
+      { reactants; products }
+  | _ -> fail Multiple_arrows
+
+let parse_reaction text = protect (fun () -> parse_reaction_exn text)
+
+let reaction_elements reaction =
+  let add_species set species =
+    Element_map.fold (fun symbol _ acc -> Element_set.add symbol acc) species.atoms set
+  in
+  let set = List.fold_left add_species Element_set.empty reaction.reactants in
+  let set = List.fold_left add_species set reaction.products in
+  Element_set.elements set
+
+let stoichiometric_matrix_exn reaction =
+  let elements = reaction_elements reaction in
+  if elements = [] then fail No_elements;
+  let q_count species element = Q.of_bigint (atom_count species.atoms element) in
+  let rows =
+    List.map
+      (fun element ->
+        List.map (fun species -> q_count species element) reaction.reactants
+        @ List.map (fun species -> Q.neg (q_count species element)) reaction.products)
+      elements
+  in
+  match Centl_matrix.of_rows rows with
+  | Ok matrix -> (elements, matrix)
+  | Error error -> fail (Matrix_failure (Centl_matrix.error_message error))
+
+let stoichiometric_matrix reaction = protect (fun () -> stoichiometric_matrix_exn reaction)
+
+let normalize_null_vector_exn vector =
+  if Array.length vector = 0 then fail Impossible_balance;
+  let denominator_lcm =
+    Array.fold_left (fun acc value -> Z.lcm acc (Q.den value)) Z.one vector
+  in
+  let integers =
+    Array.map
+      (fun value ->
+        let scaled = Q.mul value (Q.of_bigint denominator_lcm) in
+        if not (Z.equal (Q.den scaled) Z.one) then
+          fail (Matrix_failure "nullspace denominator normalization failed");
+        Q.num scaled)
+      vector
+  in
+  if Array.exists (fun value -> Z.equal value Z.zero) integers then fail Zero_coefficient;
+  let gcd =
+    Array.fold_left (fun acc value -> Z.gcd acc (Z.abs value)) Z.zero integers
+  in
+  let primitive = Array.map (fun value -> Z.div value gcd) integers in
+  let all_positive = Array.for_all (fun value -> Z.sign value > 0) primitive in
+  let all_negative = Array.for_all (fun value -> Z.sign value < 0) primitive in
+  if all_positive then primitive
+  else if all_negative then Array.map Z.neg primitive
+  else fail Mixed_sign_coefficients
+
+let split_at count values =
+  let rec loop remaining left right =
+    if remaining = 0 then (List.rev left, right)
+    else
+      match right with
+      | [] -> (List.rev left, [])
+      | value :: rest -> loop (remaining - 1) (value :: left) rest
+  in
+  loop count [] values
+
+let side_total species coefficients element =
+  try
+    List.fold_left2
+      (fun total item coefficient ->
+        Z.add total (Z.mul coefficient (atom_count item.atoms element)))
+      Z.zero species coefficients
+  with Invalid_argument _ -> fail (Matrix_failure "coefficient/species length mismatch")
+
+let conservation_for reaction reactant_coefficients product_coefficients =
+  reaction_elements reaction
+  |> List.map (fun element ->
+         let reactants = side_total reaction.reactants reactant_coefficients element in
+         let products = side_total reaction.products product_coefficients element in
+         { element; reactants; products; conserved = Z.equal reactants products })
+
+let balance_reaction_exn reaction =
+  let _, matrix = stoichiometric_matrix_exn reaction in
+  let basis = Centl_matrix.nullspace matrix in
+  let vector =
+    match basis with
+    | [] -> fail Impossible_balance
+    | [ vector ] -> vector
+    | vectors -> fail (Underdetermined_balance (List.length vectors))
+  in
+  let coefficients = normalize_null_vector_exn vector |> Array.to_list in
+  let reactant_coefficients, product_coefficients =
+    split_at (List.length reaction.reactants) coefficients
+  in
+  let conservation =
+    conservation_for reaction reactant_coefficients product_coefficients
+  in
+  let verified = List.for_all (fun item -> item.conserved) conservation in
+  if not verified then fail (Matrix_failure "independent conservation verification failed");
+  { reaction; reactant_coefficients; product_coefficients; conservation; verified }
+
+let balance_reaction reaction = protect (fun () -> balance_reaction_exn reaction)
 
 let balance text =
-  match split_arrow text with
-  | Error e -> Error e
-  | Ok (left, right) ->
-      (match parse_side left, parse_side right with
-       | Error e, _ | _, Error e -> Error e
-       | Ok reactants, Ok products ->
-           let reaction =
-             { reactants = List.map snd reactants;
-               products = List.map snd products }
-           in
-           let terms = reactants @ products in
-           let elements =
-             List.sort_uniq compare
-               (List.concat
-                  (List.map (fun (_, s) -> List.map fst s.atoms) terms))
-           in
-           let signed_terms =
-             List.map (fun (_, s) -> (1, s)) reactants
-             @ List.map (fun (_, s) -> (-1, s)) products
-           in
-           let rows =
-             List.map
-               (fun element ->
-                 List.map
-                   (fun (sign, species) ->
-                     let count =
-                       try List.assoc element species.atoms
-                       with Not_found -> 0
-                     in
-                     Q.of_int (sign * count))
-                   signed_terms)
-               elements
-           in
-           let matrix = Array.of_list (List.map Array.of_list rows) in
-           let columns = List.length terms in
-           let rank = ref 0 and pivots = ref [] in
-           for column = 0 to columns - 1 do
-             let pivot = ref None in
-             for row = !rank to Array.length matrix - 1 do
-               if !pivot = None
-                  && not (Q.equal matrix.(row).(column) Q.zero) then
-                 pivot := Some row
-             done;
-             match !pivot with
-             | None -> ()
-             | Some row ->
-                 let swap = matrix.(!rank) in
-                 matrix.(!rank) <- matrix.(row);
-                 matrix.(row) <- swap;
-                 let divisor = matrix.(!rank).(column) in
-                 for j = column to columns - 1 do
-                   matrix.(!rank).(j) <- Q.div matrix.(!rank).(j) divisor
-                 done;
-                 for i = 0 to Array.length matrix - 1 do
-                   if i <> !rank then
-                     let factor = matrix.(i).(column) in
-                     if not (Q.equal factor Q.zero) then
-                       for j = column to columns - 1 do
-                         matrix.(i).(j) <-
-                           Q.sub matrix.(i).(j)
-                             (Q.mul factor matrix.(!rank).(j))
-                       done
-                 done;
-                 pivots := column :: !pivots;
-                 incr rank
-           done;
-           if columns - !rank <> 1 then
-             Error (if columns = !rank then Impossible_balance
-                    else Underdetermined_balance)
-           else
-             let pivot_columns = List.rev !pivots in
-             let free =
-               List.find (fun c -> not (List.mem c pivot_columns))
-                 (List.init columns (fun i -> i))
-             in
-             let solution = Array.make columns Q.zero in
-             solution.(free) <- Q.one;
-             for row = !rank - 1 downto 0 do
-               let column = List.nth pivot_columns row in
-               let remainder = ref Q.zero in
-               for j = column + 1 to columns - 1 do
-                 remainder := Q.add !remainder
-                   (Q.mul matrix.(row).(j) solution.(j))
-               done;
-               solution.(column) <- Q.neg !remainder
-             done;
-             let denominator =
-               Array.fold_left
-                 (fun result value -> lcm_z result (Q.den value))
-                 Z.one solution
-             in
-             let integer_values =
-               Array.to_list
-                 (Array.map
-                    (fun value ->
-                      Z.to_int
-                        (Z.div (Z.mul (Q.num value) denominator)
-                           (Q.den value)))
-                    solution)
-             in
-             let divisor =
-               List.fold_left
-                 (fun result value ->
-                   gcd_z result (Z.of_int (abs value)))
-                 Z.zero integer_values
-               |> Z.to_int
-             in
-             let coefficients = List.map (fun value -> value / divisor)
-                 integer_values
-             in
-             if List.exists (fun value -> value <= 0) coefficients then
-               Error Impossible_balance
-             else
-               let left_coefficients, right_coefficients =
-                 let rec take count values left right =
-                   if count = 0 then (List.rev left, List.rev right)
-                   else
-                     match values with
-                     | [] -> (List.rev left, List.rev right)
-                     | value :: rest -> take (count - 1) rest
-                         (value :: left) right
-                 in
-                 take (List.length reactants) coefficients [] []
-               in
-               let count element side coefficients =
-                 List.fold_left2
-                   (fun total (_, species) coefficient ->
-                     total + coefficient *
-                       (try List.assoc element species.atoms
-                        with Not_found -> 0))
-                   0 side coefficients
-               in
-               let evidence =
-                 List.map
-                   (fun element ->
-                     { element;
-                       reactant_atoms =
-                         count element reactants left_coefficients;
-                       product_atoms =
-                         count element products right_coefficients })
-                   elements
-               in
-               Ok { reaction; coefficients; evidence }
+  protect (fun () ->
+      let reaction = parse_reaction_exn text in
+      balance_reaction_exn reaction)
+
+let render_term coefficient species =
+  if Z.equal coefficient Z.one then species.formula_text
+  else Z.to_string coefficient ^ " " ^ species.formula_text
+
+let render_side coefficients species =
+  try List.map2 render_term coefficients species |> String.concat " + "
+  with Invalid_argument _ -> fail (Matrix_failure "coefficient/species length mismatch")
+
+let render_balanced balanced =
+  render_side balanced.reactant_coefficients balanced.reaction.reactants
+  ^ " -> "
+  ^ render_side balanced.product_coefficients balanced.reaction.products
