@@ -14,16 +14,30 @@ let test_entities_protocol () =
   in
   Alcotest.(check string) "kind" "moles_to_entities"
     (json |> member "kind" |> to_string);
-  Alcotest.(check string) "source" "declared_exact"
-    (json |> member "source_class" |> to_string);
+  Alcotest.(check string) "input source" "declared_exact"
+    (json |> member "input_source_class" |> to_string);
+  Alcotest.(check string) "result source" "derived_exact"
+    (json |> member "result_source_class" |> to_string);
   Alcotest.(check string) "entities" "602214076000000000000000"
     (json |> member "entities" |> to_string);
   Alcotest.(check bool) "integral" true
     (json |> member "entities_integral" |> to_bool);
+  Alcotest.(check string) "count status" "integral_count"
+    (json |> member "entity_count_status" |> to_string);
   Alcotest.(check string) "N_A source" "CENTL Physics"
     (json |> member "avogadro_constant" |> member "source" |> to_string);
   Alcotest.(check bool) "N_A exact" true
     (json |> member "avogadro_constant" |> member "exact" |> to_bool)
+
+let test_fractional_entity_equivalent_protocol () =
+  let json =
+    unwrap
+      (entities_request ~source_class:Centl_chemistry_amount.Declared_exact "1/3")
+  in
+  Alcotest.(check bool) "not integral" false
+    (json |> member "entities_integral" |> to_bool);
+  Alcotest.(check string) "count status" "nonintegral_mathematical_equivalent"
+    (json |> member "entity_count_status" |> to_string)
 
 let test_stoich_protocol () =
   let json =
@@ -34,8 +48,10 @@ let test_stoich_protocol () =
   in
   Alcotest.(check string) "kind" "stoichiometric_amount_conversion"
     (json |> member "kind" |> to_string);
-  Alcotest.(check string) "source" "measured"
-    (json |> member "source_class" |> to_string);
+  Alcotest.(check string) "input source" "measured"
+    (json |> member "input_source_class" |> to_string);
+  Alcotest.(check string) "result source" "derived_from_measured"
+    (json |> member "result_source_class" |> to_string);
   Alcotest.(check string) "equation"
     "2 C2H6 + 7 O2 -> 4 CO2 + 6 H2O"
     (json |> member "equation" |> to_string);
@@ -60,6 +76,8 @@ let () =
       ( "protocol",
         [
           Alcotest.test_case "entities" `Quick test_entities_protocol;
+          Alcotest.test_case "fractional entity equivalent" `Quick
+            test_fractional_entity_equivalent_protocol;
           Alcotest.test_case "stoichiometry" `Quick test_stoich_protocol;
           Alcotest.test_case "error" `Quick test_error_protocol;
         ] );
