@@ -1,0 +1,15 @@
+(test
+ (name test_polynomial_gcd)
+ (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_polynomial_gcd_oracle)
+ (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_polynomial_gcd_protocol)
+ (libraries centl_lib alcotest yojson zarith))
+
+(test
+ (name test_polynomial_gcd_surfaces)
+ (libraries centl_lib alcotest yojson zarith))
