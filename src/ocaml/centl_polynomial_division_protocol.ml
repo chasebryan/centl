@@ -149,8 +149,7 @@ let division_action ?(cancelled = never_cancelled) limits ~method_ render fields
               failure ~method_ "invalid_request" message
           | Ok dividend, Ok divisor ->
               begin match
-                divide ~limits:limits.division ~cancelled ~variable ~dividend
-                  ~divisor
+                divide ~limits:limits.division ~cancelled ~variable dividend divisor
               with
               | Error error ->
                   failure ~method_ (error_code error) (error_message error)
