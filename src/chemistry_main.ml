@@ -6,9 +6,13 @@ let usage () =
     \  centl-chem atoms FORMULA\n\
     \  centl-chem balance 'REACTION'\n\
     \  centl-chem spread UNIT VALUE [VALUE ...]\n\
+    \  centl-chem spread measured UNIT VALUE [VALUE ...]\n\
+    \  centl-chem spread exact UNIT VALUE [VALUE ...]\n\
     \  centl-chem --json atoms FORMULA\n\
     \  centl-chem --json balance 'REACTION'\n\
-    \  centl-chem --json spread UNIT VALUE [VALUE ...]\n";
+    \  centl-chem --json spread UNIT VALUE [VALUE ...]\n\
+    \  centl-chem --json spread measured UNIT VALUE [VALUE ...]\n\
+    \  centl-chem --json spread exact UNIT VALUE [VALUE ...]\n";
   exit 2
 
 let fail error =
@@ -41,10 +45,16 @@ let command_balance reaction_text =
 
 let q_text = Q.to_string
 
-let command_spread unit_symbol values =
-  match Centl_chemistry_sample.summarize_strings ~unit_symbol values with
+let command_spread observation_class unit_symbol values =
+  match
+    Centl_chemistry_sample.summarize_strings ~observation_class ~unit_symbol values
+  with
   | Error error -> fail_sample error
   | Ok summary ->
+      Printf.printf "source_class=%s\n"
+        (Centl_chemistry_sample.observation_class_to_string
+           summary.observation_class);
+      Printf.printf "arithmetic_class=exact_over_reported_values\n";
       Printf.printf "n=%d\n" summary.n;
       Printf.printf "unit=%s\n" summary.unit_symbol;
       Printf.printf "observations=%s\n"
@@ -64,7 +74,9 @@ let command_spread unit_symbol values =
         summary.unit_symbol;
       begin
         match summary.sample_variance with
-        | None -> Printf.printf "sample_variance=undefined(requires_at_least_two_observations)\n"
+        | None ->
+            Printf.printf
+              "sample_variance=undefined(requires_at_least_two_observations)\n"
         | Some value ->
             Printf.printf "sample_variance=%s (%s)^2\n" (q_text value)
               summary.unit_symbol
@@ -95,12 +107,27 @@ let () =
   match Array.to_list Sys.argv with
   | [ _; "atoms"; formula ] -> command_atoms formula
   | [ _; "balance"; reaction ] -> command_balance reaction
+  | _ :: "spread" :: "measured" :: unit_symbol :: values when values <> [] ->
+      command_spread Centl_chemistry_sample.Measured unit_symbol values
+  | _ :: "spread" :: "exact" :: unit_symbol :: values when values <> [] ->
+      command_spread Centl_chemistry_sample.Declared_exact unit_symbol values
   | _ :: "spread" :: unit_symbol :: values when values <> [] ->
-      command_spread unit_symbol values
+      command_spread Centl_chemistry_sample.Measured unit_symbol values
   | [ _; "--json"; "atoms"; formula ] ->
       command_json (Centl_chemistry_protocol.atoms_request formula)
   | [ _; "--json"; "balance"; reaction ] ->
       command_json (Centl_chemistry_protocol.balance_request reaction)
+  | _ :: "--json" :: "spread" :: "measured" :: unit_symbol :: values
+    when values <> [] ->
+      command_json
+        (Centl_chemistry_sample_protocol.spread_request
+           ~observation_class:Centl_chemistry_sample.Measured ~unit_symbol values)
+  | _ :: "--json" :: "spread" :: "exact" :: unit_symbol :: values
+    when values <> [] ->
+      command_json
+        (Centl_chemistry_sample_protocol.spread_request
+           ~observation_class:Centl_chemistry_sample.Declared_exact ~unit_symbol
+           values)
   | _ :: "--json" :: "spread" :: unit_symbol :: values when values <> [] ->
       command_json
         (Centl_chemistry_sample_protocol.spread_request ~unit_symbol values)
