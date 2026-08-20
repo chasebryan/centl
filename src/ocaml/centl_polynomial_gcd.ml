@@ -85,16 +85,12 @@ let valid_limits limits =
   limits.max_euclid_steps >= 0
   && Centl_polynomial_division.valid_limits limits.division
 
-let gcd ?(limits = default_limits) ?(cancelled = never_cancelled) ~variable left
-    right =
+let gcd_with_state state ~max_euclid_steps ~variable left right =
   let ( let* ) result next = Result.bind result next in
   if String.equal variable "" then Error Empty_variable
-  else if not (valid_limits limits) then
+  else if max_euclid_steps < 0 then
     Error (Resource_limit "polynomial gcd limits are invalid")
   else
-    let state =
-      Centl_polynomial_division.make_state ~limits:limits.division ~cancelled ()
-    in
     let* () = checkpoint state in
     let* left = guard state "left input" left in
     let* right = guard state "right input" right in
@@ -106,7 +102,7 @@ let gcd ?(limits = default_limits) ?(cancelled = never_cancelled) ~variable left
       let* () = checkpoint state in
       let* () = charge state 1 in
       if is_zero b then Ok a
-      else if steps >= limits.max_euclid_steps then
+      else if steps >= max_euclid_steps then
         Error (Resource_limit "polynomial gcd exceeds the Euclidean-step limit")
       else
         let* division =
@@ -117,6 +113,17 @@ let gcd ?(limits = default_limits) ?(cancelled = never_cancelled) ~variable left
         euclid (steps + 1) b remainder
     in
     euclid 0 left right
+
+let gcd ?(limits = default_limits) ?(cancelled = never_cancelled) ~variable left
+    right =
+  if not (valid_limits limits) then
+    Error (Resource_limit "polynomial gcd limits are invalid")
+  else
+    let state =
+      Centl_polynomial_division.make_state ~limits:limits.division ~cancelled ()
+    in
+    gcd_with_state state ~max_euclid_steps:limits.max_euclid_steps ~variable left
+      right
 
 let coprime ?limits ?cancelled ~variable left right =
   let ( let* ) result next = Result.bind result next in
