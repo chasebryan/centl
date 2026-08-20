@@ -282,6 +282,48 @@ let polynomial_extended_gcd_resource_limits limits =
       ("cooperative_cancellation", `Bool true);
     ]
 
+let polynomial_square_free_limits limits =
+  let defaults = Centl_polynomial_square_free.default_limits in
+  let polynomial = limits.polynomial in
+  let division =
+    Centl_polynomial_division.
+      {
+        max_terms = min defaults.division.max_terms polynomial.max_terms;
+        max_exact_bits =
+          min defaults.division.max_exact_bits polynomial.max_exact_bits;
+        max_steps = min defaults.division.max_steps polynomial.max_work;
+        max_work = min defaults.division.max_work polynomial.max_work;
+      }
+  in
+  let square_free =
+    Centl_polynomial_square_free.
+      {
+        division;
+        max_gcd_steps = min defaults.max_gcd_steps polynomial.max_work;
+        max_factor_steps = min defaults.max_factor_steps polynomial.max_work;
+      }
+  in
+  Centl_polynomial_square_free_protocol.
+    {
+      polynomial;
+      square_free;
+      max_result_bytes = min polynomial.max_result_bytes limits.max_result_bytes;
+    }
+
+let polynomial_square_free_resource_limits limits =
+  let limits = polynomial_square_free_limits limits in
+  `Assoc
+    [
+      ("max_terms", `Int limits.square_free.division.max_terms);
+      ("max_exact_bits", `Int limits.square_free.division.max_exact_bits);
+      ("max_division_steps", `Int limits.square_free.division.max_steps);
+      ("max_gcd_steps", `Int limits.square_free.max_gcd_steps);
+      ("max_factor_steps", `Int limits.square_free.max_factor_steps);
+      ("max_work", `Int limits.square_free.division.max_work);
+      ("max_result_bytes", `Int limits.max_result_bytes);
+      ("cooperative_cancellation", `Bool true);
+    ]
+
 let capabilities limits =
   `Assoc
     [
@@ -395,6 +437,14 @@ let capabilities limits =
               ];
             `Assoc
               [
+                ("name", `String "polynomial_square_free");
+                ("classification", `String "exact");
+                ("input", `String "univariate sparse Q-polynomial plus explicit variable");
+                ("operations", strings [ "factorize" ]);
+                ("limits", polynomial_square_free_resource_limits limits);
+              ];
+            `Assoc
+              [
                 ("name", `String "real_algebraic");
                 ("classification", `String "algebraic_exact");
                 ("input", `String "integer polynomial plus rational interval");
@@ -464,6 +514,9 @@ let dispatch_domain limits ~cancelled id domain request =
       | "polynomial_extended_gcd" ->
           Centl_polynomial_extended_gcd_protocol.handle_json
             ~limits:(polynomial_extended_gcd_limits limits) ~cancelled request
+      | "polynomial_square_free" ->
+          Centl_polynomial_square_free_protocol.handle_json
+            ~limits:(polynomial_square_free_limits limits) ~cancelled request
       | "real_algebraic" ->
           Centl_real_algebraic_protocol.handle_json ~limits:limits.algebraic
             ~cancelled request

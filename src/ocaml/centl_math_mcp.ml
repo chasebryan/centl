@@ -273,6 +273,19 @@ let polynomial_extended_gcd_request_schema =
         [ "action"; "variable"; "left"; "right" ];
     ]
 
+let polynomial_square_free_request_schema =
+  one_of
+    [
+      strict_object [ ("action", const_string "capabilities") ] [ "action" ];
+      strict_object
+        [
+          ("action", const_string "factorize");
+          ("variable", string_schema);
+          ("polynomial", polynomial_schema);
+        ]
+        [ "action"; "variable"; "polynomial" ];
+    ]
+
 let algebraic_request_schema =
   one_of
     [
@@ -358,6 +371,12 @@ let input_schema =
         [ "domain"; "request" ];
       strict_object
         [
+          ("domain", const_string "polynomial_square_free");
+          ("request", polynomial_square_free_request_schema);
+        ]
+        [ "domain"; "request" ];
+      strict_object
+        [
           ("domain", const_string "real_algebraic");
           ("request", algebraic_request_schema);
         ]
@@ -426,7 +445,7 @@ let read_only_annotations =
     ]
 
 let tool_description =
-  "Use CENTL's canonical exact-first P0 mathematics gateway. Compute exact complex-rational arithmetic, exact dense rational matrix and linear-system operations, canonical sparse multivariate polynomial operations, exact simultaneous polynomial composition, exact polynomial content and primitive-part decomposition, exact univariate polynomial quotient and remainder, exact monic polynomial gcd and coprimality, exact polynomial extended-gcd Bézout certificates over Q, or Sturm-certified real algebraic root isolation. Unsupported inputs and resource boundaries remain explicit; the tool never silently falls back from exact mathematics to floating point."
+  "Use CENTL's canonical exact-first P0 mathematics gateway. Compute exact complex-rational arithmetic, exact dense rational matrix and linear-system operations, canonical sparse multivariate polynomial operations, exact simultaneous polynomial composition, exact polynomial content and primitive-part decomposition, exact univariate polynomial quotient and remainder, exact monic polynomial gcd and coprimality, exact polynomial extended-gcd Bézout certificates, exact characteristic-zero square-free multiplicity decomposition over Q, or Sturm-certified real algebraic root isolation. Unsupported inputs and resource boundaries remain explicit; the tool never silently falls back from exact mathematics to floating point."
 
 let tool () =
   `Assoc
@@ -473,6 +492,7 @@ let request_of_arguments arguments =
                    "polynomial_division";
                    "polynomial_gcd";
                    "polynomial_extended_gcd";
+                   "polynomial_square_free";
                    "real_algebraic";
                  ])
           then Error ("unknown centl_math domain " ^ domain)
