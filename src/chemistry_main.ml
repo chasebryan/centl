@@ -8,6 +8,7 @@ let usage () =
     \  centl-chem particles [measured|exact] MOLES\n\
     \  centl-chem moles [measured|exact] ENTITY_COUNT\n\
     \  centl-chem stoich [measured|exact] 'REACTION' SOURCE_SPECIES SOURCE_MOLES TARGET_SPECIES\n\
+    \  centl-chem limiting [measured|exact] 'REACTION' FORMULA=MOLES [FORMULA=MOLES ...]\n\
     \  centl-chem spread UNIT VALUE [VALUE ...]\n\
     \  centl-chem spread measured UNIT VALUE [VALUE ...]\n\
     \  centl-chem spread exact UNIT VALUE [VALUE ...]\n\
@@ -16,6 +17,7 @@ let usage () =
     \  centl-chem --json particles [measured|exact] MOLES\n\
     \  centl-chem --json moles [measured|exact] ENTITY_COUNT\n\
     \  centl-chem --json stoich [measured|exact] 'REACTION' SOURCE_SPECIES SOURCE_MOLES TARGET_SPECIES\n\
+    \  centl-chem --json limiting [measured|exact] 'REACTION' FORMULA=MOLES [FORMULA=MOLES ...]\n\
     \  centl-chem --json spread UNIT VALUE [VALUE ...]\n\
     \  centl-chem --json spread measured UNIT VALUE [VALUE ...]\n\
     \  centl-chem --json spread exact UNIT VALUE [VALUE ...]\n";
@@ -31,6 +33,10 @@ let fail_sample error =
 
 let fail_amount error =
   Printf.eprintf "centl-chem: %s\n" (Centl_chemistry_amount.error_message error);
+  exit 1
+
+let fail_limiting error =
+  Printf.eprintf "centl-chem: %s\n" (Centl_chemistry_limiting.error_message error);
   exit 1
 
 let command_atoms formula_text =
@@ -113,6 +119,30 @@ let command_stoich source_class reaction_text source_species source_moles
       Printf.printf "reaction_verified=%s\n"
         (if conversion.balanced.verified then "true" else "false")
 
+let render_amount_pairs pairs =
+  pairs
+  |> List.map (fun (species, moles) -> species ^ ":" ^ q_text moles)
+  |> String.concat ","
+
+let command_limiting source_class reaction_text assignments =
+  match Centl_chemistry_limiting.solve ~source_class ~reaction_text assignments with
+  | Error error -> fail_limiting error
+  | Ok result ->
+      print_amount_provenance result.source_class;
+      Printf.printf "equation=%s\n" (render_balanced result.balanced);
+      Printf.printf "extent=%s mol\n" (q_text result.extent_moles);
+      Printf.printf "limiting_species=%s\n"
+        (String.concat "," result.limiting_species);
+      Printf.printf "co_limiting=%s\n"
+        (if List.length result.limiting_species > 1 then "true" else "false");
+      Printf.printf "remaining_reactants=%s mol\n"
+        (render_amount_pairs result.remaining_reactants);
+      Printf.printf "theoretical_products=%s mol\n"
+        (render_amount_pairs result.theoretical_products);
+      Printf.printf "reaction_verified=%s\n"
+        (if result.balanced.verified then "true" else "false");
+      Printf.printf "scope=amount_of_substance_only\n"
+
 let command_spread observation_class unit_symbol values =
   match
     Centl_chemistry_sample.summarize_strings ~observation_class ~unit_symbol values
@@ -194,6 +224,14 @@ let () =
         target
   | [ _; "stoich"; reaction; source; amount; target ] ->
       command_stoich Centl_chemistry_amount.Unspecified reaction source amount target
+  | _ :: "limiting" :: "measured" :: reaction :: assignments
+    when assignments <> [] ->
+      command_limiting Centl_chemistry_amount.Measured reaction assignments
+  | _ :: "limiting" :: "exact" :: reaction :: assignments
+    when assignments <> [] ->
+      command_limiting Centl_chemistry_amount.Declared_exact reaction assignments
+  | _ :: "limiting" :: reaction :: assignments when assignments <> [] ->
+      command_limiting Centl_chemistry_amount.Unspecified reaction assignments
   | _ :: "spread" :: "measured" :: unit_symbol :: values when values <> [] ->
       command_spread Centl_chemistry_sample.Measured unit_symbol values
   | _ :: "spread" :: "exact" :: unit_symbol :: values when values <> [] ->
@@ -240,6 +278,23 @@ let () =
         (Centl_chemistry_amount_protocol.stoichiometry_request
            ~reaction_text:reaction ~source_species:source ~source_moles:amount
            ~target_species:target)
+  | _ :: "--json" :: "limiting" :: "measured" :: reaction :: assignments
+    when assignments <> [] ->
+      command_json
+        (Centl_chemistry_limiting_protocol.request
+           ~source_class:Centl_chemistry_amount.Measured ~reaction_text:reaction
+           assignments)
+  | _ :: "--json" :: "limiting" :: "exact" :: reaction :: assignments
+    when assignments <> [] ->
+      command_json
+        (Centl_chemistry_limiting_protocol.request
+           ~source_class:Centl_chemistry_amount.Declared_exact
+           ~reaction_text:reaction assignments)
+  | _ :: "--json" :: "limiting" :: reaction :: assignments
+    when assignments <> [] ->
+      command_json
+        (Centl_chemistry_limiting_protocol.request ~reaction_text:reaction
+           assignments)
   | _ :: "--json" :: "spread" :: "measured" :: unit_symbol :: values
     when values <> [] ->
       command_json
