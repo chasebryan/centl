@@ -21,4 +21,9 @@ case $(uname -m) in
 esac
 
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-exec "$script_dir/package-release-legacy" "$@"
+project_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+output_directory=${2:-"$project_root/dist"}
+
+"$script_dir/package-release-legacy" "$@"
+python3 "$script_dir/check-linux-release-abi.py" \
+  "$output_directory/centl-linux-x86_64.tar.gz"
