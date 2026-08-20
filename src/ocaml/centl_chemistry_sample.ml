@@ -38,7 +38,8 @@ let error_message = function
 
 let parse_q text =
   try Q.of_string text
-  with Invalid_argument _ | Failure _ -> raise (Invalid_argument text)
+  with Invalid_argument _ | Failure _ | Division_by_zero ->
+    raise (Invalid_argument text)
 
 let q_of_int value = Q.of_bigint (Z.of_int value)
 let q_abs value = if Q.compare value Q.zero < 0 then Q.neg value else value
