@@ -22,8 +22,8 @@ let print_provenance source_class =
   Printf.printf "result_source_class=%s\n" (result_source_class source_class);
   Printf.printf "arithmetic_class=exact_over_supplied_values\n"
 
-let render_species item =
-  Printf.sprintf "%s[%s]:%s" item.Centl_cps.formula_text item.composition_key
+let render_species (item : Centl_cps.species_input) =
+  Printf.sprintf "%s[%s]:%s" item.formula_text item.composition_key
     (q_text item.moles)
 
 let render_elemental_moles items =
