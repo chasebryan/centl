@@ -1,0 +1,12 @@
+(test
+ (name test_cps)
+ (modules test_cps)
+ (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_cps_protocol)
+ (modules test_cps_protocol)
+ (libraries centl_lib alcotest zarith yojson))
+
+(cram
+ (deps ../../src/cps_main.exe))
