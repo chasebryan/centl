@@ -40,7 +40,7 @@ let of_division_error = function
       Internal_division_error
         "polynomial gcd reached an impossible zero-divisor state"
 
-let lift_division = Result.map_error of_division_error
+let lift_division result = Result.map_error of_division_error result
 
 let checkpoint state =
   Centl_polynomial_division.checkpoint state |> lift_division
