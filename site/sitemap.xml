@@ -1346,6 +1346,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/route-a-k51-sector-normal-form.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/route-b-joint-k31-k47-seam.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>

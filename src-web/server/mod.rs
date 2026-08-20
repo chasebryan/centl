@@ -1817,9 +1817,14 @@ mod tests {
             .duration_since(UNIX_EPOCH)
             .unwrap_or_default()
             .as_nanos();
-        let base = env::temp_dir()
-            .canonicalize()
-            .unwrap_or_else(|_| env::temp_dir());
+        // Project roots intentionally reject shared temporary trees. Keep
+        // integration fixtures under a private, dedicated home-directory
+        // namespace so the same safety policy is exercised in CI and locally.
+        let base = env::var_os("HOME")
+            .map(PathBuf::from)
+            .expect("tests require HOME")
+            .join(".centl26-tests");
+        fs::create_dir_all(&base).unwrap();
         base.join(format!(
             "centl26-project-test-{}-{}-{}",
             label,
