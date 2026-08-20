@@ -14,8 +14,8 @@ let multiply_exn left right =
   | Ok value -> value
   | Error error -> Alcotest.fail (Centl_multivariate_polynomial.error_message error)
 
-let linear constant =
-  add (unwrap_poly (term Q.one [ ("x", 1) ])) (constant constant)
+let linear scalar =
+  add (unwrap_poly (term Q.one [ ("x", 1) ])) (constant scalar)
 
 let bezout_value left right certificate =
   add
