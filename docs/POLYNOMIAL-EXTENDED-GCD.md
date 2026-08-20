@@ -70,6 +70,11 @@ and
 
 `next_t = old_t - q*t`.
 
+The witness updates are accumulated directly into the destination difference,
+term by term. CENTL does not first materialize complete temporary `q*s` or `q*t`
+polynomials. Cancellation, work, term-count, and exact-bit guards run before each
+new product term is retained in the evolving witness.
+
 The algorithm does not monic-normalize intermediate remainders. Doing so would
 require synchronizing every unit scaling with both witness sequences. Instead,
 when the Euclidean chain terminates, CENTL multiplies the final gcd and both
@@ -87,15 +92,14 @@ The same work counter covers:
 - leading-term scans;
 - every long-division step;
 - quotient/remainder construction;
-- witness polynomial multiplication;
-- witness subtraction;
+- direct witness product-subtraction updates;
 - final gcd/witness normalization;
 - Euclidean-loop progress.
 
-Witness multiplication and subtraction are bounded term by term. Intermediate
-witness products and differences are guarded before another term is retained.
-The operation therefore cannot reset the meter between remainder work and
-certificate work.
+Witness updates are bounded term by term. The evolving difference is guarded
+before another product contribution is retained, so witness construction cannot
+allocate a complete oversized product before refusal. The operation also cannot
+reset the meter between remainder work and certificate work.
 
 ## Resource semantics
 
@@ -119,8 +123,8 @@ arithmetic.
 ## Cancellation
 
 Extended GCD is cooperatively cancellable throughout validation, long division,
-witness multiplication/subtraction, Euclidean iteration, and final
-normalization. Cancellation returns `cancelled` with no partial certificate.
+direct witness updates, Euclidean iteration, and final normalization.
+Cancellation returns `cancelled` with no partial certificate.
 
 ## Strict machine protocol
 
