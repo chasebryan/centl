@@ -5,3 +5,7 @@
 (test
  (name test_polynomial_gcd_oracle)
  (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_polynomial_gcd_protocol)
+ (libraries centl_lib alcotest yojson zarith))
