@@ -40,6 +40,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Compile engine, policy gates, and tests
         run: |
@@ -61,7 +62,7 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_oasis*.py'
 
       - name: Run Linux release portability tests
-        run: python3 -m unittest tests.test_linux_release_abi
+        run: python3 -m unittest discover -s tests -p 'test_linux_release_abi.py'
 
       - name: Validate live repository gate plan
         run: python3 scripts/oasis.py --root "$PWD" --no-repair --plan
@@ -81,6 +82,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Configure runner paths
         shell: bash
@@ -161,6 +163,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Require clear release-blocking GitHub security state
         env:
