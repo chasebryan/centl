@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-### CentL26 26.0.0 product line
+### CentL26 product line
 
 - Introduces **CentL26**, the standalone, offline scientific work environment
   and new annual desktop product line from the Free Computation Foundation.
@@ -12,16 +12,31 @@
   host, asynchronous notebook execution, command palette, collapsible IDE
   panes, exact mathematics, current physics and research kernels, and visible
   result-assurance states.
-- Defines `26.0.0`, `26.1.0`, and future annual train identities separately
-  from historical CENTL core-engine versions and Oasis qualification.
+- Keeps the public product identity at **CentL26** while source commits and
+  internal build metadata identify changes independently from historical CENTL
+  core-engine versions and Oasis qualification.
 - Establishes the `centl.broker/1` capability-registry boundary so existing
   CENTL product families can be integrated without confusing planned adapters
   with currently available executors.
+- Wires Work, Projects, Tools, Data, Models, Research, and Build to distinct
+  explorer areas with correct active state, durable mode/layout selection, and
+  honest unavailable or planned states where an adapter does not yet exist.
+- Adds runtime-backed `/api/capabilities` and `/api/workspace` read models so
+  provider availability, project revision, notebook runs, and area counts come
+  from the running application rather than decorative UI constants.
+- Turns notebook receipts into inspectable evidence records instead of rerun
+  shortcuts, and makes unmatched command-palette input executable.
+- Makes New computation start a blank draft without deleting notebook history,
+  makes Clear persist a pristine notebook after one confirmation, disables
+  empty Run/Clear actions, and keeps starters and reruns mode-compatible.
+- Replaces the status-bar repository redirect with the native CentL26 updater:
+  it checks the mutable `centl26` release channel, accepts only a complete
+  qualified macOS artifact set, installs it atomically, and relaunches the app.
 - Adds the native macOS application-bundle path; the application owns and
   terminates its private backend rather than asking the user to operate a
   browser-hosted website.
 - Freezes the user-approved CentL26 visual system behind a deterministic design
-  contract covering the workbench sources, native icon, 37 semantic invariants,
+  contract covering the workbench sources, native icon, 57 semantic invariants,
   CI enforcement, and an explicit reviewed-update workflow.
 - Adds the first durable `centl.project/1` notebook store. The default project
   now survives application restarts through bounded, schema-validated,
@@ -30,6 +45,10 @@
   JSON machine protocol. `chem atoms <formula>` and
   `chem balance <reaction>` retain their complete provider evidence, and
   reaction results are admitted only after conservation verification.
+- Bundles both canonical CENTL numerics and CENTL Chemistry by default, aligns
+  the native launcher and backend provider environment, and verifies rigorous
+  `approx(pi, 50)` plus chemistry atom/balance requests through the packaged
+  HTTP application path.
 
 - **cbis.kernel** now homes on
   `R = {hard p : p+4 and 4p+1 ∈ Sigma_1}` while the 0-to-infinity

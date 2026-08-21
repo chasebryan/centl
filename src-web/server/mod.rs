@@ -1,6 +1,7 @@
 // Zero-JavaScript Web Server for CENTL
 // Free Computation Foundation - Apache-2.0
 
+mod capabilities;
 pub mod handler;
 pub mod lab_template;
 pub mod template;
@@ -108,6 +109,11 @@ struct FlashRecord {
     session_id: String,
     work_area_html: String,
     created: Instant,
+}
+
+struct LabApiResponse {
+    content_type: &'static str,
+    body: Vec<u8>,
 }
 
 struct ServerState {
@@ -291,6 +297,96 @@ impl ServerState {
             .as_ref()
             .is_some_and(|project| requested_id == Some(project.session_id.as_str()))
     }
+
+    fn workspace_document(&self, registry: &serde_json::Value) -> io::Result<serde_json::Value> {
+        let project = self.lab_project.as_ref().ok_or_else(|| {
+            io::Error::new(
+                io::ErrorKind::NotFound,
+                "CentL26 workspace state is unavailable without a project store",
+            )
+        })?;
+        let state = project
+            .state
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        let store = project
+            .store
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        let run_count = state.session.history.len();
+        let available_tools = capabilities::available_capability_count(registry);
+        let research_status =
+            capabilities::capability_status(registry, "org.fcf.centl.research.erdos_straus")
+                .unwrap_or("unavailable");
+        let build_status =
+            capabilities::capability_status(registry, "org.fcf.centl.mirage.develop")
+                .unwrap_or("integration-planned");
+
+        Ok(serde_json::json!({
+            "schema": "centl26.workspace/1",
+            "project": {
+                "schema": LAB_PROJECT_SCHEMA,
+                "id": "default",
+                "name": "Untitled workspace",
+                "storage": "local",
+            },
+            "counts": {
+                "notebooks": 1,
+                "datasets": 0,
+                "models": 0,
+                "receipts": run_count,
+                "extensions": 0,
+            },
+            "revision": store.revision,
+            "notebook": {
+                "id": "notebook-01",
+                "title": "Notebook 01",
+                "run_count": run_count,
+            },
+            "areas": [
+                {"id": "work", "label": "Work", "status": "available", "available": true, "count": 1},
+                {"id": "projects", "label": "Projects", "status": "single-project", "available": true, "count": 1},
+                {"id": "tools", "label": "Tools", "status": "available", "available": true, "count": available_tools},
+                {"id": "data", "label": "Data", "status": "not-implemented", "available": false, "count": 0},
+                {"id": "models", "label": "Models", "status": "not-implemented", "available": false, "count": 0},
+                {"id": "research", "label": "Research", "status": research_status, "available": research_status == "available", "count": if research_status == "available" { 1 } else { 0 }},
+                {"id": "build", "label": "Build", "status": build_status, "available": build_status == "available", "count": 0},
+            ],
+        }))
+    }
+}
+
+fn lab_api_response(path: &str, server_state: &ServerState) -> io::Result<Option<LabApiResponse>> {
+    if path != "/api/capabilities" && path != "/api/workspace" {
+        return Ok(None);
+    }
+
+    let registry = capabilities::runtime_registry(
+        lab_template::CAPABILITY_REGISTRY,
+        server_state.lab_project.is_some(),
+    )
+    .map_err(|error| {
+        io::Error::new(
+            io::ErrorKind::InvalidData,
+            format!("could not construct the CentL26 capability registry: {error}"),
+        )
+    })?;
+    let document = if path == "/api/capabilities" {
+        registry
+    } else {
+        server_state.workspace_document(&registry)?
+    };
+    let mut body = serde_json::to_vec_pretty(&document).map_err(|error| {
+        io::Error::new(
+            io::ErrorKind::InvalidData,
+            format!("could not encode the CentL26 API response: {error}"),
+        )
+    })?;
+    body.push(b'\n');
+    Ok(Some(LabApiResponse {
+        content_type: "application/json; charset=utf-8",
+        body,
+    }))
 }
 
 impl ProjectStore {
@@ -1001,16 +1097,18 @@ fn handle_lab_connection(mut stream: TcpStream, server_state: Arc<ServerState>) 
             is_head,
         );
     }
-    if (method == "GET" || is_head) && path == "/api/capabilities" {
-        return write_response(
-            &mut stream,
-            200,
-            "OK",
-            "application/json; charset=utf-8",
-            lab_template::CAPABILITY_REGISTRY.as_bytes(),
-            &[("Cache-Control", "no-store".to_string())],
-            is_head,
-        );
+    if method == "GET" || is_head {
+        if let Some(response) = lab_api_response(path, &server_state)? {
+            return write_response(
+                &mut stream,
+                200,
+                "OK",
+                response.content_type,
+                &response.body,
+                &[("Cache-Control", "no-store".to_string())],
+                is_head,
+            );
+        }
     }
     if (method == "GET" || is_head) && (path == "/__centl26" || path == "/__centl_lab") {
         return write_text_response(
@@ -1073,14 +1171,15 @@ fn handle_lab_connection(mut stream: TcpStream, server_state: Arc<ServerState>) 
     let (workbench, input_value) = if method == "POST" {
         let body = String::from_utf8_lossy(&request.body);
         let command = lab_command_from_body(&body);
+        let interaction_mode = extract_form_value(&body, "interaction_mode");
         let mut app_state = session_state
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner());
         let previous_session = app_state.session.clone();
         let (mut last_result, mut last_error, mut last_physics, mut last_hunt) =
-            handle_command(&command, &mut app_state);
+            handle_lab_command_for_mode(&interaction_mode, &command, &mut app_state);
         trim_lab_history(&mut app_state);
-        if last_error.is_none() && !command.trim().is_empty() {
+        if last_error.is_none() && lab_command_requires_persistence(&command) {
             if let Err(error) = server_state.persist_lab_project(&app_state) {
                 app_state.session = previous_session;
                 last_result = None;
@@ -1097,21 +1196,16 @@ fn handle_lab_connection(mut stream: TcpStream, server_state: Arc<ServerState>) 
         } else {
             String::new()
         };
-        let mut display_session = None;
-        if last_physics.is_some() || last_hunt.is_some() {
-            let mut without_specialized_card_duplicate = app_state.session.clone();
-            without_specialized_card_duplicate.history.pop();
-            display_session = Some(without_specialized_card_duplicate);
-        }
-        let session_for_render = display_session.as_ref().unwrap_or(&app_state.session);
+        let show_transient_result = last_result.is_some() && lab_command_is_informational(&command);
         (
-            lab_template::render_lab_workbench(
+            lab_template::render_lab_workbench_with_transient_result(
                 &input_value,
                 last_result.as_ref(),
                 last_error.as_deref(),
                 last_physics.as_ref(),
                 last_hunt.as_ref(),
-                session_for_render,
+                show_transient_result,
+                &app_state.session,
             ),
             input_value,
         )
@@ -1168,6 +1262,91 @@ fn lab_command_from_body(body: &str) -> String {
         "es_hunt" => format!("es hunt {}", extract_form_value(body, "from").trim()),
         _ => extract_form_value(body, "cmd"),
     }
+}
+
+type LabCommandOutcome = (
+    Option<crate::engine::ExecutionResult>,
+    Option<String>,
+    Option<crate::physics::PhysicsResult>,
+    Option<crate::erdos_straus::HuntSummary>,
+);
+
+fn handle_lab_command_for_mode(
+    interaction_mode: &str,
+    command: &str,
+    state: &mut AppState,
+) -> LabCommandOutcome {
+    match validate_lab_interaction_mode(interaction_mode, command) {
+        Ok(()) => handle_command(command, state),
+        Err(error) => (None, Some(error), None, None),
+    }
+}
+
+fn validate_lab_interaction_mode(interaction_mode: &str, command: &str) -> Result<(), String> {
+    let mode = interaction_mode.trim();
+    let normalized_mode = if mode.is_empty() {
+        "auto".to_string()
+    } else {
+        mode.to_ascii_lowercase()
+    };
+    if !matches!(
+        normalized_mode.as_str(),
+        "auto" | "math" | "physics" | "research" | "build"
+    ) {
+        return Err(format!(
+            "Unsupported interaction mode `{}`. Choose Auto, Math, Physics, Research, or Build.",
+            mode
+        ));
+    }
+
+    let command = command.trim();
+    if command == ":clear" || command == ":clear-history" {
+        return Ok(());
+    }
+    let belongs_to = |family: &str| {
+        command == family
+            || command
+                .strip_prefix(family)
+                .is_some_and(|rest| rest.starts_with(char::is_whitespace))
+    };
+
+    match normalized_mode.as_str() {
+        "auto" => Ok(()),
+        "math"
+            if !["physics", "es", "erdos", "chem", "chemistry"]
+                .iter()
+                .any(|family| belongs_to(family)) =>
+        {
+            Ok(())
+        }
+        "math" => Err(
+            "Math mode accepts exact and symbolic mathematics only. Choose Auto for cross-domain commands."
+                .to_string(),
+        ),
+        "physics" if belongs_to("physics") => Ok(()),
+        "physics" => Err(
+            "Physics mode accepts commands beginning with `physics` only. No work was admitted."
+                .to_string(),
+        ),
+        "research" if belongs_to("es") || belongs_to("erdos") => Ok(()),
+        "research" => Err(
+            "Research mode accepts `es` or `erdos` commands only. No work was admitted."
+                .to_string(),
+        ),
+        "build" => Err(
+            "Build mode has no registered executor in this CentL26 runtime. No work was admitted."
+                .to_string(),
+        ),
+        _ => unreachable!("interaction mode was validated above"),
+    }
+}
+
+fn lab_command_is_informational(command: &str) -> bool {
+    matches!(command.trim(), ":history" | ":syntax" | ":help")
+}
+
+fn lab_command_requires_persistence(command: &str) -> bool {
+    !command.trim().is_empty() && !lab_command_is_informational(command)
 }
 
 fn trim_lab_history(state: &mut AppState) {
@@ -1813,23 +1992,35 @@ mod tests {
     use crate::engine::HistoryEntry;
 
     fn temporary_project_root(label: &str) -> PathBuf {
+        static NEXT_TEST_ROOT: AtomicU64 = AtomicU64::new(1);
         let nonce = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap_or_default()
             .as_nanos();
+        let binary = env::current_exe()
+            .ok()
+            .and_then(|path| {
+                path.file_name()
+                    .map(|name| name.to_string_lossy().into_owned())
+            })
+            .unwrap_or_else(|| "unknown-test-binary".to_string());
+        let sequence = NEXT_TEST_ROOT.fetch_add(1, Ordering::Relaxed);
         // Project roots intentionally reject shared temporary trees. Keep
-        // integration fixtures under a private, dedicated home-directory
-        // namespace so the same safety policy is exercised in CI and locally.
-        let base = env::var_os("HOME")
-            .map(PathBuf::from)
-            .expect("tests require HOME")
+        // integration fixtures under the repository-local target directory so
+        // sandboxed test runs exercise the same storage policy without writing
+        // into the developer's home directory.
+        let base = env::current_dir()
+            .expect("tests require a current directory")
+            .join("target")
             .join(".centl26-tests");
         fs::create_dir_all(&base).unwrap();
         base.join(format!(
-            "centl26-project-test-{}-{}-{}",
+            "centl26-project-test-{}-{}-{}-{}-{}",
             label,
+            binary,
             std::process::id(),
-            nonce
+            nonce,
+            sequence
         ))
     }
 
@@ -1893,6 +2084,77 @@ mod tests {
     }
 
     #[test]
+    fn interaction_modes_validate_before_command_dispatch() {
+        for (mode, command) in [
+            ("", "chem atoms H2O"),
+            ("Auto", "physics convert 100 cm m"),
+            ("Math", "solve(x^2 - 1 = 0, x)"),
+            ("Physics", "physics convert 100 cm m"),
+            ("Research", "es solve 1009"),
+            ("Research", "erdos status"),
+            ("Auto", ":clear"),
+            ("Math", ":clear"),
+            ("Build", ":clear"),
+            ("Physics", ":clear"),
+            ("Research", ":clear"),
+            ("Build", ":clear-history"),
+        ] {
+            assert!(
+                validate_lab_interaction_mode(mode, command).is_ok(),
+                "{mode} should accept {command}"
+            );
+        }
+
+        for (mode, command) in [
+            ("Math", "physics convert 100 cm m"),
+            ("Math", "chem atoms H2O"),
+            ("Physics", "1 + 1"),
+            ("Research", "diff(x^2, x)"),
+            ("Build", "1 + 1"),
+            ("Unknown", "1 + 1"),
+        ] {
+            assert!(
+                validate_lab_interaction_mode(mode, command).is_err(),
+                "{mode} should reject {command}"
+            );
+        }
+    }
+
+    #[test]
+    fn rejected_mode_command_is_visible_and_does_not_mutate_the_session() {
+        let mut state = AppState {
+            session: Session::new(),
+        };
+        let (_, error, physics, hunt) = handle_lab_command_for_mode("Physics", "1 + 1", &mut state);
+        let error = error.expect("mode mismatch must be visible");
+
+        assert!(physics.is_none());
+        assert!(hunt.is_none());
+        assert!(state.session.history.is_empty());
+        assert!(error.contains("No work was admitted"));
+        let html = lab_template::render_lab_workbench(
+            "1 + 1",
+            None,
+            Some(&error),
+            None,
+            None,
+            &state.session,
+        );
+        assert!(html.contains("Not admitted"));
+        assert!(html.contains("Physics mode accepts commands"));
+    }
+
+    #[test]
+    fn informational_commands_render_without_advancing_project_persistence() {
+        for command in [":history", ":syntax", ":help"] {
+            assert!(lab_command_is_informational(command));
+            assert!(!lab_command_requires_persistence(command));
+        }
+        assert!(lab_command_requires_persistence("factorial(6)"));
+        assert!(lab_command_requires_persistence(":clear"));
+    }
+
+    #[test]
     fn centl26_registry_advertises_the_qualified_chemistry_slice_and_project_store() {
         let registry: serde_json::Value =
             serde_json::from_str(lab_template::CAPABILITY_REGISTRY).unwrap();
@@ -1927,6 +2189,70 @@ mod tests {
             .unwrap()
             .iter()
             .any(|value| value == "org.fcf.centl.research.erdos_straus"));
+    }
+
+    #[test]
+    fn centl26_read_apis_return_json_contracts() {
+        let root = temporary_project_root("read-apis");
+        let server = ServerState::new_lab_at(root.clone()).unwrap();
+
+        let capabilities = lab_api_response("/api/capabilities", &server)
+            .unwrap()
+            .expect("capability API route");
+        assert_eq!(capabilities.content_type, "application/json; charset=utf-8");
+        let capability_json: serde_json::Value =
+            serde_json::from_slice(&capabilities.body).unwrap();
+        assert_eq!(capability_json["schema"], "centl.capability-registry/1");
+        assert!(capability_json["runtime_status"].is_object());
+        for capability in capability_json["capabilities"].as_array().unwrap() {
+            assert!(capability["id"].is_string());
+            assert!(capability["status"].is_string());
+            assert!(capability["provider"].is_string());
+        }
+
+        let workspace = lab_api_response("/api/workspace", &server)
+            .unwrap()
+            .expect("workspace API route");
+        assert_eq!(workspace.content_type, "application/json; charset=utf-8");
+        let initial: serde_json::Value = serde_json::from_slice(&workspace.body).unwrap();
+        assert_eq!(initial["schema"], "centl26.workspace/1");
+        assert_eq!(initial["project"]["schema"], LAB_PROJECT_SCHEMA);
+        assert_eq!(initial["project"]["name"], "Untitled workspace");
+        assert_eq!(initial["revision"], 0);
+        assert_eq!(initial["counts"]["notebooks"], 1);
+        assert_eq!(initial["counts"]["datasets"], 0);
+        assert_eq!(initial["counts"]["models"], 0);
+        assert_eq!(initial["counts"]["receipts"], 0);
+        assert_eq!(initial["counts"]["extensions"], 0);
+        assert_eq!(initial["notebook"]["id"], "notebook-01");
+        assert_eq!(initial["notebook"]["run_count"], 0);
+        assert!(initial["areas"].as_array().is_some_and(|areas| {
+            [
+                "work", "projects", "tools", "data", "models", "research", "build",
+            ]
+            .iter()
+            .all(|id| areas.iter().any(|area| area["id"].as_str() == Some(id)))
+        }));
+
+        let (_, state, _) = server.session_for(None);
+        {
+            let mut state = state.lock().unwrap();
+            crate::engine::evaluate("19 * 23", &mut state.session).unwrap();
+            server.persist_lab_project(&state).unwrap();
+        }
+        let updated = lab_api_response("/api/workspace", &server)
+            .unwrap()
+            .expect("workspace API route");
+        let updated: serde_json::Value = serde_json::from_slice(&updated.body).unwrap();
+        assert_eq!(updated["revision"], 1);
+        assert_eq!(updated["counts"]["receipts"], 1);
+        assert_eq!(updated["notebook"]["run_count"], 1);
+        assert!(lab_api_response("/api/not-a-route", &server)
+            .unwrap()
+            .is_none());
+
+        drop(server);
+        fs::remove_dir_all(root).unwrap();
     }
 
     #[test]
@@ -1975,6 +2301,51 @@ mod tests {
         });
         reset_session(&mut state);
         assert!(state.session.history.is_empty());
+    }
+
+    #[test]
+    fn clear_command_persists_a_pristine_workspace() {
+        let root = temporary_project_root("clear-workspace");
+        let server = ServerState::new_lab_at(root.clone()).unwrap();
+        let (_, state, _) = server.session_for(None);
+
+        {
+            let mut state = state.lock().unwrap();
+            crate::engine::evaluate("2 + 3", &mut state.session).unwrap();
+            server.persist_lab_project(&state).unwrap();
+            assert_eq!(state.session.history.len(), 1);
+
+            let (result, error, physics, hunt) =
+                handle_lab_command_for_mode("Build", ":clear", &mut state);
+            assert!(result.is_none());
+            assert!(error.is_none());
+            assert!(physics.is_none());
+            assert!(hunt.is_none());
+            assert!(state.session.history.is_empty());
+            server.persist_lab_project(&state).unwrap();
+
+            let workbench =
+                lab_template::render_lab_workbench("", None, None, None, None, &state.session);
+            assert!(workbench.contains(r#"class="start-surface""#));
+            assert!(!workbench.contains(r#"class="result-cell""#));
+            assert!(!workbench.contains(r#"class="system-result""#));
+        }
+
+        let workspace = lab_api_response("/api/workspace", &server)
+            .unwrap()
+            .expect("workspace API route");
+        let workspace: serde_json::Value = serde_json::from_slice(&workspace.body).unwrap();
+        assert_eq!(workspace["revision"], 2);
+        assert_eq!(workspace["counts"]["receipts"], 0);
+        assert_eq!(workspace["notebook"]["run_count"], 0);
+
+        drop(state);
+        drop(server);
+        let (reopened, restored) = ProjectStore::open(root.clone()).unwrap();
+        assert_eq!(reopened.revision, 2);
+        assert!(restored.history.is_empty());
+        drop(reopened);
+        fs::remove_dir_all(root).unwrap();
     }
 
     #[test]

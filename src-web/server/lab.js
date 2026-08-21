@@ -3,6 +3,9 @@
 
   const storageKey = "centl26:26.0:layout:v1";
   const draftKey = "centl26:26.0:draft:v1";
+  const areaKey = "centl26:26.0:area:v1";
+  const modeKey = "centl26:26.0:mode:v1";
+  const inspectorTabKey = "centl26:26.0:inspector-tab:v1";
   const paneClasses = {
     explorer: "hide-explorer",
     inspector: "hide-inspector",
@@ -11,6 +14,14 @@
 
   let paletteReturnFocus = null;
   let paletteActiveIndex = -1;
+  let selectedArea = "work";
+  let selectedMode = "Auto";
+  let selectedInspectorTab = "result";
+  let capabilitiesRequest = null;
+
+  const areaNames = new Set(["work", "projects", "tools", "data", "models", "research", "build"]);
+  const interactionModes = new Set(["Auto", "Math", "Physics", "Research", "Build"]);
+  const inspectorTabs = new Set(["result", "variables", "evidence"]);
 
   function workspace() {
     return document.querySelector(".workbench-shell");
@@ -22,6 +33,23 @@
 
   function activeEditor() {
     return document.querySelector("#active-command");
+  }
+
+  function hasNotebookContent() {
+    return Boolean(document.querySelector(".result-cell, .system-result, [data-receipt-target]"));
+  }
+
+  function syncComposerActions() {
+    const hasInput = Boolean(activeEditor()?.value.trim());
+    document.querySelectorAll("[data-run-active], .composer-run").forEach((button) => {
+      button.disabled = !hasInput;
+      button.setAttribute("aria-disabled", String(!hasInput));
+    });
+    const canClear = hasInput || hasNotebookContent();
+    document.querySelectorAll("[data-clear-session]").forEach((button) => {
+      button.disabled = !canClear;
+      button.setAttribute("aria-disabled", String(!canClear));
+    });
   }
 
   function readStorage(key) {
@@ -102,12 +130,190 @@
     syncLayoutControls();
   }
 
-  function togglePane(name) {
+  function setPaneVisible(name, visible, { persist = true } = {}) {
     const className = paneClasses[name];
     if (!className) return;
-    document.body.classList.toggle(className);
-    saveLayout();
+    document.body.classList.toggle(className, !visible);
+    if (persist) saveLayout();
     syncLayoutControls();
+  }
+
+  function togglePane(name) {
+    setPaneVisible(name, !paneIsVisible(name));
+  }
+
+  function storedChoice(key, allowed, fallback) {
+    const stored = readStorage(key);
+    if (stored && allowed.has(stored)) return stored;
+    if (stored !== null) removeStorage(key);
+    return fallback;
+  }
+
+  function selectArea(area, { focus = false, openExplorer = false, persist = true } = {}) {
+    if (!areaNames.has(area)) area = "work";
+    selectedArea = area;
+    if (persist) writeStorage(areaKey, area);
+
+    document.querySelectorAll(".rail-button[data-select-area]").forEach((button) => {
+      const active = button.dataset.selectArea === area;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", String(active));
+      if (active) button.setAttribute("aria-current", "page");
+      else button.removeAttribute("aria-current");
+    });
+
+    document.querySelectorAll("[data-area-panel]").forEach((panel) => {
+      panel.hidden = panel.dataset.areaPanel !== area;
+    });
+
+    const activePanel = document.querySelector(`[data-area-panel="${area}"]`);
+    const title = document.querySelector("[data-area-title]:not([data-area-panel])");
+    const subtitle = document.querySelector("[data-area-subtitle]:not([data-area-panel])");
+    if (title) title.textContent = activePanel?.dataset.areaTitle || "Work";
+    if (subtitle) subtitle.textContent = activePanel?.dataset.areaSubtitle || "Local project";
+
+    if (openExplorer || area !== "work") setPaneVisible("explorer", true);
+    if (focus && area === "work") activeEditor()?.focus({ preventScroll: true });
+  }
+
+  function modePlaceholder(mode) {
+    if (mode === "Math") return "Enter an exact or symbolic expression…";
+    if (mode === "Physics") return "Enter a supported physics command…";
+    if (mode === "Research") return "Enter a supported research command…";
+    if (mode === "Build") return "Build execution is unavailable; inspect Build status…";
+    return "Enter a supported expression or command…";
+  }
+
+  function applyInteractionMode(mode, { persist = true } = {}) {
+    if (!interactionModes.has(mode)) mode = "Auto";
+    selectedMode = mode;
+    if (persist) writeStorage(modeKey, mode);
+
+    document.querySelectorAll(".mode-control select").forEach((select) => {
+      select.value = mode;
+    });
+    document.querySelectorAll(".composer-mode span").forEach((label) => {
+      label.textContent = `${mode} tools`;
+    });
+    document.querySelectorAll(".composer-mode").forEach((button) => {
+      button.title = `Open tools for ${mode} mode`;
+      button.setAttribute("aria-label", `Open tools for ${mode} mode`);
+    });
+    document.querySelectorAll('input[type="hidden"][name="interaction_mode"]').forEach((input) => {
+      input.value = mode;
+    });
+    document.querySelectorAll("#active-command").forEach((editor) => {
+      editor.placeholder = modePlaceholder(mode);
+    });
+
+    const input = paletteInput();
+    if (input && palette() && !palette().hidden) filterPalette(input.value);
+  }
+
+  function statusLabel(status) {
+    if (!status) return "Unavailable";
+    const words = status.replaceAll("-", " ");
+    return words.charAt(0).toUpperCase() + words.slice(1);
+  }
+
+  async function capabilityPayload(root = document) {
+    const endpoint = root.querySelector?.("[data-capabilities-endpoint]")?.dataset.capabilitiesEndpoint
+      || document.querySelector("[data-capabilities-endpoint]")?.dataset.capabilitiesEndpoint
+      || "/api/capabilities";
+    if (!capabilitiesRequest) {
+      capabilitiesRequest = fetch(endpoint, {
+        credentials: "same-origin",
+        headers: { Accept: "application/json" }
+      }).then((response) => {
+        if (!response.ok) throw new Error(`capabilities returned ${response.status}`);
+        return response.json();
+      }).catch(() => {
+        capabilitiesRequest = null;
+        return null;
+      });
+    }
+    return capabilitiesRequest;
+  }
+
+  async function hydrateCapabilities(root = document) {
+    const payload = await capabilityPayload(root);
+    if (!payload || (root !== document && !root.isConnected)) return;
+    const capabilities = new Map(
+      (Array.isArray(payload.capabilities) ? payload.capabilities : [])
+        .filter((capability) => capability && typeof capability.id === "string")
+        .map((capability) => [capability.id, capability])
+    );
+
+    document.querySelectorAll("[data-capability-id]").forEach((row) => {
+      const capability = capabilities.get(row.dataset.capabilityId);
+      if (!capability) return;
+      const status = typeof capability.status === "string" ? capability.status : "unavailable";
+      const effectiveStatus = capability.runtime_available === false ? "unavailable" : status;
+      const provider = row.querySelector("[data-capability-provider]");
+      const statusNode = row.querySelector("[data-capability-status]");
+      row.dataset.status = effectiveStatus;
+      if (provider) {
+        const unavailableReason = typeof capability.unavailable_reason === "string"
+          ? capability.unavailable_reason
+          : "";
+        provider.textContent = capability.runtime_available === false && unavailableReason
+          ? unavailableReason
+          : (capability.provider || "Not registered");
+      }
+      if (statusNode) statusNode.textContent = statusLabel(effectiveStatus);
+    });
+
+    document.querySelectorAll("[data-requires-capability]").forEach((control) => {
+      const capability = capabilities.get(control.dataset.requiresCapability);
+      if (!capability) return;
+      const status = typeof capability.status === "string" ? capability.status : "unavailable";
+      const unavailable = capability.runtime_available === false
+        || status === "unavailable"
+        || status === "integration-planned";
+      const badge = control.querySelector("kbd");
+      if (badge && !badge.dataset.runtimeLabel) badge.dataset.runtimeLabel = badge.textContent;
+      control.disabled = unavailable;
+      control.setAttribute("aria-disabled", String(unavailable));
+      control.dataset.runtimeAvailable = String(!unavailable);
+      if (badge) badge.textContent = unavailable ? "Unavailable" : badge.dataset.runtimeLabel;
+      if (unavailable) {
+        control.title = capability.unavailable_reason || `${statusLabel(status)} in this runtime`;
+      } else {
+        control.removeAttribute("title");
+      }
+    });
+
+    const input = paletteInput();
+    if (input) filterPalette(input.value);
+  }
+
+  function valueAtPath(value, path) {
+    return path.split(".").reduce((current, part) => {
+      if (!current || typeof current !== "object") return undefined;
+      return current[part];
+    }, value);
+  }
+
+  async function hydrateWorkspace(root = document) {
+    const endpoint = root.querySelector?.("[data-workspace-endpoint]")?.dataset.workspaceEndpoint;
+    if (!endpoint) return;
+    try {
+      const response = await fetch(endpoint, {
+        credentials: "same-origin",
+        headers: { Accept: "application/json" }
+      });
+      if (!response.ok) return;
+      const payload = await response.json();
+      if (root !== document && !root.isConnected) return;
+      root.querySelectorAll?.("[data-workspace-field]").forEach((node) => {
+        const value = valueAtPath(payload, node.dataset.workspaceField || "");
+        if (["string", "number", "bigint"].includes(typeof value)) {
+          node.textContent = String(value);
+        }
+      });
+    } catch (_) {
+      // Server-rendered session facts remain the honest fallback.
+    }
   }
 
   function encodeForm(form, submitter) {
@@ -141,8 +347,7 @@
 
       current.replaceWith(next);
       removeStorage(draftKey);
-      preparePalette();
-      initializeInspectorTabs(next);
+      initializeWorkspace(next);
       syncLayoutControls();
 
       // Keep the newest cell visible inside the notebook without moving the page.
@@ -159,9 +364,35 @@
     }
   }
 
-  function runCommand(command) {
+  function runCommand(command, { interactionMode = selectedMode } = {}) {
     closePalette({ restoreFocus: false });
-    execute(new URLSearchParams({ lab_action: "calculate", cmd: command }));
+    execute(new URLSearchParams({
+      lab_action: "calculate",
+      cmd: command,
+      interaction_mode: interactionMode
+    }));
+  }
+
+  function startNewComputation({ fromPalette = false } = {}) {
+    if (fromPalette) closePalette({ restoreFocus: false });
+    const editor = activeEditor();
+    if (!editor) return;
+    editor.value = "";
+    removeStorage(draftKey);
+    editor.focus({ preventScroll: true });
+    editor.scrollIntoView({ block: "nearest" });
+    syncComposerActions();
+  }
+
+  function clearNotebook() {
+    const editor = activeEditor();
+    const hasWork = Boolean(editor?.value.trim()) || hasNotebookContent();
+    if (hasWork && !window.confirm("Clear this CentL26 notebook and its saved receipts?")) return;
+    execute(new URLSearchParams({
+      lab_action: "calculate",
+      cmd: ":clear",
+      interaction_mode: selectedMode
+    }), { restoreEditorFocus: true });
   }
 
   function showHostError(message) {
@@ -189,7 +420,7 @@
   }
 
   function visiblePaletteOptions() {
-    return paletteOptions().filter((option) => !option.hidden);
+    return paletteOptions().filter((option) => !option.hidden && !option.disabled);
   }
 
   function preparePalette() {
@@ -237,14 +468,36 @@
   }
 
   function filterPalette(query) {
-    const normalized = query.trim().toLowerCase().replace(/^>\s*/, "");
+    const commandText = query.trim().replace(/^>\s*/, "");
+    const normalized = commandText.toLowerCase();
     const tokens = normalized.split(/\s+/).filter(Boolean);
     const results = palette()?.querySelector(".palette-results");
+    const runInput = palette()?.querySelector('[data-palette-action="run-input"]');
+    const mode = selectedMode.toLowerCase();
+    const exactPresetCommand = paletteOptions().some((option) => {
+      const preset = option.dataset.command;
+      return option !== runInput
+        && typeof preset === "string"
+        && preset.trim().toLowerCase() === normalized;
+    });
+    const prioritizeRunInput = Boolean(runInput && commandText && !exactPresetCommand);
 
     paletteOptions().forEach((option) => {
+      if (option === runInput) {
+        option.hidden = true;
+        return;
+      }
+      const modes = (option.dataset.modes || "all").toLowerCase().split(/\s+/);
+      const matchesMode = selectedMode === "Auto" || modes.includes("all") || modes.includes(mode);
       const searchable = `${option.textContent} ${option.dataset.command || ""} ${option.dataset.paletteAction || ""}`.toLowerCase();
-      option.hidden = tokens.some((token) => !searchable.includes(token));
+      option.hidden = !matchesMode || tokens.some((token) => !searchable.includes(token));
     });
+
+    if (runInput) {
+      runInput.hidden = !prioritizeRunInput;
+      const preview = runInput.querySelector("[data-run-input-preview]");
+      if (preview) preview.textContent = prioritizeRunInput ? commandText : "";
+    }
 
     if (results) {
       let label = null;
@@ -261,7 +514,10 @@
       if (label) label.hidden = !groupHasResult;
     }
 
-    setPaletteActive(0, { scroll: false });
+    const preferredIndex = prioritizeRunInput
+      ? visiblePaletteOptions().indexOf(runInput)
+      : 0;
+    setPaletteActive(Math.max(preferredIndex, 0), { scroll: false });
   }
 
   function openPalette(mode = "quick-open") {
@@ -275,7 +531,11 @@
 
     node.hidden = false;
     node.dataset.mode = mode;
-    input.placeholder = mode === "commands" ? "Run a CentL26 command…" : "Search tools, commands, files, and settings…";
+    input.placeholder = selectedMode === "Build"
+      ? "Search Build status and workspace actions…"
+      : selectedMode === "Auto"
+      ? (mode === "commands" ? "Run a supported CentL26 command…" : "Search supported tools and commands…")
+      : `Search ${selectedMode} commands…`;
     input.value = "";
     input.setAttribute("aria-expanded", "true");
     filterPalette("");
@@ -303,6 +563,8 @@
     const inspector = tab.closest(".inspector-pane") || document;
     const selected = tab.dataset.inspectorTab;
     if (!selected) return;
+    selectedInspectorTab = selected;
+    writeStorage(inspectorTabKey, selected);
 
     inspector.querySelectorAll("[data-inspector-tab]").forEach((candidate) => {
       const active = candidate === tab;
@@ -321,14 +583,59 @@
   function initializeInspectorTabs(root = document) {
     const tabs = Array.from(root.querySelectorAll("[data-inspector-tab]"));
     if (tabs.length === 0) return;
-    const selected = tabs.find((tab) => tab.getAttribute("aria-selected") === "true" || tab.classList.contains("is-active")) || tabs[0];
+    const selected = tabs.find((tab) => tab.dataset.inspectorTab === selectedInspectorTab)
+      || tabs.find((tab) => tab.getAttribute("aria-selected") === "true" || tab.classList.contains("is-active"))
+      || tabs[0];
     activateInspectorTab(selected);
+  }
+
+  function activateReceipt(button, { focus = false } = {}) {
+    const inspector = button.closest(".inspector-pane") || document;
+    const target = button.dataset.receiptTarget;
+    if (!target) return;
+
+    inspector.querySelectorAll("[data-receipt-target]").forEach((candidate) => {
+      const active = candidate === button;
+      candidate.classList.toggle("is-selected", active);
+      candidate.setAttribute("aria-expanded", String(active));
+    });
+    inspector.querySelectorAll("[data-receipt-detail]").forEach((detail) => {
+      detail.hidden = detail.dataset.receiptDetail !== target;
+    });
+    if (focus) button.focus({ preventScroll: true });
+  }
+
+  function initializeReceipts(root = document) {
+    const buttons = Array.from(root.querySelectorAll("[data-receipt-target]"));
+    if (buttons.length === 0) return;
+    const selected = buttons.find((button) => button.getAttribute("aria-expanded") === "true") || buttons[0];
+    activateReceipt(selected);
+  }
+
+  function openEvidence() {
+    setPaneVisible("inspector", true);
+    const evidenceTab = document.querySelector('[data-inspector-tab="evidence"]');
+    if (evidenceTab) activateInspectorTab(evidenceTab);
+  }
+
+  function initializeWorkspace(root = document) {
+    initializeInspectorTabs(root);
+    initializeReceipts(root);
+    selectArea(selectedArea, { openExplorer: selectedArea !== "work", persist: false });
+    applyInteractionMode(selectedMode, { persist: false });
+    syncComposerActions();
+    void hydrateCapabilities(root);
+    void hydrateWorkspace(root);
   }
 
   document.addEventListener("submit", (event) => {
     const form = event.target.closest("[data-centl-form]");
     if (!form) return;
     event.preventDefault();
+    if (!activeEditor()?.value.trim()) {
+      syncComposerActions();
+      return;
+    }
     execute(encodeForm(form, event.submitter));
   });
 
@@ -345,6 +652,17 @@
     if (target.matches("[data-toggle-explorer]")) togglePane("explorer");
     if (target.matches("[data-toggle-inspector]")) togglePane("inspector");
     if (target.matches("[data-toggle-console]")) togglePane("console");
+    if (target.dataset.selectArea) {
+      selectArea(target.dataset.selectArea, {
+        focus: target.dataset.selectArea === "work",
+        openExplorer: true
+      });
+    }
+    if (target.matches("[data-open-evidence]")) openEvidence();
+    if (target.dataset.receiptTarget) {
+      openEvidence();
+      activateReceipt(target);
+    }
 
     if (target.matches("[data-run-active]")) {
       const form = activeForm();
@@ -352,43 +670,51 @@
     }
 
     if (target.matches("[data-clear-session]")) {
-      const editor = activeEditor();
-      const hasWork = Boolean(editor?.value.trim()) || Boolean(document.querySelector(".result-cell, .history-item"));
-      if (!hasWork || window.confirm("Clear this CentL26 notebook and start fresh?")) {
-        execute(new URLSearchParams({ lab_action: "calculate", cmd: ":clear" }), { restoreEditorFocus: true });
-      }
+      clearNotebook();
     }
 
     if (target.matches("[data-update]")) {
-      showHostError("Opening the CentL26 release channel…");
-      window.open("https://github.com/chasebryan/centl/releases/latest", "_blank", "noopener");
+      const updater = window.webkit?.messageHandlers?.centl26Update;
+      if (updater && typeof updater.postMessage === "function") {
+        try {
+          updater.postMessage({ action: "check" });
+        } catch (_) {
+          showHostError("The CentL26 automatic updater could not start.");
+        }
+      } else {
+        showHostError("Automatic updates are available in the CentL26 macOS app.");
+      }
     }
 
-    if (target.dataset.command) runCommand(target.dataset.command);
+    if (target.dataset.paletteAction === "run-input") {
+      const command = paletteInput()?.value.trim().replace(/^>\s*/, "");
+      if (command) runCommand(command);
+    } else if (target.dataset.command) {
+      const interactionMode = interactionModes.has(target.dataset.commandMode)
+        ? target.dataset.commandMode
+        : selectedMode;
+      runCommand(target.dataset.command, { interactionMode });
+    }
 
     if (target.dataset.fill) {
+      if (interactionModes.has(target.dataset.interactionMode)) {
+        applyInteractionMode(target.dataset.interactionMode);
+      }
       const editor = activeEditor();
       if (editor) {
         editor.value = target.dataset.fill;
         editor.focus({ preventScroll: true });
         writeStorage(draftKey, editor.value);
+        syncComposerActions();
       }
     }
 
-    if (target.matches(".toolbar-button") && target.textContent.includes("New cell")) {
-      const editor = activeEditor();
-      if (editor) {
-        editor.value = "";
-        removeStorage(draftKey);
-        editor.focus({ preventScroll: true });
-      }
-    }
+    if (target.matches("[data-new-computation]")) startNewComputation();
 
     if (target.matches("[data-focus-cell]")) activeEditor()?.focus({ preventScroll: true });
 
-    if (target.dataset.paletteAction === "focus") {
-      closePalette({ restoreFocus: false });
-      activeEditor()?.focus({ preventScroll: true });
+    if (target.dataset.paletteAction === "new-computation") {
+      startNewComputation({ fromPalette: true });
     }
 
     if (target.dataset.paletteAction === "inspector") {
@@ -399,6 +725,11 @@
     if (target.dataset.paletteAction === "console") {
       closePalette({ restoreFocus: false });
       togglePane("console");
+    }
+
+    if (target.dataset.paletteAction === "area-build") {
+      closePalette({ restoreFocus: false });
+      selectArea("build", { openExplorer: true });
     }
 
     if (target.matches("[data-inspector-tab]")) activateInspectorTab(target);
@@ -413,26 +744,17 @@
 
   document.addEventListener("input", (event) => {
     if (event.target.matches("#palette-search")) filterPalette(event.target.value);
-    if (event.target.matches("#active-command")) writeStorage(draftKey, event.target.value);
+    if (event.target.matches("#active-command")) {
+      writeStorage(draftKey, event.target.value);
+      syncComposerActions();
+    }
   });
 
   document.addEventListener("change", (event) => {
     const select = event.target.closest(".mode-control select");
     if (!select) return;
     const mode = select.value || "Auto";
-    const composerMode = document.querySelector(".composer-mode");
-    if (composerMode) {
-      const label = composerMode.querySelector("span");
-      if (label) label.textContent = mode;
-    }
-    if (mode !== "Auto") {
-      openPalette("quick-open");
-      const input = paletteInput();
-      if (input) {
-        input.value = mode;
-        filterPalette(mode);
-      }
-    }
+    applyInteractionMode(mode);
   });
 
   document.addEventListener("keydown", (event) => {
@@ -514,11 +836,15 @@
     }
   });
 
+  selectedArea = storedChoice(areaKey, areaNames, "work");
+  selectedMode = storedChoice(modeKey, interactionModes, "Auto");
+  selectedInspectorTab = storedChoice(inspectorTabKey, inspectorTabs, "result");
   preparePalette();
-  initializeInspectorTabs();
   restoreLayout();
+  initializeWorkspace();
 
   const editor = activeEditor();
   const draft = readStorage(draftKey);
   if (editor && !editor.value && draft) editor.value = draft;
+  syncComposerActions();
 })();

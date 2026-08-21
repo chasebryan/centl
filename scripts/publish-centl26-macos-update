@@ -1,0 +1,210 @@
+#!/bin/bash
+# SPDX-License-Identifier: Apache-2.0
+# Publish one already-qualified CentL26 macOS asset set to the mutable channel.
+
+set -euo pipefail
+
+publication_plan() {
+    local manifest_state="$1"
+    local archive_state="$2"
+    local checksum_state="$3"
+    if [ "$manifest_state" = "identical" ] \
+        && [ "$archive_state" = "identical" ] \
+        && [ "$checksum_state" = "identical" ]
+    then
+        printf '%s\n' reuse-triplet
+        return
+    fi
+    # Removing the manifest first makes every partial replacement invisible to
+    # the app. Publishing it last makes the new triplet visible in one step.
+    printf '%s\n' \
+        delete-manifest \
+        delete-archive \
+        delete-checksum \
+        upload-archive \
+        upload-checksum \
+        upload-manifest
+}
+
+if [ "${1:-}" = "--self-test" ]; then
+    IDENTICAL_PLAN="$(publication_plan identical identical identical)"
+    [ "$IDENTICAL_PLAN" = "reuse-triplet" ] \
+        || { echo "CentL26 update publisher self-test failed: identical triplet was not reused" >&2; exit 1; }
+    REPLACEMENT_PLAN="$(publication_plan different identical absent)"
+    EXPECTED_PLAN="$(printf '%s\n' delete-manifest delete-archive delete-checksum upload-archive upload-checksum upload-manifest)"
+    [ "$REPLACEMENT_PLAN" = "$EXPECTED_PLAN" ] \
+        || { echo "CentL26 update publisher self-test failed: replacement order differs" >&2; exit 1; }
+    echo "CentL26 update publisher self-test: manifest-last replacement contract passed"
+    exit 0
+fi
+
+SCRIPT_DIRECTORY="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+REPOSITORY_ROOT="$(CDPATH= cd -- "$SCRIPT_DIRECTORY/.." && pwd)"
+REPOSITORY="chasebryan/centl"
+RELEASE_TAG="centl26"
+VERSION="26.0.0"
+ARCHITECTURE="${CENTL26_ARCHITECTURE:-$(uname -m)}"
+DIST_DIRECTORY="${CENTL26_DIST_DIR:-$REPOSITORY_ROOT/dist/centl26/macos}"
+RELEASE_NAME="CentL26-$VERSION-macos-$ARCHITECTURE"
+RELEASE_DIRECTORY="${1:-$DIST_DIRECTORY/$RELEASE_NAME.release}"
+ARCHIVE_NAME="$RELEASE_NAME.zip"
+CHECKSUM_NAME="$ARCHIVE_NAME.sha256"
+MANIFEST_NAME="$RELEASE_NAME.release.json"
+ARCHIVE="$RELEASE_DIRECTORY/$ARCHIVE_NAME"
+CHECKSUM="$RELEASE_DIRECTORY/$CHECKSUM_NAME"
+MANIFEST="$RELEASE_DIRECTORY/$MANIFEST_NAME"
+VERIFY_SCRIPT="$SCRIPT_DIRECTORY/verify-centl26-macos"
+
+fail() {
+    echo "CentL26 update publication failed: $*" >&2
+    exit 1
+}
+
+plist_value() {
+    plutil -extract "$1" raw "$2"
+}
+
+sha256_file() {
+    shasum -a 256 "$1" | awk '{print $1}'
+}
+
+case "$ARCHITECTURE" in arm64|x86_64) ;; *) fail "architecture must be arm64 or x86_64" ;; esac
+for required in gh plutil shasum ditto cmp find; do
+    command -v "$required" >/dev/null 2>&1 || fail "required publication tool is missing: $required"
+done
+[ "$(uname -s)" = "Darwin" ] || fail "macOS is required"
+[ -d "$RELEASE_DIRECTORY" ] || fail "qualified package is missing: $RELEASE_DIRECTORY"
+[ ! -L "$RELEASE_DIRECTORY" ] || fail "release directory may not be a symbolic link"
+
+for artifact in "$ARCHIVE" "$CHECKSUM" "$MANIFEST"; do
+    [ -f "$artifact" ] && [ ! -L "$artifact" ] \
+        || fail "required regular release asset is missing: $artifact"
+done
+[ "$(find "$RELEASE_DIRECTORY" -maxdepth 1 -type f | wc -l | tr -d ' ')" = "3" ] \
+    || fail "release directory must contain exactly three files"
+[ -z "$(find "$RELEASE_DIRECTORY" -mindepth 1 -maxdepth 1 ! -type f -print -quit)" ] \
+    || fail "release directory contains an unexpected entry"
+
+[ "$(plist_value schema "$MANIFEST")" = "org.freecomputation.centl.macos-release/1" ] \
+    || fail "release manifest schema differs"
+[ "$(plist_value product "$MANIFEST")" = "CentL26" ] || fail "release product differs"
+[ "$(plist_value product_version "$MANIFEST")" = "$VERSION" ] || fail "release version differs"
+[ "$(plist_value bundle_identifier "$MANIFEST")" = "org.freecomputation.centl" ] \
+    || fail "release bundle identifier differs"
+[ "$(plist_value architecture "$MANIFEST")" = "$ARCHITECTURE" ] || fail "release architecture differs"
+[ "$(plist_value source_state "$MANIFEST")" = "clean" ] || fail "release source is not clean"
+[ "$(plist_value qualification "$MANIFEST")" = "release-qualified" ] \
+    || fail "package is not release-qualified"
+[ "$(plist_value native_runtime_qualification "$MANIFEST")" = "pinned-match" ] \
+    || fail "release native runtime does not match the pins"
+[ "$(plist_value signing "$MANIFEST")" = "developer-id" ] || fail "release is not Developer ID signed"
+[ "$(plist_value notarized "$MANIFEST")" = "true" ] || fail "release is not notarized"
+[ "$(plist_value archive "$MANIFEST")" = "$ARCHIVE_NAME" ] || fail "release archive name differs"
+
+EXPECTED_HASH="$(plist_value sha256 "$MANIFEST")"
+[[ "$EXPECTED_HASH" =~ ^[0-9a-f]{64}$ ]] || fail "release manifest SHA-256 is invalid"
+[ "$(sha256_file "$ARCHIVE")" = "$EXPECTED_HASH" ] || fail "archive SHA-256 differs from release manifest"
+[ "$(cat "$CHECKSUM")" = "$EXPECTED_HASH  $ARCHIVE_NAME" ] \
+    || fail "checksum asset differs from release manifest"
+
+WORK_DIRECTORY="$(mktemp -d "${TMPDIR:-/tmp}/centl26-update-publication.XXXXXX")"
+cleanup() {
+    rm -rf -- "$WORK_DIRECTORY"
+}
+trap cleanup EXIT INT TERM
+
+ditto -x -k "$ARCHIVE" "$WORK_DIRECTORY/extracted"
+EXTRACTED_APPLICATION="$WORK_DIRECTORY/extracted/CentL26.app"
+[ -d "$EXTRACTED_APPLICATION/Contents" ] || fail "archive does not contain exactly CentL26.app"
+[ "$(find "$WORK_DIRECTORY/extracted" -mindepth 1 -maxdepth 1 | wc -l | tr -d ' ')" = "1" ] \
+    || fail "archive has an unexpected top-level layout"
+CENTL26_EXPECTED_VERSION="$VERSION" \
+CENTL26_EXPECTED_ARCHITECTURE="$ARCHITECTURE" \
+CENTL26_REQUIRE_SIGNING=1 \
+CENTL26_REQUIRE_NOTARIZATION=1 \
+    "$VERIFY_SCRIPT" "$EXTRACTED_APPLICATION"
+
+RELEASE_ENDPOINT="repos/$REPOSITORY/releases/tags/$RELEASE_TAG"
+[ "$(gh api "$RELEASE_ENDPOINT" --jq .tag_name)" = "$RELEASE_TAG" ] \
+    || fail "CentL26 release tag is unavailable"
+[ "$(gh api "$RELEASE_ENDPOINT" --jq .name)" = "CentL26" ] \
+    || fail "GitHub release title must remain exactly CentL26"
+[ "$(gh api "$RELEASE_ENDPOINT" --jq .draft)" = "false" ] \
+    || fail "CentL26 release is still a draft"
+[ "$(gh api "$RELEASE_ENDPOINT" --jq .prerelease)" = "false" ] \
+    || fail "CentL26 release is marked as a prerelease"
+RELEASE_ID="$(gh api "$RELEASE_ENDPOINT" --jq .id)"
+[[ "$RELEASE_ID" =~ ^[0-9]+$ ]] || fail "GitHub release ID is invalid"
+ASSET_ROWS="$(gh api --paginate "repos/$REPOSITORY/releases/$RELEASE_ID/assets?per_page=100" --jq '.[] | [.id, .name] | @tsv')"
+
+asset_ids() {
+    local name="$1"
+    awk -F $'\t' -v expected="$name" '$2 == expected {print $1}' <<<"$ASSET_ROWS"
+}
+
+for name in "$ARCHIVE_NAME" "$CHECKSUM_NAME" "$MANIFEST_NAME"; do
+    count="$(asset_ids "$name" | wc -l | tr -d ' ')"
+    [ "$count" -le 1 ] || fail "GitHub release contains duplicate assets named $name"
+done
+
+asset_state() {
+    local local_path="$1"
+    local name="$(basename -- "$local_path")"
+    local identifiers="$(asset_ids "$name")"
+    if [ -z "$identifiers" ]; then
+        printf '%s\n' absent
+        return
+    fi
+    local download_directory="$WORK_DIRECTORY/compare-$name"
+    mkdir "$download_directory"
+    gh release download "$RELEASE_TAG" --repo "$REPOSITORY" --pattern "$name" --dir "$download_directory"
+    if cmp -s "$local_path" "$download_directory/$name"; then
+        printf '%s\n' identical
+    else
+        printf '%s\n' different
+    fi
+}
+
+ARCHIVE_STATE="$(asset_state "$ARCHIVE")"
+CHECKSUM_STATE="$(asset_state "$CHECKSUM")"
+MANIFEST_STATE="$(asset_state "$MANIFEST")"
+PLAN="$(publication_plan "$MANIFEST_STATE" "$ARCHIVE_STATE" "$CHECKSUM_STATE")"
+
+delete_asset_if_present() {
+    local name="$1"
+    local identifier="$(asset_ids "$name")"
+    if [ -n "$identifier" ]; then
+        [[ "$identifier" =~ ^[0-9]+$ ]] || fail "invalid GitHub asset ID for $name"
+        gh api --method DELETE "repos/$REPOSITORY/releases/assets/$identifier"
+    fi
+}
+
+if [ "$PLAN" = "reuse-triplet" ]; then
+    echo "Qualified CentL26 asset triplet already has identical bytes"
+else
+    # This order is the update channel's publication transaction. A failure at
+    # any point before the final upload leaves no manifest, so clients skip the
+    # incomplete set and keep their installed copy.
+    delete_asset_if_present "$MANIFEST_NAME"
+    delete_asset_if_present "$ARCHIVE_NAME"
+    delete_asset_if_present "$CHECKSUM_NAME"
+    gh release upload "$RELEASE_TAG" --repo "$REPOSITORY" "$ARCHIVE" "$CHECKSUM"
+    gh release upload "$RELEASE_TAG" --repo "$REPOSITORY" "$MANIFEST"
+fi
+
+for artifact in "$ARCHIVE" "$CHECKSUM" "$MANIFEST"; do
+    name="$(basename -- "$artifact")"
+    readback_directory="$WORK_DIRECTORY/final-$name"
+    mkdir "$readback_directory"
+    gh release download "$RELEASE_TAG" --repo "$REPOSITORY" --pattern "$name" --dir "$readback_directory"
+    cmp -s "$artifact" "$readback_directory/$name" \
+        || fail "final GitHub readback differs: $name"
+done
+
+trap - EXIT INT TERM
+rm -rf -- "$WORK_DIRECTORY"
+
+echo "CentL26 automatic-update assets published and read back"
+echo "  release: $REPOSITORY@$RELEASE_TAG"
+echo "  architecture: $ARCHITECTURE"
+echo "  build commit: $(plist_value build_commit "$MANIFEST")"

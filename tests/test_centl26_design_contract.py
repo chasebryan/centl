@@ -82,7 +82,7 @@ class DesignContractTests(unittest.TestCase):
                 root,
                 "approve",
                 "--version",
-                "CentL26.1",
+                "CentL26",
                 "--reason",
                 "test-only semantic regression",
                 "--confirm-visual-review",
@@ -101,12 +101,12 @@ class DesignContractTests(unittest.TestCase):
                 root,
                 "approve",
                 "--version",
-                "CentL26.1",
+                "CentL26",
                 "--reason",
                 "Reviewed fixture-only visual adjustment.",
                 "--confirm-visual-review",
             )
-            self.assertIn("APPROVED CentL26.1", completed.stdout)
+            self.assertIn("APPROVED CentL26", completed.stdout)
             self.run_contract(root, "check")
 
             updated = json.loads((root / MANIFEST_RELATIVE).read_text(encoding="utf-8"))
@@ -114,7 +114,7 @@ class DesignContractTests(unittest.TestCase):
                 original["files"]["src-web/server/lab.css"],
                 updated["files"]["src-web/server/lab.css"],
             )
-            self.assertEqual(updated["approval"]["release"], "CentL26.1")
+            self.assertEqual(updated["approval"]["release"], "CentL26")
             self.assertEqual(
                 updated["approval"]["change_note"],
                 "Reviewed fixture-only visual adjustment.",
@@ -128,12 +128,28 @@ class DesignContractTests(unittest.TestCase):
                 root,
                 "approve",
                 "--version",
-                "CentL26.1",
+                "CentL26",
                 "--reason",
                 "Missing review confirmation fixture.",
                 expected=1,
             )
             self.assertIn("requires --confirm-visual-review", completed.stderr)
+
+    def test_public_release_name_cannot_advance_inside_the_centl26_channel(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="centl26-design-test-") as raw:
+            root = Path(raw)
+            self.fixture(root)
+            completed = self.run_contract(
+                root,
+                "approve",
+                "--version",
+                "CentL26.1",
+                "--reason",
+                "test-only public version drift",
+                "--confirm-visual-review",
+                expected=1,
+            )
+            self.assertIn("--version must remain CentL26", completed.stderr)
 
 
 if __name__ == "__main__":

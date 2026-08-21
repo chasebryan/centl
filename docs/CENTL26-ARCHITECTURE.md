@@ -68,34 +68,18 @@ operating system sees one continuing application. Year-specific display names
 and launch aliases may coexist, but they must not fragment project ownership or
 application updates.
 
-## 3. Product version scheme
+## 3. Stable product identity and build metadata
 
-CentL product versions use an annual train plus ordered updates:
+The human-facing product name remains **CentL26** throughout the continuing
+2026 channel. Feature work, backend integration, and maintenance do not create
+public `CentL26.N` editions. The native bundle and Cargo package retain the
+internal compatibility value `26.0.0`; the source commit, build identifier, and
+composition manifest distinguish exact builds.
 
-| Display version | Canonical tuple | Meaning |
-| --- | --- | --- |
-| **CentL26** | `26.0.0` | Initial main release in the 2026 product train. |
-| **CentL26.1** | `26.1.0` | First feature/capability update to the 2026 train. |
-| **CentL26.1.1** | `26.1.1` | Maintenance or security correction to update 26.1. |
-| **CentL27** | `27.0.0` | Initial release in the next annual product train. |
-
-Trailing zeroes are suppressed in the human-facing name. The three machine
-fields are:
-
-- `train`: two-digit release year;
-- `update`: ordered, user-visible capability or experience update within the
-  train;
-- `maintenance`: compatible correction that does not redefine the advertised
-  capability set or project contract.
-
-This is **not Semantic Versioning**. In particular, `26` denotes a product
-train, not a SemVer compatibility major. Product release tags and artifacts must
-be namespaced, for example `centl26.0.0` and `centl26.1.0`, so they cannot be
-confused with historical core-engine tags such as `v0.15.0`.
-
-Pre-release and build identity follow the canonical tuple without entering the
-brand, for example `26.1.0-rc.2` and `26.1.0+build.184`. A release candidate is
-never displayed as the stable `CentL26.1` release.
+Internal build metadata never enters the brand. Diagnostic and provenance
+surfaces may report `26.0.0`, a source commit, and a build identifier, while
+normal application chrome and release communication continue to say CentL26.
+Backend engines retain their own independent versions.
 
 ### 3.1 Independent version axes
 
@@ -104,7 +88,7 @@ manifest must record every independent axis:
 
 | Axis | Example form | Compatibility question |
 | --- | --- | --- |
-| Product | `26.1.0` | Which complete application release is running? |
+| Product build | `CentL26` + source/build identity | Which complete application composition is running? |
 | Project schema | `centl.project/1` | Can this project be opened and written safely? |
 | Broker protocol | `centl.broker/1` | Can the shell and broker exchange requests? |
 | Capability contract | `org.fcf.centl.math.evaluate/1` | Does this request/result shape have the expected meaning? |
@@ -119,9 +103,9 @@ The About surface may summarize these values, but the complete composition must
 remain exportable as a machine-readable bill of materials. Receipts record the
 versions relevant to their individual run.
 
-An engine update does not silently rename the product. Conversely, the label
-`CentL26.1` does not imply that every bundled engine is version `26.1`. The
-product manifest is the authoritative mapping between them.
+An engine or product update does not rename CentL26. The product manifest is the
+authoritative mapping between the stable application identity and its exact
+components.
 
 ## 4. Standalone application boundary
 
@@ -186,6 +170,22 @@ provide access to depth without permanent dashboard density.
 
 Layout is a user preference, not project scientific state. It may be synced or
 restored separately, but it must not change a project's computational revision.
+
+### 4.2 Automatic update channel
+
+The status-line **Update** action is a native application operation, not a link
+to the source repository. On macOS it asks the host to check the repository's
+published `centl26` release, offers the newest complete build for the current
+architecture, downloads it after confirmation, replaces `CentL26.app`, and
+relaunches the application. A browser-hosted development surface reports that
+updates require the native app and does not redirect elsewhere.
+
+The public name and bundle version remain CentL26 and `26.0.0`; the release and
+build manifests compare source commits to identify an update. The channel
+publishes one architecture-specific ZIP, adjacent checksum, and release
+manifest. The manifest is published last so a partially uploaded update is not
+offered. Local ad-hoc or unpinned builds remain development artifacts and do not
+masquerade as installable channel updates.
 
 ## 5. Capability broker
 
@@ -318,6 +318,30 @@ source modules or merging all numerical implementations immediately.
 Where two engines currently answer the same operation, CentL26 must not route
 between them opportunistically. The capability manifest identifies the owner;
 parity work runs as conformance testing or an explicitly requested comparison.
+
+### 6.1 Current CentL26 implementation boundary
+
+The shipping implementation is intentionally narrower than the target broker
+described above. Its current, testable boundary is:
+
+- one durable local `centl.project/1` project with one notebook, revisioned
+  execution history, typed provider evidence, and atomic restart persistence;
+- a runtime-overlay capability registry at `GET /api/capabilities` and a
+  project/notebook read model at `GET /api/workspace`;
+- built-in exact/symbolic mathematics, typed physics, and bounded
+  Erdős–Straus execution, plus explicitly resolved `centl` rigorous-numerics
+  and `centl-chem` chemistry providers;
+- one authenticated compatibility mutation route, `POST /api/run`, whose
+  admitted results are persisted before the refreshed workbench is returned;
+- distinct Work, Projects, Tools, Data, Models, Research, and Build surfaces.
+  Data objects, model/SCi execution, multi-project switching, and the
+  BUILD/MIRAGE extension workbench report unavailable or planned status rather
+  than presenting decorative controls as working product features.
+
+`POST /api/run` is not yet the complete typed broker envelope from Section 5.
+New capability families must not add more UI-only prefix routing; they should
+enter through a versioned request/response adapter and then migrate this
+compatibility route behind the same dispatcher.
 
 ## 7. Project object model
 

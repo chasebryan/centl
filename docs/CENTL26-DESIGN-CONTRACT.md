@@ -63,17 +63,18 @@ approved interface changed and requires either restoration or intentional review
    motion remains usable.
 5. Obtain explicit approval from the product/design owner. Ordinary refactoring
    approval is not visual-design approval.
-6. Record the approved bytes with a new CentL26 release identifier and a concrete
-   reason:
+6. Record the approved bytes against the continuing CentL26 release channel and
+   a concrete reason:
 
    ```sh
    make centl26-design-approve \
-     DESIGN_VERSION=CentL26.1 \
+     DESIGN_VERSION=CentL26 \
      DESIGN_REASON='Approved refinement of the notebook result hierarchy.'
    ```
 
 7. Inspect the protected source diff and manifest diff together. The manifest
-   must change only for files actually reviewed, the release must be correct, and
+   must change only for files actually reviewed, the release must remain
+   `CentL26`, and
    the change note must describe the approved visual decision.
 8. Run `make centl26-design-contract-test`, `make centl26-design-check`, and the
    normal CentL26 build/test gates before committing the visual sources and

@@ -7,7 +7,6 @@ use crate::physics::{convert_units, simulate_collision_1d, PhysicsResult};
 use serde_json::Value;
 use std::env;
 use std::io::{self, Read};
-use std::path::PathBuf;
 use std::process::{Command, ExitStatus, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -256,7 +255,7 @@ fn is_approximation_command(command: &str) -> bool {
 }
 
 fn run_canonical_approx(command: &str) -> Result<ExecutionResult, String> {
-    let engine = env::var("CENTL_ENGINE_BIN").unwrap_or_else(|_| "centl".to_string());
+    let engine = super::capabilities::canonical_math_provider().command;
     run_canonical_approx_with(&engine, command)
 }
 
@@ -289,11 +288,17 @@ fn run_canonical_approx_with(engine: &str, command: &str) -> Result<ExecutionRes
     if stdout.is_empty() {
         return Err("canonical CENTL approximation returned no result".to_string());
     }
+    let enclosure = stdout
+        .strip_prefix('≈')
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .unwrap_or(stdout.as_str())
+        .to_string();
 
     Ok(ExecutionResult {
         text: stdout,
         exact_rational: None,
-        approximate: Some("canonical CENTL rigorous enclosure".to_string()),
+        approximate: Some(enclosure),
         symbolic_expr: None,
         execution_micros: started.elapsed().as_micros(),
     })
@@ -325,7 +330,7 @@ fn handle_chemistry_command(
         Ok(args) => args,
         Err(error) => return (None, Some(error), None, None),
     };
-    let provider = provider_binary("CENTL26_CHEM_BIN", "centl-chem");
+    let provider = super::capabilities::chemistry_provider().command;
     let started = Instant::now();
     match run_chemistry_with(&provider, &args) {
         Ok(outcome) => {
@@ -388,23 +393,6 @@ fn strip_matching_quotes(value: &str) -> &str {
         }
     }
     value
-}
-
-fn provider_binary(environment_key: &str, binary_name: &str) -> String {
-    if let Some(configured) = env::var(environment_key)
-        .ok()
-        .filter(|value| !value.trim().is_empty())
-    {
-        return configured;
-    }
-
-    let sibling: Option<PathBuf> = env::current_exe()
-        .ok()
-        .and_then(|executable| executable.parent().map(|parent| parent.join(binary_name)))
-        .filter(|candidate| candidate.is_file());
-    sibling
-        .map(|candidate| candidate.to_string_lossy().into_owned())
-        .unwrap_or_else(|| binary_name.to_string())
 }
 
 fn run_chemistry_with(provider: &str, args: &[String]) -> Result<ChemistryOutcome, String> {
@@ -1700,7 +1688,7 @@ mod tests {
         assert_eq!(result.text, "≈ [9.3248e157, 9.3249e157]");
         assert_eq!(
             result.approximate.as_deref(),
-            Some("canonical CENTL rigorous enclosure")
+            Some("[9.3248e157, 9.3249e157]")
         );
         assert!(result.execution_micros > 0);
 

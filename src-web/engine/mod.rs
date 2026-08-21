@@ -9,8 +9,8 @@ pub mod symbolic;
 use functions::*;
 use numerics::*;
 use rational::{BigInt, BigRational};
-use symbolic::{Expr, Parser};
 use std::collections::HashMap;
+use symbolic::{Expr, Parser};
 
 #[derive(Clone, Debug)]
 pub struct Session {
@@ -69,9 +69,17 @@ pub fn evaluate(input: &str, session: &mut Session) -> Result<ExecutionResult, S
         let elapsed = start_time.elapsed().as_micros();
         match trimmed {
             ":history" => {
-                let items: Vec<String> = session.history.iter().map(|h| format!("  {} => {}", h.command, h.result)).collect();
+                let items: Vec<String> = session
+                    .history
+                    .iter()
+                    .map(|h| format!("  {} => {}", h.command, h.result))
+                    .collect();
                 return Ok(ExecutionResult {
-                    text: if items.is_empty() { "No history recorded.".to_string() } else { items.join("\n") },
+                    text: if items.is_empty() {
+                        "No history recorded.".to_string()
+                    } else {
+                        items.join("\n")
+                    },
                     exact_rational: None,
                     approximate: None,
                     symbolic_expr: None,
@@ -179,7 +187,10 @@ pub fn evaluate(input: &str, session: &mut Session) -> Result<ExecutionResult, S
                     "x"
                 };
                 let roots = target.solve(var_name)?;
-                let root_strs: Vec<String> = roots.iter().map(|r| format!("{} = {}", var_name, r)).collect();
+                let root_strs: Vec<String> = roots
+                    .iter()
+                    .map(|r| format!("{} = {}", var_name, r))
+                    .collect();
                 ExecutionResult {
                     text: root_strs.join(", "),
                     exact_rational: None,
@@ -204,7 +215,10 @@ pub fn evaluate(input: &str, session: &mut Session) -> Result<ExecutionResult, S
                         ExecutionResult {
                             text: enclosure.value_str.clone(),
                             exact_rational: Some(n),
-                            approximate: Some(format!("{} (enclosure precision: {} digits)", enclosure.value_str, digits)),
+                            approximate: Some(format!(
+                                "{} (enclosure precision: {} digits)",
+                                enclosure.value_str, digits
+                            )),
                             symbolic_expr: None,
                             execution_micros: start_time.elapsed().as_micros(),
                         }
@@ -249,16 +263,19 @@ pub fn evaluate(input: &str, session: &mut Session) -> Result<ExecutionResult, S
                         let fact = factorial(u)?;
                         let rat = BigRational::from_bigint(fact);
                         let text = format!("{}", rat);
-                        return Ok(ExecutionResult {
+                        ExecutionResult {
                             text,
                             exact_rational: Some(rat),
                             approximate: None,
                             symbolic_expr: None,
                             execution_micros: start_time.elapsed().as_micros(),
-                        });
+                        }
+                    } else {
+                        return Err("factorial requires non-negative integer".to_string());
                     }
+                } else {
+                    return Err("factorial requires non-negative integer".to_string());
                 }
-                return Err("factorial requires non-negative integer".to_string());
             }
             "fibonacci" if args.len() == 1 => {
                 let arg_eval = eval_expr(&args[0], session)?;
@@ -268,16 +285,19 @@ pub fn evaluate(input: &str, session: &mut Session) -> Result<ExecutionResult, S
                         let fib = fibonacci(u)?;
                         let rat = BigRational::from_bigint(fib);
                         let text = format!("{}", rat);
-                        return Ok(ExecutionResult {
+                        ExecutionResult {
                             text,
                             exact_rational: Some(rat),
                             approximate: None,
                             symbolic_expr: None,
                             execution_micros: start_time.elapsed().as_micros(),
-                        });
+                        }
+                    } else {
+                        return Err("fibonacci requires non-negative integer".to_string());
                     }
+                } else {
+                    return Err("fibonacci requires non-negative integer".to_string());
                 }
-                return Err("fibonacci requires non-negative integer".to_string());
             }
             "gcd" if args.len() == 2 => {
                 let a = eval_expr(&args[0], session)?;
@@ -286,15 +306,16 @@ pub fn evaluate(input: &str, session: &mut Session) -> Result<ExecutionResult, S
                     let g = BigInt::gcd(&na.numer, &nb.numer);
                     let rat = BigRational::from_bigint(g);
                     let text = format!("{}", rat);
-                    return Ok(ExecutionResult {
+                    ExecutionResult {
                         text,
                         exact_rational: Some(rat),
                         approximate: None,
                         symbolic_expr: None,
                         execution_micros: start_time.elapsed().as_micros(),
-                    });
+                    }
+                } else {
+                    return Err("gcd requires integers".to_string());
                 }
-                return Err("gcd requires integers".to_string());
             }
             "lcm" if args.len() == 2 => {
                 let a = eval_expr(&args[0], session)?;
@@ -303,15 +324,16 @@ pub fn evaluate(input: &str, session: &mut Session) -> Result<ExecutionResult, S
                     let l = BigInt::lcm(&na.numer, &nb.numer);
                     let rat = BigRational::from_bigint(l);
                     let text = format!("{}", rat);
-                    return Ok(ExecutionResult {
+                    ExecutionResult {
                         text,
                         exact_rational: Some(rat),
                         approximate: None,
                         symbolic_expr: None,
                         execution_micros: start_time.elapsed().as_micros(),
-                    });
+                    }
+                } else {
+                    return Err("lcm requires integers".to_string());
                 }
-                return Err("lcm requires integers".to_string());
             }
             _ => {
                 let eval = eval_expr(&expr, session)?;
@@ -450,6 +472,28 @@ fn eval_expr(expr: &Expr, session: &Session) -> Result<Expr, String> {
             let el = eval_expr(l, session)?;
             let er = eval_expr(r, session)?;
             Ok(Expr::Equation(Box::new(el), Box::new(er)))
+        }
+    }
+}
+
+#[cfg(test)]
+mod admission_tests {
+    use super::{evaluate, Session};
+
+    #[test]
+    fn combinatoric_results_share_the_normal_history_admission_path() {
+        for (command, expected) in [
+            ("factorial(6)", "720"),
+            ("fibonacci(10)", "55"),
+            ("gcd(84, 30)", "6"),
+            ("lcm(12, 18)", "36"),
+        ] {
+            let mut session = Session::new();
+            let result = evaluate(command, &mut session).unwrap();
+            assert_eq!(result.text, expected);
+            assert_eq!(session.history.len(), 1, "{command} was not admitted");
+            assert_eq!(session.history[0].command, command);
+            assert_eq!(session.history[0].result, expected);
         }
     }
 }
