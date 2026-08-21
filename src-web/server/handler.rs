@@ -3400,24 +3400,66 @@ mod tests {
         let cargo = find_executable("cargo");
         assert!(cargo.is_some());
     }
+
+    #[test]
+    fn test_version_comparison_and_update_detection() {
+        assert!(is_version_newer("26.7.4", "26.7.3"));
+        assert!(is_version_newer("v26.8.0", "26.7.3"));
+        assert!(is_version_newer("27.0.0", "26.7.3"));
+        assert!(!is_version_newer("26.7.3", "26.7.3"));
+        assert!(!is_version_newer("v26.7.3", "26.7.3"));
+        assert!(!is_version_newer("26.7.2", "26.7.3"));
+        assert!(!is_version_newer("26.6.1", "26.7.3"));
+    }
+}
+
+pub fn is_version_newer(remote: &str, current: &str) -> bool {
+    let parse_parts = |v: &str| -> Vec<u64> {
+        v.trim_start_matches('v')
+            .split('.')
+            .map(|p| p.chars().take_while(|c| c.is_ascii_digit()).collect::<String>())
+            .filter_map(|s| s.parse::<u64>().ok())
+            .collect()
+    };
+    let r = parse_parts(remote);
+    let c = parse_parts(current);
+    if r.is_empty() || c.is_empty() {
+        return false;
+    }
+    for (rp, cp) in r.iter().zip(c.iter()) {
+        if rp > cp {
+            return true;
+        } else if rp < cp {
+            return false;
+        }
+    }
+    r.len() > c.len()
 }
 
 pub fn handle_update_check() -> serde_json::Value {
+    let current_version = "26.7.3";
     let git_status = check_git_update_available();
+    let latest_version = git_status.latest_tag.clone().unwrap_or_else(|| format!("v{}", current_version));
+    
     serde_json::json!({
         "schema": "centl26.update-check/1",
         "product": "CentL26",
-        "version": "26.7.3",
-        "release_name": "CentL26.7.3",
-        "release_tag": "v26.7.3",
+        "version": current_version,
+        "latest_version": latest_version,
+        "release_name": format!("CentL26 {}", latest_version),
+        "release_tag": latest_version,
         "build_commit": super::build_commit(),
         "status": if git_status.update_available { "update_available" } else { "up_to_date" },
         "update_available": git_status.update_available,
         "channel": "main",
         "message": if git_status.update_available {
-            format!("New updates found on origin/main ({} commit(s) behind). Click Update to pull and rebuild.", git_status.commits_behind)
+            if git_status.commits_behind > 0 {
+                format!("New update found! ({} new commit(s) on origin/main). Click Update to sync and build.", git_status.commits_behind)
+            } else {
+                format!("New update available: {} (current: v{}). Click Update to sync and build.", latest_version, current_version)
+            }
         } else {
-            "CentL26 v26.7.3 is up to date.".to_string()
+            format!("CentL26 v{} is up to date.", current_version)
         }
     })
 }
@@ -3425,6 +3467,7 @@ pub fn handle_update_check() -> serde_json::Value {
 pub struct GitUpdateStatus {
     pub update_available: bool,
     pub commits_behind: usize,
+    pub latest_tag: Option<String>,
 }
 
 pub fn find_repo_root() -> Option<std::path::PathBuf> {
@@ -3499,8 +3542,9 @@ pub fn create_system_command(name: &str) -> std::process::Command {
 }
 
 pub fn check_git_update_available() -> GitUpdateStatus {
+    // 1. Fast fetch origin main
     let _ = create_system_command("git")
-        .args(["fetch", "--all", "--quiet"])
+        .args(["fetch", "origin", "main", "--quiet"])
         .output();
 
     let local_head = create_system_command("git")
@@ -3510,26 +3554,51 @@ pub fn check_git_update_available() -> GitUpdateStatus {
         .unwrap_or_default();
 
     let remote_head = create_system_command("git")
-        .args(["rev-parse", "@{u}"])
+        .args(["rev-parse", "origin/main"])
         .output()
         .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
         .unwrap_or_default();
 
-    let target_remote = if !remote_head.is_empty() {
-        "@{u}"
-    } else {
-        "origin/main"
-    };
+    let mut count = 0;
+    if !local_head.is_empty() && !remote_head.is_empty() && local_head != remote_head {
+        let count_output = create_system_command("git")
+            .args(["rev-list", "--count", "HEAD..origin/main"])
+            .output()
+            .map(|o| String::from_utf8_lossy(&o.stdout).trim().parse::<usize>().unwrap_or(0))
+            .unwrap_or(0);
+        count = count_output;
+    }
 
-    let count_output = create_system_command("git")
-        .args(["rev-list", "--count", &format!("{}..{}", local_head, target_remote)])
-        .output()
-        .map(|o| String::from_utf8_lossy(&o.stdout).trim().parse::<usize>().unwrap_or(0))
-        .unwrap_or(0);
+    // 2. Query GitHub latest release tag via curl (with 2s timeout)
+    let mut github_newer = false;
+    let mut github_tag = None;
+    if let Some(curl) = find_executable("curl") {
+        if let Ok(output) = std::process::Command::new(curl)
+            .args([
+                "-s",
+                "-m", "2",
+                "-H", "User-Agent: CentL26-Updater",
+                "https://api.github.com/repos/chasebryan/centl/releases/latest",
+            ])
+            .output()
+        {
+            if let Ok(json_str) = String::from_utf8(output.stdout) {
+                if let Ok(release_val) = serde_json::from_str::<serde_json::Value>(&json_str) {
+                    if let Some(tag) = release_val["tag_name"].as_str() {
+                        github_tag = Some(tag.to_string());
+                        if is_version_newer(tag, "26.7.3") {
+                            github_newer = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     GitUpdateStatus {
-        update_available: count_output > 0,
-        commits_behind: count_output,
+        update_available: count > 0 || github_newer,
+        commits_behind: count,
+        latest_tag: github_tag,
     }
 }
 
@@ -3545,20 +3614,19 @@ pub fn execute_repo_update() -> serde_json::Value {
         }
     };
 
-    // 1. Check if git worktree is dirty; if so, stash to ensure smooth pull
+    // 1. Fast stash if worktree is dirty
     let status_out = create_system_command("git").args(["status", "--porcelain"]).output();
     let is_dirty = status_out.as_ref().map(|s| !s.stdout.is_empty()).unwrap_or(false);
     if is_dirty {
-        let _ = create_system_command("git").args(["stash", "save", "centl26-autoupdate-stash"]).output();
+        let _ = create_system_command("git").args(["stash", "save", "-u", "centl26-autoupdate-stash"]).output();
     }
 
-    // 2. Fetch and pull
-    let _ = create_system_command("git").args(["fetch", "--all", "--quiet"]).output();
-    let pull = create_system_command("git").args(["pull", "origin", "main"]).output();
+    // 2. Fast pull origin main
+    let pull = create_system_command("git").args(["pull", "--ff-only", "origin", "main"]).output();
     let pull_success = match pull {
         Ok(ref o) if o.status.success() => true,
         _ => {
-            create_system_command("git").args(["pull"]).output().map(|o| o.status.success()).unwrap_or(false)
+            create_system_command("git").args(["pull", "origin", "main"]).output().map(|o| o.status.success()).unwrap_or(false)
         }
     };
 
@@ -3571,17 +3639,22 @@ pub fn execute_repo_update() -> serde_json::Value {
         });
     }
 
-    // 4. Run cargo build --release --bin centl26
+    // 4. Fast release build --bin centl26
     let build = create_system_command("cargo")
         .args(["build", "--release", "--bin", "centl26"])
         .output();
 
     match build {
         Ok(b_out) if b_out.status.success() => {
-            // If on macOS and build.sh exists, also refresh .app bundle
-            let macos_build_sh = repo_root.join("desktop/centl26/macos/build.sh");
-            if cfg!(target_os = "macos") && macos_build_sh.exists() {
-                let _ = create_system_command("bash").arg(&macos_build_sh).output();
+            // High-speed .app bundle sync without slow full rebuild script
+            let app_bundle = repo_root.join("build/centl26/macos/CentL26.app");
+            let target_bin = repo_root.join("target/release/centl26");
+            if cfg!(target_os = "macos") && app_bundle.exists() && target_bin.exists() {
+                let app_bin = app_bundle.join("Contents/Resources/bin/centl26");
+                let _ = std::fs::copy(&target_bin, &app_bin);
+                let _ = create_system_command("codesign")
+                    .args(["-s", "-", "--force", app_bundle.to_str().unwrap_or_default()])
+                    .output();
             }
 
             serde_json::json!({

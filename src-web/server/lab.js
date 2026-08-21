@@ -809,15 +809,15 @@
         .then((data) => {
           if (spinner) spinner.hidden = true;
           if (data.update_available) {
-            if (spinnerText) spinnerText.textContent = data.message;
-            if (details) details.textContent = "A newer build is published on origin/main. Click 'Install Update' to pull and recompile in-place.";
+            if (spinnerText) spinnerText.textContent = "⚡ " + data.message;
+            if (details) details.textContent = `A newer build (${data.latest_version || "latest"}) is available. Click 'Install Update' to pull and compile in-place.`;
             if (installBtn) {
               installBtn.hidden = false;
               installBtn.textContent = "Install Update";
             }
           } else {
             if (spinnerText) spinnerText.textContent = "✓ " + (data.message || `${data.product} ${data.version} is up to date.`);
-            if (details) details.textContent = "You are running the official release version. Click below to pull and recompile in-place anytime.";
+            if (details) details.textContent = "You are running the latest release version. Click below to pull and recompile in-place anytime.";
             if (installBtn) {
               installBtn.hidden = false;
               installBtn.textContent = "Rebuild & Sync Now";
