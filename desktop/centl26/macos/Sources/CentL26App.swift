@@ -940,8 +940,12 @@ private final class WorkspaceNavigationDelegate: NSObject, WKNavigationDelegate,
         for navigationAction: WKNavigationAction,
         windowFeatures: WKWindowFeatures
     ) -> WKWebView? {
-        if navigationAction.targetFrame == nil && permits(navigationAction.request.url) {
-            webView.load(navigationAction.request)
+        if navigationAction.targetFrame == nil {
+            if permits(navigationAction.request.url) {
+                webView.load(navigationAction.request)
+            } else if let url = navigationAction.request.url {
+                NSWorkspace.shared.open(url)
+            }
         }
         return nil
     }

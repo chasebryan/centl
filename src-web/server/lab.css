@@ -447,6 +447,8 @@ body.hide-explorer .explorer-pane, body.hide-inspector .inspector-pane { visibil
 .mode-control select:hover { border-color: var(--line-strong); }
 .composer-clear { height: 30px; margin-left: 6px; padding: 0 9px; color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: 6px; font-size: 11px; }
 .composer-clear:hover { color: var(--danger, #b42318); border-color: #f1b8b2; background: #fff8f7; }
+.status-update { margin: 0 5px; padding: 2px 6px; color: var(--faint); background: transparent; border: 0; border-radius: 4px; font: inherit; font-size: 10px; }
+.status-update:hover { color: var(--brand-hover); background: var(--brand-soft); }
 
 /* Start surface and composer */
 .workspace-canvas { display: grid; grid-template-rows: minmax(0, 1fr) auto; min-width: 0; min-height: 0; overflow: hidden; background: var(--surface); }
