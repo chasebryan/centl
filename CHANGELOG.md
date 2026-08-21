@@ -1,5 +1,10 @@
 ## Unreleased
 
+### CentL26.7.1 — Natural Language Arithmetic & In-App Update Dialog (2026-08-21)
+
+- **Universal Natural Language Arithmetic**: CentL-SCi parses and solves conversational math questions in plain English (e.g. `"what is 55 divided by 22?"` $\rightarrow$ `5/2` / `2.5`, percentages `"15% of 300"`, square roots `"square root of 144"`, fractions `"half of 150"`, number theory `"is 97 a prime number?"`, and gcd/lcm) with exact rational receipts.
+- **Dedicated In-App Update Modal Dialog**: Built a Google-grade Software Update Dialog (`.fcf-update-modal`) with real-time status indication, 1-click in-place git pull & release recompilation, and smooth automated reload.
+
 ### CentL26.7.0 — Rock Standard Multi-Platform Release (2026-08-21)
 
 - **Multi-Platform Standard Freeze**: Official native build and packaging automation for **Windows 11** (`install.ps1`, `desktop/centl26/windows/build.ps1`, `CentL26.bat`, `CentL26.ico`), **macOS Arm64** (`install.sh`, `./desktop/centl26/macos/build.sh`, `CentL26.app`), and **Debian / Ubuntu / Fedora / RHEL / Arch Linux** (`scripts/install-linux.sh`, `desktop/centl26/linux/build.sh`, `CentL26.desktop`, hicolor icon set).

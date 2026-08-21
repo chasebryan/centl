@@ -3239,9 +3239,9 @@ pub fn handle_update_check() -> serde_json::Value {
     serde_json::json!({
         "schema": "centl26.update-check/1",
         "product": "CentL26",
-        "version": "26.7.0",
-        "release_name": "CentL26.7.0",
-        "release_tag": "v26.7.0",
+        "version": "26.7.1",
+        "release_name": "CentL26.7.1",
+        "release_tag": "v26.7.1",
         "build_commit": super::build_commit(),
         "status": if git_status.update_available { "update_available" } else { "up_to_date" },
         "update_available": git_status.update_available,
@@ -3249,7 +3249,7 @@ pub fn handle_update_check() -> serde_json::Value {
         "message": if git_status.update_available {
             format!("New updates found on origin/main ({} commit(s) behind). Click Update to pull and rebuild.", git_status.commits_behind)
         } else {
-            "CentL26 v26.7.0 is up to date.".to_string()
+            "CentL26 v26.7.1 is up to date.".to_string()
         }
     })
 }
@@ -3359,7 +3359,7 @@ pub fn execute_repo_update() -> serde_json::Value {
 pub fn export_notebook_markdown(state: &AppState) -> String {
     let name = state.notebook_name();
     let session = state.session();
-    let mut md = format!("# {}\n\nExported from CentL26 v26.7.0\n\n", name);
+    let mut md = format!("# {}\n\nExported from CentL26 v26.7.1\n\n", name);
     for entry in &session.history {
         md.push_str(&format!("## `{}`\n\n", entry.command));
         md.push_str(&format!("**Result:** {}\n\n", entry.result));
@@ -3381,7 +3381,7 @@ pub fn export_notebook_json(state: &AppState) -> String {
             e.exact_repr.as_ref().map(|s| serde_json_str(s)).unwrap_or("null".to_string())
         )
     }).collect();
-    format!("{{\"schema\":\"centl26.notebook/1\",\"name\":{},\"version\":\"26.7.0\",\"entries\":[{}]}}",
+    format!("{{\"schema\":\"centl26.notebook/1\",\"name\":{},\"version\":\"26.7.1\",\"entries\":[{}]}}",
         serde_json_str(name), entries.join(","))
 }
 
