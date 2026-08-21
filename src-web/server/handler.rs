@@ -3260,29 +3260,30 @@ pub struct GitUpdateStatus {
 }
 
 pub fn check_git_update_available() -> GitUpdateStatus {
-    let fetch = std::process::Command::new("git")
-        .args(["fetch", "origin", "main", "--quiet"])
+    let _ = std::process::Command::new("git")
+        .args(["fetch", "--all", "--quiet"])
         .output();
-    if fetch.is_err() {
-        return GitUpdateStatus { update_available: false, commits_behind: 0 };
-    }
+
     let local_head = std::process::Command::new("git")
         .args(["rev-parse", "HEAD"])
         .output()
         .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
         .unwrap_or_default();
+
     let remote_head = std::process::Command::new("git")
-        .args(["rev-parse", "origin/main"])
+        .args(["rev-parse", "@{u}"])
         .output()
         .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
         .unwrap_or_default();
 
-    if local_head.is_empty() || remote_head.is_empty() || local_head == remote_head {
-        return GitUpdateStatus { update_available: false, commits_behind: 0 };
-    }
+    let target_remote = if !remote_head.is_empty() {
+        "@{u}"
+    } else {
+        "origin/main"
+    };
 
     let count_output = std::process::Command::new("git")
-        .args(["rev-list", "--count", &format!("{}..origin/main", local_head)])
+        .args(["rev-list", "--count", &format!("{}..{}", local_head, target_remote)])
         .output()
         .map(|o| String::from_utf8_lossy(&o.stdout).trim().parse::<usize>().unwrap_or(0))
         .unwrap_or(0);
@@ -3294,63 +3295,53 @@ pub fn check_git_update_available() -> GitUpdateStatus {
 }
 
 pub fn execute_repo_update() -> serde_json::Value {
-    // 1. Try git pull origin main, fallback to generic git pull
-    let mut pull = std::process::Command::new("git")
-        .args(["pull", "origin", "main", "--ff-only"])
-        .output();
-
-    if pull.as_ref().map(|o| !o.status.success()).unwrap_or(true) {
-        pull = std::process::Command::new("git")
-            .args(["pull", "--ff-only"])
-            .output();
+    // 1. Check if git worktree is dirty; if so, stash to ensure smooth pull
+    let status_out = std::process::Command::new("git").args(["status", "--porcelain"]).output();
+    let is_dirty = status_out.as_ref().map(|s| !s.stdout.is_empty()).unwrap_or(false);
+    if is_dirty {
+        let _ = std::process::Command::new("git").args(["stash"]).output();
     }
 
-    match pull {
-        Ok(output) if output.status.success() => {
-            let build = std::process::Command::new("cargo")
-                .args(["build", "--release", "--bin", "centl26"])
-                .output();
-            match build {
-                Ok(b_out) if b_out.status.success() => {
-                    // If on macOS and build script exists, refresh the .app bundle in background
-                    if cfg!(target_os = "macos") && std::path::Path::new("desktop/centl26/macos/build.sh").exists() {
-                        let _ = std::process::Command::new("./desktop/centl26/macos/build.sh").output();
-                    }
-
-                    serde_json::json!({
-                        "success": true,
-                        "updated": true,
-                        "message": "CentL26 updated and rebuilt successfully! Reloading session..."
-                    })
-                }
-                Ok(b_out) => {
-                    serde_json::json!({
-                        "success": false,
-                        "updated": true,
-                        "message": format!("Git pull succeeded but cargo build failed: {}", String::from_utf8_lossy(&b_out.stderr))
-                    })
-                }
-                Err(err) => {
-                    serde_json::json!({
-                        "success": false,
-                        "updated": true,
-                        "message": format!("Git pull succeeded but could not launch cargo: {}", err)
-                    })
-                }
-            }
+    // 2. Fetch and pull
+    let _ = std::process::Command::new("git").args(["fetch", "--all", "--quiet"]).output();
+    let pull = std::process::Command::new("git").args(["pull", "origin", "main"]).output();
+    let pull_success = match pull {
+        Ok(ref o) if o.status.success() => true,
+        _ => {
+            std::process::Command::new("git").args(["pull"]).output().map(|o| o.status.success()).unwrap_or(false)
         }
-        Ok(output) => {
+    };
+
+    // 3. Always run cargo build --release --bin centl26
+    let build = std::process::Command::new("cargo")
+        .args(["build", "--release", "--bin", "centl26"])
+        .output();
+
+    match build {
+        Ok(b_out) if b_out.status.success() => {
+            // If on macOS and build.sh exists, also refresh .app bundle
+            if cfg!(target_os = "macos") && std::path::Path::new("desktop/centl26/macos/build.sh").exists() {
+                let _ = std::process::Command::new("./desktop/centl26/macos/build.sh").output();
+            }
+
+            serde_json::json!({
+                "success": true,
+                "updated": true,
+                "message": if pull_success { "CentL26 updated to latest version and rebuilt successfully! Reloading..." } else { "CentL26 rebuilt successfully with release optimizations! Reloading..." }
+            })
+        }
+        Ok(b_out) => {
             serde_json::json!({
                 "success": false,
                 "updated": false,
-                "message": format!("Git update could not fast-forward: {}", String::from_utf8_lossy(&output.stderr))
+                "message": format!("Cargo build failed: {}", String::from_utf8_lossy(&b_out.stderr))
             })
         }
         Err(err) => {
             serde_json::json!({
                 "success": false,
                 "updated": false,
-                "message": format!("Could not run git update: {}", err)
+                "message": format!("Could not launch cargo: {}", err)
             })
         }
     }

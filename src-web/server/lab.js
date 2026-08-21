@@ -785,7 +785,6 @@
       const modal = document.querySelector(".fcf-update-modal");
       if (modal) modal.hidden = false;
 
-      const statusBox = document.querySelector("[data-update-status-box]");
       const spinnerText = document.querySelector("[data-update-status-text]");
       const details = document.querySelector("[data-update-details]");
       const installBtn = document.querySelector("[data-update-install]");
@@ -798,11 +797,8 @@
 
       const updater = window.webkit?.messageHandlers?.centl26Update;
       if (updater && typeof updater.postMessage === "function") {
-        if (spinnerText) spinnerText.textContent = "Checking for CentL26 application updates...";
         try {
           updater.postMessage({ action: "check" });
-          if (details) details.textContent = "Delegated to native macOS AppKit updater bridge.";
-          return;
         } catch (_) {
           showHostNotice("Automatic updates are available in the CentL26 macOS app.");
         }
@@ -815,11 +811,17 @@
           if (data.update_available) {
             if (spinnerText) spinnerText.textContent = data.message;
             if (details) details.textContent = "A newer build is published on origin/main. Click 'Install Update' to pull and recompile in-place.";
-            if (installBtn) installBtn.hidden = false;
+            if (installBtn) {
+              installBtn.hidden = false;
+              installBtn.textContent = "Install Update";
+            }
           } else {
             if (spinnerText) spinnerText.textContent = "✓ " + (data.message || `${data.product} ${data.version} is up to date.`);
-            if (details) details.textContent = "You are running the official release version. No newer commits found on origin/main.";
-            if (installBtn) installBtn.hidden = true;
+            if (details) details.textContent = "You are running the official release version. Click below to pull and recompile in-place anytime.";
+            if (installBtn) {
+              installBtn.hidden = false;
+              installBtn.textContent = "Rebuild & Sync Now";
+            }
           }
         })
         .catch((err) => {
@@ -829,7 +831,7 @@
         });
     }
 
-    if (target.matches("[data-update], [data-update-check]")) {
+    if (target.matches("[data-update], [data-update-check]") || target.closest("[data-update], [data-update-check]")) {
       runUpdateCheck();
     }
 

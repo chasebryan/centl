@@ -1841,13 +1841,39 @@ fn lab_mutation_is_authorized(
     expected_authority: &str,
     requested_session: Option<&str>,
 ) -> bool {
-    let expected_origin = format!("http://{}", expected_authority);
-    request.headers.get("origin").map(String::as_str) == Some(expected_origin.as_str())
-        && server_state.authorizes_lab_session(requested_session)
+    let origin = match request.headers.get("origin").map(String::as_str) {
+        Some(o) => o,
+        None => return false,
+    };
+    let port = expected_authority.rsplit(':').next().unwrap_or("2626");
+    let valid_origins = [
+        format!("http://{}", expected_authority),
+        format!("http://localhost:{}", port),
+        format!("http://127.0.0.1:{}", port),
+        format!("http://[::1]:{}", port),
+    ];
+    valid_origins.iter().any(|o| o == origin) && server_state.authorizes_lab_session(requested_session)
 }
 
 fn lab_host_is_authorized(request: &HttpRequest, expected_authority: &str) -> bool {
-    request.headers.get("host").map(String::as_str) == Some(expected_authority)
+    if let Some(host) = request.headers.get("host").map(String::as_str) {
+        if host == expected_authority {
+            return true;
+        }
+        let port = expected_authority.rsplit(':').next().unwrap_or("2626");
+        let valid_authorities = [
+            expected_authority.to_string(),
+            format!("localhost:{}", port),
+            format!("127.0.0.1:{}", port),
+            format!("[::1]:{}", port),
+            "localhost".to_string(),
+            "127.0.0.1".to_string(),
+        ];
+        if valid_authorities.iter().any(|a| a == host) {
+            return true;
+        }
+    }
+    false
 }
 
 fn cookie_value(cookie_header: &str, name: &str) -> Option<String> {

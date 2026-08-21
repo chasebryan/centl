@@ -792,11 +792,7 @@ final class CentL26UpdateController {
 
         let signingMode = bundle.object(forInfoDictionaryKey: "CentLSigningMode") as? String ?? "adhoc"
         if signingMode != "developer-id" {
-            present(
-                title: "Local Repository Build",
-                message: "This is a local source build of CentL26. Click the Update button at the bottom-right of the window to check origin/main, pull commits, and rebuild.",
-                style: .informational
-            )
+            logger("local adhoc build: in-app update modal handles origin/main synchronization")
             return
         }
 
