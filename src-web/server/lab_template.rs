@@ -64,6 +64,7 @@ pub fn render_lab_page(workbench: &str) -> String {
       <span>Exact-first</span>
       <span>Local</span>
       <span>CentL26</span>
+      <button class="status-update" type="button" data-update title="Check for CentL26 updates">Update</button>
       <span class="fcf-status" title="Free Computation Foundation">FCF</span>
     </footer>
   </div>

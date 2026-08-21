@@ -359,6 +359,11 @@
       }
     }
 
+    if (target.matches("[data-update]")) {
+      showHostError("Opening the CentL26 release channel…");
+      window.open("https://github.com/chasebryan/centl/releases/latest", "_blank", "noopener");
+    }
+
     if (target.dataset.command) runCommand(target.dataset.command);
 
     if (target.dataset.fill) {
