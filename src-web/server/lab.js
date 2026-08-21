@@ -988,7 +988,20 @@
 
   document.addEventListener("focusout", (event) => {
     if (event.target.matches("[data-rename-notebook]")) {
-      const newName = event.target.textContent.trim();
+      const newName = (event.target.value !== undefined ? event.target.value : event.target.textContent).trim();
+      if (newName) {
+        execute(new URLSearchParams({
+          lab_action: "calculate",
+          cmd: `:rename-notebook ${newName}`,
+          interaction_mode: selectedMode
+        }), { restoreEditorFocus: false });
+      }
+    }
+  });
+
+  document.addEventListener("change", (event) => {
+    if (event.target.matches("[data-rename-notebook]") && event.target.tagName === "INPUT") {
+      const newName = event.target.value.trim();
       if (newName) {
         execute(new URLSearchParams({
           lab_action: "calculate",
