@@ -1,6 +1,6 @@
 [package]
 name = "centl-web"
-version = "26.8.0"
+version = "26.8.1"
 edition = "2021"
 authors = ["Free Computation Foundation <contact@freecomputation.org>"]
 description = "CentL26 standalone scientific work environment and CENTL compatibility hosts"
@@ -8,21 +8,25 @@ description = "CentL26 standalone scientific work environment and CENTL compatib
 [dependencies]
 serde_json = "1.0.151"
 
-[[bin]]
-name = "centl-web"
-path = "src-web/main.rs"
-
-[[bin]]
-name = "centl-hub"
-path = "src-web/main.rs"
-
-[[bin]]
-name = "centl-lab"
-path = "src-web/main.rs"
+[lib]
+name = "centl_web"
+path = "src-web/lib.rs"
 
 [[bin]]
 name = "centl26"
 path = "src-web/main.rs"
+
+[[bin]]
+name = "centl-web"
+path = "src-web/bin/centl_web.rs"
+
+[[bin]]
+name = "centl-hub"
+path = "src-web/bin/centl_hub.rs"
+
+[[bin]]
+name = "centl-lab"
+path = "src-web/bin/centl_lab.rs"
 
 [profile.release]
 opt-level = 3

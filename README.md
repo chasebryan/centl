@@ -5,7 +5,7 @@
 
 # CENTL / CentL26
 
-[![Version](https://img.shields.io/badge/version-26.8.0-blue.svg)](https://github.com/chasebryan/centl)
+[![Version](https://img.shields.io/badge/version-26.8.1-blue.svg)](https://github.com/chasebryan/centl)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-2021%20edition-orange.svg)](https://www.rust-lang.org/)
 [![Offline First](https://img.shields.io/badge/offline-100%25%20local-success.svg)](https://freecomputation.org/)
@@ -21,7 +21,7 @@
 > **CentL26 is the flagship standalone scientific computing environment of CENTL.**  
 > The "26" represents the 2026 flagship product line. CentL26 provides a calm, offline, deterministic scientific workbench that combines exact rational arithmetic, symbolic algebra, physics kernels, chemical stoichiometry, in-app hackability, 2D function plotting, STEM academic search engine, and a comprehensive offline natural language problem solver.
 > 
-> **CentL26.8 is the official universal release across all supported desktop and web environments.**
+> **CentL26.8.1 is the official universal release across all supported desktop and web environments.**
 
 ---
 

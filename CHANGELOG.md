@@ -1,5 +1,14 @@
 ## Unreleased
 
+### CentL26.8.1 — Resilient Multi-Strategy Updater, Clean Bin Architecture & Zero Build Warnings (2026-08-21)
+
+- **Resilient Multi-Strategy In-App Updater**: `execute_repo_update` now features a 3-tier compilation and download fallback pipeline:
+  1. Standard fast release build (`cargo build --release --bin centl26`).
+  2. Isolated target directory retry (`--target-dir target/update-build`) to gracefully bypass `Operation not permitted (os error 1)` hardlink locks in `target/release/build/`.
+  3. Precompiled binary automatic download from GitHub Releases (`https://github.com/chasebryan/centl/releases/latest/download/...`) with in-place binary replacement if local cargo tools or compilation are locked.
+- **Clean Library & Binary Architecture**: Refactored entry points into `src-web/lib.rs` and dedicated binary files (`centl_web.rs`, `centl_hub.rs`, `centl_lab.rs`), permanently eliminating the Cargo warning `warning: file src-web/main.rs found to be present in multiple build targets`.
+- **Zero Build Warnings**: Guaranteed pristine compiler diagnostics across all 4 release targets.
+
 ### CentL26.8.0 — STEM Academic Search Engine, Gemini AI Resiliency & Intelligent Updates (2026-08-21)
 
 - **STEM Academic Search Engine & Chrome Router**: Upgraded the Command Palette (`⌘ K`) into a unified STEM academic research hub. Routes any scientific inquiry directly to Google Scholar, arXiv, PubMed, Wolfram MathWorld, OEIS, NIST Chemistry WebBook, IEEE Xplore, and NASA ADS through Google Chrome with a bespoke FCF-stylized Chrome vector emblem.

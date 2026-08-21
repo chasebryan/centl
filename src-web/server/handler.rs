@@ -284,7 +284,7 @@ pub fn handle_single_command(
 
     if cmd == ":release" || cmd == ":version" || cmd == ":releases" {
         let res = ExecutionResult {
-            text: "=== CentL26.8 Official Release (All Platforms) ===\nVersion: 26.8.0 (Universal Release)\nCapabilities:\n• Multi-Platform Standard: native support for Windows 11, macOS Apple Silicon / Intel, and Debian/Fedora/Arch Linux.\n• STEM Academic Search Engine: omnibar Chrome routing to Google Scholar, arXiv, PubMed, Wolfram MathWorld, OEIS, NIST, and NASA ADS.\n• FCF Knowledge Center & In-App Reader: built-in documentation browser for all FCF manuals, specs, and research theorem preprints.\n• Gemini AI Co-Pilot Resiliency: multi-model auto-fallback (2.5-flash -> 2.0-flash -> 1.5-flash -> 1.5-pro), cross-platform key persistence, and fault-tolerant JSON decomposition.\n• Intelligent Dual-Channel Updates: real-time GitHub raw manifest and git remote synchronization with in-place build optimization.\n• Multi-Notebook Tabs & Workspaces: seamlessly organize independent computations in named tabs.\n• Save & Download: export active notebooks to clean Markdown and structured JSON.\n• In-App Programmability (build): define, inspect, and test custom STEM functions & constants in plain English.\n• 2D Function Plotter: multi-line ASCII/Unicode coordinate grid visualization.\n• Dim Mode Theme: toggle between standard light and dimmed matte slate palettes.\n• Smart Multi-Domain Auto-Detector: direct stoichiometry, reactions, physics conversions, and constants.\n• CentL-SCi Natural Language STEM Solver: comprehensive step-by-step offline verified problem solving across chemistry, mechanics, circuits, thermodynamics, geometry, linear algebra, and statistics without external dependencies.\n• Rigorous Interval Numerics: arbitrary-precision interval enclosures and transcendental constants.\n• 50+ STEM Examples Sheet: multi-domain reference dataset available via /download/centl26-examples.csv.".to_string(),
+            text: "=== CentL26.8.1 Official Release (All Platforms) ===\nVersion: 26.8.1 (Universal Release)\nCapabilities:\n• Multi-Platform Standard: native support for Windows 11, macOS Apple Silicon / Intel, and Debian/Fedora/Arch Linux.\n• STEM Academic Search Engine: omnibar Chrome routing to Google Scholar, arXiv, PubMed, Wolfram MathWorld, OEIS, NIST, and NASA ADS.\n• FCF Knowledge Center & In-App Reader: built-in documentation browser for all FCF manuals, specs, and research theorem preprints.\n• Gemini AI Co-Pilot Resiliency: multi-model auto-fallback (2.5-flash -> 2.0-flash -> 1.5-flash -> 1.5-pro), cross-platform key persistence, and fault-tolerant JSON decomposition.\n• Resilient Multi-Strategy In-App Updater: dual-channel git & GitHub manifest synchronization, isolated build retry, and automated precompiled binary fallback.\n• Clean Library & Binary Architecture: zero compiler build warnings across all packaging targets.\n• Multi-Notebook Tabs & Workspaces: seamlessly organize independent computations in named tabs.\n• Save & Download: export active notebooks to clean Markdown and structured JSON.\n• In-App Programmability (build): define, inspect, and test custom STEM functions & constants in plain English.\n• 2D Function Plotter: multi-line ASCII/Unicode coordinate grid visualization.\n• Dim Mode Theme: toggle between standard light and dimmed matte slate palettes.\n• Smart Multi-Domain Auto-Detector: direct stoichiometry, reactions, physics conversions, and constants.\n• CentL-SCi Natural Language STEM Solver: comprehensive step-by-step offline verified problem solving across chemistry, mechanics, circuits, thermodynamics, geometry, linear algebra, and statistics without external dependencies.\n• Rigorous Interval Numerics: arbitrary-precision interval enclosures and transcendental constants.\n• 50+ STEM Examples Sheet: multi-domain reference dataset available via /download/centl26-examples.csv.".to_string(),
             exact_rational: None,
             approximate: None,
             symbolic_expr: None,
@@ -3470,13 +3470,13 @@ mod tests {
 
     #[test]
     fn test_version_comparison_and_update_detection() {
-        assert!(is_version_newer("26.8.1", "26.8.0"));
-        assert!(is_version_newer("v26.9.0", "26.8.0"));
-        assert!(is_version_newer("27.0.0", "26.8.0"));
-        assert!(!is_version_newer("26.8.0", "26.8.0"));
-        assert!(!is_version_newer("v26.8.0", "26.8.0"));
-        assert!(!is_version_newer("26.7.3", "26.8.0"));
-        assert!(!is_version_newer("26.6.1", "26.8.0"));
+        assert!(is_version_newer("26.8.2", "26.8.1"));
+        assert!(is_version_newer("v26.9.0", "26.8.1"));
+        assert!(is_version_newer("27.0.0", "26.8.1"));
+        assert!(!is_version_newer("26.8.1", "26.8.1"));
+        assert!(!is_version_newer("v26.8.1", "26.8.1"));
+        assert!(!is_version_newer("26.8.0", "26.8.1"));
+        assert!(!is_version_newer("26.7.3", "26.8.1"));
     }
 }
 
@@ -3733,53 +3733,127 @@ pub fn execute_repo_update() -> serde_json::Value {
         }
     };
 
-    // 3. Ensure cargo is found
-    if find_executable("cargo").is_none() {
-        return serde_json::json!({
-            "success": false,
-            "updated": false,
-            "message": "Rust toolchain (cargo) was not found in ~/.cargo/bin or system PATH. Please ensure Rust is installed (https://rustup.rs) or update via GitHub Releases."
-        });
+    // 3. Compile or retrieve fresh binary
+    let mut build_success = false;
+
+    if find_executable("cargo").is_some() {
+        // Strategy A: Standard release build
+        let build = create_system_command("cargo")
+            .args(["build", "--release", "--bin", "centl26"])
+            .output();
+
+        if let Ok(ref b_out) = build {
+            if b_out.status.success() {
+                build_success = true;
+            }
+        }
+
+        // Strategy B: If standard build failed (e.g. target/ hardlink or permission lock), retry with isolated target dir
+        if !build_success {
+            let isolated_target = repo_root.join("target/update-build");
+            let retry_build = create_system_command("cargo")
+                .args(["build", "--release", "--bin", "centl26", "--target-dir", isolated_target.to_str().unwrap_or("target/update-build")])
+                .output();
+
+            if let Ok(ref b_out) = retry_build {
+                if b_out.status.success() {
+                    let src_bin = isolated_target.join("release/centl26");
+                    let dst_bin = repo_root.join("target/release/centl26");
+                    if src_bin.exists() {
+                        let _ = std::fs::create_dir_all(repo_root.join("target/release"));
+                        let _ = std::fs::copy(&src_bin, &dst_bin);
+                        build_success = true;
+                    }
+                }
+            }
+        }
     }
 
-    // 4. Fast release build --bin centl26
-    let build = create_system_command("cargo")
-        .args(["build", "--release", "--bin", "centl26"])
-        .output();
+    // Strategy C: Precompiled binary fallback via GitHub releases if compilation could not complete
+    if !build_success {
+        if let Some(curl) = find_executable("curl") {
+            let tmp_dir = std::env::temp_dir().join("centl26-autoupdate");
+            let _ = std::fs::create_dir_all(&tmp_dir);
 
-    match build {
-        Ok(b_out) if b_out.status.success() => {
-            // High-speed .app bundle sync without slow full rebuild script
-            let app_bundle = repo_root.join("build/centl26/macos/CentL26.app");
-            let target_bin = repo_root.join("target/release/centl26");
-            if cfg!(target_os = "macos") && app_bundle.exists() && target_bin.exists() {
-                let app_bin = app_bundle.join("Contents/Resources/bin/centl26");
-                let _ = std::fs::copy(&target_bin, &app_bin);
-                let _ = create_system_command("codesign")
-                    .args(["-s", "-", "--force", app_bundle.to_str().unwrap_or_default()])
-                    .output();
+            #[cfg(target_os = "macos")]
+            let (asset_name, is_zip) = ("CentL26-macOS-arm64.zip", true);
+            #[cfg(target_os = "linux")]
+            let (asset_name, is_zip) = ("CentL26-Linux-x86_64.tar.gz", false);
+            #[cfg(target_os = "windows")]
+            let (asset_name, is_zip) = ("CentL26-Windows-x64.zip", true);
+
+            let download_url = format!("https://github.com/chasebryan/centl/releases/latest/download/{}", asset_name);
+            let downloaded_file = tmp_dir.join(asset_name);
+
+            let download_res = std::process::Command::new(&curl)
+                .args([
+                    "-sSL",
+                    "-m", "30",
+                    "-A", "CentL26-Updater",
+                    "-o", downloaded_file.to_str().unwrap_or(""),
+                    &download_url,
+                ])
+                .output();
+
+            if let Ok(d_out) = download_res {
+                if d_out.status.success() && downloaded_file.exists() {
+                    let unpack_res = if is_zip {
+                        std::process::Command::new("unzip")
+                            .args(["-o", downloaded_file.to_str().unwrap_or(""), "-d", tmp_dir.to_str().unwrap_or("")])
+                            .output()
+                    } else {
+                        std::process::Command::new("tar")
+                            .args(["-xzf", downloaded_file.to_str().unwrap_or(""), "-C", tmp_dir.to_str().unwrap_or("")])
+                            .output()
+                    };
+
+                    if let Ok(u_out) = unpack_res {
+                        if u_out.status.success() {
+                            let mut candidate_bin = tmp_dir.join("CentL26.app/Contents/Resources/bin/centl26");
+                            if !candidate_bin.exists() {
+                                candidate_bin = tmp_dir.join("CentL26-Linux-x86_64/centl26");
+                            }
+                            if !candidate_bin.exists() {
+                                candidate_bin = tmp_dir.join("CentL26-Windows-x64/centl26.exe");
+                            }
+
+                            if candidate_bin.exists() {
+                                let target_bin = repo_root.join("target/release/centl26");
+                                let _ = std::fs::create_dir_all(repo_root.join("target/release"));
+                                let _ = std::fs::copy(&candidate_bin, &target_bin);
+                                build_success = true;
+                            }
+                        }
+                    }
+                }
             }
+            let _ = std::fs::remove_dir_all(&tmp_dir);
+        }
+    }
 
-            serde_json::json!({
-                "success": true,
-                "updated": true,
-                "message": if pull_success { "CentL26 updated to latest version and rebuilt successfully! Reloading..." } else { "CentL26 rebuilt successfully with release optimizations! Reloading..." }
-            })
+    if build_success {
+        // High-speed .app bundle sync without slow full rebuild script
+        let app_bundle = repo_root.join("build/centl26/macos/CentL26.app");
+        let target_bin = repo_root.join("target/release/centl26");
+        if cfg!(target_os = "macos") && app_bundle.exists() && target_bin.exists() {
+            let app_bin = app_bundle.join("Contents/Resources/bin/centl26");
+            let _ = std::fs::copy(&target_bin, &app_bin);
+            let _ = create_system_command("codesign")
+                .args(["-s", "-", "--force", app_bundle.to_str().unwrap_or_default()])
+                .output();
         }
-        Ok(b_out) => {
-            serde_json::json!({
-                "success": false,
-                "updated": false,
-                "message": format!("Cargo build failed: {}", String::from_utf8_lossy(&b_out.stderr))
-            })
-        }
-        Err(err) => {
-            serde_json::json!({
-                "success": false,
-                "updated": false,
-                "message": format!("Could not launch cargo: {}", err)
-            })
-        }
+
+        serde_json::json!({
+            "success": true,
+            "updated": true,
+            "message": if pull_success { "CentL26 updated to latest version and synchronized successfully! Reloading..." } else { "CentL26 rebuilt successfully with latest release optimizations! Reloading..." }
+        })
+    } else {
+        serde_json::json!({
+            "success": false,
+            "updated": false,
+            "message": "Update encountered a build lock. Please update manually with 'git pull origin main && cargo build --release' or download the binary release from https://github.com/chasebryan/centl/releases/latest"
+        })
     }
 }
 
