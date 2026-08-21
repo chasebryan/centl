@@ -1,7 +1,7 @@
 // HTTP Request Dispatcher & Command Execution Handler
 // Free Computation Foundation - Apache-2.0
 
-use crate::engine::{evaluate, ExecutionResult, HistoryEntry, Session};
+use crate::engine::{evaluate_single, ExecutionResult, HistoryEntry, Session};
 use crate::erdos_straus::{run_hunt_window, solve_es, HuntSummary, SolveResult};
 use crate::physics::{convert_units, simulate_collision_1d, PhysicsResult};
 use serde_json::Value;
@@ -66,6 +66,97 @@ impl Default for AppState {
 }
 
 pub fn handle_command(
+    raw_cmd: &str,
+    state: &mut AppState,
+) -> (
+    Option<ExecutionResult>,
+    Option<String>,
+    Option<PhysicsResult>,
+    Option<HuntSummary>,
+) {
+    let stmts = crate::engine::split_statements(raw_cmd);
+    if stmts.is_empty() {
+        return (None, None, None, None);
+    }
+    if stmts.len() == 1 {
+        return handle_single_command(&stmts[0], state);
+    }
+
+    // Multi-statement computation block inside a single cell
+    let initial_history_len = state.session().history.len();
+    let mut step_outputs: Vec<(String, String)> = Vec::new();
+    let mut last_exec: Option<ExecutionResult> = None;
+    let mut last_phys: Option<PhysicsResult> = None;
+    let mut last_hunt: Option<HuntSummary> = None;
+    let mut total_micros = 0u128;
+
+    for (idx, stmt) in stmts.iter().enumerate() {
+        let (exec, err, phys, hunt) = handle_single_command(stmt, state);
+        if let Some(e) = err {
+            state.session_mut().history.truncate(initial_history_len);
+            return (None, Some(format!("Step {} ('{}') failed: {}", idx + 1, stmt, e)), None, None);
+        }
+        if let Some(ref res) = exec {
+            total_micros += res.execution_micros;
+            step_outputs.push((stmt.clone(), res.text.clone()));
+            last_exec = Some(res.clone());
+        } else if let Some(ref p) = phys {
+            step_outputs.push((stmt.clone(), p.title.clone()));
+            last_phys = Some(p.clone());
+        } else if let Some(ref h) = hunt {
+            step_outputs.push((stmt.clone(), format!("Search range [{}, {}]", h.start_bound, h.end_bound)));
+            last_hunt = Some(h.clone());
+        } else {
+            step_outputs.push((stmt.clone(), "OK".to_string()));
+        }
+    }
+
+    // Rollback intermediate step history additions so the entire cell is saved as one unified computation
+    state.session_mut().history.truncate(initial_history_len);
+
+    let mut block_text = format!("Block Execution ({} steps):\n", stmts.len());
+    for (i, (stmt, out)) in step_outputs.iter().enumerate() {
+        if out == stmt || out.is_empty() {
+            block_text.push_str(&format!("  [{}] {}\n", i + 1, stmt));
+        } else if out.lines().count() > 1 {
+            block_text.push_str(&format!("  [{}] {}\n    ↳ {}\n", i + 1, stmt, out.replace('\n', "\n    ")));
+        } else {
+            block_text.push_str(&format!("  [{}] {}  →  {}\n", i + 1, stmt, out));
+        }
+    }
+
+    let (exact_rat, approx, sym_expr) = if let Some(ref final_res) = last_exec {
+        if let Some(ref exact) = final_res.exact_rational {
+            block_text.push_str(&format!("\nResult: {}", exact));
+        } else if !final_res.text.is_empty() && !final_res.text.contains('\n') {
+            block_text.push_str(&format!("\nResult: {}", final_res.text));
+        }
+        (final_res.exact_rational.clone(), final_res.approximate.clone(), final_res.symbolic_expr.clone())
+    } else {
+        (None, None, None)
+    };
+
+    let combined_res = ExecutionResult {
+        text: block_text.clone(),
+        exact_rational: exact_rat.clone(),
+        approximate: approx.clone(),
+        symbolic_expr: sym_expr,
+        execution_micros: total_micros,
+    };
+
+    state.session_mut().history.push(HistoryEntry {
+        command: raw_cmd.trim().to_string(),
+        result: block_text,
+        exact_repr: exact_rat.map(|r| format!("{}", r)),
+        approximate_repr: approx,
+        execution_micros: total_micros,
+        success: true,
+    });
+
+    (Some(combined_res), None, last_phys, last_hunt)
+}
+
+pub fn handle_single_command(
     raw_cmd: &str,
     state: &mut AppState,
 ) -> (
@@ -150,7 +241,7 @@ pub fn handle_command(
 
     if cmd == ":release" || cmd == ":version" || cmd == ":releases" {
         let res = ExecutionResult {
-            text: "=== CentL26.7 Official Release (Standard Freeze) ===\nVersion: 26.7.0 (Rock Standard)\nCapabilities:\n• Multi-Platform Standard: native support for Windows 11, macOS Arm64, and Debian/Fedora Linux.\n• Multi-Notebook Tabs & Workspaces: seamlessly organize independent computations in named tabs.\n• Save & Download: export active notebooks to clean Markdown and structured JSON.\n• In-App Programmability (build): define, inspect, and test custom STEM functions & constants in plain English.\n• 2D Function Plotter: multi-line ASCII/Unicode coordinate grid visualization.\n• Dim Mode Theme: toggle between standard light and dimmed matte slate palettes.\n• Smart Multi-Domain Auto-Detector: direct stoichiometry, reactions, physics conversions, and constants.\n• CentL-SCi Natural Language STEM Solver: comprehensive step-by-step offline verified problem solving across chemistry, mechanics, circuits, thermodynamics, geometry, linear algebra, and statistics without external dependencies.\n• Rigorous Interval Numerics: arbitrary-precision interval enclosures and transcendental constants.\n• Hybrid Gemini Support: online/offline LLM STEM decomposition with exact rational verification.\n• 50+ STEM Examples Sheet: multi-domain reference dataset available via /download/centl26-examples.csv.\n• In-App Updates: verified multi-channel update checks via WebKit message bridge and git repository synchronization.".to_string(),
+            text: "=== CentL26.7 Official Release (Standard Freeze) ===\nVersion: 26.7.1 (Rock Standard)\nCapabilities:\n• Multi-Platform Standard: native support for Windows 11, macOS Arm64, and Debian/Fedora Linux.\n• Multi-Notebook Tabs & Workspaces: seamlessly organize independent computations in named tabs.\n• Save & Download: export active notebooks to clean Markdown and structured JSON.\n• In-App Programmability (build): define, inspect, and test custom STEM functions & constants in plain English.\n• 2D Function Plotter: multi-line ASCII/Unicode coordinate grid visualization.\n• Dim Mode Theme: toggle between standard light and dimmed matte slate palettes.\n• Smart Multi-Domain Auto-Detector: direct stoichiometry, reactions, physics conversions, and constants.\n• CentL-SCi Natural Language STEM Solver: comprehensive step-by-step offline verified problem solving across chemistry, mechanics, circuits, thermodynamics, geometry, linear algebra, and statistics without external dependencies.\n• Rigorous Interval Numerics: arbitrary-precision interval enclosures and transcendental constants.\n• Hybrid Gemini Support: online/offline LLM STEM decomposition with exact rational verification.\n• 50+ STEM Examples Sheet: multi-domain reference dataset available via /download/centl26-examples.csv.\n• In-App Updates: verified multi-channel update checks via WebKit message bridge and git repository synchronization.".to_string(),
             exact_rational: None,
             approximate: None,
             symbolic_expr: None,
@@ -213,7 +304,7 @@ pub fn handle_command(
     }
 
     // 9. Exact Mathematical Evaluator (with smart SCi plain-English fallback)
-    match evaluate(cmd, state.session_mut()) {
+    match evaluate_single(cmd, state.session_mut()) {
         Ok(result) => (Some(result), None, None, None),
         Err(error) => {
             if cmd.contains(' ') {
@@ -3231,6 +3322,47 @@ mod tests {
         handle_command(":close-notebook 1", &mut state);
         assert_eq!(state.notebooks.len(), 1);
         assert_eq!(state.active_notebook, 0);
+    }
+
+    #[test]
+    fn test_multistatement_cell_execution() {
+        let mut state = AppState::new();
+
+        // 1. Multi-line arithmetic block
+        let script = "a = 15\nb = 25\nc = a * b + 10\nc / 2";
+        let (res, err, _, _) = handle_command(script, &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        let r = res.unwrap();
+        assert!(r.text.contains("Block Execution (4 steps):"));
+        assert!(r.text.contains("[1] a = 15"));
+        assert!(r.text.contains("[2] b = 25"));
+        assert!(r.text.contains("[3] c = a * b + 10  →  c = 385"));
+        assert!(r.text.contains("[4] c / 2  →  385/2"));
+        assert!(r.text.contains("Result: 385/2"));
+        assert_eq!(r.exact_rational.as_ref().map(|x| format!("{}", x)), Some("385/2".to_string()));
+
+        // Check that session retained the variables
+        assert!(state.session().variables.contains_key("a"));
+        assert!(state.session().variables.contains_key("b"));
+        assert!(state.session().variables.contains_key("c"));
+
+        // 2. Semicolon-delimited single line
+        let semi_script = "x = 5; y = 12; sqrt(x^2 + y^2)";
+        let (res2, err2, _, _) = handle_command(semi_script, &mut state);
+        assert!(err2.is_none());
+        assert!(res2.is_some());
+        let r2 = res2.unwrap();
+        assert!(r2.text.contains("Block Execution (3 steps):"));
+        assert!(r2.text.contains("Result: 13"));
+
+        // 3. Comments support
+        let comment_script = "# Setup physics calculation\nm = 1000\n// velocity in m/s\nv = 20\n1/2 * m * v^2";
+        let (res3, err3, _, _) = handle_command(comment_script, &mut state);
+        assert!(err3.is_none());
+        assert!(res3.is_some());
+        let r3 = res3.unwrap();
+        assert!(r3.text.contains("Result: 200000"));
     }
 }
 

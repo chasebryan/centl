@@ -57,7 +57,137 @@ pub struct ExecutionResult {
     pub execution_micros: u128,
 }
 
+pub fn split_statements(input: &str) -> Vec<String> {
+    let mut stmts = Vec::new();
+    let mut current = String::new();
+    let mut paren_depth = 0usize;
+    let mut bracket_depth = 0usize;
+    let mut brace_depth = 0usize;
+    let mut in_string = false;
+    let mut chars = input.chars().peekable();
+
+    while let Some(c) = chars.next() {
+        if c == '"' {
+            in_string = !in_string;
+            current.push(c);
+            continue;
+        }
+        if !in_string {
+            // Comments: # or // to end of line
+            if c == '#' || (c == '/' && chars.peek() == Some(&'/')) {
+                while let Some(&next_c) = chars.peek() {
+                    if next_c == '\n' {
+                        break;
+                    }
+                    chars.next();
+                }
+                continue;
+            }
+            if c == '(' { paren_depth += 1; }
+            else if c == ')' { paren_depth = paren_depth.saturating_sub(1); }
+            else if c == '[' { bracket_depth += 1; }
+            else if c == ']' { bracket_depth = bracket_depth.saturating_sub(1); }
+            else if c == '{' { brace_depth += 1; }
+            else if c == '}' { brace_depth = brace_depth.saturating_sub(1); }
+
+            if (c == '\n' || c == ';') && paren_depth == 0 && bracket_depth == 0 && brace_depth == 0 {
+                let trimmed = current.trim();
+                if !trimmed.is_empty() {
+                    stmts.push(trimmed.to_string());
+                }
+                current.clear();
+                continue;
+            }
+        }
+        current.push(c);
+    }
+    let trimmed = current.trim();
+    if !trimmed.is_empty() {
+        stmts.push(trimmed.to_string());
+    }
+    stmts
+}
+
 pub fn evaluate(input: &str, session: &mut Session) -> Result<ExecutionResult, String> {
+    let stmts = split_statements(input);
+    if stmts.is_empty() {
+        return Ok(ExecutionResult {
+            text: String::new(),
+            exact_rational: None,
+            approximate: None,
+            symbolic_expr: None,
+            execution_micros: 0,
+        });
+    }
+    if stmts.len() == 1 {
+        return evaluate_single(&stmts[0], session);
+    }
+
+    let initial_history_len = session.history.len();
+    let mut step_outputs: Vec<(String, String)> = Vec::new();
+    let mut last_res: Option<ExecutionResult> = None;
+    let mut total_micros = 0u128;
+
+    for (idx, stmt) in stmts.iter().enumerate() {
+        match evaluate_single(stmt, session) {
+            Ok(res) => {
+                total_micros += res.execution_micros;
+                step_outputs.push((stmt.clone(), res.text.clone()));
+                last_res = Some(res);
+            }
+            Err(e) => {
+                session.history.truncate(initial_history_len);
+                return Err(format!("Step {} ('{}') failed: {}", idx + 1, stmt, e));
+            }
+        }
+    }
+
+    // Rollback individual step history additions so the entire block is saved as one
+    session.history.truncate(initial_history_len);
+
+    let mut block_text = format!("Block Execution ({} steps):\n", stmts.len());
+    for (i, (stmt, out)) in step_outputs.iter().enumerate() {
+        if out == stmt || out.is_empty() {
+            block_text.push_str(&format!("  [{}] {}\n", i + 1, stmt));
+        } else if out.lines().count() > 1 {
+            block_text.push_str(&format!("  [{}] {}\n    ↳ {}\n", i + 1, stmt, out.replace('\n', "\n    ")));
+        } else {
+            block_text.push_str(&format!("  [{}] {}  →  {}\n", i + 1, stmt, out));
+        }
+    }
+
+    let (exact_rat, approx, sym_expr) = if let Some(ref final_res) = last_res {
+        if let Some(ref exact) = final_res.exact_rational {
+            block_text.push_str(&format!("\nResult: {}", exact));
+        } else if !final_res.text.is_empty() && !final_res.text.contains('\n') {
+            block_text.push_str(&format!("\nResult: {}", final_res.text));
+        }
+        (final_res.exact_rational.clone(), final_res.approximate.clone(), final_res.symbolic_expr.clone())
+    } else {
+        (None, None, None)
+    };
+
+    let result = ExecutionResult {
+        text: block_text.clone(),
+        exact_rational: exact_rat.clone(),
+        approximate: approx.clone(),
+        symbolic_expr: sym_expr,
+        execution_micros: total_micros,
+    };
+
+    session.history.push(HistoryEntry {
+        command: input.trim().to_string(),
+        result: block_text,
+        exact_repr: exact_rat.map(|r| format!("{}", r)),
+        approximate_repr: approx,
+        execution_micros: total_micros,
+        success: true,
+    });
+
+    Ok(result)
+}
+
+pub fn evaluate_single(input: &str, session: &mut Session) -> Result<ExecutionResult, String> {
     let start_time = std::time::Instant::now();
     let trimmed = input.trim();
 
