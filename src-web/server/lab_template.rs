@@ -167,7 +167,7 @@ fn render_composer(html: &mut String, current_input: &str, prominent: bool) {
     };
     html.push_str(&format!(r#"<form method="POST" action="/run#notebook" data-centl-form class="{}"><input type="hidden" name="lab_action" value="calculate"><textarea name="cmd" id="active-command" rows="2" spellcheck="false" aria-label="CentL26 instruction" placeholder="Ask CentL26 or enter canonical input…">"#, class));
     html.push_str(&escape_html(current_input));
-    html.push_str(r#"</textarea><div class="composer-footer"><div><button class="composer-mode" type="button" data-open-palette title="Choose a CentL26 tool"><span>Auto</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 8 3 3 3-3"></path></svg></button></div><div><span class="run-hint">Ctrl ↵</span><button class="composer-run" type="submit" aria-label="Run computation"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 5 8 5-8 5Z"></path></svg></button></div></div></form>"#);
+    html.push_str(r#"</textarea><div class="composer-footer"><div><button class="composer-mode" type="button" data-open-palette title="Choose a CentL26 tool"><span>Auto</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 8 3 3 3-3"></path></svg></button><button class="composer-clear" type="button" data-clear-session title="Clear notebook and start fresh">Clear</button></div><div><span class="run-hint">Ctrl ↵</span><button class="composer-run" type="submit" aria-label="Run computation"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 5 8 5-8 5Z"></path></svg></button></div></div></form>"#);
 }
 
 fn render_console(html: &mut String, session: &Session) {

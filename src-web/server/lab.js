@@ -351,6 +351,14 @@
       if (form) form.requestSubmit();
     }
 
+    if (target.matches("[data-clear-session]")) {
+      const editor = activeEditor();
+      const hasWork = Boolean(editor?.value.trim()) || Boolean(document.querySelector(".result-cell, .history-item"));
+      if (!hasWork || window.confirm("Clear this CentL26 notebook and start fresh?")) {
+        execute(new URLSearchParams({ lab_action: "calculate", cmd: ":clear" }), { restoreEditorFocus: true });
+      }
+    }
+
     if (target.dataset.command) runCommand(target.dataset.command);
 
     if (target.dataset.fill) {
