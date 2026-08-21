@@ -1,5 +1,16 @@
 ## Unreleased
 
+### CentL26.8.0 — STEM Academic Search Engine, Gemini AI Resiliency & Intelligent Updates (2026-08-21)
+
+- **STEM Academic Search Engine & Chrome Router**: Upgraded the Command Palette (`⌘ K`) into a unified STEM academic research hub. Routes any scientific inquiry directly to Google Scholar, arXiv, PubMed, Wolfram MathWorld, OEIS, NIST Chemistry WebBook, IEEE Xplore, and NASA ADS through Google Chrome with a bespoke FCF-stylized Chrome vector emblem.
+- **FCF Knowledge Center & In-App Reader**: Built an offline indexed document viewer (`.fcf-doc-modal`) with rich Markdown parsing for all FCF operator manuals, mathematical architecture specifications, and theoretical research papers (Erdős–Straus, Collatz dynamics, Ramanujan tau asymptotics).
+- **Gemini AI Co-Pilot Resiliency & Multi-Model Fallback**:
+  - Auto-fallback chain across `gemini-2.5-flash` $\rightarrow$ `gemini-2.0-flash` $\rightarrow$ `gemini-1.5-flash` $\rightarrow$ `gemini-1.5-pro` $\rightarrow$ `gemini-2.5-pro` prevents 404/unsupported model errors.
+  - Multi-variable key discovery (`CENTL_GEMINI_KEY`, `GEMINI_API_KEY`, `GOOGLE_API_KEY`, `GOOGLE_AI_API_KEY`, `GEMINI_KEY`) and cross-platform key persistence (`~/.centl/gemini.key` on macOS/Linux and `%USERPROFILE%\.centl\gemini.key` on Windows).
+  - Resilient JSON/Markdown parsing: strips markdown code fences and automatically extracts JSON objects or graceful conversational mathematical reasoning with exact CentL verification.
+- **Intelligent Dual-Channel Updates**: Rate-limit-free GitHub raw manifest polling (`https://raw.githubusercontent.com/chasebryan/CentL/main/Cargo.toml`) combined with `git ls-remote` / `git rev-parse` commit parity checks, providing 100% reliable update detection and in-place release recompilation.
+- **Multi-Platform Universal Standard**: Certified builds across Windows 11, macOS (Apple Silicon / Intel), and Debian/Ubuntu/Fedora/Arch Linux.
+
 ### CentL26.7.3 — In-App Rust Toolchain & Repository Discovery (2026-08-21)
 
 - **Universal Cargo & Git Discovery for In-App Updates**: `execute_repo_update` dynamically locates user Rust toolchains (`~/.cargo/bin/cargo`, Homebrew, system binaries) and auto-augments process `PATH` in GUI AppKit/WebKit desktop bundles to eliminate missing path / `os error 2` failures.

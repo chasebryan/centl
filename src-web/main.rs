@@ -83,7 +83,7 @@ fn main() {
     }
 
     if args.iter().any(|arg| arg == "--version" || arg == "-v") {
-        println!("CentL26 26.7.3 · backend compatibility 0.15 Al-Nur");
+        println!("CentL26 {} · backend compatibility 0.15 Al-Nur", env!("CARGO_PKG_VERSION"));
         return;
     }
 

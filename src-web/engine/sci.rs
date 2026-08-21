@@ -11,13 +11,21 @@ use std::sync::Mutex;
 static RUNTIME_GEMINI_KEY: Mutex<Option<String>> = Mutex::new(None);
 static RUNTIME_GEMINI_MODEL: Mutex<Option<String>> = Mutex::new(None);
 
+pub fn sanitize_api_key(raw: &str) -> String {
+    let mut cleaned = raw.trim().trim_matches('"').trim_matches('\'').trim().to_string();
+    if cleaned.starts_with("Bearer ") {
+        cleaned = cleaned.strip_prefix("Bearer ").unwrap_or(&cleaned).trim().to_string();
+    }
+    cleaned
+}
+
 pub fn set_runtime_gemini_key(key: &str) {
     let mut lock = RUNTIME_GEMINI_KEY.lock().unwrap_or_else(|p| p.into_inner());
-    let trimmed = key.trim().to_string();
-    if trimmed.is_empty() {
+    let sanitized = sanitize_api_key(key);
+    if sanitized.is_empty() {
         *lock = None;
     } else {
-        *lock = Some(trimmed);
+        *lock = Some(sanitized);
     }
 }
 
@@ -41,44 +49,52 @@ pub fn get_runtime_gemini_model() -> String {
             return m.trim().to_string();
         }
     }
+    if let Ok(m) = env::var("CENTL_GEMINI_MODEL") {
+        if !m.trim().is_empty() {
+            return m.trim().to_string();
+        }
+    }
     "gemini-2.5-flash".to_string()
 }
 
 pub fn get_runtime_gemini_key() -> Option<String> {
     let lock = RUNTIME_GEMINI_KEY.lock().unwrap_or_else(|p| p.into_inner());
     if let Some(ref k) = *lock {
-        return Some(k.clone());
-    }
-    if let Ok(k) = env::var("CENTL_GEMINI_KEY") {
-        if !k.trim().is_empty() {
-            return Some(k.trim().to_string());
+        let cleaned = sanitize_api_key(k);
+        if !cleaned.is_empty() {
+            return Some(cleaned);
         }
     }
-    if let Ok(k) = env::var("GEMINI_API_KEY") {
-        if !k.trim().is_empty() {
-            return Some(k.trim().to_string());
-        }
-    }
-    if let Ok(k) = env::var("GOOGLE_API_KEY") {
-        if !k.trim().is_empty() {
-            return Some(k.trim().to_string());
-        }
-    }
-    if let Ok(k) = env::var("GOOGLE_AI_API_KEY") {
-        if !k.trim().is_empty() {
-            return Some(k.trim().to_string());
-        }
-    }
-    // Check ~/.centl/gemini.key
-    if let Ok(home) = env::var("HOME") {
-        let key_path = std::path::Path::new(&home).join(".centl").join("gemini.key");
-        if let Ok(content) = std::fs::read_to_string(key_path) {
-            let trimmed = content.trim().to_string();
-            if !trimmed.is_empty() {
-                return Some(trimmed);
+
+    // 1. Check environment variables
+    for var in &["CENTL_GEMINI_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY", "GOOGLE_AI_API_KEY", "GEMINI_KEY"] {
+        if let Ok(k) = env::var(var) {
+            let cleaned = sanitize_api_key(&k);
+            if !cleaned.is_empty() {
+                return Some(cleaned);
             }
         }
     }
+
+    // 2. Check cross-platform file paths
+    let mut candidate_paths = Vec::new();
+    if let Ok(home) = env::var("HOME").or_else(|_| env::var("USERPROFILE")) {
+        candidate_paths.push(std::path::Path::new(&home).join(".centl").join("gemini.key"));
+    }
+    if let Ok(appdata) = env::var("APPDATA") {
+        candidate_paths.push(std::path::Path::new(&appdata).join("centl").join("gemini.key"));
+    }
+    candidate_paths.push(std::path::PathBuf::from(".centl/gemini.key"));
+
+    for path in candidate_paths {
+        if let Ok(content) = std::fs::read_to_string(path) {
+            let cleaned = sanitize_api_key(&content);
+            if !cleaned.is_empty() {
+                return Some(cleaned);
+            }
+        }
+    }
+
     None
 }
 
@@ -86,37 +102,35 @@ pub fn get_gemini_status_info() -> (bool, Option<String>, &'static str, String) 
     let model = get_runtime_gemini_model();
     let lock = RUNTIME_GEMINI_KEY.lock().unwrap_or_else(|p| p.into_inner());
     if let Some(ref k) = *lock {
-        let masked = if k.len() > 8 {
-            format!("{}...{}", &k[..4], &k[k.len() - 4..])
+        let cleaned = sanitize_api_key(k);
+        let masked = if cleaned.len() > 8 {
+            format!("{}...{}", &cleaned[..4], &cleaned[cleaned.len() - 4..])
         } else {
             "Active".to_string()
         };
         return (true, Some(masked), "Session Configuration", model);
     }
-    if let Ok(k) = env::var("CENTL_GEMINI_KEY") {
-        if !k.trim().is_empty() {
-            let masked = format!("{}...{}", &k[..4.min(k.len())], &k[k.len().saturating_sub(4)..]);
-            return (true, Some(masked), "CENTL_GEMINI_KEY env", model);
+    for (var, label) in &[
+        ("CENTL_GEMINI_KEY", "CENTL_GEMINI_KEY env"),
+        ("GEMINI_API_KEY", "GEMINI_API_KEY env"),
+        ("GOOGLE_API_KEY", "GOOGLE_API_KEY env"),
+        ("GOOGLE_AI_API_KEY", "GOOGLE_AI_API_KEY env"),
+        ("GEMINI_KEY", "GEMINI_KEY env"),
+    ] {
+        if let Ok(k) = env::var(var) {
+            let cleaned = sanitize_api_key(&k);
+            if !cleaned.is_empty() {
+                let masked = format!("{}...{}", &cleaned[..4.min(cleaned.len())], &cleaned[cleaned.len().saturating_sub(4)..]);
+                return (true, Some(masked), label, model);
+            }
         }
     }
-    if let Ok(k) = env::var("GEMINI_API_KEY") {
-        if !k.trim().is_empty() {
-            let masked = format!("{}...{}", &k[..4.min(k.len())], &k[k.len().saturating_sub(4)..]);
-            return (true, Some(masked), "GEMINI_API_KEY env", model);
-        }
-    }
-    if let Ok(k) = env::var("GOOGLE_API_KEY") {
-        if !k.trim().is_empty() {
-            let masked = format!("{}...{}", &k[..4.min(k.len())], &k[k.len().saturating_sub(4)..]);
-            return (true, Some(masked), "GOOGLE_API_KEY env", model);
-        }
-    }
-    if let Ok(home) = env::var("HOME") {
+    if let Ok(home) = env::var("HOME").or_else(|_| env::var("USERPROFILE")) {
         let key_path = std::path::Path::new(&home).join(".centl").join("gemini.key");
         if let Ok(content) = std::fs::read_to_string(key_path) {
-            let trimmed = content.trim().to_string();
-            if !trimmed.is_empty() {
-                let masked = format!("{}...{}", &trimmed[..4.min(trimmed.len())], &trimmed[trimmed.len().saturating_sub(4)..]);
+            let cleaned = sanitize_api_key(&content);
+            if !cleaned.is_empty() {
+                let masked = format!("{}...{}", &cleaned[..4.min(cleaned.len())], &cleaned[cleaned.len().saturating_sub(4)..]);
                 return (true, Some(masked), "~/.centl/gemini.key", model);
             }
         }
@@ -2761,6 +2775,16 @@ fn solve_with_gemini_hybrid(
     api_key: &str,
     session: &mut Session,
 ) -> Result<SciSolution, String> {
+    let configured_model = get_runtime_gemini_model();
+    
+    // Auto-model fallback sequence
+    let mut candidate_models = vec![configured_model.as_str()];
+    for fallback in &["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.5-pro"] {
+        if !candidate_models.contains(fallback) {
+            candidate_models.push(fallback);
+        }
+    }
+
     let system_instructions = "You are the CentL STEM Decomposition & Verification Engine. \
     Analyze the user's scientific/mathematical query and decompose it into exact CentL atomic commands. \
     CentL supports: \
@@ -2784,82 +2808,148 @@ fn solve_with_gemini_hybrid(
         }
     });
 
-    let model = get_runtime_gemini_model();
-    let endpoint = format!(
-        "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent?key={}",
-        model,
-        api_key
-    );
+    let mut last_error = String::new();
 
-    // Call API using lightweight rust HTTPS caller
-    let response_body = http_post_json(&endpoint, &payload)?;
+    for model in candidate_models {
+        let endpoint = format!(
+            "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent?key={}",
+            model,
+            api_key
+        );
 
-    let res_json: Value = serde_json::from_str(&response_body)
-        .map_err(|e| format!("Invalid Gemini API JSON response: {}", e))?;
+        let response_body = match http_post_json(&endpoint, &payload) {
+            Ok(body) => body,
+            Err(e) => {
+                last_error = e;
+                continue;
+            }
+        };
 
-    let text_part = res_json
-        .get("candidates")
-        .and_then(|c| c.get(0))
-        .and_then(|c| c.get("content"))
-        .and_then(|c| c.get("parts"))
-        .and_then(|p| p.get(0))
-        .and_then(|p| p.get("text"))
-        .and_then(Value::as_str)
-        .ok_or_else(|| "Gemini API returned empty candidate content.".to_string())?;
+        let res_json: Value = match serde_json::from_str(&response_body) {
+            Ok(val) => val,
+            Err(e) => {
+                last_error = format!("Invalid Gemini API JSON response: {}", e);
+                continue;
+            }
+        };
 
-    let parsed_gemini: Value = serde_json::from_str(text_part)
-        .map_err(|e| format!("Could not parse Gemini JSON decomposition: {}", e))?;
-
-    let summary = parsed_gemini.get("summary").and_then(Value::as_str).unwrap_or("Gemini STEM Solution").to_string();
-    let domain_str = parsed_gemini.get("domain").and_then(Value::as_str).unwrap_or("STEM");
-    let reasoning = parsed_gemini.get("reasoning").and_then(Value::as_array).map(|arr| {
-        arr.iter().filter_map(Value::as_str).map(|s| s.to_string()).collect::<Vec<_>>()
-    }).unwrap_or_default();
-    let centl_command = parsed_gemini.get("centl_command").and_then(Value::as_str).map(|s| s.to_string());
-
-    let mut final_steps = reasoning;
-    let mut exact_result = None;
-    let mut approx_result = None;
-
-    // Execute the CentL exact verification command if provided
-    if let Some(ref cmd) = centl_command {
-        if let Ok(eval_res) = evaluate(cmd, session) {
-            final_steps.push(format!("Exact CentL Kernel Verification: {} -> {}", cmd, eval_res.text));
-            exact_result = Some(eval_res.text);
-            approx_result = eval_res.approximate;
+        // Check if API returned an error object
+        if let Some(err_obj) = res_json.get("error") {
+            let message = err_obj.get("message").and_then(Value::as_str).unwrap_or("Unknown API Error");
+            let code = err_obj.get("code").and_then(Value::as_i64).unwrap_or(0);
+            let status = err_obj.get("status").and_then(Value::as_str).unwrap_or("");
+            
+            // If it's an explicit API key invalid error, fail immediately with clear diagnostic
+            if code == 400 && message.contains("API key") || status == "INVALID_ARGUMENT" && message.contains("API key") {
+                return Err(format!("Google Gemini Authentication Failed: {}. Please check your API key with ':gemini-key <KEY>'.", message));
+            }
+            
+            last_error = format!("Google API ({}, {}): {}", code, status, message);
+            continue; // Try next fallback model
         }
+
+        let text_part = match res_json
+            .get("candidates")
+            .and_then(|c| c.get(0))
+            .and_then(|c| c.get("content"))
+            .and_then(|c| c.get("parts"))
+            .and_then(|p| p.get(0))
+            .and_then(|p| p.get("text"))
+            .and_then(Value::as_str)
+        {
+            Some(t) if !t.trim().is_empty() => t,
+            _ => {
+                last_error = format!("Gemini model {} returned empty candidate text.", model);
+                continue;
+            }
+        };
+
+        // Resilient markdown fence and JSON slice extraction
+        let mut clean_text = text_part.trim();
+        if clean_text.starts_with("```json") {
+            clean_text = clean_text.strip_prefix("```json").unwrap_or(clean_text);
+        } else if clean_text.starts_with("```") {
+            clean_text = clean_text.strip_prefix("```").unwrap_or(clean_text);
+        }
+        if clean_text.ends_with("```") {
+            clean_text = clean_text.strip_suffix("```").unwrap_or(clean_text);
+        }
+        let clean_text = clean_text.trim();
+
+        let json_candidate = if let (Some(start), Some(end)) = (clean_text.find('{'), clean_text.rfind('}')) {
+            if start < end {
+                &clean_text[start..=end]
+            } else {
+                clean_text
+            }
+        } else {
+            clean_text
+        };
+
+        let (summary, domain_str, reasoning, centl_command) = if let Ok(parsed_gemini) = serde_json::from_str::<Value>(json_candidate) {
+            let summary = parsed_gemini.get("summary").and_then(Value::as_str).unwrap_or("Gemini STEM Solution").to_string();
+            let domain_str = parsed_gemini.get("domain").and_then(Value::as_str).unwrap_or("STEM").to_string();
+            let reasoning = parsed_gemini.get("reasoning").and_then(Value::as_array).map(|arr| {
+                arr.iter().filter_map(Value::as_str).map(|s| s.to_string()).collect::<Vec<_>>()
+            }).unwrap_or_default();
+            let centl_command = parsed_gemini.get("centl_command").and_then(Value::as_str).map(|s| s.to_string());
+            (summary, domain_str, reasoning, centl_command)
+        } else {
+            // Fallback: Gemini answered in rich natural language prose
+            let steps = text_part.lines().map(|l| l.trim().to_string()).filter(|l| !l.is_empty()).collect::<Vec<_>>();
+            ("Gemini STEM Solution".to_string(), "STEM".to_string(), steps, None)
+        };
+
+        let mut final_steps = reasoning;
+        let mut exact_result = None;
+        let mut approx_result = None;
+
+        if let Some(ref cmd) = centl_command {
+            if let Ok(eval_res) = evaluate(cmd, session) {
+                final_steps.push(format!("Exact CentL Kernel Verification: {} -> {}", cmd, eval_res.text));
+                exact_result = Some(eval_res.text);
+                approx_result = eval_res.approximate;
+            }
+        }
+
+        return Ok(SciSolution {
+            summary,
+            steps: final_steps,
+            exact_result,
+            approximate_result: approx_result,
+            domain: match domain_str.as_str() {
+                "Chemistry" => "Chemistry",
+                "Physics" => "Physics",
+                "Calculus" => "Calculus",
+                "Algebra" => "Algebra",
+                "Number Theory" => "Number Theory",
+                _ => "STEM (Hybrid Gemini + CentL)",
+            },
+            confidence: "Verified (Gemini + CentL Exact Kernel)",
+            raw_centl_command: centl_command,
+        });
     }
 
-    Ok(SciSolution {
-        summary,
-        steps: final_steps,
-        exact_result,
-        approximate_result: approx_result,
-        domain: match domain_str {
-            "Chemistry" => "Chemistry",
-            "Physics" => "Physics",
-            "Calculus" => "Calculus",
-            "Algebra" => "Algebra",
-            "Number Theory" => "Number Theory",
-            _ => "STEM (Hybrid Gemini + CentL)",
-        },
-        confidence: "Verified (Gemini + CentL Exact Kernel)",
-        raw_centl_command: centl_command,
+    Err(if last_error.is_empty() {
+        "Gemini API request failed across all candidate models. Please check network connection and API key.".to_string()
+    } else {
+        last_error
     })
 }
 
 fn http_post_json(url_str: &str, payload: &Value) -> Result<String, String> {
-    // For universal standalone compatibility, call via curl if available
     let payload_str = payload.to_string();
     let child = std::process::Command::new("curl")
-        .arg("-s")
-        .arg("-X")
-        .arg("POST")
-        .arg(url_str)
-        .arg("-H")
-        .arg("Content-Type: application/json")
-        .arg("-d")
-        .arg(&payload_str)
+        .args([
+            "-sS",
+            "--max-time", "25",
+            "--connect-timeout", "8",
+            "-A", "CentL26/26.8",
+            "-X", "POST",
+            url_str,
+            "-H", "Content-Type: application/json",
+            "-d", &payload_str,
+        ])
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
         .spawn()
@@ -2868,6 +2958,13 @@ fn http_post_json(url_str: &str, payload: &Value) -> Result<String, String> {
     let output = child
         .wait_with_output()
         .map_err(|e| format!("Failed to receive response from Gemini: {}", e))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        if !stderr.trim().is_empty() {
+            return Err(format!("curl Gemini error: {}", stderr.trim()));
+        }
+    }
 
     Ok(String::from_utf8_lossy(&output.stdout).to_string())
 }
@@ -2977,6 +3074,23 @@ mod tests {
 
         let sol23 = solve_stem_offline("15 choose 3", &mut session).unwrap();
         assert_eq!(sol23.exact_result.as_deref(), Some("455"));
+    }
+
+    #[test]
+    fn test_gemini_key_sanitization_and_status() {
+        assert_eq!(sanitize_api_key("  AIzaSyD_test123  "), "AIzaSyD_test123");
+        assert_eq!(sanitize_api_key("\"AIzaSyD_test456\""), "AIzaSyD_test456");
+        assert_eq!(sanitize_api_key("'AIzaSyD_test789'"), "AIzaSyD_test789");
+        assert_eq!(sanitize_api_key("Bearer AIzaSyD_bearer"), "AIzaSyD_bearer");
+
+        set_runtime_gemini_key("AIzaSyD_SessionKey123");
+        let (active, masked, source, model) = get_gemini_status_info();
+        assert!(active);
+        assert_eq!(source, "Session Configuration");
+        assert!(masked.unwrap().contains("AIza...y123"));
+        assert!(!model.is_empty());
+
+        set_runtime_gemini_key("");
     }
 }
 

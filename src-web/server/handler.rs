@@ -284,7 +284,7 @@ pub fn handle_single_command(
 
     if cmd == ":release" || cmd == ":version" || cmd == ":releases" {
         let res = ExecutionResult {
-            text: "=== CentL26.7 Official Release (Standard Freeze) ===\nVersion: 26.7.3 (Rock Standard)\nCapabilities:\n• Multi-Platform Standard: native support for Windows 11, macOS Arm64, and Debian/Fedora Linux.\n• Multi-Notebook Tabs & Workspaces: seamlessly organize independent computations in named tabs.\n• Save & Download: export active notebooks to clean Markdown and structured JSON.\n• In-App Programmability (build): define, inspect, and test custom STEM functions & constants in plain English.\n• 2D Function Plotter: multi-line ASCII/Unicode coordinate grid visualization.\n• Dim Mode Theme: toggle between standard light and dimmed matte slate palettes.\n• Smart Multi-Domain Auto-Detector: direct stoichiometry, reactions, physics conversions, and constants.\n• CentL-SCi Natural Language STEM Solver: comprehensive step-by-step offline verified problem solving across chemistry, mechanics, circuits, thermodynamics, geometry, linear algebra, and statistics without external dependencies.\n• Rigorous Interval Numerics: arbitrary-precision interval enclosures and transcendental constants.\n• Hybrid Gemini Support: online/offline LLM STEM decomposition with exact rational verification.\n• 50+ STEM Examples Sheet: multi-domain reference dataset available via /download/centl26-examples.csv.\n• In-App Updates: verified multi-channel update checks via WebKit message bridge and git repository synchronization.".to_string(),
+            text: "=== CentL26.8 Official Release (All Platforms) ===\nVersion: 26.8.0 (Universal Release)\nCapabilities:\n• Multi-Platform Standard: native support for Windows 11, macOS Apple Silicon / Intel, and Debian/Fedora/Arch Linux.\n• STEM Academic Search Engine: omnibar Chrome routing to Google Scholar, arXiv, PubMed, Wolfram MathWorld, OEIS, NIST, and NASA ADS.\n• FCF Knowledge Center & In-App Reader: built-in documentation browser for all FCF manuals, specs, and research theorem preprints.\n• Gemini AI Co-Pilot Resiliency: multi-model auto-fallback (2.5-flash -> 2.0-flash -> 1.5-flash -> 1.5-pro), cross-platform key persistence, and fault-tolerant JSON decomposition.\n• Intelligent Dual-Channel Updates: real-time GitHub raw manifest and git remote synchronization with in-place build optimization.\n• Multi-Notebook Tabs & Workspaces: seamlessly organize independent computations in named tabs.\n• Save & Download: export active notebooks to clean Markdown and structured JSON.\n• In-App Programmability (build): define, inspect, and test custom STEM functions & constants in plain English.\n• 2D Function Plotter: multi-line ASCII/Unicode coordinate grid visualization.\n• Dim Mode Theme: toggle between standard light and dimmed matte slate palettes.\n• Smart Multi-Domain Auto-Detector: direct stoichiometry, reactions, physics conversions, and constants.\n• CentL-SCi Natural Language STEM Solver: comprehensive step-by-step offline verified problem solving across chemistry, mechanics, circuits, thermodynamics, geometry, linear algebra, and statistics without external dependencies.\n• Rigorous Interval Numerics: arbitrary-precision interval enclosures and transcendental constants.\n• 50+ STEM Examples Sheet: multi-domain reference dataset available via /download/centl26-examples.csv.".to_string(),
             exact_rational: None,
             approximate: None,
             symbolic_expr: None,
@@ -3470,15 +3470,17 @@ mod tests {
 
     #[test]
     fn test_version_comparison_and_update_detection() {
-        assert!(is_version_newer("26.7.4", "26.7.3"));
-        assert!(is_version_newer("v26.8.0", "26.7.3"));
-        assert!(is_version_newer("27.0.0", "26.7.3"));
-        assert!(!is_version_newer("26.7.3", "26.7.3"));
-        assert!(!is_version_newer("v26.7.3", "26.7.3"));
-        assert!(!is_version_newer("26.7.2", "26.7.3"));
-        assert!(!is_version_newer("26.6.1", "26.7.3"));
+        assert!(is_version_newer("26.8.1", "26.8.0"));
+        assert!(is_version_newer("v26.9.0", "26.8.0"));
+        assert!(is_version_newer("27.0.0", "26.8.0"));
+        assert!(!is_version_newer("26.8.0", "26.8.0"));
+        assert!(!is_version_newer("v26.8.0", "26.8.0"));
+        assert!(!is_version_newer("26.7.3", "26.8.0"));
+        assert!(!is_version_newer("26.6.1", "26.8.0"));
     }
 }
+
+pub const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub fn is_version_newer(remote: &str, current: &str) -> bool {
     let parse_parts = |v: &str| -> Vec<u64> {
@@ -3504,14 +3506,13 @@ pub fn is_version_newer(remote: &str, current: &str) -> bool {
 }
 
 pub fn handle_update_check() -> serde_json::Value {
-    let current_version = "26.7.3";
     let git_status = check_git_update_available();
-    let latest_version = git_status.latest_tag.clone().unwrap_or_else(|| format!("v{}", current_version));
+    let latest_version = git_status.latest_tag.clone().unwrap_or_else(|| format!("v{}", CURRENT_VERSION));
     
     serde_json::json!({
         "schema": "centl26.update-check/1",
         "product": "CentL26",
-        "version": current_version,
+        "version": CURRENT_VERSION,
         "latest_version": latest_version,
         "release_name": format!("CentL26 {}", latest_version),
         "release_tag": latest_version,
@@ -3523,10 +3524,10 @@ pub fn handle_update_check() -> serde_json::Value {
             if git_status.commits_behind > 0 {
                 format!("New update found! ({} new commit(s) on origin/main). Click Update to sync and build.", git_status.commits_behind)
             } else {
-                format!("New update available: {} (current: v{}). Click Update to sync and build.", latest_version, current_version)
+                format!("New update available: {} (current: v{}). Click Update to sync and build.", latest_version, CURRENT_VERSION)
             }
         } else {
-            format!("CentL26 v{} is up to date.", current_version)
+            format!("CentL26 v{} is up to date.", CURRENT_VERSION)
         }
     })
 }
@@ -3609,52 +3610,87 @@ pub fn create_system_command(name: &str) -> std::process::Command {
 }
 
 pub fn check_git_update_available() -> GitUpdateStatus {
-    // 1. Fast fetch origin main
-    let _ = create_system_command("git")
-        .args(["fetch", "origin", "main", "--quiet"])
-        .output();
-
-    let local_head = create_system_command("git")
-        .args(["rev-parse", "HEAD"])
-        .output()
-        .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
-        .unwrap_or_default();
-
-    let remote_head = create_system_command("git")
-        .args(["rev-parse", "origin/main"])
-        .output()
-        .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
-        .unwrap_or_default();
-
+    // 1. Check local/remote git commits if inside repository
     let mut count = 0;
-    if !local_head.is_empty() && !remote_head.is_empty() && local_head != remote_head {
-        let count_output = create_system_command("git")
-            .args(["rev-list", "--count", "HEAD..origin/main"])
+    if find_repo_root().is_some() {
+        let _ = create_system_command("git")
+            .args(["fetch", "origin", "main", "--quiet"])
+            .output();
+
+        let local_head = create_system_command("git")
+            .args(["rev-parse", "HEAD"])
             .output()
-            .map(|o| String::from_utf8_lossy(&o.stdout).trim().parse::<usize>().unwrap_or(0))
-            .unwrap_or(0);
-        count = count_output;
+            .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
+            .unwrap_or_default();
+
+        let remote_head = create_system_command("git")
+            .args(["rev-parse", "origin/main"])
+            .output()
+            .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
+            .unwrap_or_default();
+
+        if !local_head.is_empty() && !remote_head.is_empty() && local_head != remote_head {
+            let count_output = create_system_command("git")
+                .args(["rev-list", "--count", "HEAD..origin/main"])
+                .output()
+                .map(|o| String::from_utf8_lossy(&o.stdout).trim().parse::<usize>().unwrap_or(0))
+                .unwrap_or(0);
+            count = count_output;
+        }
     }
 
-    // 2. Query GitHub latest release tag via curl (with 2s timeout)
+    // 2. Dual-channel online check:
+    // Channel A: Query rate-limit-free GitHub raw Cargo.toml manifest (no API rate limiting!)
     let mut github_newer = false;
-    let mut github_tag = None;
+    let mut latest_discovered_ver = None;
+
     if let Some(curl) = find_executable("curl") {
-        if let Ok(output) = std::process::Command::new(curl)
+        if let Ok(output) = std::process::Command::new(&curl)
             .args([
-                "-s",
-                "-m", "2",
-                "-H", "User-Agent: CentL26-Updater",
-                "https://api.github.com/repos/chasebryan/centl/releases/latest",
+                "-sS",
+                "-m", "3",
+                "-A", "CentL26-Updater",
+                "https://raw.githubusercontent.com/chasebryan/CentL/main/Cargo.toml",
             ])
             .output()
         {
-            if let Ok(json_str) = String::from_utf8(output.stdout) {
-                if let Ok(release_val) = serde_json::from_str::<serde_json::Value>(&json_str) {
-                    if let Some(tag) = release_val["tag_name"].as_str() {
-                        github_tag = Some(tag.to_string());
-                        if is_version_newer(tag, "26.7.3") {
-                            github_newer = true;
+            if output.status.success() {
+                let toml_str = String::from_utf8_lossy(&output.stdout);
+                for line in toml_str.lines() {
+                    let trimmed = line.trim();
+                    if trimmed.starts_with("version =") {
+                        if let Some(v) = trimmed.split('"').nth(1) {
+                            if is_version_newer(v, CURRENT_VERSION) {
+                                github_newer = true;
+                                latest_discovered_ver = Some(format!("v{}", v));
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Channel B: GitHub Releases API fallback
+        if !github_newer {
+            if let Ok(output) = std::process::Command::new(&curl)
+                .args([
+                    "-sS",
+                    "-m", "3",
+                    "-A", "CentL26-Updater",
+                    "https://api.github.com/repos/chasebryan/CentL/releases/latest",
+                ])
+                .output()
+            {
+                if output.status.success() {
+                    if let Ok(json_str) = String::from_utf8(output.stdout) {
+                        if let Ok(release_val) = serde_json::from_str::<serde_json::Value>(&json_str) {
+                            if let Some(tag) = release_val["tag_name"].as_str() {
+                                if is_version_newer(tag, CURRENT_VERSION) {
+                                    github_newer = true;
+                                    latest_discovered_ver = Some(tag.to_string());
+                                }
+                            }
                         }
                     }
                 }
@@ -3665,7 +3701,7 @@ pub fn check_git_update_available() -> GitUpdateStatus {
     GitUpdateStatus {
         update_available: count > 0 || github_newer,
         commits_behind: count,
-        latest_tag: github_tag,
+        latest_tag: latest_discovered_ver,
     }
 }
 
@@ -3750,7 +3786,7 @@ pub fn execute_repo_update() -> serde_json::Value {
 pub fn export_notebook_markdown(state: &AppState) -> String {
     let name = state.notebook_name();
     let session = state.session();
-    let mut md = format!("# {}\n\nExported from CentL26 v26.7.3\n\n", name);
+    let mut md = format!("# {}\n\nExported from CentL26 v{}\n\n", name, CURRENT_VERSION);
     for entry in &session.history {
         md.push_str(&format!("## `{}`\n\n", entry.command));
         md.push_str(&format!("**Result:** {}\n\n", entry.result));
@@ -3772,8 +3808,8 @@ pub fn export_notebook_json(state: &AppState) -> String {
             e.exact_repr.as_ref().map(|s| serde_json_str(s)).unwrap_or("null".to_string())
         )
     }).collect();
-    format!("{{\"schema\":\"centl26.notebook/1\",\"name\":{},\"version\":\"26.7.3\",\"entries\":[{}]}}",
-        serde_json_str(name), entries.join(","))
+    format!("{{\"schema\":\"centl26.notebook/1\",\"name\":{},\"version\":{},\"entries\":[{}]}}",
+        serde_json_str(name), serde_json_str(CURRENT_VERSION), entries.join(","))
 }
 
 pub fn export_project_json(state: &AppState) -> String {
@@ -3793,7 +3829,8 @@ pub fn export_project_json(state: &AppState) -> String {
         ));
     }
     format!(
-        "{{\"schema\":\"centl26.project/1\",\"version\":\"26.7.3\",\"active_notebook\":{},\"notebooks\":[{}]}}",
+        "{{\"schema\":\"centl26.project/1\",\"version\":{},\"active_notebook\":{},\"notebooks\":[{}]}}",
+        serde_json_str(CURRENT_VERSION),
         state.active_notebook,
         notebooks_json.join(",")
     )
