@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "approval": {
-    "change_note": "Refine header typography, remove C26 mark, remove Ready indicators, single + tab button, interactive breadcrumb rename input",
+    "change_note": "CentL26.6.1 release: full backend improvement sweep, native rigorous numerics enclosure, and unified web/app instructions",
     "release": "CentL26",
     "reviewed_viewports": [
       "1366x768",
@@ -14,7 +14,7 @@
     "desktop/centl26/macos/Assets/CentL26Icon.svg": "a599538a075f61f861fe44ad1260fdc98d561dab0931a36ea08c02430e623298",
     "src-web/server/lab.css": "dd41272db426e415edab22d5ab2e478bfc2f16aa89cccdb572e7b30d5fbb8177",
     "src-web/server/lab.js": "27bc6f83178f466e3f088c7635d7b559b72d7b617331fd6351eb02fbe64cb4f0",
-    "src-web/server/lab_template.rs": "3e4283173eb84aa98e2cafd0d5f94b19c2fa0fb7ca524e13489da58301f851f2"
+    "src-web/server/lab_template.rs": "262e7c92e87ddf8caff3bae74dee07ddaa45a5caf9534f2080df2502cc1a5210"
   },
   "schema": 1,
   "semantic_contract": {

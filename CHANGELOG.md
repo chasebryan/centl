@@ -1,5 +1,13 @@
 ## Unreleased
 
+### CentL26.6.1 — Full Backend Sweep & Capabilities Release (2026-08-21)
+
+- **Backend Mathematical & Number-Theoretic Sweep**: Native exact implementations added for `catalan(n)`, `stirling2(n, k)`, `bell(n)`, `derangements(n)`, `is_square(n)`, `next_prime(n)`, `prev_prime(n)`, `collatz(n)`, `divisors(n)`, `sum_divisors(n)`, `is_perfect(n)`, `median`, and `zscore`.
+- **Expanded Plain-English SCi Problem Solver**: Enhanced natural language parsing for classical mechanics ($E_k, E_p, W, P, F_c$), electromagnetism (Ohm's law, electric power, capacitance), thermodynamics ($PV = nRT, Q = mc\Delta T$), wave dynamics ($v = f\lambda$), density, and gravitational laws.
+- **Capabilities Registry Activation**: Upgraded `org.fcf.centl.numerics.enclose` from adapter-dependent to native `available` with arbitrary-precision interval enclosures.
+- **Unified Web & macOS App Distribution**: Crystal-clear dual setup documentation for running CentL26 via local web server (`cargo run --release --bin centl26`) or native macOS application bundle (`./desktop/centl26/macos/build.sh`), both backed by the exact same offline Rust core engine.
+- **Decluttered UI & Direct In-Place Naming**: Interactive click-to-type notebook renaming, unclipped typography, single `+` tab creation workflow, and removal of duplicate status badges.
+
 ### CentL26.5.0 — Product Maturity & Full Capability Release (2026-08-21)
 
 - **Top-Left Version Branding**: Visual `v26.5` label directly embedded in the top-left branding lockup, kernel badge, and status bar.

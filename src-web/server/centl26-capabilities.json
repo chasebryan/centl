@@ -2,7 +2,7 @@
   "schema": "centl.capability-registry/1",
   "product": {
     "name": "CentL26",
-    "version": "26.5.0",
+    "version": "26.6.1",
     "organization": "Free Computation Foundation",
     "organization_abbreviation": "FCF",
     "runtime": "offline-local"
@@ -26,9 +26,9 @@
     {
       "id": "org.fcf.centl.numerics.enclose",
       "contract": 1,
-      "status": "adapter-dependent",
-      "provider": "centl.canonical-core",
-      "assurance": ["rigorous-bound"]
+      "status": "available",
+      "provider": "centl26.numerics",
+      "assurance": ["rigorous-bound", "arbitrary-precision", "deterministic"]
     },
     {
       "id": "org.fcf.centl.physics.compute",

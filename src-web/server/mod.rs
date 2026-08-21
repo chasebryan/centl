@@ -2331,6 +2331,7 @@ mod tests {
 
     #[test]
     fn centl26_read_apis_return_json_contracts() {
+        crate::engine::extensions::clear_extensions();
         let root = temporary_project_root("read-apis");
         let server = ServerState::new_lab_at(root.clone()).unwrap();
 

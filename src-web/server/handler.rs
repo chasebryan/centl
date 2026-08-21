@@ -150,7 +150,7 @@ pub fn handle_command(
 
     if cmd == ":release" || cmd == ":version" || cmd == ":releases" {
         let res = ExecutionResult {
-            text: "=== CentL26.5 Official Release ===\nVersion: 26.5.0 (Release Quality)\nCapabilities:\n• Multi-Notebook Tabs & Workspaces: seamlessly organize independent computations in named tabs.\n• Save & Download: export active notebooks to clean Markdown and structured JSON.\n• In-App Programmability (build): define, inspect, and test custom STEM functions & constants in plain English.\n• 2D Function Plotter: multi-line ASCII/Unicode coordinate grid visualization.\n• Dim Mode Theme: toggle between standard light and dimmed matte slate palettes.\n• Smart Multi-Domain Auto-Detector: direct stoichiometry, reactions, physics conversions, and constants.\n• CentL-SCi Natural Language STEM Solver: comprehensive step-by-step offline verified problem solving across chemistry, mechanics, circuits, thermodynamics, geometry, linear algebra, and statistics without external dependencies.\n• Hybrid Gemini Support: online/offline LLM STEM decomposition with exact rational verification.\n• 50+ STEM Examples Sheet: multi-domain reference dataset available via /download/centl26-examples.csv.\n• In-App Updates: seamless update checks pulling directly from origin/main and rebuilding in-place.".to_string(),
+            text: "=== CentL26.6.1 Official Release ===\nVersion: 26.6.1 (Release Quality)\nCapabilities:\n• Multi-Notebook Tabs & Workspaces: seamlessly organize independent computations in named tabs.\n• Save & Download: export active notebooks to clean Markdown and structured JSON.\n• In-App Programmability (build): define, inspect, and test custom STEM functions & constants in plain English.\n• 2D Function Plotter: multi-line ASCII/Unicode coordinate grid visualization.\n• Dim Mode Theme: toggle between standard light and dimmed matte slate palettes.\n• Smart Multi-Domain Auto-Detector: direct stoichiometry, reactions, physics conversions, and constants.\n• CentL-SCi Natural Language STEM Solver: comprehensive step-by-step offline verified problem solving across chemistry, mechanics, circuits, thermodynamics, geometry, linear algebra, and statistics without external dependencies.\n• Rigorous Interval Numerics: arbitrary-precision interval enclosures and transcendental constants.\n• Hybrid Gemini Support: online/offline LLM STEM decomposition with exact rational verification.\n• 50+ STEM Examples Sheet: multi-domain reference dataset available via /download/centl26-examples.csv.\n• In-App Updates: seamless update checks pulling directly from origin/main and rebuilding in-place.".to_string(),
             exact_rational: None,
             approximate: None,
             symbolic_expr: None,
@@ -3239,9 +3239,9 @@ pub fn handle_update_check() -> serde_json::Value {
     serde_json::json!({
         "schema": "centl26.update-check/1",
         "product": "CentL26",
-        "version": "26.5.0",
-        "release_name": "CentL26.5.0",
-        "release_tag": "centl26-build-0006-release",
+        "version": "26.6.1",
+        "release_name": "CentL26.6.1",
+        "release_tag": "centl26-build-0007-release",
         "build_commit": super::build_commit(),
         "status": if git_status.update_available { "update_available" } else { "up_to_date" },
         "update_available": git_status.update_available,
@@ -3249,7 +3249,7 @@ pub fn handle_update_check() -> serde_json::Value {
         "message": if git_status.update_available {
             format!("New updates found on origin/main ({} commit(s) behind). Click Update to pull and rebuild.", git_status.commits_behind)
         } else {
-            "CentL26 v26.5.0 is up to date with origin/main.".to_string()
+            "CentL26 v26.6.1 is up to date with origin/main.".to_string()
         }
     })
 }
@@ -3347,7 +3347,7 @@ pub fn execute_repo_update() -> serde_json::Value {
 pub fn export_notebook_markdown(state: &AppState) -> String {
     let name = state.notebook_name();
     let session = state.session();
-    let mut md = format!("# {}\n\nExported from CentL26 v26.5.0\n\n", name);
+    let mut md = format!("# {}\n\nExported from CentL26 v26.6.1\n\n", name);
     for entry in &session.history {
         md.push_str(&format!("## `{}`\n\n", entry.command));
         md.push_str(&format!("**Result:** {}\n\n", entry.result));
@@ -3369,7 +3369,7 @@ pub fn export_notebook_json(state: &AppState) -> String {
             e.exact_repr.as_ref().map(|s| serde_json_str(s)).unwrap_or("null".to_string())
         )
     }).collect();
-    format!("{{\"schema\":\"centl26.notebook/1\",\"name\":{},\"version\":\"26.5.0\",\"entries\":[{}]}}",
+    format!("{{\"schema\":\"centl26.notebook/1\",\"name\":{},\"version\":\"26.6.1\",\"entries\":[{}]}}",
         serde_json_str(name), entries.join(","))
 }
 

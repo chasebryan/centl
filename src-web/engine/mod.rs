@@ -871,6 +871,296 @@ pub fn evaluate(input: &str, session: &mut Session) -> Result<ExecutionResult, S
                     execution_micros: start_time.elapsed().as_micros(),
                 }
             }
+            "catalan" if args.len() == 1 => {
+                let a = eval_expr(&args[0], session)?;
+                if let Expr::Number(na) = a {
+                    if na.is_integer() && !na.is_negative() {
+                        let n = na.numer.to_i64().unwrap_or(0) as u64;
+                        let cat = catalan(n)?;
+                        let rat = BigRational::from_bigint(cat);
+                        let text = format!("{}", rat);
+                        ExecutionResult {
+                            text,
+                            exact_rational: Some(rat),
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("catalan requires non-negative integer".to_string());
+                    }
+                } else {
+                    return Err("catalan requires integer argument".to_string());
+                }
+            }
+            "stirling2" if args.len() == 2 => {
+                let a = eval_expr(&args[0], session)?;
+                let b = eval_expr(&args[1], session)?;
+                if let (Expr::Number(na), Expr::Number(nb)) = (a, b) {
+                    if na.is_integer() && nb.is_integer() && !na.is_negative() && !nb.is_negative() {
+                        let n = na.numer.to_i64().unwrap_or(0) as u64;
+                        let k = nb.numer.to_i64().unwrap_or(0) as u64;
+                        let s = stirling2(n, k)?;
+                        let rat = BigRational::from_bigint(s);
+                        let text = format!("{}", rat);
+                        ExecutionResult {
+                            text,
+                            exact_rational: Some(rat),
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("stirling2 requires non-negative integers".to_string());
+                    }
+                } else {
+                    return Err("stirling2 requires integer arguments".to_string());
+                }
+            }
+            "bell" if args.len() == 1 => {
+                let a = eval_expr(&args[0], session)?;
+                if let Expr::Number(na) = a {
+                    if na.is_integer() && !na.is_negative() {
+                        let n = na.numer.to_i64().unwrap_or(0) as u64;
+                        let b = bell(n)?;
+                        let rat = BigRational::from_bigint(b);
+                        let text = format!("{}", rat);
+                        ExecutionResult {
+                            text,
+                            exact_rational: Some(rat),
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("bell requires non-negative integer".to_string());
+                    }
+                } else {
+                    return Err("bell requires integer argument".to_string());
+                }
+            }
+            "derangements" | "subfactorial" if args.len() == 1 => {
+                let a = eval_expr(&args[0], session)?;
+                if let Expr::Number(na) = a {
+                    if na.is_integer() && !na.is_negative() {
+                        let n = na.numer.to_i64().unwrap_or(0) as u64;
+                        let d = derangements(n)?;
+                        let rat = BigRational::from_bigint(d);
+                        let text = format!("{}", rat);
+                        ExecutionResult {
+                            text,
+                            exact_rational: Some(rat),
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("derangements requires non-negative integer".to_string());
+                    }
+                } else {
+                    return Err("derangements requires integer argument".to_string());
+                }
+            }
+            "is_prime" if args.len() == 1 => {
+                let a = eval_expr(&args[0], session)?;
+                if let Expr::Number(na) = a {
+                    if na.is_integer() && !na.is_negative() {
+                        let n = na.numer.to_i64().unwrap_or(0) as u64;
+                        let prime = is_prime(n);
+                        let text = format!("{}", prime);
+                        ExecutionResult {
+                            text,
+                            exact_rational: Some(BigRational::from_u64(if prime { 1 } else { 0 })),
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("is_prime requires non-negative integer".to_string());
+                    }
+                } else {
+                    return Err("is_prime requires integer argument".to_string());
+                }
+            }
+            "next_prime" if args.len() == 1 => {
+                let a = eval_expr(&args[0], session)?;
+                if let Expr::Number(na) = a {
+                    if na.is_integer() && !na.is_negative() {
+                        let n = na.numer.to_i64().unwrap_or(0) as u64;
+                        let p = next_prime(n);
+                        let text = format!("{}", p);
+                        ExecutionResult {
+                            text,
+                            exact_rational: Some(BigRational::from_u64(p)),
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("next_prime requires non-negative integer".to_string());
+                    }
+                } else {
+                    return Err("next_prime requires integer argument".to_string());
+                }
+            }
+            "prev_prime" if args.len() == 1 => {
+                let a = eval_expr(&args[0], session)?;
+                if let Expr::Number(na) = a {
+                    if na.is_integer() && !na.is_negative() {
+                        let n = na.numer.to_i64().unwrap_or(0) as u64;
+                        if let Some(p) = prev_prime(n) {
+                            let text = format!("{}", p);
+                            ExecutionResult {
+                                text,
+                                exact_rational: Some(BigRational::from_u64(p)),
+                                approximate: None,
+                                symbolic_expr: None,
+                                execution_micros: start_time.elapsed().as_micros(),
+                            }
+                        } else {
+                            return Err(format!("no prime exists less than {}", n));
+                        }
+                    } else {
+                        return Err("prev_prime requires non-negative integer".to_string());
+                    }
+                } else {
+                    return Err("prev_prime requires integer argument".to_string());
+                }
+            }
+            "is_square" if args.len() == 1 => {
+                let a = eval_expr(&args[0], session)?;
+                if let Expr::Number(na) = a {
+                    if na.is_integer() && !na.is_negative() {
+                        let n = na.numer.to_i64().unwrap_or(0) as u64;
+                        let sq = is_square(n);
+                        let text = format!("{}", sq);
+                        ExecutionResult {
+                            text,
+                            exact_rational: Some(BigRational::from_u64(if sq { 1 } else { 0 })),
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("is_square requires non-negative integer".to_string());
+                    }
+                } else {
+                    return Err("is_square requires integer argument".to_string());
+                }
+            }
+            "collatz" if args.len() == 1 => {
+                let a = eval_expr(&args[0], session)?;
+                if let Expr::Number(na) = a {
+                    if na.is_integer() && !na.is_negative() {
+                        let n = na.numer.to_i64().unwrap_or(0) as u64;
+                        let steps = collatz(n);
+                        let text = format!("{} steps", steps);
+                        ExecutionResult {
+                            text,
+                            exact_rational: Some(BigRational::from_u64(steps)),
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("collatz requires positive integer".to_string());
+                    }
+                } else {
+                    return Err("collatz requires integer argument".to_string());
+                }
+            }
+            "divisors" | "factors" if args.len() == 1 => {
+                let a = eval_expr(&args[0], session)?;
+                if let Expr::Number(na) = a {
+                    if na.is_integer() && !na.is_negative() {
+                        let n = na.numer.to_i64().unwrap_or(0) as u64;
+                        let f = factors(n);
+                        let text = format!("{:?}", f);
+                        ExecutionResult {
+                            text,
+                            exact_rational: None,
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("divisors requires non-negative integer".to_string());
+                    }
+                } else {
+                    return Err("divisors requires integer argument".to_string());
+                }
+            }
+            "sum_divisors" | "sigma" if args.len() == 1 => {
+                let a = eval_expr(&args[0], session)?;
+                if let Expr::Number(na) = a {
+                    if na.is_integer() && !na.is_negative() {
+                        let n = na.numer.to_i64().unwrap_or(0) as u64;
+                        let s = sum_divisors(n);
+                        let text = format!("{}", s);
+                        ExecutionResult {
+                            text,
+                            exact_rational: Some(BigRational::from_u64(s)),
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("sum_divisors requires non-negative integer".to_string());
+                    }
+                } else {
+                    return Err("sum_divisors requires integer argument".to_string());
+                }
+            }
+            "is_perfect" if args.len() == 1 => {
+                let a = eval_expr(&args[0], session)?;
+                if let Expr::Number(na) = a {
+                    if na.is_integer() && !na.is_negative() {
+                        let n = na.numer.to_i64().unwrap_or(0) as u64;
+                        let perf = is_perfect(n);
+                        let text = format!("{}", perf);
+                        ExecutionResult {
+                            text,
+                            exact_rational: Some(BigRational::from_u64(if perf { 1 } else { 0 })),
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("is_perfect requires non-negative integer".to_string());
+                    }
+                } else {
+                    return Err("is_perfect requires integer argument".to_string());
+                }
+            }
+            "median" if !args.is_empty() => {
+                let mut vals = Vec::new();
+                for a in args {
+                    vals.push(eval_expr(a, session)?.to_f64()?);
+                }
+                let m = median(&vals)?;
+                let text = format!("{:.8}", m);
+                ExecutionResult {
+                    text,
+                    exact_rational: None,
+                    approximate: Some(format!("{:.8}", m)),
+                    symbolic_expr: None,
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+            "zscore" if args.len() == 3 => {
+                let x = eval_expr(&args[0], session)?.to_f64()?;
+                let mu = eval_expr(&args[1], session)?.to_f64()?;
+                let sigma = eval_expr(&args[2], session)?.to_f64()?;
+                let z = zscore(x, mu, sigma)?;
+                let text = format!("{:.8}", z);
+                ExecutionResult {
+                    text,
+                    exact_rational: None,
+                    approximate: Some(format!("{:.8}", z)),
+                    symbolic_expr: None,
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
             _ => {
                 let eval = eval_expr(&expr, session)?;
                 let text = format!("{}", eval);
@@ -1044,6 +1334,15 @@ mod admission_tests {
             ("fibonacci(10)", "55"),
             ("gcd(84, 30)", "6"),
             ("lcm(12, 18)", "36"),
+            ("catalan(5)", "42"),
+            ("stirling2(5, 3)", "25"),
+            ("bell(5)", "52"),
+            ("derangements(4)", "9"),
+            ("is_prime(97)", "true"),
+            ("next_prime(100)", "101"),
+            ("is_square(144)", "true"),
+            ("is_perfect(28)", "true"),
+            ("sum_divisors(28)", "56"),
         ] {
             let mut session = Session::new();
             let result = evaluate(command, &mut session).unwrap();

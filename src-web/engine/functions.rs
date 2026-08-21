@@ -378,3 +378,178 @@ pub fn poisson_pmf(k: u64, lambda: f64) -> Result<f64, String> {
     }
     Ok(log_p.exp())
 }
+
+/// Catalan number: C_n = (1 / (n + 1)) * choose(2n, n)
+pub fn catalan(n: u64) -> Result<BigInt, String> {
+    if n > 500 {
+        return Err("catalan index too large (limit 500)".to_string());
+    }
+    let c = choose(2 * n, n)?;
+    let denom = BigInt::from_u64(n + 1);
+    Ok(&c / &denom)
+}
+
+/// Stirling numbers of the second kind: S(n, k)
+pub fn stirling2(n: u64, k: u64) -> Result<BigInt, String> {
+    if k == 0 {
+        return Ok(if n == 0 { BigInt::one() } else { BigInt::zero() });
+    }
+    if k > n {
+        return Ok(BigInt::zero());
+    }
+    if k == 1 || k == n {
+        return Ok(BigInt::one());
+    }
+    if n > 200 {
+        return Err("stirling2 index too large (limit 200)".to_string());
+    }
+    let n_usize = n as usize;
+    let k_usize = k as usize;
+    let mut dp = vec![vec![BigInt::zero(); k_usize + 1]; n_usize + 1];
+    dp[0][0] = BigInt::one();
+    for i in 1..=n_usize {
+        for j in 1..=k_usize.min(i) {
+            let term1 = &dp[i - 1][j] * &BigInt::from_u64(j as u64);
+            let term2 = &dp[i - 1][j - 1];
+            dp[i][j] = &term1 + term2;
+        }
+    }
+    Ok(dp[n_usize][k_usize].clone())
+}
+
+/// Bell number: B_n = sum_{k=0}^n S(n, k)
+pub fn bell(n: u64) -> Result<BigInt, String> {
+    if n == 0 || n == 1 {
+        return Ok(BigInt::one());
+    }
+    if n > 200 {
+        return Err("bell index too large (limit 200)".to_string());
+    }
+    let mut sum = BigInt::zero();
+    for k in 0..=n {
+        sum = &sum + &stirling2(n, k)?;
+    }
+    Ok(sum)
+}
+
+/// Subfactorial / Derangements: !n = (n - 1) * (!(n - 1) + !(n - 2))
+pub fn derangements(n: u64) -> Result<BigInt, String> {
+    if n == 0 {
+        return Ok(BigInt::one());
+    }
+    if n == 1 {
+        return Ok(BigInt::zero());
+    }
+    if n > 1000 {
+        return Err("derangements index too large (limit 1000)".to_string());
+    }
+    let mut d_prev2 = BigInt::one(); // !0
+    let mut d_prev1 = BigInt::zero(); // !1
+    let mut d_curr = BigInt::zero();
+    for i in 2..=n {
+        let factor = BigInt::from_u64(i - 1);
+        let sum = &d_prev1 + &d_prev2;
+        d_curr = &factor * &sum;
+        d_prev2 = d_prev1;
+        d_prev1 = d_curr.clone();
+    }
+    Ok(d_curr)
+}
+
+/// Next prime strictly greater than n
+pub fn next_prime(mut n: u64) -> u64 {
+    if n < 2 {
+        return 2;
+    }
+    n += 1;
+    if n > 2 && n % 2 == 0 {
+        n += 1;
+    }
+    while !is_prime(n) {
+        n += 2;
+    }
+    n
+}
+
+/// Previous prime strictly less than n
+pub fn prev_prime(mut n: u64) -> Option<u64> {
+    if n <= 2 {
+        return None;
+    }
+    if n == 3 {
+        return Some(2);
+    }
+    n -= 1;
+    if n % 2 == 0 {
+        n -= 1;
+    }
+    while n >= 2 {
+        if is_prime(n) {
+            return Some(n);
+        }
+        if n == 2 {
+            break;
+        }
+        n -= 2;
+    }
+    None
+}
+
+/// Returns true if n is a perfect integer square
+pub fn is_square(n: u64) -> bool {
+    let r = (n as f64).sqrt().round() as u64;
+    r * r == n
+}
+
+/// Collatz sequence stopping time / step count
+pub fn collatz(mut n: u64) -> u64 {
+    if n <= 1 {
+        return 0;
+    }
+    let mut steps = 0;
+    while n > 1 && steps < 1000000 {
+        if n % 2 == 0 {
+            n /= 2;
+        } else {
+            n = 3 * n + 1;
+        }
+        steps += 1;
+    }
+    steps
+}
+
+/// Sum of all positive divisors: sigma(n)
+pub fn sum_divisors(n: u64) -> u64 {
+    factors(n).iter().sum()
+}
+
+/// Check if n is a perfect number (sum of proper divisors == n)
+pub fn is_perfect(n: u64) -> bool {
+    if n <= 1 {
+        return false;
+    }
+    sum_divisors(n) == 2 * n
+}
+
+/// Statistical Median
+pub fn median(values: &[f64]) -> Result<f64, String> {
+    if values.is_empty() {
+        return Err("median requires at least one value".to_string());
+    }
+    let mut sorted = values.to_vec();
+    sorted.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+    let n = sorted.len();
+    if n % 2 == 1 {
+        Ok(sorted[n / 2])
+    } else {
+        Ok((sorted[n / 2 - 1] + sorted[n / 2]) / 2.0)
+    }
+}
+
+/// Standard score / z-score: (x - mean) / stddev
+pub fn zscore(x: f64, mu: f64, sigma: f64) -> Result<f64, String> {
+    if sigma <= 0.0 {
+        return Err("standard deviation must be > 0".to_string());
+    }
+    Ok((x - mu) / sigma)
+}
