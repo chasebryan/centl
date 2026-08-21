@@ -805,19 +805,20 @@
     }
   }
 
+  let isOpeningChrome = false;
   function openInChrome(url) {
-    if (!url) return;
+    if (!url || isOpeningChrome) return;
+    isOpeningChrome = true;
+    setTimeout(() => { isOpeningChrome = false; }, 800);
+
     showHostNotice("Opening in Google Chrome...");
-    try {
-      fetch("/api/open-chrome", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url })
-      }).catch(() => {});
-    } catch (_) {}
-    const launchBrowser = window["open"];
-    if (launchBrowser) launchBrowser(url, "_blank");
     closeOmnibar();
+
+    fetch("/api/open-chrome", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url })
+    }).catch(() => {});
   }
 
   function openFcfDoc(docId) {
@@ -840,6 +841,767 @@
     if (modal) modal.hidden = true;
     activeDoc = null;
   }
+
+  // --- STEM DYNAMIC VISUALIZER & THEOREM LAB ---
+  const StemVisualizer = {
+    canvas: null,
+    ctx: null,
+    modal: null,
+    animId: null,
+    isOpen: false,
+    initialized: false,
+    
+    // Viewport
+    view: {
+      centerX: 0,
+      centerY: 0,
+      zoom: 46, // pixels per unit
+      isDragging: false,
+      dragStartX: 0,
+      dragStartY: 0,
+      origCenterX: 0,
+      origCenterY: 0
+    },
+    
+    // Animation
+    anim: {
+      time: 0,
+      isPlaying: true,
+      speed: 1.0,
+      lastFrame: 0,
+      maxTime: 10.0
+    },
+    
+    // Parameters
+    params: {
+      a: 1.0,
+      b: 1.0,
+      c: 0.0,
+      k: 3,
+      omega: 1.5
+    },
+    
+    // Active theorem
+    currentTheorem: "riemann",
+    
+    // Custom Tracks
+    tracks: [
+      { expr: "sin(x - 2*t)", active: true, color: "#06b6d4", compiled: null },
+      { expr: "cos(2*x + t) * exp(-0.1*abs(x))", active: true, color: "#8b5cf6", compiled: null },
+      { expr: "", active: false, color: "#f59e0b", compiled: null }
+    ],
+
+    compileExpression: function(expr) {
+      if (!expr || !expr.trim()) return null;
+      let clean = expr.trim()
+        .replace(/\^/g, "**")
+        .replace(/\bpi\b/gi, "Math.PI")
+        .replace(/\be\b/g, "Math.E")
+        .replace(/\btau\b/gi, "(2*Math.PI)")
+        .replace(/\bsin\b/g, "Math.sin")
+        .replace(/\bcos\b/g, "Math.cos")
+        .replace(/\btan\b/g, "Math.tan")
+        .replace(/\basin\b/g, "Math.asin")
+        .replace(/\bacos\b/g, "Math.acos")
+        .replace(/\batan\b/g, "Math.atan")
+        .replace(/\bexp\b/g, "Math.exp")
+        .replace(/\bln\b/g, "Math.log")
+        .replace(/\blog\b/g, "Math.log10")
+        .replace(/\bsqrt\b/g, "Math.sqrt")
+        .replace(/\babs\b/g, "Math.abs")
+        .replace(/\bsinc\b/g, "(x === 0 ? 1 : Math.sin(x)/x)")
+        .replace(/\bfloor\b/g, "Math.floor")
+        .replace(/\bceil\b/g, "Math.ceil");
+      
+      try {
+        return new Function("x", "t", "a", "b", "c", "k", "omega", `return (${clean});`);
+      } catch (e) {
+        return null;
+      }
+    },
+
+    toScreen: function(x, y) {
+      const rect = StemVisualizer.canvas.getBoundingClientRect();
+      const v = StemVisualizer.view;
+      return {
+        x: rect.width / 2 + v.centerX + x * v.zoom,
+        y: rect.height / 2 + v.centerY - y * v.zoom
+      };
+    },
+
+    toMath: function(screenX, screenY) {
+      const rect = StemVisualizer.canvas.getBoundingClientRect();
+      const v = StemVisualizer.view;
+      return {
+        x: (screenX - (rect.width / 2 + v.centerX)) / v.zoom,
+        y: ((rect.height / 2 + v.centerY) - screenY) / v.zoom
+      };
+    },
+
+    drawMathCurve: function(ctx, fn, color, lineWidth = 2) {
+      const rect = StemVisualizer.canvas.getBoundingClientRect();
+      const w = rect.width;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = lineWidth;
+      ctx.beginPath();
+      
+      let isDrawing = false;
+      const pxStep = 2;
+      for (let px = 0; px <= w; px += pxStep) {
+        const math = StemVisualizer.toMath(px, 0);
+        try {
+          const y = fn(math.x);
+          if (isNaN(y) || !isFinite(y) || Math.abs(y) > 500) {
+            isDrawing = false;
+            continue;
+          }
+          const sc = StemVisualizer.toScreen(math.x, y);
+          if (!isDrawing) {
+            ctx.moveTo(sc.x, sc.y);
+            isDrawing = true;
+          } else {
+            ctx.lineTo(sc.x, sc.y);
+          }
+        } catch (e) {
+          isDrawing = false;
+        }
+      }
+      ctx.stroke();
+    },
+
+    drawGrid: function(ctx, width, height) {
+      ctx.fillStyle = "#090d16";
+      ctx.fillRect(0, 0, width, height);
+      
+      const v = StemVisualizer.view;
+      const originX = width / 2 + v.centerX;
+      const originY = height / 2 + v.centerY;
+      
+      let step = 1;
+      if (v.zoom < 25) step = 5;
+      else if (v.zoom < 10) step = 10;
+      else if (v.zoom > 120) step = 0.5;
+      else if (v.zoom > 240) step = 0.25;
+      
+      const pixelStep = step * v.zoom;
+      
+      // Grid lines
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+      ctx.lineWidth = 1;
+      
+      const startX = (originX % pixelStep) - pixelStep;
+      for (let x = startX; x < width + pixelStep; x += pixelStep) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0); ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      const startY = (originY % pixelStep) - pixelStep;
+      for (let y = startY; y < height + pixelStep; y += pixelStep) {
+        ctx.beginPath();
+        ctx.moveTo(0, y); ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+      
+      // Axes
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, originY); ctx.lineTo(width, originY);
+      ctx.moveTo(originX, 0); ctx.lineTo(originX, height);
+      ctx.stroke();
+      
+      // Labels
+      ctx.fillStyle = "rgba(148, 163, 184, 0.7)";
+      ctx.font = "10px monospace";
+      for (let x = startX; x < width + pixelStep; x += pixelStep) {
+        const mathX = (x - originX) / v.zoom;
+        if (Math.abs(mathX) > 0.001) {
+          ctx.fillText(mathX.toFixed(step < 1 ? 2 : 0), x - 8, originY + 14);
+        }
+      }
+      for (let y = startY; y < height + pixelStep; y += pixelStep) {
+        const mathY = (originY - y) / v.zoom;
+        if (Math.abs(mathY) > 0.001) {
+          ctx.fillText(mathY.toFixed(step < 1 ? 2 : 0), originX + 6, y + 4);
+        }
+      }
+      ctx.fillText("0", originX - 10, originY + 14);
+    },
+
+    theorems: {
+      riemann: {
+        title: "Riemann Integral Sum Approximation",
+        desc: "Definite integral ∫ f(x)dx approximated by n step rectangles converging to exact analytical area.",
+        render: function(ctx, width, height, t, p, toScreen) {
+          const fn = (x) => Math.sin(x) + 0.4 * Math.sin(2 * x) + 1.2;
+          const a = -2.5;
+          const b = 2.0 + 0.8 * Math.sin(t * 0.8);
+          const n = Math.max(4, Math.min(120, Math.round(p.k * 4)));
+          const dx = (b - a) / n;
+          
+          let riemannSum = 0;
+          for (let i = 0; i < n; i++) {
+            const xi = a + i * dx;
+            const xmid = xi + dx / 2;
+            const yi = fn(xmid);
+            riemannSum += yi * dx;
+            
+            const p1 = toScreen(xi, 0);
+            ctx.fillStyle = i % 2 === 0 ? "rgba(6, 182, 212, 0.28)" : "rgba(14, 165, 233, 0.18)";
+            ctx.strokeStyle = "rgba(56, 189, 248, 0.6)";
+            ctx.lineWidth = 1;
+            const rectW = dx * StemVisualizer.view.zoom;
+            const rectH = (0 - yi) * StemVisualizer.view.zoom;
+            ctx.fillRect(p1.x, p1.y, rectW, rectH);
+            ctx.strokeRect(p1.x, p1.y, rectW, rectH);
+          }
+          
+          StemVisualizer.drawMathCurve(ctx, fn, "#38bdf8", 2.5);
+          
+          const boundA = toScreen(a, 0);
+          const boundB = toScreen(b, 0);
+          ctx.strokeStyle = "#f43f5e";
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.moveTo(boundA.x, 0); ctx.lineTo(boundA.x, height);
+          ctx.moveTo(boundB.x, 0); ctx.lineTo(boundB.x, height);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          
+          ctx.fillStyle = "#f8fafc";
+          ctx.font = "11.5px monospace";
+          ctx.fillText(`Interval [${a.toFixed(2)}, ${b.toFixed(2)}] | n = ${n} | Riemann Area ≈ ${riemannSum.toFixed(4)}`, 20, height - 30);
+        }
+      },
+      
+      taylor: {
+        title: "Taylor / Maclaurin Series Polynomial Expansion",
+        desc: "Polynomial series Pₙ(x) = ∑ f⁽ᵏ⁾(0)/k! · xᵏ converging to transcendental function sin(x).",
+        render: function(ctx, width, height, t, p) {
+          const n = Math.max(1, Math.min(15, Math.round(p.k)));
+          const exactFn = Math.sin;
+          const taylorSin = (x) => {
+            let sum = 0;
+            let term = x;
+            for (let m = 0; m < n; m++) {
+              sum += term;
+              term = -term * x * x / ((2 * m + 2) * (2 * m + 3));
+            }
+            return sum;
+          };
+          
+          ctx.setLineDash([6, 4]);
+          StemVisualizer.drawMathCurve(ctx, exactFn, "rgba(255, 255, 255, 0.4)", 1.5);
+          ctx.setLineDash([]);
+          StemVisualizer.drawMathCurve(ctx, taylorSin, "#8b5cf6", 2.8);
+          
+          ctx.fillStyle = "#f8fafc";
+          ctx.font = "11.5px monospace";
+          ctx.fillText(`Target: sin(x) (Dashed) | Maclaurin Degree: ${2*n-1} (n=${n}) (Violet)`, 20, height - 30);
+        }
+      },
+
+      fourier: {
+        title: "Fourier Series Harmonic Synthesis",
+        desc: "Superposition of infinite harmonic sines approximating square wave with Gibbs phenomenon.",
+        render: function(ctx, width, height, t, p) {
+          const N = Math.max(1, Math.min(30, Math.round(p.k)));
+          const fourierSquare = (x) => {
+            let sum = 0;
+            for (let m = 1; m <= N; m++) {
+              const k = 2 * m - 1;
+              sum += (4 / Math.PI) * (Math.sin(k * (x - p.omega * t * 0.5)) / k);
+            }
+            return sum;
+          };
+          
+          const targetSquare = (x) => Math.sin(x - p.omega * t * 0.5) >= 0 ? 1 : -1;
+          ctx.setLineDash([4, 4]);
+          StemVisualizer.drawMathCurve(ctx, targetSquare, "rgba(255, 255, 255, 0.3)", 1.2);
+          ctx.setLineDash([]);
+          StemVisualizer.drawMathCurve(ctx, fourierSquare, "#10b981", 2.5);
+          
+          ctx.fillStyle = "#f8fafc";
+          ctx.font = "11.5px monospace";
+          ctx.fillText(`Square Wave Harmonic Sum: N = ${N} | Phase ω = ${p.omega.toFixed(2)} rad/s`, 20, height - 30);
+        }
+      },
+
+      tangent: {
+        title: "Tangent Line & Instantaneous Derivative Flow",
+        desc: "Instantaneous slope dy/dx vector flow moving along differentiable curve.",
+        render: function(ctx, width, height, t, p, toScreen) {
+          const fn = (x) => 0.2 * Math.pow(x, 3) - 0.8 * x + 0.5 * Math.sin(t);
+          const df = (x) => 0.6 * Math.pow(x, 2) - 0.8;
+          
+          const x0 = 2.4 * Math.sin(t * 0.8);
+          const y0 = fn(x0);
+          const slope = df(x0);
+          
+          StemVisualizer.drawMathCurve(ctx, fn, "#38bdf8", 2.2);
+          
+          const tanFn = (x) => slope * (x - x0) + y0;
+          StemVisualizer.drawMathCurve(ctx, tanFn, "#f43f5e", 2.0);
+          
+          const p0 = toScreen(x0, y0);
+          ctx.fillStyle = "#f43f5e";
+          ctx.beginPath();
+          ctx.arc(p0.x, p0.y, 6, 0, Math.PI * 2);
+          ctx.fill();
+          
+          ctx.fillStyle = "#f8fafc";
+          ctx.font = "11.5px monospace";
+          ctx.fillText(`x₀ = ${x0.toFixed(2)}, f(x₀) = ${y0.toFixed(2)}, Instantaneous Slope f'(x₀) = ${slope.toFixed(3)}`, 20, height - 30);
+        }
+      },
+
+      newton: {
+        title: "Newton-Raphson Root Finding Iteration",
+        desc: "Superlinear quadratic convergence xₙ₊₁ = xₙ - f(xₙ)/f'(xₙ) following tangent projections to the root.",
+        render: function(ctx, width, height, t, p, toScreen) {
+          const fn = (x) => 0.3 * Math.pow(x, 3) - 2 * x + 1;
+          const df = (x) => 0.9 * Math.pow(x, 2) - 2;
+          
+          StemVisualizer.drawMathCurve(ctx, fn, "#38bdf8", 2.0);
+          
+          let xCurr = 3.2;
+          const steps = Math.max(1, Math.min(6, Math.round(p.k)));
+          
+          for (let i = 0; i < steps; i++) {
+            const yCurr = fn(xCurr);
+            const slope = df(xCurr);
+            const xNext = xCurr - yCurr / slope;
+            
+            const ptCurrent = toScreen(xCurr, yCurr);
+            const ptGround = toScreen(xCurr, 0);
+            const ptNext = toScreen(xNext, 0);
+            
+            ctx.strokeStyle = "rgba(245, 158, 11, 0.4)";
+            ctx.setLineDash([2, 2]);
+            ctx.beginPath();
+            ctx.moveTo(ptGround.x, ptGround.y);
+            ctx.lineTo(ptCurrent.x, ptCurrent.y);
+            ctx.stroke();
+            
+            ctx.strokeStyle = "#f59e0b";
+            ctx.setLineDash([]);
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(ptCurrent.x, ptCurrent.y);
+            ctx.lineTo(ptNext.x, ptNext.y);
+            ctx.stroke();
+            
+            ctx.fillStyle = "#f59e0b";
+            ctx.beginPath();
+            ctx.arc(ptNext.x, ptNext.y, 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            xCurr = xNext;
+          }
+          
+          ctx.fillStyle = "#f8fafc";
+          ctx.font = "11.5px monospace";
+          ctx.fillText(`Newton Steps: ${steps} | Current Root Estimate: x ≈ ${xCurr.toFixed(6)} | Residue f(x) ≈ ${fn(xCurr).toExponential(2)}`, 20, height - 30);
+        }
+      },
+
+      wave_interf: {
+        title: "Wave Superposition, Interference & Standing Waves",
+        desc: "Linear superposition y(x,t) = A₁ sin(kx - ωt) + A₂ sin(kx + ωt) creating stationary nodes and antinodes.",
+        render: function(ctx, width, height, t, p) {
+          const k = p.k * 0.8;
+          const w = p.omega;
+          const y1 = (x) => Math.sin(k * x - w * t);
+          const y2 = (x) => Math.sin(k * x + w * t);
+          const yCombined = (x) => y1(x) + y2(x);
+          
+          ctx.setLineDash([4, 4]);
+          StemVisualizer.drawMathCurve(ctx, y1, "rgba(6, 182, 212, 0.4)", 1.2);
+          StemVisualizer.drawMathCurve(ctx, y2, "rgba(139, 92, 246, 0.4)", 1.2);
+          ctx.setLineDash([]);
+          StemVisualizer.drawMathCurve(ctx, yCombined, "#10b981", 2.6);
+          
+          ctx.fillStyle = "#f8fafc";
+          ctx.font = "11.5px monospace";
+          ctx.fillText(`Standing Wave: 2·sin(${k.toFixed(1)}x)·cos(${w.toFixed(1)}t) | Emerald Curve`, 20, height - 30);
+        }
+      },
+
+      damped_osc: {
+        title: "Damped Harmonic Oscillator & Attenuation",
+        desc: "Dynamic phase-attenuation envelope y(x, t) = e^(-γt) cos(ωd·t + φ) showing energy dissipation.",
+        render: function(ctx, width, height, t, p) {
+          const gamma = 0.15 * p.a;
+          const wd = p.omega;
+          const waveFn = (x) => Math.exp(-gamma * Math.abs(x)) * Math.cos(wd * x - 2 * t);
+          const envelopePos = (x) => Math.exp(-gamma * Math.abs(x));
+          const envelopeNeg = (x) => -Math.exp(-gamma * Math.abs(x));
+          
+          ctx.setLineDash([3, 3]);
+          StemVisualizer.drawMathCurve(ctx, envelopePos, "rgba(244, 63, 94, 0.5)", 1.2);
+          StemVisualizer.drawMathCurve(ctx, envelopeNeg, "rgba(244, 63, 94, 0.5)", 1.2);
+          ctx.setLineDash([]);
+          StemVisualizer.drawMathCurve(ctx, waveFn, "#f43f5e", 2.4);
+          
+          ctx.fillStyle = "#f8fafc";
+          ctx.font = "11.5px monospace";
+          ctx.fillText(`Damping γ = ${gamma.toFixed(3)} | Damped Frequency ω = ${wd.toFixed(2)} rad/s`, 20, height - 30);
+        }
+      },
+
+      projectile: {
+        title: "Projectile Drag Dynamics & Trajectory Comparison",
+        desc: "Analytical vacuum parabola vs numerical Euler integration of quadratic air drag F_drag = -c|v|v.",
+        render: function(ctx, width, height, t, p, toScreen) {
+          const g = 9.81;
+          const v0 = 16.0;
+          const angle = (p.a * 15 + 30) * Math.PI / 180;
+          const vx0 = v0 * Math.cos(angle);
+          const vy0 = v0 * Math.sin(angle);
+          
+          const maxDistVac = (v0 * v0 * Math.sin(2 * angle)) / g;
+          const vacY = (x) => (x * Math.tan(angle)) - (g * x * x) / (2 * v0 * v0 * Math.cos(angle) * Math.cos(angle));
+          
+          ctx.setLineDash([4, 4]);
+          StemVisualizer.drawMathCurve(ctx, (x) => x >= 0 && x <= maxDistVac ? vacY(x) : NaN, "rgba(255, 255, 255, 0.35)", 1.4);
+          ctx.setLineDash([]);
+          
+          const cDrag = 0.08 * p.b;
+          let x = 0, y = 0, vx = vx0, vy = vy0, dtSim = 0.02;
+          const pts = [{ x, y }];
+          while (y >= 0 && x < 40) {
+            const v = Math.sqrt(vx * vx + vy * vy);
+            const ax = -cDrag * v * vx;
+            const ay = -g - cDrag * v * vy;
+            vx += ax * dtSim;
+            vy += ay * dtSim;
+            x += vx * dtSim;
+            y += vy * dtSim;
+            pts.push({ x, y: Math.max(0, y) });
+          }
+          
+          ctx.strokeStyle = "#38bdf8";
+          ctx.lineWidth = 2.4;
+          ctx.beginPath();
+          pts.forEach((pt, i) => {
+            const sc = toScreen(pt.x, pt.y);
+            if (i === 0) ctx.moveTo(sc.x, sc.y);
+            else ctx.lineTo(sc.x, sc.y);
+          });
+          ctx.stroke();
+          
+          const currentSimIdx = Math.min(pts.length - 1, Math.floor((t % 4.0) * 25));
+          const currPt = pts[currentSimIdx];
+          const currSc = toScreen(currPt.x, currPt.y);
+          ctx.fillStyle = "#f59e0b";
+          ctx.beginPath();
+          ctx.arc(currSc.x, currSc.y, 6, 0, Math.PI * 2);
+          ctx.fill();
+          
+          ctx.fillStyle = "#f8fafc";
+          ctx.font = "11.5px monospace";
+          ctx.fillText(`Launch θ = ${(angle*180/Math.PI).toFixed(1)}° | v₀ = ${v0} m/s | Drag c = ${cDrag.toFixed(3)} | Vacuum (Dashed) vs Drag (Cyan)`, 20, height - 30);
+        }
+      },
+
+      quantum_packet: {
+        title: "Quantum Gaussian Wavepacket Dispersion",
+        desc: "Time evolution of free quantum particle probability density |ψ(x,t)|² showing uncertainty spreading.",
+        render: function(ctx, width, height, t, p) {
+          const sigma0 = 0.8;
+          const hbar_m = 0.5;
+          const vg = 1.2;
+          const x0 = vg * (t - 4.0);
+          const sigmaT = Math.sqrt(sigma0 * sigma0 + Math.pow(hbar_m * t / sigma0, 2));
+          
+          const probDensity = (x) => (1 / (sigmaT * Math.sqrt(2 * Math.PI))) * Math.exp(-Math.pow(x - x0, 2) / (2 * sigmaT * sigmaT));
+          const waveRe = (x) => probDensity(x) * Math.cos(5 * (x - x0));
+          
+          StemVisualizer.drawMathCurve(ctx, probDensity, "#06b6d4", 2.6);
+          StemVisualizer.drawMathCurve(ctx, waveRe, "rgba(139, 92, 246, 0.6)", 1.2);
+          
+          ctx.fillStyle = "#f8fafc";
+          ctx.font = "11.5px monospace";
+          ctx.fillText(`Wavepacket Peak x₀ = ${x0.toFixed(2)} | Spatial Width σ(t) = ${sigmaT.toFixed(3)} | Group Velocity vg = ${vg} m/s`, 20, height - 30);
+        }
+      },
+
+      chem_kinetics: {
+        title: "Reversible First-Order Reaction Kinetics",
+        desc: "Equilibrium concentrations [A](t) ⇌ [B](t) governed by forward/reverse rate constants k₁ and k₋₁.",
+        render: function(ctx, width, height, t, p) {
+          const k1 = Math.max(0.1, p.a * 0.5);
+          const k_rev = Math.max(0.1, p.b * 0.3);
+          const A0 = 2.0;
+          const B0 = 0.0;
+          const A_eq = (k_rev * (A0 + B0)) / (k1 + k_rev);
+          const B_eq = (A0 + B0) - A_eq;
+          const kSum = k1 + k_rev;
+          
+          const concA = (x) => x < 0 ? A0 : A_eq + (A0 - A_eq) * Math.exp(-kSum * x);
+          const concB = (x) => x < 0 ? B0 : B_eq + (B0 - B_eq) * Math.exp(-kSum * x);
+          
+          StemVisualizer.drawMathCurve(ctx, concA, "#f43f5e", 2.4);
+          StemVisualizer.drawMathCurve(ctx, concB, "#10b981", 2.4);
+          
+          ctx.fillStyle = "#f8fafc";
+          ctx.font = "11.5px monospace";
+          ctx.fillText(`[A](t) Reactant (Red) | [B](t) Product (Green) | k₁ = ${k1.toFixed(2)}, k₋₁ = ${k_rev.toFixed(2)} | [A]eq = ${A_eq.toFixed(2)}`, 20, height - 30);
+        }
+      },
+
+      maxwell_boltzmann: {
+        title: "Maxwell-Boltzmann Molecular Speed Distribution",
+        desc: "Statistical distribution of particle kinetic velocities f(v) = 4π(M/2πRT)^(3/2) v² exp(-Mv²/2RT).",
+        render: function(ctx, width, height, t, p) {
+          const T = Math.max(0.2, p.a);
+          const mbSpeed = (v) => {
+            if (v < 0) return 0;
+            return (4 / Math.sqrt(Math.PI)) * Math.pow(1 / T, 1.5) * Math.pow(v, 2) * Math.exp(-Math.pow(v, 2) / T);
+          };
+          
+          StemVisualizer.drawMathCurve(ctx, mbSpeed, "#f59e0b", 2.6);
+          
+          ctx.fillStyle = "#f8fafc";
+          ctx.font = "11.5px monospace";
+          ctx.fillText(`Temperature Parameter T = ${T.toFixed(2)} | Peak Speed vp = ${Math.sqrt(T).toFixed(2)}`, 20, height - 30);
+        }
+      },
+
+      michaelis_menten: {
+        title: "Enzyme Kinetics (Michaelis-Menten Model)",
+        desc: "Substrate saturation velocity v = (Vmax · [S]) / (Km + [S]) and transition to zero-order maximum rate.",
+        render: function(ctx, width, height, t, p) {
+          const Vmax = 2.5 * p.a;
+          const Km = Math.max(0.2, p.b);
+          const mmRate = (S) => S < 0 ? 0 : (Vmax * S) / (Km + S);
+          
+          StemVisualizer.drawMathCurve(ctx, mmRate, "#10b981", 2.6);
+          
+          ctx.setLineDash([4, 4]);
+          StemVisualizer.drawMathCurve(ctx, () => Vmax, "rgba(255, 255, 255, 0.35)", 1.2);
+          ctx.setLineDash([]);
+          
+          ctx.fillStyle = "#f8fafc";
+          ctx.font = "11.5px monospace";
+          ctx.fillText(`Vmax = ${Vmax.toFixed(2)} | Michaelis Constant Km = ${Km.toFixed(2)}`, 20, height - 30);
+        }
+      },
+
+      lissajous: {
+        title: "Lissajous Complex Parametric Harmonics",
+        desc: "Orthogonal harmonic oscillator trajectory (x(θ), y(θ)) = (A·sin(a·θ + δ), B·sin(b·θ)).",
+        render: function(ctx, width, height, t, p, toScreen) {
+          const aFreq = Math.round(p.a * 2);
+          const bFreq = Math.round(p.b * 3);
+          const delta = p.omega * t;
+          
+          ctx.strokeStyle = "#8b5cf6";
+          ctx.lineWidth = 2.4;
+          ctx.beginPath();
+          const steps = 360;
+          for (let i = 0; i <= steps; i++) {
+            const theta = (i / steps) * Math.PI * 2;
+            const x = 3.0 * Math.sin(aFreq * theta + delta);
+            const y = 3.0 * Math.sin(bFreq * theta);
+            const sc = toScreen(x, y);
+            if (i === 0) ctx.moveTo(sc.x, sc.y);
+            else ctx.lineTo(sc.x, sc.y);
+          }
+          ctx.stroke();
+          
+          ctx.fillStyle = "#f8fafc";
+          ctx.font = "11.5px monospace";
+          ctx.fillText(`Parametric Frequency Ratio a:b = ${aFreq}:${bFreq} | Phase Shift δ = ${delta.toFixed(2)} rad`, 20, height - 30);
+        }
+      },
+
+      rose_curves: {
+        title: "Polar Rose & Epicycloid Petals",
+        desc: "Polar coordinate harmonic function r(θ, t) = a·cos(k·θ + ω·t) generating n-petal flowers.",
+        render: function(ctx, width, height, t, p, toScreen) {
+          const kPetals = Math.max(1, Math.round(p.k));
+          const aAmp = 3.2;
+          const phase = p.omega * t * 0.5;
+          
+          ctx.strokeStyle = "#06b6d4";
+          ctx.lineWidth = 2.4;
+          ctx.beginPath();
+          const steps = 400;
+          for (let i = 0; i <= steps; i++) {
+            const theta = (i / steps) * Math.PI * 2;
+            const r = aAmp * Math.cos(kPetals * theta + phase);
+            const x = r * Math.cos(theta);
+            const y = r * Math.sin(theta);
+            const sc = toScreen(x, y);
+            if (i === 0) ctx.moveTo(sc.x, sc.y);
+            else ctx.lineTo(sc.x, sc.y);
+          }
+          ctx.stroke();
+          
+          ctx.fillStyle = "#f8fafc";
+          ctx.font = "11.5px monospace";
+          ctx.fillText(`Polar Equation: r = ${aAmp}·cos(${kPetals}θ + ${phase.toFixed(2)}) | Petals = ${kPetals % 2 === 0 ? 2 * kPetals : kPetals}`, 20, height - 30);
+        }
+      }
+    },
+
+    init: function() {
+      if (StemVisualizer.initialized) return;
+      StemVisualizer.canvas = document.getElementById("stem-viz-canvas");
+      if (!StemVisualizer.canvas) return;
+      StemVisualizer.ctx = StemVisualizer.canvas.getContext("2d");
+      StemVisualizer.modal = document.querySelector("[data-visualizer-modal]");
+      StemVisualizer.initialized = true;
+
+      // Mouse drag pan & zoom
+      StemVisualizer.canvas.addEventListener("mousedown", (e) => {
+        StemVisualizer.view.isDragging = true;
+        StemVisualizer.view.dragStartX = e.clientX;
+        StemVisualizer.view.dragStartY = e.clientY;
+        StemVisualizer.view.origCenterX = StemVisualizer.view.centerX;
+        StemVisualizer.view.origCenterY = StemVisualizer.view.centerY;
+      });
+
+      window.addEventListener("mousemove", (e) => {
+        if (!StemVisualizer.isOpen) return;
+        if (StemVisualizer.view.isDragging) {
+          StemVisualizer.view.centerX = StemVisualizer.view.origCenterX + (e.clientX - StemVisualizer.view.dragStartX);
+          StemVisualizer.view.centerY = StemVisualizer.view.origCenterY + (e.clientY - StemVisualizer.view.dragStartY);
+        }
+        
+        // Coordinate readout
+        const rect = StemVisualizer.canvas.getBoundingClientRect();
+        if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
+          const math = StemVisualizer.toMath(e.clientX - rect.left, e.clientY - rect.top);
+          const badge = document.querySelector("[data-viz-coord-badge]");
+          if (badge) badge.textContent = `(x: ${math.x.toFixed(2)}, y: ${math.y.toFixed(2)})`;
+        }
+      });
+
+      window.addEventListener("mouseup", () => {
+        StemVisualizer.view.isDragging = false;
+      });
+
+      StemVisualizer.canvas.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 1.12 : 0.89;
+        StemVisualizer.view.zoom = Math.max(8, Math.min(600, StemVisualizer.view.zoom * factor));
+      }, { passive: false });
+    },
+
+    renderFrame: function(now) {
+      if (!StemVisualizer.isOpen) return;
+      
+      if (StemVisualizer.anim.isPlaying) {
+        if (!StemVisualizer.anim.lastFrame) StemVisualizer.anim.lastFrame = now;
+        const dt = (now - StemVisualizer.anim.lastFrame) / 1000;
+        StemVisualizer.anim.lastFrame = now;
+        
+        StemVisualizer.anim.time += dt * StemVisualizer.anim.speed;
+        if (StemVisualizer.anim.time > StemVisualizer.anim.maxTime) {
+          StemVisualizer.anim.time = 0;
+        }
+        
+        const scrubber = document.querySelector("[data-viz-scrubber]");
+        if (scrubber && document.activeElement !== scrubber) {
+          scrubber.value = StemVisualizer.anim.time.toFixed(2);
+        }
+        const timeDisplay = document.querySelector("[data-viz-time-display]");
+        if (timeDisplay) {
+          timeDisplay.textContent = `t = ${StemVisualizer.anim.time.toFixed(2)} s`;
+        }
+      } else {
+        StemVisualizer.anim.lastFrame = now;
+      }
+      
+      const canvas = StemVisualizer.canvas;
+      const ctx = StemVisualizer.ctx;
+      if (!canvas || !ctx) return;
+      
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      if (canvas.width !== Math.floor(rect.width * dpr) || canvas.height !== Math.floor(rect.height * dpr)) {
+        canvas.width = Math.floor(rect.width * dpr);
+        canvas.height = Math.floor(rect.height * dpr);
+      }
+      
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      const width = rect.width;
+      const height = rect.height;
+      
+      StemVisualizer.drawGrid(ctx, width, height);
+      
+      const t = StemVisualizer.anim.time;
+      const p = StemVisualizer.params;
+      
+      const activePanel = document.querySelector(".viz-tab-panel:not([hidden])");
+      const isCustomTab = activePanel?.dataset.vizPanel === "custom";
+      
+      if (isCustomTab) {
+        StemVisualizer.tracks.forEach(track => {
+          if (track.active && track.expr) {
+            if (!track.compiled) track.compiled = StemVisualizer.compileExpression(track.expr);
+            if (track.compiled) {
+              StemVisualizer.drawMathCurve(ctx, (x) => track.compiled(x, t, p.a, p.b, p.c, p.k, p.omega), track.color, 2.4);
+            }
+          }
+        });
+      } else if (StemVisualizer.currentTheorem && StemVisualizer.theorems[StemVisualizer.currentTheorem]) {
+        StemVisualizer.theorems[StemVisualizer.currentTheorem].render(
+          ctx, width, height, t, p, StemVisualizer.toScreen, StemVisualizer.toMath
+        );
+      }
+      
+      ctx.restore();
+      StemVisualizer.animId = requestAnimationFrame(StemVisualizer.renderFrame);
+    },
+
+    open: function(prefillFunc) {
+      const modal = document.querySelector("[data-visualizer-modal]");
+      if (!modal) return;
+      modal.hidden = false;
+      StemVisualizer.isOpen = true;
+      StemVisualizer.init();
+      
+      if (prefillFunc) {
+        const f1Input = document.querySelector('[data-fn-track="1"]');
+        if (f1Input) {
+          f1Input.value = prefillFunc;
+          StemVisualizer.tracks[0].expr = prefillFunc;
+          StemVisualizer.tracks[0].compiled = null;
+        }
+        const customTab = document.querySelector('[data-viz-tab="custom"]');
+        if (customTab) customTab.click();
+      }
+      
+      StemVisualizer.anim.lastFrame = performance.now();
+      cancelAnimationFrame(StemVisualizer.animId);
+      StemVisualizer.animId = requestAnimationFrame(StemVisualizer.renderFrame);
+    },
+
+    close: function() {
+      const modal = document.querySelector("[data-visualizer-modal]");
+      if (modal) modal.hidden = true;
+      StemVisualizer.isOpen = false;
+      cancelAnimationFrame(StemVisualizer.animId);
+    },
+
+    setTheorem: function(id) {
+      if (!StemVisualizer.theorems[id]) return;
+      StemVisualizer.currentTheorem = id;
+      document.querySelectorAll("[data-load-theorem]").forEach(btn => {
+        btn.classList.toggle("is-selected", btn.dataset.loadTheorem === id);
+      });
+      
+      const bannerTitle = document.querySelector("[data-viz-banner-title]");
+      const bannerDesc = document.querySelector("[data-viz-banner-desc]");
+      if (bannerTitle) bannerTitle.textContent = StemVisualizer.theorems[id].title;
+      if (bannerDesc) bannerDesc.textContent = StemVisualizer.theorems[id].desc;
+    }
+  };
 
   function focusOmnibar() {
     const input = omnibarInput();
@@ -1483,6 +2245,72 @@
       return;
     }
 
+    // STEM Dynamic Visualizer Modal Controls
+    if (target.matches("[data-open-visualizer]") || target.closest("[data-open-visualizer]")) {
+      StemVisualizer.open();
+      return;
+    }
+
+    if (target.matches("[data-visualizer-close]") || target.closest("[data-visualizer-close]") || (target.matches(".stem-visualizer-modal") && !target.closest(".stem-visualizer-dialog"))) {
+      StemVisualizer.close();
+      return;
+    }
+
+    const thChip = target.closest("[data-load-theorem]");
+    if (thChip) {
+      StemVisualizer.setTheorem(thChip.dataset.loadTheorem);
+      return;
+    }
+
+    const vizTab = target.closest("[data-viz-tab]");
+    if (vizTab) {
+      const tabName = vizTab.dataset.vizTab;
+      document.querySelectorAll("[data-viz-tab]").forEach(t => t.classList.toggle("is-active", t === vizTab));
+      document.querySelectorAll("[data-viz-panel]").forEach(p => p.hidden = p.dataset.vizPanel !== tabName);
+      return;
+    }
+
+    const fnToggle = target.closest("[data-fn-toggle]");
+    if (fnToggle) {
+      const trackIdx = parseInt(fnToggle.dataset.fnToggle, 10) - 1;
+      if (StemVisualizer.tracks[trackIdx]) {
+        StemVisualizer.tracks[trackIdx].active = !StemVisualizer.tracks[trackIdx].active;
+        fnToggle.classList.toggle("is-active", StemVisualizer.tracks[trackIdx].active);
+      }
+      return;
+    }
+
+    const vizAction = target.closest("[data-viz-action]");
+    if (vizAction) {
+      const act = vizAction.dataset.vizAction;
+      if (act === "export-png") {
+        if (StemVisualizer.canvas) {
+          const a = document.createElement("a");
+          a.download = `centl-stem-graph-${Date.now()}.png`;
+          a.href = StemVisualizer.canvas.toDataURL("image/png");
+          a.click();
+        }
+      } else if (act === "reset-view") {
+        StemVisualizer.view.centerX = 0;
+        StemVisualizer.view.centerY = 0;
+        StemVisualizer.view.zoom = 46;
+      } else if (act === "play-pause") {
+        StemVisualizer.anim.isPlaying = !StemVisualizer.anim.isPlaying;
+        vizAction.textContent = StemVisualizer.anim.isPlaying ? "⏯" : "▶";
+      } else if (act === "reset-time") {
+        StemVisualizer.anim.time = 0;
+      }
+      return;
+    }
+
+    const zoomBtn = target.closest("[data-viz-zoom]");
+    if (zoomBtn) {
+      const dir = zoomBtn.dataset.vizZoom;
+      const factor = dir === "in" ? 1.25 : 0.8;
+      StemVisualizer.view.zoom = Math.max(8, Math.min(600, StemVisualizer.view.zoom * factor));
+      return;
+    }
+
     // Click outside Omnibar closes dropdown
     if (!target.closest(".header-omnibar")) {
       closeOmnibar();
@@ -1522,13 +2350,34 @@
       writeStorage(draftKey, event.target.value);
       syncComposerActions();
     }
+    if (event.target.matches("[data-fn-track]")) {
+      const trackIdx = parseInt(event.target.dataset.fnTrack, 10) - 1;
+      if (StemVisualizer.tracks[trackIdx]) {
+        StemVisualizer.tracks[trackIdx].expr = event.target.value;
+        StemVisualizer.tracks[trackIdx].compiled = null;
+      }
+    }
+    if (event.target.matches("[data-slider]")) {
+      const paramName = event.target.dataset.slider;
+      const val = parseFloat(event.target.value);
+      StemVisualizer.params[paramName] = val;
+      const readout = document.querySelector(`[data-slider-val="${paramName}"]`);
+      if (readout) readout.textContent = Number.isInteger(val) ? val.toString() : val.toFixed(2);
+    }
+    if (event.target.matches("[data-viz-scrubber]")) {
+      StemVisualizer.anim.time = parseFloat(event.target.value);
+    }
   });
 
   document.addEventListener("change", (event) => {
     const select = event.target.closest(".mode-control select");
-    if (!select) return;
-    const mode = select.value || "Auto";
-    applyInteractionMode(mode);
+    if (select) {
+      const mode = select.value || "Auto";
+      applyInteractionMode(mode);
+    }
+    if (event.target.matches("[data-viz-speed]")) {
+      StemVisualizer.anim.speed = parseFloat(event.target.value) || 1.0;
+    }
   });
 
   document.addEventListener("keydown", (event) => {
@@ -1538,6 +2387,14 @@
     const omnibarIsOpen = omnibarDropdownEl && !omnibarDropdownEl.hidden;
     const docModal = document.querySelector("[data-fcf-doc-modal]");
     const docModalIsOpen = docModal && !docModal.hidden;
+    const vizModal = document.querySelector("[data-visualizer-modal]");
+    const vizModalIsOpen = vizModal && !vizModal.hidden;
+
+    if (vizModalIsOpen && event.key === "Escape") {
+      event.preventDefault();
+      StemVisualizer.close();
+      return;
+    }
 
     if (docModalIsOpen && event.key === "Escape") {
       event.preventDefault();

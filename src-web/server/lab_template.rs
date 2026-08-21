@@ -267,6 +267,191 @@ pub fn render_lab_page(workbench: &str) -> String {
       </footer>
     </div>
   </div>
+
+  <div class="stem-visualizer-modal" data-visualizer-modal hidden>
+    <div class="stem-visualizer-dialog" role="dialog" aria-modal="true" aria-labelledby="visualizer-modal-title">
+      <header class="visualizer-header">
+        <div class="visualizer-brand">
+          <span class="visualizer-badge">STEM DYNAMIC VISUALIZER &amp; THEOREM LAB</span>
+          <h2 id="visualizer-modal-title">Interactive Mathematical Grapher</h2>
+        </div>
+        <div class="visualizer-header-actions">
+          <button type="button" class="viz-btn" data-viz-action="export-png" title="Export graph snapshot (PNG)">📷 Snapshot</button>
+          <button type="button" class="viz-btn" data-viz-action="reset-view" title="Center at (0,0) with standard domain">⌖ Reset View</button>
+          <button type="button" class="viz-btn doc-close-btn" data-visualizer-close aria-label="Close visualizer">✕</button>
+        </div>
+      </header>
+
+      <div class="visualizer-layout">
+        <!-- Sidebar: Functions, Parameters, Theorem Catalog -->
+        <aside class="visualizer-sidebar">
+          <div class="viz-sidebar-tabs">
+            <button type="button" class="viz-tab is-active" data-viz-tab="theorems">Theorems</button>
+            <button type="button" class="viz-tab" data-viz-tab="custom">Custom f(x,t)</button>
+            <button type="button" class="viz-tab" data-viz-tab="params">Sliders</button>
+          </div>
+
+          <div class="viz-tab-panel" data-viz-panel="theorems">
+            <div class="viz-section-label">STEM Theorem Demonstrations</div>
+            <div class="theorems-list">
+              <div class="theorem-group-title">Calculus &amp; Analysis</div>
+              <button type="button" class="theorem-chip is-selected" data-load-theorem="riemann">
+                <strong>Riemann Integral Sums</strong>
+                <small>Rectangle &amp; trapezoid area convergence</small>
+              </button>
+              <button type="button" class="theorem-chip" data-load-theorem="taylor">
+                <strong>Taylor Series Expansion</strong>
+                <small>Maclaurin harmonic polynomial</small>
+              </button>
+              <button type="button" class="theorem-chip" data-load-theorem="fourier">
+                <strong>Fourier Series Synthesis</strong>
+                <small>Harmonic waveform summation</small>
+              </button>
+              <button type="button" class="theorem-chip" data-load-theorem="tangent">
+                <strong>Tangent Line &amp; Derivative Flow</strong>
+                <small>Instantaneous slope along curve</small>
+              </button>
+              <button type="button" class="theorem-chip" data-load-theorem="newton">
+                <strong>Newton-Raphson Roots</strong>
+                <small>Iterative root finding tangent steps</small>
+              </button>
+
+              <div class="theorem-group-title">Physics &amp; Kinematics</div>
+              <button type="button" class="theorem-chip" data-load-theorem="wave_interf">
+                <strong>Wave Interference &amp; Beats</strong>
+                <small>Superposition &amp; envelope propagation</small>
+              </button>
+              <button type="button" class="theorem-chip" data-load-theorem="damped_osc">
+                <strong>Damped Harmonic Oscillator</strong>
+                <small>Resonance &amp; phase attenuation</small>
+              </button>
+              <button type="button" class="theorem-chip" data-load-theorem="projectile">
+                <strong>Projectile Drag Dynamics</strong>
+                <small>Parabolic arc vs quadratic air drag</small>
+              </button>
+              <button type="button" class="theorem-chip" data-load-theorem="quantum_packet">
+                <strong>Quantum Wavepacket Dispersion</strong>
+                <small>Gaussian probability density |ψ|²</small>
+              </button>
+
+              <div class="theorem-group-title">Chemistry &amp; Kinetics</div>
+              <button type="button" class="theorem-chip" data-load-theorem="chem_kinetics">
+                <strong>Reversible Reaction Kinetics</strong>
+                <small>Equilibrium concentration decay/formation</small>
+              </button>
+              <button type="button" class="theorem-chip" data-load-theorem="maxwell_boltzmann">
+                <strong>Maxwell-Boltzmann Distribution</strong>
+                <small>Molecular speed vs temperature T</small>
+              </button>
+              <button type="button" class="theorem-chip" data-load-theorem="michaelis_menten">
+                <strong>Enzyme Michaelis-Menten</strong>
+                <small>Reaction velocity saturation curve</small>
+              </button>
+
+              <div class="theorem-group-title">Geometry &amp; Parametric</div>
+              <button type="button" class="theorem-chip" data-load-theorem="lissajous">
+                <strong>Lissajous Parametric Knots</strong>
+                <small>Frequency phase harmonics (x(t), y(t))</small>
+              </button>
+              <button type="button" class="theorem-chip" data-load-theorem="rose_curves">
+                <strong>Polar Rose &amp; Epicycloids</strong>
+                <small>r = a·cos(k·θ + ω·t) petals</small>
+              </button>
+            </div>
+          </div>
+
+          <div class="viz-tab-panel" data-viz-panel="custom" hidden>
+            <div class="viz-section-label">Active Function Tracks</div>
+            <div class="viz-function-tracks">
+              <div class="viz-fn-row fn-track-1">
+                <span class="fn-color-dot" style="background:#06b6d4;"></span>
+                <label>f₁(x, t) =</label>
+                <input type="text" class="viz-fn-input" data-fn-track="1" value="sin(x - 2*t)" spellcheck="false">
+                <button type="button" class="viz-fn-toggle is-active" data-fn-toggle="1" title="Toggle visibility">👁</button>
+              </div>
+              <div class="viz-fn-row fn-track-2">
+                <span class="fn-color-dot" style="background:#8b5cf6;"></span>
+                <label>f₂(x, t) =</label>
+                <input type="text" class="viz-fn-input" data-fn-track="2" value="cos(2*x + t) * exp(-0.1*abs(x))" spellcheck="false">
+                <button type="button" class="viz-fn-toggle is-active" data-fn-toggle="2" title="Toggle visibility">👁</button>
+              </div>
+              <div class="viz-fn-row fn-track-3">
+                <span class="fn-color-dot" style="background:#f59e0b;"></span>
+                <label>f₃(x, t) =</label>
+                <input type="text" class="viz-fn-input" data-fn-track="3" value="" placeholder="e.g. 0.5*x^2 or cos(x)" spellcheck="false">
+                <button type="button" class="viz-fn-toggle" data-fn-toggle="3" title="Toggle visibility">👁</button>
+              </div>
+            </div>
+            <div class="viz-help-note">
+              <span>Supported:</span> <code>sin, cos, tan, exp, ln, sqrt, abs, sinc</code>, variables <code>x, t</code>, parameters <code>a, b, c, k, omega</code>.
+            </div>
+          </div>
+
+          <div class="viz-tab-panel" data-viz-panel="params" hidden>
+            <div class="viz-section-label">Interactive Parameters</div>
+            <div class="viz-slider-group">
+              <div class="viz-slider-row">
+                <label>Parameter <strong>a</strong>: <span data-slider-val="a">1.00</span></label>
+                <input type="range" data-slider="a" min="-5" max="5" step="0.05" value="1.0">
+              </div>
+              <div class="viz-slider-row">
+                <label>Parameter <strong>b</strong>: <span data-slider-val="b">1.00</span></label>
+                <input type="range" data-slider="b" min="-5" max="5" step="0.05" value="1.0">
+              </div>
+              <div class="viz-slider-row">
+                <label>Parameter <strong>c</strong>: <span data-slider-val="c">0.00</span></label>
+                <input type="range" data-slider="c" min="-5" max="5" step="0.05" value="0.0">
+              </div>
+              <div class="viz-slider-row">
+                <label>Harmonic / Step <strong>k</strong>: <span data-slider-val="k">3</span></label>
+                <input type="range" data-slider="k" min="1" max="20" step="1" value="3">
+              </div>
+              <div class="viz-slider-row">
+                <label>Angular speed <strong>ω</strong>: <span data-slider-val="omega">1.50</span></label>
+                <input type="range" data-slider="omega" min="0" max="10" step="0.1" value="1.5">
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main Canvas Area -->
+        <main class="visualizer-main">
+          <div class="visualizer-canvas-container" id="viz-canvas-container">
+            <canvas id="stem-viz-canvas" class="stem-viz-canvas"></canvas>
+            <div class="viz-coord-badge" data-viz-coord-badge>(x: 0.00, y: 0.00)</div>
+            <div class="viz-theorem-banner" data-viz-theorem-banner>
+              <h4 data-viz-banner-title>Riemann Sum Approximation</h4>
+              <p data-viz-banner-desc>Area under curve f(x) with rectangles converging to exact integral.</p>
+            </div>
+          </div>
+
+          <!-- Interactive Timeline & Transport Controls -->
+          <footer class="visualizer-timeline">
+            <div class="viz-transport">
+              <button type="button" class="viz-transport-btn" data-viz-action="play-pause" title="Play/Pause Animation">⏯</button>
+              <button type="button" class="viz-transport-btn" data-viz-action="reset-time" title="Reset Time to 0.0s">⏮</button>
+              <span class="viz-time-display" data-viz-time-display>t = 0.00 s</span>
+            </div>
+            <div class="viz-scrubber-wrap">
+              <input type="range" class="viz-scrubber" data-viz-scrubber min="0" max="10" step="0.01" value="0">
+            </div>
+            <div class="viz-timeline-extras">
+              <label>Speed:</label>
+              <select data-viz-speed class="viz-select">
+                <option value="0.25">0.25×</option>
+                <option value="0.5">0.5×</option>
+                <option value="1.0" selected>1.0×</option>
+                <option value="2.0">2.0×</option>
+                <option value="4.0">4.0×</option>
+              </select>
+              <button type="button" class="viz-btn" data-viz-zoom="in" title="Zoom in">+</button>
+              <button type="button" class="viz-btn" data-viz-zoom="out" title="Zoom out">−</button>
+            </div>
+          </footer>
+        </main>
+      </div>
+    </div>
+  </div>
 </body>
 </html>"##
     )
@@ -363,7 +548,7 @@ pub(crate) fn render_lab_workbench_with_transient_result(
     }
     html.push_str(r#"</div><button class="strip-action add-tab" type="button" data-new-notebook data-new-computation title="Start a blank computation without clearing notebook history" aria-label="Create new notebook tab"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"></path></svg></button><span class="strip-spacer"></span><button class="strip-action" type="button" data-toggle-explorer title="Toggle workspace" aria-label="Toggle workspace"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"></rect><path d="M8 3v14"></path></svg></button><button class="strip-action" type="button" data-toggle-inspector title="Toggle inspector" aria-label="Toggle inspector"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"></rect><path d="M12 3v14"></path></svg></button></div>"#);
 
-    html.push_str(r#"<div class="workspace-toolbar"><div><button class="toolbar-button" type="button" data-open-welcome title="Open Welcome Screen"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 9.5 10 4l7 5.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z"></path><path d="M9 18v-6h2v6"></path></svg>Welcome</button><button class="toolbar-button" type="button" data-open-palette><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M4 10h12M4 15h8"></path></svg>Tools</button><button class="toolbar-button" type="button" data-save-project title="Save workspace (Ctrl / ⌘ S)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h9l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm2 0v4h6V4M6 13h8v4H6v-4Z"></path></svg>Save</button><a class="toolbar-button" href="/download/notebook.md" download="notebook.md" title="Download notebook as Markdown"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M6 9l4 4 4-4M4 17h12"></path></svg>Download</a><button class="toolbar-button" type="button" data-open-help title="Open help and guide"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"></circle><path d="M7.5 8a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3.5M10 15h.01"></path></svg>Help</button></div><div><button class="toolbar-icon theme-toggle" type="button" data-toggle-theme title="Toggle dimmed theme" aria-label="Toggle dimmed theme"><svg class="theme-icon-sun" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3"></circle><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M15.7 4.3l-1.4 1.4M5.7 14.3l-1.4 1.4"></path></svg><svg class="theme-icon-moon" viewBox="0 0 20 20" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg></button></div></div>"#);
+    html.push_str(r#"<div class="workspace-toolbar"><div><button class="toolbar-button" type="button" data-open-welcome title="Open Welcome Screen"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 9.5 10 4l7 5.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z"></path><path d="M9 18v-6h2v6"></path></svg>Welcome</button><button class="toolbar-button" type="button" data-open-visualizer title="Open Interactive STEM Animated Visualizer &amp; Theorem Studio"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17V3m0 14h14M3 12c3-4 6 2 9-5 2-4 3-1 5 1"></path></svg>Visualizer</button><button class="toolbar-button" type="button" data-open-palette><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M4 10h12M4 15h8"></path></svg>Tools</button><button class="toolbar-button" type="button" data-save-project title="Save workspace (Ctrl / ⌘ S)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h9l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm2 0v4h6V4M6 13h8v4H6v-4Z"></path></svg>Save</button><a class="toolbar-button" href="/download/notebook.md" download="notebook.md" title="Download notebook as Markdown"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M6 9l4 4 4-4M4 17h12"></path></svg>Download</a><button class="toolbar-button" type="button" data-open-help title="Open help and guide"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"></circle><path d="M7.5 8a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3.5M10 15h.01"></path></svg>Help</button></div><div><button class="toolbar-icon theme-toggle" type="button" data-toggle-theme title="Toggle dimmed theme" aria-label="Toggle dimmed theme"><svg class="theme-icon-sun" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3"></circle><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M15.7 4.3l-1.4 1.4M5.7 14.3l-1.4 1.4"></path></svg><svg class="theme-icon-moon" viewBox="0 0 20 20" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg></button></div></div>"#);
 
     let show_welcome_surface = current_input.is_empty()
         && last_result.is_none()
@@ -646,6 +831,7 @@ fn render_start_surface(html: &mut String, current_input: &str, session: &Sessio
     html.push_str(r#"<button type="button" class="launchpad-tile" data-fill="What is the pH of a 0.05 M HCl solution?"><span class="tile-icon chem">⚗</span><strong>pH Equilibrium</strong><small>0.05 M HCl</small></button>"#);
     html.push_str(r#"<button type="button" class="launchpad-tile" data-fill="physics convert 100 km/h m/s" data-interaction-mode="Physics"><span class="tile-icon phys">⚡</span><strong>Physics Units</strong><small>100 km/h in m/s</small></button>"#);
     html.push_str(r#"<button type="button" class="launchpad-tile" data-fill="plot sin(x) from -3.14 to 3.14"><span class="tile-icon plot">📈</span><strong>2D Curve</strong><small>plot sin(x) [-π, π]</small></button>"#);
+    html.push_str(r#"<button type="button" class="launchpad-tile" data-open-visualizer><span class="tile-icon viz-icon">📊</span><strong>STEM Visualizer</strong><small>Animated Theorems</small></button>"#);
     html.push_str(r#"<button type="button" class="launchpad-tile" data-fill="es solve 1009" data-interaction-mode="Research"><span class="tile-icon res">🔬</span><strong>FCF Preprint</strong><small>es solve 1009</small></button>"#);
     html.push_str(r#"</div></div>"#);
 
@@ -1102,6 +1288,11 @@ mod tests {
             "data-open-welcome",
             "data-resume-session",
             "data-start-fresh",
+            "data-open-visualizer",
+            "data-visualizer-",
+            "data-viz-",
+            "data-load-theorem",
+            "data-fn-",
         ];
 
         for rest in html.split("<button").skip(1) {
@@ -1339,5 +1530,28 @@ mod tests {
 
         assert!(LAB_JS.contains("data-resume-session"));
         assert!(LAB_JS.contains("data-open-welcome"));
+    }
+
+    #[test]
+    fn test_stem_dynamic_visualizer_and_theorems() {
+        let session = Session::new();
+        let workbench = render_lab_workbench("", None, None, None, None, &session);
+        let html = render_lab_page(&workbench);
+
+        assert!(html.contains(r#"data-open-visualizer"#));
+        assert!(html.contains(r#"data-visualizer-modal"#));
+        assert!(html.contains(r#"data-visualizer-close"#));
+        assert!(html.contains(r#"id="stem-viz-canvas""#));
+        assert!(html.contains(r#"data-load-theorem="riemann""#));
+        assert!(html.contains(r#"data-load-theorem="taylor""#));
+        assert!(html.contains(r#"data-load-theorem="fourier""#));
+        assert!(html.contains(r#"data-load-theorem="wave_interf""#));
+        assert!(html.contains(r#"data-load-theorem="chem_kinetics""#));
+
+        assert!(LAB_JS.contains("const StemVisualizer"));
+        assert!(LAB_JS.contains("compileExpression"));
+        assert!(LAB_JS.contains("drawMathCurve"));
+        assert!(LAB_JS.contains("drawGrid"));
+        assert!(LAB_JS.contains("theorems:"));
     }
 }
