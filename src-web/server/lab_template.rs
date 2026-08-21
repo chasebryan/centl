@@ -75,10 +75,6 @@ pub fn render_lab_page(workbench: &str) -> String {
           </div>
         </div>
       </div>
-      <button class="header-visualizer-btn" type="button" data-open-visualizer title="Open Interactive STEM Animated Visualizer &amp; Theorem Studio">
-        <svg viewBox="0 0 20 20" aria-hidden="true" width="14" height="14"><path d="M3 17h14M3 13l4-5 4 3 5-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span>STEM Visualizer</span>
-      </button>
     </header>
 
     <div class="app-body">
@@ -92,7 +88,6 @@ pub fn render_lab_page(workbench: &str) -> String {
           <button class="rail-button" type="button" data-select-area="research" data-label="Research" aria-label="Research" aria-controls="explorer-area-research" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3h6M8 3v5l-4 7c-.5 1 .1 2 1.3 2h9.4c1.2 0 1.8-1 1.3-2l-4-7V3"></path><path d="M6.5 13h7"></path></svg></button>
           <button class="rail-button" type="button" data-select-area="build" data-label="Build" aria-label="Build" aria-controls="explorer-area-build" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 5-4 5 4 5M13 5l4 5-4 5M11.5 3 8.5 17"></path></svg></button>
           <button class="rail-button gemini-rail-button" type="button" data-select-area="gemini" data-label="Gemini AI" aria-label="Gemini AI Co-Pilot" aria-controls="explorer-area-gemini" aria-pressed="false"><svg viewBox="0 0 24 24" class="gemini-sparkle-icon" aria-hidden="true"><defs><linearGradient id="gemini-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color='#4E82EE'/><stop offset="35%" stop-color='#7B61FF'/><stop offset="70%" stop-color='#C259D4'/><stop offset="100%" stop-color='#FA6076'/></linearGradient></defs><path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="url(#gemini-grad)"/></svg></button>
-          <button class="rail-button visualizer-rail-button" type="button" data-open-visualizer data-label="Visualizer" aria-label="STEM Dynamic Visualizer &amp; Theorem Studio" title="STEM Visualizer &amp; Animated Theorems"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17h14M3 13l4-5 4 3 5-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
         <div>
           <button class="rail-button" type="button" data-toggle-console data-label="Trace" aria-label="Trace"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m4 6 4 4-4 4M10 15h6"></path></svg></button>

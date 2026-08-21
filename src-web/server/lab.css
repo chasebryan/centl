@@ -156,41 +156,13 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
   position: relative;
   z-index: 20;
   display: grid;
-  grid-template-columns: max-content minmax(100px, 1fr) minmax(260px, 460px) auto;
+  grid-template-columns: max-content minmax(140px, 1fr) minmax(280px, 480px);
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   min-width: 0;
   padding: 0 16px 0 12px;
   background: var(--surface);
   border-bottom: 1px solid var(--line);
-}
-.header-visualizer-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 30px;
-  padding: 0 10px;
-  font-size: 11.5px;
-  font-weight: 650;
-  color: #0891b2;
-  background: rgba(6, 182, 212, 0.08);
-  border: 1px solid rgba(6, 182, 212, 0.28);
-  border-radius: 7px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 120ms ease;
-}
-.header-visualizer-btn:hover {
-  background: rgba(6, 182, 212, 0.16);
-  border-color: #06b6d4;
-  color: #0e7490;
-  transform: translateY(-1px);
-}
-.visualizer-rail-button {
-  color: #0891b2 !important;
-}
-.visualizer-rail-button:hover {
-  color: #06b6d4 !important;
 }
 .visualizer-tree-badge {
   font-size: 9px;
