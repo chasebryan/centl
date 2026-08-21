@@ -1068,7 +1068,7 @@ private final class WorkspaceController {
     }
 
     func runActiveCell() {
-        webView.evaluateJavaScript("document.querySelector('[data-run-active]')?.click()")
+        webView.evaluateJavaScript("document.querySelector('.composer-run, form button[type=submit]')?.click()")
     }
 }
 

@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "approval": {
-    "change_note": "Update engine overhaul and always-available rebuild sync",
+    "change_note": "Remove redundant header Run button and allocate search bar",
     "release": "CentL26",
     "reviewed_viewports": [
       "1366x768",
@@ -12,9 +12,9 @@
   "files": {
     "desktop/centl26/macos/Assets/CentL26Icon.png": "f8654785b5f6441a1b54a0859490dd09a4447b00547209f6ada2fb26b663baef",
     "desktop/centl26/macos/Assets/CentL26Icon.svg": "a62da90372e32287849ea8d33bb6ed2fa5ec1f314528924f1fd4ff01bfc7acc7",
-    "src-web/server/lab.css": "dc9deaa394fea07152ab033971cf359ab02e0e41901da38347ae1ad3e4a4722c",
+    "src-web/server/lab.css": "eaf4b83684a6c50c63cfa7bccfcc7b1e12fa89983b8aadc58579d02102ec5329",
     "src-web/server/lab.js": "d7661ea49c370f682ee655b2ba8f87f5c4ebcb5abf5648127120fa8f4e06e1a8",
-    "src-web/server/lab_template.rs": "d4f7ec4799f04f415aa50a15166b0f37efb1cc21e7dd1267b52d066d589279a8"
+    "src-web/server/lab_template.rs": "925a2d75cd292d8ca1a2e88cb4dd21f3b76deba408fdb251f84539f257227788"
   },
   "schema": 1,
   "semantic_contract": {

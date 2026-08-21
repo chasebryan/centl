@@ -34,9 +34,6 @@ pub fn render_lab_page(workbench: &str) -> String {
       </a>
       <div class="workspace-path"><button type="button" data-toggle-explorer title="Toggle workspace explorer">Workspace</button><span>/</span><input type="text" class="notebook-rename-input" data-rename-notebook value="Notebook 01" aria-label="Rename active notebook" spellcheck="false" title="Click to rename active notebook"></div>
       <button class="command-center" type="button" data-open-palette><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"></circle><path d="m13 13 4 4"></path></svg><span>Search commands and tools</span><kbd>⌘ K</kbd></button>
-      <div class="app-actions">
-        <button class="run-action" type="button" data-run-active><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 5 8 5-8 5Z"></path></svg><span>Run</span></button>
-      </div>
     </header>
 
     <div class="app-body">
