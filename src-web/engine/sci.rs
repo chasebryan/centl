@@ -90,6 +90,152 @@ pub fn interpret_and_solve_stem(
     solve_stem_offline(trimmed, session)
 }
 
+pub fn replace_case_insensitive(text: &str, pattern: &str, replacement: &str) -> String {
+    let mut result = String::new();
+    let lower_text = text.to_ascii_lowercase();
+    let lower_pattern = pattern.to_ascii_lowercase();
+    let mut last_end = 0;
+
+    for (start, _) in lower_text.match_indices(&lower_pattern) {
+        if start >= last_end {
+            result.push_str(&text[last_end..start]);
+            result.push_str(replacement);
+            last_end = start + pattern.len();
+        }
+    }
+    result.push_str(&text[last_end..]);
+    result
+}
+
+pub fn replace_unary_phrase(text: &str, phrase: &str, func_name: &str) -> String {
+    let mut result = text.to_string();
+    let phrase_lower = phrase.to_ascii_lowercase();
+
+    while let Some(pos) = result.to_ascii_lowercase().find(&phrase_lower) {
+        let after = &result[pos + phrase.len()..];
+        let trimmed_after = after.trim_start();
+        let leading_spaces = after.len() - trimmed_after.len();
+
+        let (arg, arg_len) = if trimmed_after.starts_with('(') {
+            let mut depth = 0;
+            let mut end_idx = None;
+            for (idx, c) in trimmed_after.char_indices() {
+                if c == '(' {
+                    depth += 1;
+                } else if c == ')' {
+                    depth -= 1;
+                    if depth == 0 {
+                        end_idx = Some(idx + 1);
+                        break;
+                    }
+                }
+            }
+            if let Some(end) = end_idx {
+                let inside = &trimmed_after[1..end - 1];
+                (inside.trim(), leading_spaces + end)
+            } else {
+                (trimmed_after.trim(), after.len())
+            }
+        } else {
+            let op_delimiters = [
+                " multiplied by", " multiply by", " times", " divided by", " div by",
+                " plus", " minus", " over", " to the power", " to the", " raised to",
+                " +", " -", " *", " /", " ^", " %", ",", ";", ")", "]"
+            ];
+            let lower_after = trimmed_after.to_ascii_lowercase();
+            let mut first_op_idx = trimmed_after.len();
+
+            for op in &op_delimiters {
+                if let Some(idx) = lower_after.find(op) {
+                    if idx < first_op_idx {
+                        first_op_idx = idx;
+                    }
+                }
+            }
+
+            let token = trimmed_after[..first_op_idx].trim();
+            (token, leading_spaces + first_op_idx)
+        };
+
+        if arg.is_empty() {
+            break;
+        }
+
+        let replacement = format!("{}({})", func_name, arg);
+        let total_match_len = phrase.len() + arg_len;
+        let prefix = &result[..pos];
+        let suffix = &result[pos + total_match_len..];
+        result = format!("{}{}{}", prefix, replacement, suffix);
+    }
+
+    result
+}
+
+pub fn lower_natural_math_sentence(input: &str) -> String {
+    let mut core = input.to_string();
+
+    // 1. Lower unary function phrases
+    core = replace_unary_phrase(&core, "square root of ", "sqrt");
+    core = replace_unary_phrase(&core, "sqrt of ", "sqrt");
+    core = replace_unary_phrase(&core, "cube root of ", "cbrt");
+    core = replace_unary_phrase(&core, "cbrt of ", "cbrt");
+    core = replace_unary_phrase(&core, "absolute value of ", "abs");
+    core = replace_unary_phrase(&core, "abs of ", "abs");
+    core = replace_unary_phrase(&core, "sine of ", "sin");
+    core = replace_unary_phrase(&core, "sin of ", "sin");
+    core = replace_unary_phrase(&core, "cosine of ", "cos");
+    core = replace_unary_phrase(&core, "cos of ", "cos");
+    core = replace_unary_phrase(&core, "tangent of ", "tan");
+    core = replace_unary_phrase(&core, "tan of ", "tan");
+    core = replace_unary_phrase(&core, "natural log of ", "ln");
+    core = replace_unary_phrase(&core, "ln of ", "ln");
+    core = replace_unary_phrase(&core, "log base 10 of ", "log10");
+    core = replace_unary_phrase(&core, "log10 of ", "log10");
+    core = replace_unary_phrase(&core, "log of ", "log10");
+
+    // 2. Binary phrases
+    let replacements = [
+        ("to the power of", " ^ "),
+        ("raised to the power of", " ^ "),
+        ("raised to the power", " ^ "),
+        ("raised to the", " ^ "),
+        ("raised to", " ^ "),
+        ("to the power", " ^ "),
+        ("divided by", " / "),
+        ("div by", " / "),
+        ("divided into", " / "),
+        ("multiplied by", " * "),
+        ("multiply by", " * "),
+        ("subtracted by", " - "),
+        ("subtracted from", " - "),
+        ("added to", " + "),
+        ("take away", " - "),
+        ("modulo", " % "),
+        (" mod ", " % "),
+        ("squared", " ^ 2 "),
+        ("cubed", " ^ 3 "),
+    ];
+
+    for (pat, repl) in &replacements {
+        core = replace_case_insensitive(&core, pat, repl);
+    }
+
+    // 3. Single-word operator lowering
+    let words: Vec<&str> = core.split_whitespace().collect();
+    let mut normalized_words: Vec<String> = Vec::new();
+    for w in words {
+        match w.to_ascii_lowercase().as_str() {
+            "plus" => normalized_words.push("+".to_string()),
+            "minus" => normalized_words.push("-".to_string()),
+            "times" => normalized_words.push("*".to_string()),
+            "over" => normalized_words.push("/".to_string()),
+            "less" => normalized_words.push("-".to_string()),
+            other => normalized_words.push(other.to_string()),
+        }
+    }
+    normalized_words.join(" ")
+}
+
 /// Universal Natural Language Arithmetic & Algebra Evaluator
 pub fn try_solve_natural_arithmetic(prompt: &str, session: &mut Session) -> Option<SciSolution> {
     let mut cleaned = prompt.trim();
@@ -379,44 +525,9 @@ pub fn try_solve_natural_arithmetic(prompt: &str, session: &mut Session) -> Opti
         }
     }
 
-    // 5. Binary operators lowering:
-    // "55 divided by 22", "14 times 15", "100 minus 45", "35 plus 47", "2 to the power of 10", "2 to the 10th power", "55 mod 22"
-    let mut expr = core.to_string();
-
-    expr = expr.replace("to the power of", "^");
-    expr = expr.replace("raised to the power of", "^");
-    expr = expr.replace("raised to the power", "^");
-    expr = expr.replace("raised to the", "^");
-    expr = expr.replace("raised to", "^");
-    expr = expr.replace("to the power", "^");
-    expr = expr.replace("divided by", "/");
-    expr = expr.replace("div by", "/");
-    expr = expr.replace("multiplied by", "*");
-    expr = expr.replace("multiply by", "*");
-    expr = expr.replace("subtracted by", "-");
-    expr = expr.replace("subtracted from", "-");
-    expr = expr.replace("added to", "+");
-    expr = expr.replace("take away", "-");
-    expr = expr.replace("modulo", "%");
-    expr = expr.replace(" mod ", " % ");
-    expr = expr.replace("squared", "^2");
-    expr = expr.replace("cubed", "^3");
-
-    let words: Vec<&str> = expr.split_whitespace().collect();
-    let mut normalized_words: Vec<String> = Vec::new();
-    for w in words {
-        match w.to_ascii_lowercase().as_str() {
-            "plus" => normalized_words.push("+".to_string()),
-            "minus" => normalized_words.push("-".to_string()),
-            "times" => normalized_words.push("*".to_string()),
-            "over" => normalized_words.push("/".to_string()),
-            "less" => normalized_words.push("-".to_string()),
-            other => normalized_words.push(other.to_string()),
-        }
-    }
-    let synthesized = normalized_words.join(" ");
-
-    // Attempt mathematical evaluation
+    // 5. Universal Natural Language Mathematical Sentence Synthesizer:
+    // Handles compound queries like "what is the square root of 42 multiplied by 3?", "55 divided by 22", "14 times 15", "2 to the power of 10 plus 5", etc.
+    let synthesized = lower_natural_math_sentence(core);
     if let Ok(res) = evaluate(&synthesized, session) {
         let approx = res.approximate.or_else(|| {
             if res.text.contains('/') {
@@ -438,16 +549,16 @@ pub fn try_solve_natural_arithmetic(prompt: &str, session: &mut Session) -> Opti
         });
 
         return Some(SciSolution {
-            summary: format!("Exact Arithmetic Evaluation: {}", cleaned),
+            summary: format!("Exact Mathematical Evaluation: {}", cleaned),
             steps: vec![
                 format!("Natural language query: {}", prompt),
                 format!("Synthesized expression: {}", synthesized),
-                format!("Exact rational result: {}", res.text),
+                format!("Exact result: {}", res.text),
             ],
             exact_result: Some(res.text),
             approximate_result: approx,
             domain: "Arithmetic",
-            confidence: "Exact Rational",
+            confidence: "Exact Rational / Radical",
             raw_centl_command: Some(synthesized),
         });
     }
@@ -2074,6 +2185,26 @@ mod tests {
         // 8. Exponentiation
         let sol8 = solve_stem_offline("what is 2 to the power of 10?", &mut session).unwrap();
         assert_eq!(sol8.exact_result.as_deref(), Some("1024"));
+
+        // 9. Compound square root and multiplication: "what is the square root of 42 multiplied by 3?"
+        let sol9 = solve_stem_offline("what is the square root of 42 multiplied by 3?", &mut session).unwrap();
+        assert_eq!(sol9.domain, "Arithmetic");
+        assert!(sol9.exact_result.as_deref().unwrap().contains("sqrt(42)"));
+        assert!(sol9.approximate_result.is_some());
+        let approx9 = sol9.approximate_result.unwrap().parse::<f64>().unwrap();
+        assert!((approx9 - (42f64.sqrt() * 3.0)).abs() < 1e-6);
+
+        // 10. Compound square root and addition
+        let sol10 = solve_stem_offline("what is the square root of 144 plus 10?", &mut session).unwrap();
+        assert_eq!(sol10.exact_result.as_deref(), Some("22"));
+
+        // 11. Cube root and multiplication
+        let sol11 = solve_stem_offline("cube root of 27 times 4", &mut session).unwrap();
+        assert_eq!(sol11.exact_result.as_deref(), Some("12"));
+
+        // 12. Absolute value and division
+        let sol12 = solve_stem_offline("what is the absolute value of -100 divided by 4?", &mut session).unwrap();
+        assert_eq!(sol12.exact_result.as_deref(), Some("25"));
     }
 }
 

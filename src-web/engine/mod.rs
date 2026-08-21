@@ -1298,10 +1298,15 @@ pub fn evaluate_single(input: &str, session: &mut Session) -> Result<ExecutionRe
                     Expr::Number(n) => Some(n.clone()),
                     _ => None,
                 };
+                let approx = if exact.is_none() {
+                    eval.to_f64().ok().map(|f| format!("{}", f))
+                } else {
+                    None
+                };
                 ExecutionResult {
                     text,
                     exact_rational: exact,
-                    approximate: None,
+                    approximate: approx,
                     symbolic_expr: Some(eval),
                     execution_micros: start_time.elapsed().as_micros(),
                 }
@@ -1314,10 +1319,15 @@ pub fn evaluate_single(input: &str, session: &mut Session) -> Result<ExecutionRe
                 Expr::Number(n) => Some(n.clone()),
                 _ => None,
             };
+            let approx = if exact.is_none() {
+                eval.to_f64().ok().map(|f| format!("{}", f))
+            } else {
+                None
+            };
             ExecutionResult {
                 text,
                 exact_rational: exact,
-                approximate: None,
+                approximate: approx,
                 symbolic_expr: Some(eval),
                 execution_micros: start_time.elapsed().as_micros(),
             }
@@ -1438,6 +1448,14 @@ fn eval_expr(expr: &Expr, session: &Session) -> Result<Expr, String> {
                             let sq = (i as f64).sqrt() as i64;
                             if sq * sq == i {
                                 return Ok(Expr::num(sq));
+                            }
+                        }
+                    }
+                    if name == "cbrt" && n.denom.is_one() {
+                        if let Some(i) = n.numer.to_i64() {
+                            let cb = (i as f64).cbrt().round() as i64;
+                            if cb * cb * cb == i {
+                                return Ok(Expr::num(cb));
                             }
                         }
                     }

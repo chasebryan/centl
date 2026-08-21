@@ -375,6 +375,14 @@ impl Expr {
                                 }
                             }
                         }
+                        if name == "cbrt" && n.denom.is_one() {
+                            if let Some(i) = n.numer.to_i64() {
+                                let cb = (i as f64).cbrt().round() as i64;
+                                if cb * cb * cb == i {
+                                    return Expr::num(cb);
+                                }
+                            }
+                        }
                     }
                 }
                 Expr::Function(name.clone(), sargs)
