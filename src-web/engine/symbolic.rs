@@ -46,6 +46,54 @@ impl Expr {
         }
     }
 
+    pub fn to_f64(&self) -> Result<f64, String> {
+        match self {
+            Expr::Number(n) => Ok(n.to_f64()),
+            Expr::Constant(c) => match c.as_str() {
+                "pi" => Ok(std::f64::consts::PI),
+                "e" => Ok(std::f64::consts::E),
+                "tau" => Ok(std::f64::consts::TAU),
+                _ => Err(format!("unknown constant: {}", c)),
+            },
+            Expr::Neg(inner) => Ok(-inner.to_f64()?),
+            Expr::Add(a, b) => Ok(a.to_f64()? + b.to_f64()?),
+            Expr::Sub(a, b) => Ok(a.to_f64()? - b.to_f64()?),
+            Expr::Mul(a, b) => Ok(a.to_f64()? * b.to_f64()?),
+            Expr::Div(a, b) => {
+                let den = b.to_f64()?;
+                if den == 0.0 {
+                    return Err("division by zero in numerical evaluation".to_string());
+                }
+                Ok(a.to_f64()? / den)
+            }
+            Expr::Pow(base, exp) => Ok(base.to_f64()?.powi(*exp as i32)),
+            Expr::Function(name, args) => {
+                if args.len() == 1 {
+                    let val = args[0].to_f64()?;
+                    match name.as_str() {
+                        "sin" => Ok(val.sin()),
+                        "cos" => Ok(val.cos()),
+                        "tan" => Ok(val.tan()),
+                        "asin" => Ok(val.asin()),
+                        "acos" => Ok(val.acos()),
+                        "atan" => Ok(val.atan()),
+                        "sinh" => Ok(val.sinh()),
+                        "cosh" => Ok(val.cosh()),
+                        "tanh" => Ok(val.tanh()),
+                        "exp" => Ok(val.exp()),
+                        "ln" | "log" => Ok(val.ln()),
+                        "sqrt" => Ok(val.sqrt()),
+                        "abs" => Ok(val.abs()),
+                        _ => Err(format!("unknown function in to_f64: {}", name)),
+                    }
+                } else {
+                    Err(format!("cannot convert multi-arg function '{}' to float", name))
+                }
+            }
+            _ => Err(format!("cannot convert symbolic expression '{}' to float", self)),
+        }
+    }
+
     // Symbolic Differentiation d(expr)/d(var)
     pub fn diff(&self, var: &str) -> Expr {
         match self {

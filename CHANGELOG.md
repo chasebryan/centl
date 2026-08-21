@@ -1,6 +1,30 @@
-# Changelog
-
 ## Unreleased
+
+### CentL26.2.3 release (Offline Multi-Domain SCi Solver & Plain English Reasoning)
+
+- **Comprehensive Native Offline SCi Solver**: Substantially upgraded offline natural language problem understanding without external API dependencies. Users can think out loud and type plain-English questions across:
+  - **Aqueous & Solution Chemistry**: Solution pH/pOH equilibrium ($[H^+] = 10^{-\text{pH}}$, $[OH^-] = 10^{-\text{pOH}}$, strong monoprotic/monobasic), volumetric dilutions ($M_1 V_1 = M_2 V_2$), thermochemical Gibbs free energy ($\Delta G = \Delta H - T\Delta S$) and spontaneity classification, electrochemical Nernst cell potentials ($E = E^\circ - \frac{0.0592}{n}\log_{10} Q$), reaction balancing, and composition.
+  - **Classical Mechanics & Kinematics**: Multivariable linear kinematics ($v = v_0 + at$, $d = v_0 t + \frac{1}{2}at^2$), gravitational free fall impact speed ($v = \sqrt{2gh}$) and drop duration, kinetic energy ($KE = \frac{1}{2}mv^2$), gravitational potential energy ($PE = mgh$), mechanical work ($W = Fd$), power dissipation ($P = W/t$).
+  - **Electromagnetism & Circuit Laws**: Ohmic current ($I = V/R$), circuit resistance ($R = V/I$), electric power ($P = VI$), capacitance and electrostatic stored energy ($C = Q/V$, $U = \frac{1}{2}CV^2$).
+  - **Quantum, Photonics & Spectroscopy**: Hydrogenic Rydberg spectral lines ($1/\lambda = R_\infty Z^2 (1/n_1^2 - 1/n_2^2)$), photoelectric work function and stopping voltage ($K_{max} = hf - \Phi$), photon energy/momentum ($E = hc/\lambda$), matter waves ($\lambda = h/p$).
+  - **Thermodynamics & Radiation**: Carnot cycle maximum thermodynamic limits ($\eta = 1 - T_c/T_h$), Stefan-Boltzmann radiant flux ($P/A = \sigma T^4$), Wien displacement peak wavelength ($\lambda_{max} = b/T$).
+  - **Astrophysics & Relativity**: Planetary escape velocities ($v_{esc} = \sqrt{2GM/R}$), circular orbital velocities ($v_{orb} = \sqrt{GM/R}$), relativistic Lorentz factors ($\gamma = 1/\sqrt{1-v^2/c^2}$).
+  - **Geometry & Mensuration**: Circle area and circumference ($A = \pi r^2, C = 2\pi r$), sphere volume and surface area ($V = \frac{4}{3}\pi r^3, A = 4\pi r^2$), cylinder volume ($V = \pi r^2 h$), Pythagorean right triangle geometry ($c = \sqrt{a^2 + b^2}$).
+  - **Linear Algebra & Vector Calculus**: 3D vector dot products, cross products, and 2x2 matrix determinants.
+  - **Number Theory & Statistics**: Euler's totient ($\phi(n)$), extended Euclidean algorithm ($ax + by = \gcd(a, b)$), modular multiplicative inverse ($a^{-1} \pmod m$), primality verification, prime factorization, sample mean, sample variance, and sample standard deviation.
+  - **Symbolic Calculus & Plotting**: Derivatives with arbitrary variables, definite and indefinite integrals, algebraic root finding, polynomial factoring, polynomial expansion, and 2D ASCII coordinate graphing.
+- **Unrestricted Evaluator Routing**: Removed restrictive symbol filters so that mathematical questions containing units (e.g. `m/s`, `km/h`, `kJ/mol`), operators (`*`, `+`, `-`, `/`, `^`), or parenthesized quantities seamlessly route to the offline SCi solver with verified step-by-step rational deductions.
+
+### CentL26.2 release (Multi-Domain Auto-Detector, SCi Natural Language Solver, Gemini Hybrid, & Examples Catalog)
+
+- **In-App Programmability & Extension Engine (`build`)**: Allows non-programmers to define, brainstorm, test, and execute custom STEM functions, units, constants, and pipelines in plain English or explicit builder syntax (e.g. `build fn KE(m, v) = 1/2 * m * v^2`, `build a formula for kinetic energy KE(m, v) = 0.5 * m * v^2`, `build const G_earth = 9.80665`, `build list`, `build inspect KE`, `build test KE 10 5`, `build export`). Registered user extensions are dynamically wired directly into notebook evaluations (e.g., `KE(10, 5)` computes `125` with exact receipts).
+- **Dim Mode Theme Toggle**: Replaced redundant toolbar icon with a theme toggle (Sun/Moon icons) that engages a matte dimmed color palette (`theme-dim`), preserving 100% of the exact geometry, typography, and calm clarity, persisted across sessions in `localStorage`.
+- **Smart Multi-Domain Auto-Detector**: Eliminates the requirement to manually prefix commands with subsystem tags. Users can run chemistry commands directly (e.g. `stoich measured 'C2H6 + O2 -> CO2 + H2O' C2H6 3 CO2`, `balance Fe + O2 -> Fe2O3`, `atoms Ca(OH)2`, `limiting ...`, `molar-mass ...`, `particles ...`, `moles ...`, `spread ...`, or raw chemical reactions like `Fe + O2 -> Fe2O3`), physics commands directly (e.g. `convert 100 cm m`, `convert 100 cm to m`, `constant c`, `cherenkov ...`, `gravity ...`, `collision ...`, `units`), Erdős–Straus commands directly (`solve 2521`, `probe 2521`, `hunt 20000`), and CPS commands (`preflight ...`).
+- **CentL-SCi Natural Language STEM Problem Solver**: Allows users to write problem sets in plain English (e.g., "What is the molar mass of Ca(OH)2?", "Find the derivative of x^4 * cos(x) with respect to x", "Convert 100 kilometers per hour to meters per second", "Is 1009 a prime number?") and receive structured, step-by-step verified solutions offline across chemistry, physics, calculus, algebra, and number theory.
+- **Extensible Hybrid Gemini Support**: Integrates optional Gemini API language model support (`:gemini-key <key>`, `GEMINI_API_KEY`/`CENTL_GEMINI_KEY`, or `:gemini <query>`) that decomposes complex STEM word problems into atomic CentL computational commands, executing and verifying each step against CentL's exact mathematical engine with offline SCi fallback.
+- **Complete 50+ STEM Examples Catalog**: Added full downloadable spreadsheet (`/download/centl26-examples.csv`, `/download/centl26-examples.tsv`, and `/api/examples`) and explorer reference sheet links covering Chemistry, Chemical Process Systems, Mechanics, Thermodynamics, Quantum Physics, Calculus, Linear Algebra, Statistics, and Number Theory.
+- **New Computation Flow Enhancement**: Fixed "New computation" button and keyboard shortcuts (`Alt+N`, `Cmd+Shift+N`, Palette `New computation`) to reliably activate the Work area, clear draft state without deleting notebook history, and smoothly focus the composer editor.
+- **In-App Updater Flow**: Updated update checker to provide seamless in-app status notifications via WebKit messaging and `/api/update` without navigating out of the application.
 
 ### CentL26 product line
 

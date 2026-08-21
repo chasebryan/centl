@@ -8,7 +8,6 @@ pub mod server;
 
 use engine::{evaluate, Session};
 use erdos_straus::{run_hunt_window, solve_es};
-use physics::convert_units;
 use server::{start_lab_server, start_server};
 use std::env;
 use std::path::Path;
@@ -79,16 +78,24 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let mut session = Session::new();
 
+    if args.iter().any(|arg| arg == "--help" || arg == "-h") {
+        print_help();
+        return;
+    }
+
+    if args.iter().any(|arg| arg == "--version" || arg == "-v") {
+        println!("CentL26 26.2.3 · backend compatibility 0.15 Al-Nur");
+        return;
+    }
+
     let invoked_as_lab = args
         .first()
         .and_then(|value| Path::new(value).file_stem())
         .and_then(|value| value.to_str())
         .is_some_and(|value| value == "centl-lab" || value == "centl26");
-    if invoked_as_lab {
+    if invoked_as_lab && (args.len() <= 1 || (args.len() == 2 && args[1].parse::<u16>().is_ok())) {
         let port = args
-            .iter()
-            .skip(1)
-            .find(|argument| !argument.starts_with('-'))
+            .get(1)
             .and_then(|argument| argument.parse::<u16>().ok())
             .unwrap_or(2626);
         serve_lab(port);
@@ -101,8 +108,6 @@ fn main() {
     }
 
     match args[1].as_str() {
-        "--help" | "-h" => print_help(),
-        "--version" | "-v" => println!("CentL26 26.0.0 · backend compatibility 0.15 Al-Nur"),
         "--serve" | "serve" => {
             let port = if args.len() >= 3 {
                 args[2].parse::<u16>().unwrap_or(8080)
@@ -129,76 +134,58 @@ fn main() {
                 match evaluate(&expression, &mut session) {
                     Ok(result) => println!("{}", result.text),
                     Err(error) => {
-                        eprintln!("Error: {}", error);
-                        std::process::exit(1);
+                        if let Ok(solution) = crate::engine::sci::solve_stem_offline(&expression, &mut session) {
+                            println!("SCi Solution [{} · {}]:\n{}", solution.domain, solution.confidence, solution.summary);
+                            for step in &solution.steps {
+                                println!("• {}", step);
+                            }
+                            if let Some(ref exact) = solution.exact_result {
+                                println!("\nExact Result: {}", exact);
+                            }
+                        } else {
+                            eprintln!("Error: {}", error);
+                            std::process::exit(1);
+                        }
                     }
                 }
             } else {
                 eprintln!("Usage: centl-web eval \"EXPRESSION\"");
             }
         }
-        "es" | "erdos" => {
-            if args.len() >= 4 && args[2] == "solve" {
-                if let Ok(prime) = args[3].parse::<u64>() {
-                    let result = solve_es(prime);
-                    if let Some(witness) = result.witness {
-                        println!(
-                            "{}\nGrade: {} · Layer: {} · Kind: {}",
-                            witness.equation(),
-                            result.grade.to_uppercase(),
-                            witness.layer,
-                            witness.kind
-                        );
-                    } else {
-                        println!("Prime {} unsolved in window. Grade: {}", prime, result.grade);
-                    }
-                } else {
-                    eprintln!("Invalid prime number: {}", args[3]);
+        "physics" | "chem" | "chemistry" | "build" | "sci" | "gemini" => {
+            let full_cmd = args[1..].join(" ");
+            let mut state = server::handler::AppState::new();
+            let (exec, err, phys, hunt) = server::handler::handle_command(&full_cmd, &mut state);
+            if let Some(e) = err {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            } else if let Some(p) = phys {
+                println!("=== {} ===\n{}\nVerified SI Formulation: {}", p.title, p.summary, p.verified);
+                for (k, v) in p.details {
+                    println!("• {}: {}", k, v);
                 }
-            } else if args.len() >= 3 && args[2] == "hunt" {
-                let from = if args.len() >= 4 {
-                    args[3].parse::<u64>().unwrap_or(20000)
-                } else {
-                    20000
-                };
-                let summary = run_hunt_window(from, 50000, 50);
-                println!(
-                    "Public Hunt Window [{}, {}]: Checked {} primes.",
-                    summary.start_bound, summary.end_bound, summary.primes_checked
-                );
-                println!(
-                    "GREAT: {} | GOOD: {} | LETTER: {} | UNSOLVED: {}",
-                    summary.great_count,
-                    summary.good_count,
-                    summary.letter_count,
-                    summary.unsolved_count
-                );
-            } else {
-                eprintln!("Usage: centl-web es solve <p> | centl-web es hunt [from]");
-            }
-        }
-        "physics" => {
-            if args.len() >= 6 && args[2] == "convert" {
-                if let Ok(value) = args[3].parse::<f64>() {
-                    match convert_units(value, &args[4], &args[5]) {
-                        Ok(result) => println!("{}", result.summary),
-                        Err(error) => eprintln!("Physics Error: {}", error),
-                    }
-                } else {
-                    eprintln!("Invalid physics value: {}", args[3]);
-                }
-            } else {
-                eprintln!("Usage: centl-web physics convert <val> <from> <to>");
+            } else if let Some(res) = exec {
+                println!("{}", res.text);
+            } else if let Some(h) = hunt {
+                println!("Hunt Window [{}, {}]: Checked {} primes", h.start_bound, h.end_bound, h.primes_checked);
             }
         }
         _ => {
             let expression = args[1..].join(" ");
-            match evaluate(&expression, &mut session) {
-                Ok(result) => println!("{}", result.text),
-                Err(error) => {
-                    eprintln!("Error: {}", error);
-                    std::process::exit(1);
+            let mut state = server::handler::AppState::new();
+            let (exec, err, phys, hunt) = server::handler::handle_command(&expression, &mut state);
+            if let Some(res) = exec {
+                println!("{}", res.text);
+            } else if let Some(p) = phys {
+                println!("=== {} ===\n{}\nVerified SI Formulation: {}", p.title, p.summary, p.verified);
+                for (k, v) in p.details {
+                    println!("• {}: {}", k, v);
                 }
+            } else if let Some(h) = hunt {
+                println!("Hunt Window [{}, {}]: Checked {} primes", h.start_bound, h.end_bound, h.primes_checked);
+            } else if let Some(e) = err {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
             }
         }
     }

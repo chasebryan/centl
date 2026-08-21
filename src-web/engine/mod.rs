@@ -1,9 +1,12 @@
 // CENTL Mathematical Engine Module
 // Free Computation Foundation - Apache-2.0
 
+pub mod extensions;
 pub mod functions;
 pub mod numerics;
+pub mod plot;
 pub mod rational;
+pub mod sci;
 pub mod symbolic;
 
 use functions::*;
@@ -62,6 +65,28 @@ pub fn evaluate(input: &str, session: &mut Session) -> Result<ExecutionResult, S
             symbolic_expr: None,
             execution_micros: 0,
         });
+    }
+
+    // 2D ASCII / Unicode Plotting
+    if trimmed.starts_with("plot ") || trimmed.starts_with("plot(") || trimmed == "plot" {
+        let plot_text = plot::handle_plot_command(trimmed)?;
+        let elapsed = start_time.elapsed().as_micros();
+        let res = ExecutionResult {
+            text: plot_text,
+            exact_rational: None,
+            approximate: None,
+            symbolic_expr: None,
+            execution_micros: elapsed,
+        };
+        session.history.push(HistoryEntry {
+            command: trimmed.to_string(),
+            result: "2D Function Plot".to_string(),
+            exact_repr: None,
+            approximate_repr: None,
+            execution_micros: elapsed,
+            success: true,
+        });
+        return Ok(res);
     }
 
     // Special REPL commands
@@ -173,6 +198,32 @@ pub fn evaluate(input: &str, session: &mut Session) -> Result<ExecutionResult, S
                 success: true,
             });
             return Ok(exec_res);
+        }
+    }
+
+    // Check if the command is a top-level user function call
+    if let Expr::Function(name, args) = &expr {
+        if let Some(ext) = extensions::get_extension(name) {
+            if ext.kind == extensions::ExtensionKind::Function && ext.params.len() == args.len() {
+                let evaluated_args: Result<Vec<String>, String> = args.iter().map(|arg| {
+                    let eval = eval_expr(arg, session)?;
+                    Ok(format!("{}", eval))
+                }).collect();
+                if let Ok(arg_strs) = evaluated_args {
+                    if let Some(res) = extensions::try_eval_user_function(name, &arg_strs, session) {
+                        let exec_res = res?;
+                        session.history.push(HistoryEntry {
+                            command: trimmed.to_string(),
+                            result: exec_res.text.clone(),
+                            exact_repr: exec_res.exact_rational.as_ref().map(|r| format!("{}", r)),
+                            approximate_repr: exec_res.approximate.clone(),
+                            execution_micros: exec_res.execution_micros,
+                            success: true,
+                        });
+                        return Ok(exec_res);
+                    }
+                }
+            }
         }
     }
 
@@ -573,6 +624,249 @@ pub fn evaluate(input: &str, session: &mut Session) -> Result<ExecutionResult, S
                     return Err("lcm requires integers".to_string());
                 }
             }
+            "xgcd" | "extgcd" if args.len() == 2 => {
+                let a = eval_expr(&args[0], session)?;
+                let b = eval_expr(&args[1], session)?;
+                if let (Expr::Number(na), Expr::Number(nb)) = (a, b) {
+                    if na.is_integer() && nb.is_integer() {
+                        let ai = na.numer.to_i64().unwrap_or(0);
+                        let bi = nb.numer.to_i64().unwrap_or(0);
+                        let (g, x, y) = xgcd(ai, bi);
+                        let text = format!("gcd = {}, x = {}, y = {} ({}*{} + {}*{} = {})", g, x, y, ai, x, bi, y, g);
+                        ExecutionResult {
+                            text,
+                            exact_rational: Some(BigRational::from_i64(g)),
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("xgcd requires integers".to_string());
+                    }
+                } else {
+                    return Err("xgcd requires integer arguments".to_string());
+                }
+            }
+            "modinv" if args.len() == 2 => {
+                let a = eval_expr(&args[0], session)?;
+                let b = eval_expr(&args[1], session)?;
+                if let (Expr::Number(na), Expr::Number(nb)) = (a, b) {
+                    if na.is_integer() && nb.is_integer() {
+                        let ai = na.numer.to_i64().unwrap_or(0);
+                        let mi = nb.numer.to_i64().unwrap_or(0);
+                        let inv = modinv(ai, mi)?;
+                        let text = format!("{}", inv);
+                        ExecutionResult {
+                            text,
+                            exact_rational: Some(BigRational::from_i64(inv)),
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("modinv requires integers".to_string());
+                    }
+                } else {
+                    return Err("modinv requires integer arguments".to_string());
+                }
+            }
+            "modpow" if args.len() == 3 => {
+                let a = eval_expr(&args[0], session)?;
+                let b = eval_expr(&args[1], session)?;
+                let c = eval_expr(&args[2], session)?;
+                if let (Expr::Number(na), Expr::Number(nb), Expr::Number(nc)) = (a, b, c) {
+                    if na.is_integer() && nb.is_integer() && nc.is_integer() && !na.is_negative() && !nb.is_negative() && !nc.is_negative() {
+                        let base = na.numer.to_i64().unwrap_or(0) as u64;
+                        let exp = nb.numer.to_i64().unwrap_or(0) as u64;
+                        let m = nc.numer.to_i64().unwrap_or(0) as u64;
+                        let res = modpow(base, exp, m);
+                        let text = format!("{}", res);
+                        ExecutionResult {
+                            text,
+                            exact_rational: Some(BigRational::from_u64(res)),
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("modpow requires non-negative integers".to_string());
+                    }
+                } else {
+                    return Err("modpow requires integer arguments".to_string());
+                }
+            }
+            "totient" | "phi" if args.len() == 1 => {
+                let a = eval_expr(&args[0], session)?;
+                if let Expr::Number(na) = a {
+                    if na.is_integer() && !na.is_negative() {
+                        let n = na.numer.to_i64().unwrap_or(0) as u64;
+                        let t = totient(n);
+                        let text = format!("{}", t);
+                        ExecutionResult {
+                            text,
+                            exact_rational: Some(BigRational::from_u64(t)),
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("totient requires non-negative integer".to_string());
+                    }
+                } else {
+                    return Err("totient requires integer".to_string());
+                }
+            }
+            "det2" if args.len() == 4 => {
+                let a = eval_expr(&args[0], session)?.to_f64()?;
+                let b = eval_expr(&args[1], session)?.to_f64()?;
+                let c = eval_expr(&args[2], session)?.to_f64()?;
+                let d = eval_expr(&args[3], session)?.to_f64()?;
+                let res = det2(a, b, c, d);
+                let text = format!("{}", res);
+                ExecutionResult {
+                    text,
+                    exact_rational: BigRational::from_f64(res),
+                    approximate: None,
+                    symbolic_expr: None,
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+            "inv2" if args.len() == 4 => {
+                let a = eval_expr(&args[0], session)?.to_f64()?;
+                let b = eval_expr(&args[1], session)?.to_f64()?;
+                let c = eval_expr(&args[2], session)?.to_f64()?;
+                let d = eval_expr(&args[3], session)?.to_f64()?;
+                let inv = inv2(a, b, c, d)?;
+                let text = format!("[[{:.6}, {:.6}], [{:.6}, {:.6}]]", inv[0], inv[1], inv[2], inv[3]);
+                ExecutionResult {
+                    text,
+                    exact_rational: None,
+                    approximate: None,
+                    symbolic_expr: None,
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+            "dot" if args.len() == 6 => {
+                let x1 = eval_expr(&args[0], session)?.to_f64()?;
+                let y1 = eval_expr(&args[1], session)?.to_f64()?;
+                let z1 = eval_expr(&args[2], session)?.to_f64()?;
+                let x2 = eval_expr(&args[3], session)?.to_f64()?;
+                let y2 = eval_expr(&args[4], session)?.to_f64()?;
+                let z2 = eval_expr(&args[5], session)?.to_f64()?;
+                let dot = dot3((x1, y1, z1), (x2, y2, z2));
+                let text = format!("{}", dot);
+                ExecutionResult {
+                    text,
+                    exact_rational: BigRational::from_f64(dot),
+                    approximate: None,
+                    symbolic_expr: None,
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+            "cross" if args.len() == 6 => {
+                let x1 = eval_expr(&args[0], session)?.to_f64()?;
+                let y1 = eval_expr(&args[1], session)?.to_f64()?;
+                let z1 = eval_expr(&args[2], session)?.to_f64()?;
+                let x2 = eval_expr(&args[3], session)?.to_f64()?;
+                let y2 = eval_expr(&args[4], session)?.to_f64()?;
+                let z2 = eval_expr(&args[5], session)?.to_f64()?;
+                let c = cross3((x1, y1, z1), (x2, y2, z2));
+                let text = format!("({:.6}, {:.6}, {:.6})", c.0, c.1, c.2);
+                ExecutionResult {
+                    text,
+                    exact_rational: None,
+                    approximate: None,
+                    symbolic_expr: None,
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+            "norm" if args.len() == 3 => {
+                let x = eval_expr(&args[0], session)?.to_f64()?;
+                let y = eval_expr(&args[1], session)?.to_f64()?;
+                let z = eval_expr(&args[2], session)?.to_f64()?;
+                let n = norm3((x, y, z));
+                let text = format!("{:.8}", n);
+                ExecutionResult {
+                    text,
+                    exact_rational: None,
+                    approximate: Some(format!("{:.8}", n)),
+                    symbolic_expr: None,
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+            "mean" if !args.is_empty() => {
+                let mut vals = Vec::new();
+                for a in args {
+                    vals.push(eval_expr(a, session)?.to_f64()?);
+                }
+                let m = mean(&vals)?;
+                let text = format!("{:.8}", m);
+                ExecutionResult {
+                    text,
+                    exact_rational: None,
+                    approximate: Some(format!("{:.8}", m)),
+                    symbolic_expr: None,
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+            "variance" if !args.is_empty() => {
+                let mut vals = Vec::new();
+                for a in args {
+                    vals.push(eval_expr(a, session)?.to_f64()?);
+                }
+                let v = variance(&vals)?;
+                let text = format!("{:.8}", v);
+                ExecutionResult {
+                    text,
+                    exact_rational: None,
+                    approximate: Some(format!("{:.8}", v)),
+                    symbolic_expr: None,
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+            "stddev" if !args.is_empty() => {
+                let mut vals = Vec::new();
+                for a in args {
+                    vals.push(eval_expr(a, session)?.to_f64()?);
+                }
+                let s = stddev(&vals)?;
+                let text = format!("{:.8}", s);
+                ExecutionResult {
+                    text,
+                    exact_rational: None,
+                    approximate: Some(format!("{:.8}", s)),
+                    symbolic_expr: None,
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+            "normal_pdf" if args.len() == 3 => {
+                let x = eval_expr(&args[0], session)?.to_f64()?;
+                let mu = eval_expr(&args[1], session)?.to_f64()?;
+                let sigma = eval_expr(&args[2], session)?.to_f64()?;
+                let pdf = normal_pdf(x, mu, sigma)?;
+                let text = format!("{:.8}", pdf);
+                ExecutionResult {
+                    text,
+                    exact_rational: None,
+                    approximate: Some(format!("{:.8}", pdf)),
+                    symbolic_expr: None,
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+            "normal_cdf" if args.len() == 3 => {
+                let x = eval_expr(&args[0], session)?.to_f64()?;
+                let mu = eval_expr(&args[1], session)?.to_f64()?;
+                let sigma = eval_expr(&args[2], session)?.to_f64()?;
+                let cdf = normal_cdf(x, mu, sigma)?;
+                let text = format!("{:.8}", cdf);
+                ExecutionResult {
+                    text,
+                    exact_rational: None,
+                    approximate: Some(format!("{:.8}", cdf)),
+                    symbolic_expr: None,
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
             _ => {
                 let eval = eval_expr(&expr, session)?;
                 let text = format!("{}", eval);
@@ -626,6 +920,16 @@ fn eval_expr(expr: &Expr, session: &Session) -> Result<Expr, String> {
         Expr::Variable(v) => {
             if let Some(val) = session.variables.get(v) {
                 Ok(val.clone())
+            } else if let Some(ext) = extensions::get_extension(v) {
+                if ext.kind == extensions::ExtensionKind::Constant {
+                    if let Ok(parsed) = Parser::parse(&ext.body) {
+                        eval_expr(&parsed, session)
+                    } else {
+                        Ok(Expr::Variable(v.clone()))
+                    }
+                } else {
+                    Ok(Expr::Variable(v.clone()))
+                }
             } else {
                 Ok(Expr::Variable(v.clone()))
             }
@@ -688,6 +992,17 @@ fn eval_expr(expr: &Expr, session: &Session) -> Result<Expr, String> {
             let mut eval_args = Vec::new();
             for a in args {
                 eval_args.push(eval_expr(a, session)?);
+            }
+            if let Some(ext) = extensions::get_extension(name) {
+                if ext.kind == extensions::ExtensionKind::Function && ext.params.len() == eval_args.len() {
+                    let mut substituted = ext.body.clone();
+                    for (param, arg) in ext.params.iter().zip(eval_args.iter()) {
+                        substituted = substituted.replace(param, &format!("({})", arg));
+                    }
+                    if let Ok(parsed) = Parser::parse(&substituted) {
+                        return eval_expr(&parsed, session);
+                    }
+                }
             }
             if eval_args.len() == 1 {
                 if let Expr::Number(n) = &eval_args[0] {

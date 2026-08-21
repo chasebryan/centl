@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "approval": {
-    "change_note": "Approved CentL26 control wiring, truthful action states, and native update integration.",
+    "change_note": "CentL26.2 Huge Release: In-app programmability, Dim Mode theme, 2D plotting, quantum/thermo/orbital physics, extended math, and natural language SCi solver",
     "release": "CentL26",
     "reviewed_viewports": [
       "1366x768",
@@ -12,9 +12,9 @@
   "files": {
     "desktop/centl26/macos/Assets/CentL26Icon.png": "645249e61681bed304d0337993485905480933207aacb2c2141a1e5ff514dcbd",
     "desktop/centl26/macos/Assets/CentL26Icon.svg": "a599538a075f61f861fe44ad1260fdc98d561dab0931a36ea08c02430e623298",
-    "src-web/server/lab.css": "80757ad185ed4d9527a55beaff0bb3147757b14c99ac9f5d93a17807a2d900cd",
-    "src-web/server/lab.js": "b1179178f664501ee50e9f902532f2de1a10132f60fb91eeb78c35519db13746",
-    "src-web/server/lab_template.rs": "6459aaa2839afd0343c5dd55eebc9738367d44a45cefca90977838d0db68205c"
+    "src-web/server/lab.css": "f75931b00cd40ee14ee2eacd5bd7b79c551919f4b77bbacf96b4f538b4d36b00",
+    "src-web/server/lab.js": "08595015c31f3853cf2d0faedd2961a8a711cf34cd8a38bb537f3dbc12014f32",
+    "src-web/server/lab_template.rs": "c73845a5a2cd77990b867e252762abd3869105d5d2aa668c9efd157013f721b5"
   },
   "schema": 1,
   "semantic_contract": {

@@ -2,6 +2,7 @@
 // Free Computation Foundation - Apache-2.0
 
 mod capabilities;
+pub mod examples_data;
 pub mod handler;
 pub mod lab_template;
 pub mod template;
@@ -338,7 +339,7 @@ impl ServerState {
                 "datasets": 0,
                 "models": if model_status == "available" { 1 } else { 0 },
                 "receipts": run_count,
-                "extensions": 0,
+                "extensions": crate::engine::extensions::extension_count(),
             },
             "revision": store.revision,
             "notebook": {
@@ -353,13 +354,64 @@ impl ServerState {
                 {"id": "data", "label": "Data", "status": "not-implemented", "available": false, "count": 0},
                 {"id": "models", "label": "Models", "status": model_status, "available": model_status == "available", "count": if model_status == "available" { 1 } else { 0 }},
                 {"id": "research", "label": "Research", "status": research_status, "available": research_status == "available", "count": if research_status == "available" { 1 } else { 0 }},
-                {"id": "build", "label": "Build", "status": build_status, "available": build_status == "available", "count": if build_status == "available" { 1 } else { 0 }},
+                {"id": "build", "label": "Build", "status": build_status, "available": build_status == "available", "count": crate::engine::extensions::extension_count()},
             ],
         }))
     }
 }
 
 fn lab_api_response(path: &str, server_state: &ServerState) -> io::Result<Option<LabApiResponse>> {
+    if path == "/download/centl26-examples.csv" {
+        let csv = examples_data::generate_examples_csv();
+        return Ok(Some(LabApiResponse {
+            content_type: "text/csv; charset=utf-8",
+            body: csv.into_bytes(),
+        }));
+    }
+
+    if path == "/download/centl26-examples.tsv" {
+        let tsv = examples_data::generate_examples_tsv();
+        return Ok(Some(LabApiResponse {
+            content_type: "text/tab-separated-values; charset=utf-8",
+            body: tsv.into_bytes(),
+        }));
+    }
+
+    if path == "/api/examples" {
+        let examples_list: Vec<serde_json::Value> = examples_data::STEM_EXAMPLES
+            .iter()
+            .map(|e| {
+                serde_json::json!({
+                    "domain": e.domain,
+                    "category": e.category,
+                    "command": e.command,
+                    "input_example": e.input_example,
+                    "description": e.description,
+                    "expected_result": e.expected_result,
+                    "exactness_guarantee": e.exactness_guarantee,
+                })
+            })
+            .collect();
+        let body = serde_json::to_vec_pretty(&examples_list).map_err(|e| {
+            io::Error::new(io::ErrorKind::InvalidData, format!("failed to encode examples: {e}"))
+        })?;
+        return Ok(Some(LabApiResponse {
+            content_type: "application/json; charset=utf-8",
+            body,
+        }));
+    }
+
+    if path == "/api/update" {
+        let update_doc = handler::handle_update_check();
+        let body = serde_json::to_vec_pretty(&update_doc).map_err(|e| {
+            io::Error::new(io::ErrorKind::InvalidData, format!("failed to encode update check: {e}"))
+        })?;
+        return Ok(Some(LabApiResponse {
+            content_type: "application/json; charset=utf-8",
+            body,
+        }));
+    }
+
     if path != "/api/capabilities" && path != "/api/workspace" {
         return Ok(None);
     }
@@ -1114,13 +1166,18 @@ fn handle_lab_connection(mut stream: TcpStream, server_state: Arc<ServerState>) 
     }
     if method == "GET" || is_head {
         if let Some(response) = lab_api_response(path, &server_state)? {
+            let mut headers = vec![("Cache-Control", "no-store".to_string())];
+            if path.starts_with("/download/") {
+                let filename = path.rsplit('/').next().unwrap_or("centl26-examples.csv");
+                headers.push(("Content-Disposition", format!("attachment; filename=\"{}\"", filename)));
+            }
             return write_response(
                 &mut stream,
                 200,
                 "OK",
                 response.content_type,
                 &response.body,
-                &[("Cache-Control", "no-store".to_string())],
+                &headers,
                 is_head,
             );
         }
@@ -1393,6 +1450,25 @@ fn handle_connection(
     let raw_path = request.target.as_str();
     let path = raw_path.split('?').next().unwrap_or("/");
     let is_head = method == "HEAD";
+
+    if (method == "GET" || is_head) && (path.starts_with("/download/") || path == "/api/examples" || path == "/api/update") {
+        if let Some(response) = lab_api_response(path, &server_state)? {
+            let mut headers = vec![("Cache-Control", "no-store".to_string())];
+            if path.starts_with("/download/") {
+                let filename = path.rsplit('/').next().unwrap_or("centl26-examples.csv");
+                headers.push(("Content-Disposition", format!("attachment; filename=\"{}\"", filename)));
+            }
+            return write_response(
+                &mut stream,
+                200,
+                "OK",
+                response.content_type,
+                &response.body,
+                &headers,
+                is_head,
+            );
+        }
+    }
 
     if (method == "GET" || is_head) && path == "/__centl_origin" {
         let body = format!("centl-web {}\n", build_commit());

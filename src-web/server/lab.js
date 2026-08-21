@@ -5,6 +5,7 @@
   const draftKey = "centl26:26.0:draft:v1";
   const areaKey = "centl26:26.0:area:v1";
   const modeKey = "centl26:26.0:mode:v1";
+  const themeKey = "centl26:26.0:theme:v1";
   const inspectorTabKey = "centl26:26.0:inspector-tab:v1";
   const paneClasses = {
     explorer: "hide-explorer",
@@ -74,6 +75,26 @@
     } catch (_) {
       // Nothing needs to be recovered when storage is unavailable.
     }
+  }
+
+  function applyTheme(theme) {
+    const isDim = theme === "dim";
+    document.body.classList.toggle("theme-dim", isDim);
+    document.documentElement.dataset.theme = isDim ? "dim" : "light";
+    document.querySelectorAll(".theme-toggle, [data-toggle-theme]").forEach((button) => {
+      const sun = button.querySelector(".theme-icon-sun");
+      const moon = button.querySelector(".theme-icon-moon");
+      if (sun) sun.style.display = isDim ? "none" : "block";
+      if (moon) moon.style.display = isDim ? "block" : "none";
+      button.setAttribute("title", isDim ? "Switch to standard theme" : "Toggle dimmed theme");
+      button.setAttribute("aria-label", isDim ? "Switch to standard theme" : "Toggle dimmed theme");
+    });
+    writeStorage(themeKey, isDim ? "dim" : "light");
+  }
+
+  function toggleTheme() {
+    const current = readStorage(themeKey) || (document.body.classList.contains("theme-dim") ? "dim" : "light");
+    applyTheme(current === "dim" ? "light" : "dim");
   }
 
   function paneIsVisible(name) {
@@ -375,6 +396,7 @@
 
   function startNewComputation({ fromPalette = false } = {}) {
     if (fromPalette) closePalette({ restoreFocus: false });
+    selectArea("work", { focus: true });
     const editor = activeEditor();
     if (!editor) return;
     editor.value = "";
@@ -682,8 +704,29 @@
           showHostError("The CentL26 automatic updater could not start.");
         }
       } else {
-        showHostError("Automatic updates are available in the CentL26 macOS app.");
+        fetch("/api/update")
+          .then((r) => r.json())
+          .then((data) => {
+            showHostError(`${data.product} ${data.version}: ${data.message}`);
+          })
+          .catch(() => {
+            showHostError("Automatic updates are available in the CentL26 macOS app.");
+          });
       }
+    }
+
+    if (target.matches("[data-toggle-theme], [data-toggle-theme] *")) {
+      toggleTheme();
+    }
+
+    if (target.dataset.paletteAction === "toggle-theme") {
+      closePalette({ restoreFocus: false });
+      toggleTheme();
+    }
+
+    if (target.dataset.paletteAction === "download-examples") {
+      closePalette({ restoreFocus: false });
+      window.location.href = "/download/centl26-examples.csv";
     }
 
     if (target.dataset.paletteAction === "run-input") {
@@ -812,6 +855,12 @@
       return;
     }
 
+    if ((primary && event.shiftKey && key === "n") || (event.altKey && key === "n")) {
+      event.preventDefault();
+      startNewComputation();
+      return;
+    }
+
     if (primary && event.key === "Enter") {
       const form = activeForm();
       if (form) {
@@ -842,6 +891,8 @@
   preparePalette();
   restoreLayout();
   initializeWorkspace();
+  const savedTheme = readStorage(themeKey);
+  if (savedTheme) applyTheme(savedTheme);
 
   const editor = activeEditor();
   const draft = readStorage(draftKey);

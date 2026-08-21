@@ -549,6 +549,18 @@ impl BigRational {
         BigRational::new(BigInt::from_i64(numer), BigInt::from_i64(denom))
     }
 
+    pub fn from_u64(n: u64) -> Self {
+        BigRational::new(BigInt::from_u64(n), BigInt::one())
+    }
+
+    pub fn from_f64(val: f64) -> Option<Self> {
+        if val.is_nan() || val.is_infinite() {
+            return None;
+        }
+        let s = format!("{:.8}", val);
+        BigRational::from_str(&s).ok()
+    }
+
     pub fn from_str(s: &str) -> Result<Self, String> {
         let s = s.trim();
         if let Some((n_str, d_str)) = s.split_once('/') {

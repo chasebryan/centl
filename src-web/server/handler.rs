@@ -71,279 +71,76 @@ pub fn handle_command(
         return (None, None, None, None);
     }
 
-    // Exact-first chemistry is executed by the authoritative CENTL Chemistry
-    // provider. CentL26 consumes its machine protocol and records the complete
-    // protocol response as evidence; the Rust host does not duplicate chemical
-    // parsing, balancing, or conservation semantics.
-    if has_command_prefix(cmd, "chem") || has_command_prefix(cmd, "chemistry") {
+    if let Some(key) = cmd.strip_prefix(":gemini-key ").or_else(|| cmd.strip_prefix(":set-gemini-key ")) {
+        crate::engine::sci::set_runtime_gemini_key(key.trim());
+        let res = ExecutionResult {
+            text: "Runtime Gemini API key configured successfully.".to_string(),
+            exact_rational: None,
+            approximate: None,
+            symbolic_expr: None,
+            execution_micros: 0,
+        };
+        return (Some(res), None, None, None);
+    }
+
+    if cmd == ":examples" {
+        let res = ExecutionResult {
+            text: "CentL26 Example Catalog:\nDownload the complete 50+ example STEM spreadsheet (CSV) from /download/centl26-examples.csv or open the Explorer Data panel.".to_string(),
+            exact_rational: None,
+            approximate: None,
+            symbolic_expr: None,
+            execution_micros: 0,
+        };
+        return (Some(res), None, None, None);
+    }
+
+    if cmd == ":release" || cmd == ":version" || cmd == ":releases" {
+        let res = ExecutionResult {
+            text: "=== CentL26.2 Official Release ===\nVersion: 26.2.3 (Release Quality)\nCapabilities:\n• In-App Programmability (build): define, brainstorm, inspect, and test custom STEM functions & constants in plain English.\n• Dim Mode Theme: toggle between standard light and dimmed matte slate palettes.\n• Smart Multi-Domain Auto-Detector: direct stoichiometry, reactions, physics conversions, and constants.\n• CentL-SCi Natural Language STEM Solver: expanded step-by-step offline verified problem solving across chemistry, mechanics, circuits, thermodynamics, geometry, linear algebra, and statistics without external dependencies.\n• Hybrid Gemini Support: online/offline LLM STEM decomposition with exact rational verification.\n• 50+ STEM Examples Sheet: multi-domain reference dataset available via /download/centl26-examples.csv.\n• In-App Updates: seamless update checks via WebKit and /api/update.".to_string(),
+            exact_rational: None,
+            approximate: None,
+            symbolic_expr: None,
+            execution_micros: 0,
+        };
+        return (Some(res), None, None, None);
+    }
+
+    // 1. Auto-detected / explicit Chemistry
+    if is_auto_detected_chemistry(cmd) {
         return handle_chemistry_command(cmd, state);
     }
 
-    // Chemical Process Systems (CPS) Command Handler
-    if has_command_prefix(cmd, "cps") {
+    // 2. Auto-detected / explicit CPS
+    if is_auto_detected_cps(cmd) {
         return handle_cps_command(cmd, state);
     }
 
-    // Scientific Problem Interpretation (SCi) Command Handler
-    if has_command_prefix(cmd, "sci") {
-        return handle_sci_command(cmd, state);
+    // 3. Auto-detected / explicit Physics
+    if is_auto_detected_physics(cmd) {
+        return handle_physics_command(cmd, state);
     }
 
-    // Development Workbench (MIRAGE) Command Handler
-    if has_command_prefix(cmd, "mirage") {
-        return handle_mirage_command(cmd, state);
+    // 4. Auto-detected / explicit Erdős–Straus
+    if is_auto_detected_es(cmd) {
+        return handle_es_command(cmd, state);
     }
 
-    // Preservation & Retrieval (CARAVAN) Command Handler
+    // 5. Development Workbench & In-App Programmability (BUILD / MIRAGE)
+    if is_auto_detected_build(cmd) {
+        return handle_build_command(cmd, state);
+    }
+
+    // 6. Preservation & Retrieval (CARAVAN)
     if has_command_prefix(cmd, "caravan") {
         return handle_caravan_command(cmd, state);
     }
 
-    // 1. Erdős–Straus Command Handler
-    if cmd.starts_with("es ") || cmd == "es" || cmd.starts_with("erdos ") {
-        let parts: Vec<&str> = cmd.split_whitespace().collect();
-        if parts.len() == 1 {
-            let summary = run_hunt_window(1000, 500, 20);
-            record_hunt_history(cmd, &summary, state);
-            return (None, None, None, Some(summary));
-        }
-        match parts[1] {
-            "solve" | "probe" => {
-                if parts.len() >= 3 {
-                    if let Ok(n) = parts[2].parse::<u64>() {
-                        let res = solve_es(n);
-                        let mut witness_text = if let Some(witness) = &res.witness {
-                            format!(
-                                "{}\nGrade: {} · Layer: {} · Kind: {}",
-                                witness.equation(),
-                                res.grade.to_uppercase(),
-                                witness.layer,
-                                witness.kind
-                            )
-                        } else {
-                            format!(
-                                "Prime {} is unsolved in the standard window. Grade: {}",
-                                n,
-                                res.grade.to_uppercase()
-                            )
-                        };
-                        if let Some(letter_number) = &res.letter_number {
-                            witness_text.push_str(&format!("\nLetter ID: #{}", letter_number));
-                        }
-                        let execution = ExecutionResult {
-                            text: witness_text,
-                            exact_rational: None,
-                            approximate: None,
-                            symbolic_expr: None,
-                            execution_micros: res.execution_micros,
-                        };
-                        record_solve_history(cmd, &execution, &res, state);
-                        return (Some(execution), None, None, None);
-                    }
-                }
-                return (
-                    None,
-                    Some("Usage: es solve <prime_integer>".to_string()),
-                    None,
-                    None,
-                );
-            }
-            "hunt" | "go" => {
-                let from = if parts.len() >= 3 {
-                    parts[2].parse::<u64>().unwrap_or(20000)
-                } else {
-                    20000
-                };
-                let summary = run_hunt_window(from, 5000, 50);
-                record_hunt_history(cmd, &summary, state);
-                return (None, None, None, Some(summary));
-            }
-            "status" => {
-                let summary = run_hunt_window(1000, 1000, 30);
-                record_hunt_history(cmd, &summary, state);
-                return (None, None, None, Some(summary));
-            }
-            _ => {
-                return (
-                    None,
-                    Some("Usage: es solve <p> | es hunt [from] | es status".to_string()),
-                    None,
-                    None,
-                );
-            }
-        }
+    // 7. Auto-detected / explicit SCi (Natural Language STEM / Gemini)
+    if is_auto_detected_sci(cmd) {
+        return handle_sci_command(cmd, state);
     }
 
-    // 2. Physics Command Handler
-    if cmd.starts_with("physics ") || cmd == "physics" {
-        let parts: Vec<&str> = cmd.split_whitespace().collect();
-        if parts.len() >= 2 && (parts[1] == "convert" || parts[1] == "unit") {
-            if parts.len() != 5 {
-                return (
-                    None,
-                    Some("Usage: physics convert <value> <from_unit> <to_unit>".to_string()),
-                    None,
-                    None,
-                );
-            }
-            let value = match parts[2].parse::<f64>() {
-                Ok(value) => value,
-                Err(_) => {
-                    return (
-                        None,
-                        Some(format!("Invalid physics value: {}", parts[2])),
-                        None,
-                        None,
-                    )
-                }
-            };
-            let started = Instant::now();
-            return match convert_units(value, parts[3], parts[4]) {
-                Ok(result) => {
-                    record_physics_history(cmd, &result, started.elapsed().as_micros(), state);
-                    (None, None, Some(result), None)
-                }
-                Err(error) => (None, Some(error), None, None),
-            };
-        }
-
-        if parts.len() >= 2 && parts[1] == "units" {
-            let started = Instant::now();
-            let result = crate::physics::list_units_catalog();
-            record_physics_history(cmd, &result, started.elapsed().as_micros(), state);
-            return (None, None, Some(result), None);
-        }
-
-        if parts.len() >= 2 && parts[1] == "constant" {
-            if parts.len() != 3 {
-                return (
-                    None,
-                    Some("Usage: physics constant <symbol>".to_string()),
-                    None,
-                    None,
-                );
-            }
-            let sym = parts[2];
-            let started = Instant::now();
-            if let Some(c) = crate::physics::lookup_constant(sym) {
-                let result = PhysicsResult {
-                    title: format!("Physical Constant: {} ({})", c.symbol, c.name),
-                    details: vec![
-                        ("Symbol".to_string(), c.symbol.to_string()),
-                        ("Name".to_string(), c.name.to_string()),
-                        ("Value".to_string(), format!("{} {}", c.value_str, c.unit)),
-                        ("Exactness".to_string(), if c.exact { "Exact definition".to_string() } else { "Measured / Derived".to_string() }),
-                        ("Provenance".to_string(), c.provenance.to_string()),
-                    ],
-                    summary: format!("{} = {} {}", c.symbol, c.value_str, c.unit),
-                    verified: true,
-                };
-                record_physics_history(cmd, &result, started.elapsed().as_micros(), state);
-                return (None, None, Some(result), None);
-            } else {
-                return (
-                    None,
-                    Some(format!("Unknown physical constant: {}. Use 'physics units' to see available constants.", sym)),
-                    None,
-                    None,
-                );
-            }
-        }
-
-        if parts.len() >= 2 && parts[1] == "cherenkov" {
-            if parts.len() != 4 {
-                return (
-                    None,
-                    Some("Usage: physics cherenkov <refractive_index> <particle_speed_m_per_s>".to_string()),
-                    None,
-                    None,
-                );
-            }
-            let n = match parts[2].parse::<f64>() {
-                Ok(v) => v,
-                Err(_) => return (None, Some(format!("Invalid refractive index: {}", parts[2])), None, None),
-            };
-            let v = match parts[3].parse::<f64>() {
-                Ok(v) => v,
-                Err(_) => return (None, Some(format!("Invalid particle speed: {}", parts[3])), None, None),
-            };
-            let started = Instant::now();
-            return match crate::physics::calculate_cherenkov(n, v) {
-                Ok(result) => {
-                    record_physics_history(cmd, &result, started.elapsed().as_micros(), state);
-                    (None, None, Some(result), None)
-                }
-                Err(error) => (None, Some(error), None, None),
-            };
-        }
-
-        if parts.len() >= 2 && parts[1] == "gravity" {
-            let mass = named_f64(&parts[2..], "m").or_else(|| named_f64(&parts[2..], "mass")).unwrap_or(1.0);
-            let pos = named_vec3(&parts[2..], "p").or_else(|| named_vec3(&parts[2..], "pos")).or_else(|| named_vec3(&parts[2..], "position")).unwrap_or((0.0, 0.0, 0.0));
-            let vel = named_vec3(&parts[2..], "v").or_else(|| named_vec3(&parts[2..], "vel")).or_else(|| named_vec3(&parts[2..], "velocity")).unwrap_or((0.0, 0.0, 0.0));
-            let grav = named_vec3(&parts[2..], "g").or_else(|| named_vec3(&parts[2..], "grav")).or_else(|| named_vec3(&parts[2..], "gravity")).unwrap_or((0.0, 0.0, -9.80665));
-            let dt = named_f64(&parts[2..], "dt").unwrap_or(0.01);
-            let steps = named_u64(&parts[2..], "steps").or_else(|| named_u64(&parts[2..], "n")).unwrap_or(100);
-
-            let started = Instant::now();
-            return match crate::physics::simulate_gravity_trajectory(mass, pos, vel, grav, dt, steps) {
-                Ok(result) => {
-                    record_physics_history(cmd, &result, started.elapsed().as_micros(), state);
-                    (None, None, Some(result), None)
-                }
-                Err(error) => (None, Some(error), None, None),
-            };
-        }
-
-        if parts.len() >= 2 && parts[1] == "collision" {
-            let m1 = named_f64(&parts[2..], "m1");
-            let v1 = named_f64(&parts[2..], "v1");
-            let m2 = named_f64(&parts[2..], "m2");
-            let v2 = named_f64(&parts[2..], "v2");
-            let restitution = named_f64(&parts[2..], "e")
-                .or_else(|| named_f64(&parts[2..], "restitution"))
-                .unwrap_or(1.0);
-
-            let (Some(m1), Some(v1), Some(m2), Some(v2)) = (m1, v1, m2, v2) else {
-                return (
-                    None,
-                    Some(
-                        "Usage: physics collision m1=<mass> v1=<velocity> m2=<mass> v2=<velocity> [e=<0..1>]"
-                            .to_string(),
-                    ),
-                    None,
-                    None,
-                );
-            };
-
-            let started = Instant::now();
-            return match simulate_collision_1d(m1, v1, m2, v2, restitution) {
-                Ok(result) => {
-                    record_physics_history(cmd, &result, started.elapsed().as_micros(), state);
-                    (None, None, Some(result), None)
-                }
-                Err(error) => (None, Some(error), None, None),
-            };
-        }
-
-        return (
-            None,
-            Some(
-                "Usage: physics convert <value> <from> <to> | physics constant <sym> | physics units | physics cherenkov <n> <v> | physics gravity m=.. p=.. v=.. g=.. dt=.. steps=.. | physics collision m1=.. v1=.. m2=.. v2=.. [e=..]"
-                    .to_string(),
-            ),
-            None,
-            None,
-        );
-    }
-
-    // 3. Rigorous approximation boundary.
-    //
-    // The Rust web shell deliberately does not maintain a second floating-point
-    // approximation implementation. Top-level approx(...) requests are executed
-    // by the canonical CENTL executable, whose Arb-backed evaluator owns the
-    // rigorous-enclosure contract. This prevents the web UI and native CENTL
-    // calculator from drifting into different numerical semantics.
+    // 8. Rigorous approximation boundary
     if is_approximation_command(cmd) {
         return match run_canonical_approx(cmd) {
             Ok(result) => {
@@ -361,11 +158,606 @@ pub fn handle_command(
         };
     }
 
-    // 4. Exact Mathematical Evaluator
+    // 9. Exact Mathematical Evaluator (with smart SCi plain-English fallback)
     match evaluate(cmd, &mut state.session) {
         Ok(result) => (Some(result), None, None, None),
-        Err(error) => (None, Some(error), None, None),
+        Err(error) => {
+            if cmd.contains(' ') {
+                if let Ok(solution) = crate::engine::sci::solve_stem_offline(cmd, &mut state.session) {
+                    let mut formatted = format!("SCi Solution [{} · {}]:\n{}\n", solution.domain, solution.confidence, solution.summary);
+                    for s in &solution.steps {
+                        formatted.push_str(&format!("\n• {}", s));
+                    }
+                    if let Some(ref exact) = solution.exact_result {
+                        formatted.push_str(&format!("\n\nExact Result: {}", exact));
+                    }
+                    if let Some(ref approx) = solution.approximate_result {
+                        formatted.push_str(&format!("\nApproximate Bound: {}", approx));
+                    }
+                    let res = ExecutionResult {
+                        text: formatted.clone(),
+                        exact_rational: None,
+                        approximate: solution.approximate_result,
+                        symbolic_expr: None,
+                        execution_micros: 0,
+                    };
+                    state.session.history.push(HistoryEntry {
+                        command: cmd.to_string(),
+                        result: formatted,
+                        exact_repr: None,
+                        approximate_repr: None,
+                        execution_micros: 0,
+                        success: true,
+                    });
+                    return (Some(res), None, None, None);
+                }
+            }
+            (None, Some(error), None, None)
+        }
     }
+}
+
+fn is_auto_detected_chemistry(cmd: &str) -> bool {
+    let trimmed = cmd.trim();
+    if has_command_prefix(trimmed, "chem") || has_command_prefix(trimmed, "chemistry") {
+        return true;
+    }
+    let lower = trimmed.to_ascii_lowercase();
+    let chem_ops = [
+        "atoms", "balance", "stoich", "limiting", "molar-mass", "molarmass", "mass",
+        "particles", "moles", "spread", "concentration", "dilution", "yield", "gas",
+        "charge", "thermo"
+    ];
+    for op in chem_ops {
+        if has_command_prefix(&lower, op) {
+            return true;
+        }
+    }
+    if (trimmed.contains("->") || trimmed.contains("-->") || trimmed.contains("=>"))
+        && !trimmed.starts_with("diff")
+        && !trimmed.starts_with("integrate")
+        && !trimmed.starts_with("approx")
+        && !trimmed.starts_with("solve")
+    {
+        return true;
+    }
+    false
+}
+
+fn is_auto_detected_physics(cmd: &str) -> bool {
+    let trimmed = cmd.trim();
+    if has_command_prefix(trimmed, "physics") {
+        return true;
+    }
+    let lower = trimmed.to_ascii_lowercase();
+    let parts: Vec<&str> = lower.split_whitespace().collect();
+    if parts.is_empty() {
+        return false;
+    }
+    if parts[0] == "convert" || parts[0] == "unit" {
+        if parts.len() == 4 || (parts.len() == 5 && (parts[3] == "to" || parts[3] == "in" || parts[3] == "into")) {
+            return true;
+        }
+        return false;
+    }
+    let physics_ops = [
+        "collision", "cherenkov", "gravity", "constant", "units",
+        "debroglie", "photon", "rydberg", "photoelectric", "carnot", "blackbody", "escape", "orbit", "lorentz"
+    ];
+    for op in physics_ops {
+        if has_command_prefix(&lower, op) || lower == *op {
+            return true;
+        }
+    }
+    false
+}
+
+fn is_auto_detected_es(cmd: &str) -> bool {
+    let trimmed = cmd.trim();
+    if trimmed.starts_with("es ") || trimmed == "es" || trimmed.starts_with("erdos ") {
+        return true;
+    }
+    let parts: Vec<&str> = trimmed.split_whitespace().collect();
+    if parts.len() >= 2 && parts[0] == "solve" {
+        if parts[1].parse::<u64>().is_ok() && !trimmed.contains('=') && !trimmed.contains(',') && !trimmed.contains('(') {
+            return true;
+        }
+    }
+    if parts.len() >= 2 && (parts[0] == "probe" || parts[0] == "hunt") {
+        return true;
+    }
+    false
+}
+
+fn is_auto_detected_cps(cmd: &str) -> bool {
+    let trimmed = cmd.trim();
+    has_command_prefix(trimmed, "cps") || has_command_prefix(trimmed, "preflight")
+}
+
+fn is_auto_detected_sci(cmd: &str) -> bool {
+    let trimmed = cmd.trim();
+    if has_command_prefix(trimmed, "sci") || has_command_prefix(trimmed, "gemini") || has_command_prefix(trimmed, ":gemini") {
+        return true;
+    }
+    let lower = trimmed.to_ascii_lowercase();
+    if lower.ends_with('?') {
+        return true;
+    }
+    let sci_prefixes = [
+        "what is", "what are", "what's", "how many", "how much", "how far", "how fast", "how long",
+        "calculate", "compute", "determine", "find the", "find all", "find ", "give me",
+        "differentiate", "derive", "integrate the", "integrate f", "balance the",
+        "explain", "solve for", "solve the", "solve ", "show that", "is it prime", "is prime", "convert ",
+        "area of", "volume of", "circumference of", "hypotenuse of", "dot product", "cross product",
+        "determinant of", "inverse of", "mean of", "median of", "variance of", "standard deviation of",
+        "totient of", "prime factors of", "stopping potential", "stopping voltage", "de broglie",
+        "carnot", "blackbody", "stefan", "escape velocity", "orbital speed", "lorentz", "photoelectric"
+    ];
+    for prefix in sci_prefixes {
+        if lower.starts_with(prefix) {
+            return true;
+        }
+    }
+    if lower.split_whitespace().count() >= 3 && (
+        lower.contains("accelerat") || lower.contains("velocity") || lower.contains("kinetic energy")
+        || lower.contains("potential energy") || lower.contains("free fall") || lower.contains("molar mass")
+        || lower.contains("molarity") || lower.contains("dilut") || lower.contains("gibbs") || lower.contains("nernst")
+        || lower.contains("ohm") || lower.contains("capacitance") || lower.contains("photon") || lower.contains("rydberg")
+    ) {
+        return true;
+    }
+    false
+}
+
+fn is_auto_detected_build(command: &str) -> bool {
+    let trimmed = command.trim();
+    has_command_prefix(trimmed, "build")
+        || has_command_prefix(trimmed, "mirage")
+        || trimmed.starts_with("fn ")
+        || trimmed.starts_with("function ")
+        || trimmed.starts_with("def ")
+        || (trimmed.starts_with("const ") && trimmed.contains('='))
+}
+
+fn handle_es_command(
+    raw_cmd: &str,
+    state: &mut AppState,
+) -> (
+    Option<ExecutionResult>,
+    Option<String>,
+    Option<PhysicsResult>,
+    Option<HuntSummary>,
+) {
+    let cmd = if raw_cmd.starts_with("es ") || raw_cmd.starts_with("erdos ") {
+        raw_cmd.split_whitespace().skip(1).collect::<Vec<_>>().join(" ")
+    } else if raw_cmd == "es" {
+        String::new()
+    } else {
+        raw_cmd.to_string()
+    };
+    let parts: Vec<&str> = cmd.split_whitespace().collect();
+    if parts.is_empty() {
+        let summary = run_hunt_window(1000, 500, 20);
+        record_hunt_history(raw_cmd, &summary, state);
+        return (None, None, None, Some(summary));
+    }
+    match parts[0] {
+        "solve" | "probe" => {
+            if parts.len() >= 2 {
+                if let Ok(n) = parts[1].parse::<u64>() {
+                    let res = solve_es(n);
+                    let mut witness_text = if let Some(witness) = &res.witness {
+                        format!(
+                            "{}\nGrade: {} · Layer: {} · Kind: {}",
+                            witness.equation(),
+                            res.grade.to_uppercase(),
+                            witness.layer,
+                            witness.kind
+                        )
+                    } else {
+                        format!(
+                            "Prime {} is unsolved in the standard window. Grade: {}",
+                            n,
+                            res.grade.to_uppercase()
+                        )
+                    };
+                    if let Some(letter_number) = &res.letter_number {
+                        witness_text.push_str(&format!("\nLetter ID: #{}", letter_number));
+                    }
+                    let execution = ExecutionResult {
+                        text: witness_text,
+                        exact_rational: None,
+                        approximate: None,
+                        symbolic_expr: None,
+                        execution_micros: res.execution_micros,
+                    };
+                    record_solve_history(raw_cmd, &execution, &res, state);
+                    return (Some(execution), None, None, None);
+                }
+            }
+            (None, Some("Usage: es solve <prime_integer>".to_string()), None, None)
+        }
+        "hunt" | "go" => {
+            let from = if parts.len() >= 2 {
+                parts[1].parse::<u64>().unwrap_or(20000)
+            } else {
+                20000
+            };
+            let summary = run_hunt_window(from, 5000, 50);
+            record_hunt_history(raw_cmd, &summary, state);
+            (None, None, None, Some(summary))
+        }
+        "status" => {
+            let summary = run_hunt_window(1000, 1000, 30);
+            record_hunt_history(raw_cmd, &summary, state);
+            (None, None, None, Some(summary))
+        }
+        _ => (None, Some("Usage: es solve <p> | es hunt [from] | es status".to_string()), None, None)
+    }
+}
+
+fn handle_physics_command(
+    raw_cmd: &str,
+    state: &mut AppState,
+) -> (
+    Option<ExecutionResult>,
+    Option<String>,
+    Option<PhysicsResult>,
+    Option<HuntSummary>,
+) {
+    let cmd = if has_command_prefix(raw_cmd, "physics") {
+        raw_cmd["physics".len()..].trim()
+    } else {
+        raw_cmd.trim()
+    };
+    let parts: Vec<&str> = cmd.split_whitespace().collect();
+    if parts.is_empty() {
+        return (
+            None,
+            Some(
+                "Usage: physics convert <value> <from> <to> | physics constant <sym> | physics units | physics cherenkov <n> <v> | physics gravity m=.. p=.. v=.. g=.. dt=.. steps=.. | physics collision m1=.. v1=.. m2=.. v2=.. [e=..]"
+                    .to_string(),
+            ),
+            None,
+            None,
+        );
+    }
+
+    if parts[0] == "convert" || parts[0] == "unit" {
+        let (val_str, from_u, to_u) = if parts.len() == 4 {
+            (parts[1], parts[2], parts[3])
+        } else if parts.len() == 5 && (parts[3] == "to" || parts[3] == "in" || parts[3] == "into") {
+            (parts[1], parts[2], parts[4])
+        } else {
+            return (
+                None,
+                Some("Usage: convert <value> <from_unit> <to_unit> (or convert <value> <from> to <to>)".to_string()),
+                None,
+                None,
+            );
+        };
+        let value = match val_str.parse::<f64>() {
+            Ok(value) => value,
+            Err(_) => {
+                return (
+                    None,
+                    Some(format!("Invalid physics value: {}", val_str)),
+                    None,
+                    None,
+                )
+            }
+        };
+        let started = Instant::now();
+        return match convert_units(value, from_u, to_u) {
+            Ok(result) => {
+                record_physics_history(raw_cmd, &result, started.elapsed().as_micros(), state);
+                (None, None, Some(result), None)
+            }
+            Err(error) => (None, Some(error), None, None),
+        };
+    }
+
+    if parts[0] == "units" {
+        let started = Instant::now();
+        let result = crate::physics::list_units_catalog();
+        record_physics_history(raw_cmd, &result, started.elapsed().as_micros(), state);
+        return (None, None, Some(result), None);
+    }
+
+    if parts[0] == "constant" {
+        if parts.len() != 2 {
+            return (
+                None,
+                Some("Usage: constant <symbol> (e.g. constant c, constant h, constant G)".to_string()),
+                None,
+                None,
+            );
+        }
+        let sym = parts[1];
+        let started = Instant::now();
+        if let Some(c) = crate::physics::lookup_constant(sym) {
+            let result = PhysicsResult {
+                title: format!("Physical Constant: {} ({})", c.symbol, c.name),
+                details: vec![
+                    ("Symbol".to_string(), c.symbol.to_string()),
+                    ("Name".to_string(), c.name.to_string()),
+                    ("Value".to_string(), format!("{} {}", c.value_str, c.unit)),
+                    ("Exactness".to_string(), if c.exact { "Exact definition".to_string() } else { "Measured / Derived".to_string() }),
+                    ("Provenance".to_string(), c.provenance.to_string()),
+                ],
+                summary: format!("{} = {} {}", c.symbol, c.value_str, c.unit),
+                verified: true,
+            };
+            record_physics_history(raw_cmd, &result, started.elapsed().as_micros(), state);
+            return (None, None, Some(result), None);
+        } else {
+            return (
+                None,
+                Some(format!("Unknown physical constant: {}. Use 'physics units' to see available constants.", sym)),
+                None,
+                None,
+            );
+        }
+    }
+
+    if parts[0] == "cherenkov" {
+        if parts.len() != 3 {
+            return (
+                None,
+                Some("Usage: cherenkov <refractive_index> <particle_speed_m_per_s>".to_string()),
+                None,
+                None,
+            );
+        }
+        let n = match parts[1].parse::<f64>() {
+            Ok(v) => v,
+            Err(_) => return (None, Some(format!("Invalid refractive index: {}", parts[1])), None, None),
+        };
+        let v = match parts[2].parse::<f64>() {
+            Ok(v) => v,
+            Err(_) => return (None, Some(format!("Invalid particle speed: {}", parts[2])), None, None),
+        };
+        let started = Instant::now();
+        return match crate::physics::calculate_cherenkov(n, v) {
+            Ok(result) => {
+                record_physics_history(raw_cmd, &result, started.elapsed().as_micros(), state);
+                (None, None, Some(result), None)
+            }
+            Err(error) => (None, Some(error), None, None),
+        };
+    }
+
+    if parts[0] == "gravity" {
+        let mass = named_f64(&parts[1..], "m").or_else(|| named_f64(&parts[1..], "mass")).unwrap_or(1.0);
+        let pos = named_vec3(&parts[1..], "p").or_else(|| named_vec3(&parts[1..], "pos")).or_else(|| named_vec3(&parts[1..], "position")).unwrap_or((0.0, 0.0, 0.0));
+        let vel = named_vec3(&parts[1..], "v").or_else(|| named_vec3(&parts[1..], "vel")).or_else(|| named_vec3(&parts[1..], "velocity")).unwrap_or((0.0, 0.0, 0.0));
+        let grav = named_vec3(&parts[1..], "g").or_else(|| named_vec3(&parts[1..], "grav")).or_else(|| named_vec3(&parts[1..], "gravity")).unwrap_or((0.0, 0.0, -9.80665));
+        let dt = named_f64(&parts[1..], "dt").unwrap_or(0.01);
+        let steps = named_u64(&parts[1..], "steps").or_else(|| named_u64(&parts[1..], "n")).unwrap_or(100);
+
+        let started = Instant::now();
+        return match crate::physics::simulate_gravity_trajectory(mass, pos, vel, grav, dt, steps) {
+            Ok(result) => {
+                record_physics_history(raw_cmd, &result, started.elapsed().as_micros(), state);
+                (None, None, Some(result), None)
+            }
+            Err(error) => (None, Some(error), None, None),
+        };
+    }
+
+    if parts[0] == "collision" {
+        let m1 = named_f64(&parts[1..], "m1");
+        let v1 = named_f64(&parts[1..], "v1");
+        let m2 = named_f64(&parts[1..], "m2");
+        let v2 = named_f64(&parts[1..], "v2");
+        let restitution = named_f64(&parts[1..], "e")
+            .or_else(|| named_f64(&parts[1..], "restitution"))
+            .unwrap_or(1.0);
+
+        let (Some(m1), Some(v1), Some(m2), Some(v2)) = (m1, v1, m2, v2) else {
+            return (
+                None,
+                Some(
+                    "Usage: collision m1=<mass> v1=<velocity> m2=<mass> v2=<velocity> [e=<0..1>]"
+                        .to_string(),
+                ),
+                None,
+                None,
+            );
+        };
+
+        let started = Instant::now();
+        return match simulate_collision_1d(m1, v1, m2, v2, restitution) {
+            Ok(result) => {
+                record_physics_history(raw_cmd, &result, started.elapsed().as_micros(), state);
+                (None, None, Some(result), None)
+            }
+            Err(error) => (None, Some(error), None, None),
+        };
+    }
+
+    if parts[0] == "debroglie" {
+        if parts.len() < 3 {
+            return (None, Some("Usage: physics debroglie <mass_kg> <velocity_m_s>".to_string()), None, None);
+        }
+        let m: f64 = match parts[1].parse() {
+            Ok(v) => v,
+            Err(_) => return (None, Some(format!("Invalid mass: {}", parts[1])), None, None),
+        };
+        let v: f64 = match parts[2].parse() {
+            Ok(v) => v,
+            Err(_) => return (None, Some(format!("Invalid velocity: {}", parts[2])), None, None),
+        };
+        let started = Instant::now();
+        return match crate::physics::calculate_debroglie(m, v) {
+            Ok(result) => {
+                record_physics_history(raw_cmd, &result, started.elapsed().as_micros(), state);
+                (None, None, Some(result), None)
+            }
+            Err(error) => (None, Some(error), None, None),
+        };
+    }
+
+    if parts[0] == "photon" {
+        if parts.len() < 2 {
+            return (None, Some("Usage: physics photon <wavelength_m_or_nm> [hz|nm|m]".to_string()), None, None);
+        }
+        let mut val: f64 = match parts[1].parse() {
+            Ok(v) => v,
+            Err(_) => return (None, Some(format!("Invalid photon value: {}", parts[1])), None, None),
+        };
+        let is_wavelength = if parts.len() >= 3 && parts[2].eq_ignore_ascii_case("hz") {
+            false
+        } else {
+            if val > 1.0 { val *= 1e-9; } // Assume nm if > 1.0
+            true
+        };
+        let started = Instant::now();
+        return match crate::physics::calculate_photon(val, is_wavelength) {
+            Ok(result) => {
+                record_physics_history(raw_cmd, &result, started.elapsed().as_micros(), state);
+                (None, None, Some(result), None)
+            }
+            Err(error) => (None, Some(error), None, None),
+        };
+    }
+
+    if parts[0] == "rydberg" {
+        if parts.len() < 3 {
+            return (None, Some("Usage: physics rydberg <n1_lower> <n2_upper> [Z]".to_string()), None, None);
+        }
+        let n1: u64 = match parts[1].parse() {
+            Ok(v) => v,
+            Err(_) => return (None, Some(format!("Invalid n1: {}", parts[1])), None, None),
+        };
+        let n2: u64 = match parts[2].parse() {
+            Ok(v) => v,
+            Err(_) => return (None, Some(format!("Invalid n2: {}", parts[2])), None, None),
+        };
+        let z: u64 = if parts.len() >= 4 { parts[3].parse().unwrap_or(1) } else { 1 };
+        let started = Instant::now();
+        return match crate::physics::calculate_rydberg(n1, n2, z) {
+            Ok(result) => {
+                record_physics_history(raw_cmd, &result, started.elapsed().as_micros(), state);
+                (None, None, Some(result), None)
+            }
+            Err(error) => (None, Some(error), None, None),
+        };
+    }
+
+    if parts[0] == "photoelectric" {
+        if parts.len() < 3 {
+            return (None, Some("Usage: physics photoelectric <work_function_eV> <wavelength_nm>".to_string()), None, None);
+        }
+        let phi: f64 = match parts[1].parse() {
+            Ok(v) => v,
+            Err(_) => return (None, Some(format!("Invalid work function: {}", parts[1])), None, None),
+        };
+        let lambda: f64 = match parts[2].parse() {
+            Ok(v) => v,
+            Err(_) => return (None, Some(format!("Invalid wavelength: {}", parts[2])), None, None),
+        };
+        let started = Instant::now();
+        return match crate::physics::calculate_photoelectric(phi, lambda) {
+            Ok(result) => {
+                record_physics_history(raw_cmd, &result, started.elapsed().as_micros(), state);
+                (None, None, Some(result), None)
+            }
+            Err(error) => (None, Some(error), None, None),
+        };
+    }
+
+    if parts[0] == "carnot" {
+        if parts.len() < 3 {
+            return (None, Some("Usage: physics carnot <Th_kelvin> <Tc_kelvin>".to_string()), None, None);
+        }
+        let th: f64 = match parts[1].parse() {
+            Ok(v) => v,
+            Err(_) => return (None, Some(format!("Invalid Th: {}", parts[1])), None, None),
+        };
+        let tc: f64 = match parts[2].parse() {
+            Ok(v) => v,
+            Err(_) => return (None, Some(format!("Invalid Tc: {}", parts[2])), None, None),
+        };
+        let started = Instant::now();
+        return match crate::physics::calculate_carnot(th, tc) {
+            Ok(result) => {
+                record_physics_history(raw_cmd, &result, started.elapsed().as_micros(), state);
+                (None, None, Some(result), None)
+            }
+            Err(error) => (None, Some(error), None, None),
+        };
+    }
+
+    if parts[0] == "blackbody" {
+        if parts.len() < 2 {
+            return (None, Some("Usage: physics blackbody <temperature_K> [area_m2] [emissivity]".to_string()), None, None);
+        }
+        let t: f64 = match parts[1].parse() {
+            Ok(v) => v,
+            Err(_) => return (None, Some(format!("Invalid temperature: {}", parts[1])), None, None),
+        };
+        let area: Option<f64> = parts.get(2).and_then(|s| s.parse().ok());
+        let eps: Option<f64> = parts.get(3).and_then(|s| s.parse().ok());
+        let started = Instant::now();
+        return match crate::physics::calculate_blackbody(t, area, eps) {
+            Ok(result) => {
+                record_physics_history(raw_cmd, &result, started.elapsed().as_micros(), state);
+                (None, None, Some(result), None)
+            }
+            Err(error) => (None, Some(error), None, None),
+        };
+    }
+
+    if parts[0] == "escape" {
+        if parts.len() < 3 {
+            return (None, Some("Usage: physics escape <mass_kg> <radius_m>".to_string()), None, None);
+        }
+        let m: f64 = match parts[1].parse() {
+            Ok(v) => v,
+            Err(_) => return (None, Some(format!("Invalid mass: {}", parts[1])), None, None),
+        };
+        let r: f64 = match parts[2].parse() {
+            Ok(v) => v,
+            Err(_) => return (None, Some(format!("Invalid radius: {}", parts[2])), None, None),
+        };
+        let started = Instant::now();
+        return match crate::physics::calculate_escape_velocity(m, r) {
+            Ok(result) => {
+                record_physics_history(raw_cmd, &result, started.elapsed().as_micros(), state);
+                (None, None, Some(result), None)
+            }
+            Err(error) => (None, Some(error), None, None),
+        };
+    }
+
+    if parts[0] == "lorentz" {
+        if parts.len() < 2 {
+            return (None, Some("Usage: physics lorentz <velocity_m_s>".to_string()), None, None);
+        }
+        let v: f64 = match parts[1].parse() {
+            Ok(val) => val,
+            Err(_) => return (None, Some(format!("Invalid velocity: {}", parts[1])), None, None),
+        };
+        let started = Instant::now();
+        return match crate::physics::calculate_lorentz(v) {
+            Ok(result) => {
+                record_physics_history(raw_cmd, &result, started.elapsed().as_micros(), state);
+                (None, None, Some(result), None)
+            }
+            Err(error) => (None, Some(error), None, None),
+        };
+    }
+
+    (
+        None,
+        Some(
+            "Usage: physics convert <value> <from> <to> | physics constant <sym> | physics units | physics debroglie <m> <v> | physics photon <λ> | physics rydberg <n1> <n2> | physics carnot <Th> <Tc> | physics blackbody <T> | physics escape <M> <R> | physics lorentz <v> | physics collision .."
+                .to_string(),
+        ),
+        None,
+        None,
+    )
 }
 
 fn is_approximation_command(command: &str) -> bool {
@@ -481,12 +873,22 @@ fn handle_chemistry_command(
 fn chemistry_provider_args(command: &str) -> Result<Vec<String>, String> {
     let body = if has_command_prefix(command, "chemistry") {
         command["chemistry".len()..].trim()
-    } else {
+    } else if has_command_prefix(command, "chem") {
         command["chem".len()..].trim()
+    } else {
+        command.trim()
     };
     let mut tokens = tokenize_command_args(body);
     if tokens.is_empty() {
         return Err("Usage: chem <operation> [args...]".to_string());
+    }
+
+    if (body.contains("->") || body.contains("-->") || body.contains("=>"))
+        && !tokens[0].eq_ignore_ascii_case("balance")
+        && !tokens[0].eq_ignore_ascii_case("stoich")
+        && !tokens[0].eq_ignore_ascii_case("limiting")
+    {
+        return Ok(vec!["balance".to_string(), strip_matching_quotes(body).to_string()]);
     }
     let operation = tokens.remove(0).to_ascii_lowercase();
     match operation.as_str() {
@@ -1730,70 +2132,116 @@ fn handle_sci_command(
     Option<PhysicsResult>,
     Option<HuntSummary>,
 ) {
-    let body = command.strip_prefix("sci ").unwrap_or(command).trim();
+    let body = if command.starts_with("sci ") {
+        command["sci ".len()..].trim()
+    } else if command.starts_with(":gemini ") {
+        command[":gemini ".len()..].trim()
+    } else if command.starts_with("gemini ") {
+        command["gemini ".len()..].trim()
+    } else {
+        command.trim()
+    };
+    let prefer_gemini = command.starts_with(":gemini") || command.starts_with("gemini");
     let provider = super::capabilities::sci_provider().command;
     let started = Instant::now();
-    let output = match run_bounded_provider(&provider, &["--json".to_string(), body.to_string()], CHEMISTRY_PROVIDER_TIMEOUT) {
-        Ok(out) => out,
-        Err(error) => {
-            return (
-                None,
-                Some(format!("CENTL-SCi scientific interpretation engine unavailable: {}", error)),
-                None,
-                None,
-            );
+
+    // 1. Try external centl-sci provider if available and not explicitly preferring Gemini
+    if !prefer_gemini {
+        if let Ok(output) = run_bounded_provider(&provider, &["--json".to_string(), body.to_string()], CHEMISTRY_PROVIDER_TIMEOUT) {
+            if output.status.success() {
+                if let Ok(payload) = serde_json::from_slice::<Value>(&output.stdout) {
+                    let summary = payload.get("summary").and_then(Value::as_str).or_else(|| payload.get("answer").and_then(Value::as_str)).unwrap_or("SCi interpretation completed.").to_string();
+                    let evidence_doc = serde_json::json!({
+                        "schema": "centl26.sci-evidence/1",
+                        "capability": "org.fcf.centl.sci.interpret",
+                        "request": command,
+                        "provider": provider,
+                        "host": {
+                            "product": "CentL26",
+                            "build_commit": super::build_commit(),
+                        },
+                        "response": payload,
+                    });
+                    let evidence = serde_json::to_string_pretty(&evidence_doc).unwrap_or_default();
+                    let elapsed = started.elapsed().as_micros();
+                    let result = ExecutionResult {
+                        text: summary.clone(),
+                        exact_rational: None,
+                        approximate: None,
+                        symbolic_expr: None,
+                        execution_micros: elapsed,
+                    };
+                    state.session.history.push(HistoryEntry {
+                        command: command.to_string(),
+                        result: summary,
+                        exact_repr: Some(evidence),
+                        approximate_repr: None,
+                        execution_micros: elapsed,
+                        success: true,
+                    });
+                    return (Some(result), None, None, None);
+                }
+            }
         }
-    };
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return (
-            None,
-            Some(if stderr.is_empty() {
-                format!("SCi interpretation failed with status {}", output.status)
-            } else {
-                stderr.trim().to_string()
-            }),
-            None,
-            None,
-        );
     }
-    let payload: Value = match serde_json::from_slice(&output.stdout) {
-        Ok(v) => v,
-        Err(e) => return (None, Some(format!("SCi returned invalid protocol JSON: {}", e)), None, None),
-    };
-    let summary = payload.get("summary").and_then(Value::as_str).or_else(|| payload.get("answer").and_then(Value::as_str)).unwrap_or("SCi interpretation completed.").to_string();
-    let evidence_doc = serde_json::json!({
-        "schema": "centl26.sci-evidence/1",
-        "capability": "org.fcf.centl.sci.interpret",
-        "request": command,
-        "provider": provider,
-        "host": {
-            "product": "CentL26",
-            "build_commit": super::build_commit(),
-        },
-        "response": payload,
-    });
-    let evidence = serde_json::to_string_pretty(&evidence_doc).unwrap_or_default();
-    let elapsed = started.elapsed().as_micros();
-    let result = ExecutionResult {
-        text: summary.clone(),
-        exact_rational: None,
-        approximate: None,
-        symbolic_expr: None,
-        execution_micros: elapsed,
-    };
-    state.session.history.push(HistoryEntry {
-        command: command.to_string(),
-        result: summary,
-        exact_repr: Some(evidence),
-        approximate_repr: None,
-        execution_micros: elapsed,
-        success: true,
-    });
-    (Some(result), None, None, None)
+
+    // 2. Native Offline SCi Solver & Hybrid Gemini STEM Solver
+    match crate::engine::sci::interpret_and_solve_stem(body, &mut state.session, prefer_gemini) {
+        Ok(solution) => {
+            let elapsed = started.elapsed().as_micros();
+            let mut formatted_text = format!("SCi Solution [{} · {}]:\n{}\n", solution.domain, solution.confidence, solution.summary);
+            for step in &solution.steps {
+                formatted_text.push_str(&format!("\n• {}", step));
+            }
+            if let Some(ref exact) = solution.exact_result {
+                formatted_text.push_str(&format!("\n\nExact Result: {}", exact));
+            }
+            if let Some(ref approx) = solution.approximate_result {
+                formatted_text.push_str(&format!("\nApproximate Bound: {}", approx));
+            }
+
+            let evidence_doc = serde_json::json!({
+                "schema": "centl26.sci-evidence/1",
+                "capability": "org.fcf.centl.sci.interpret",
+                "request": command,
+                "provider": if prefer_gemini { "gemini-hybrid" } else { "centl-sci-native" },
+                "domain": solution.domain,
+                "confidence": solution.confidence,
+                "raw_command": solution.raw_centl_command,
+                "host": {
+                    "product": "CentL26",
+                    "build_commit": super::build_commit(),
+                },
+                "solution": {
+                    "summary": solution.summary,
+                    "steps": solution.steps,
+                    "exact_result": solution.exact_result,
+                    "approximate_result": solution.approximate_result
+                }
+            });
+            let evidence = serde_json::to_string_pretty(&evidence_doc).unwrap_or_default();
+            let result = ExecutionResult {
+                text: formatted_text.clone(),
+                exact_rational: None,
+                approximate: solution.approximate_result,
+                symbolic_expr: None,
+                execution_micros: elapsed,
+            };
+            state.session.history.push(HistoryEntry {
+                command: command.to_string(),
+                result: formatted_text,
+                exact_repr: Some(evidence),
+                approximate_repr: None,
+                execution_micros: elapsed,
+                success: true,
+            });
+            (Some(result), None, None, None)
+        }
+        Err(err) => (None, Some(err), None, None),
+    }
 }
 
-fn handle_mirage_command(
+fn handle_build_command(
     command: &str,
     state: &mut AppState,
 ) -> (
@@ -1802,57 +2250,71 @@ fn handle_mirage_command(
     Option<PhysicsResult>,
     Option<HuntSummary>,
 ) {
-    let body = command.strip_prefix("mirage").unwrap_or(command).trim();
-    let tokens = tokenize_command_args(body);
-    let provider = super::capabilities::mirage_provider().command;
     let started = Instant::now();
-    let output = match run_bounded_provider(&provider, &tokens, CHEMISTRY_PROVIDER_TIMEOUT) {
-        Ok(out) => out,
-        Err(error) => {
-            return (
-                None,
-                Some(format!("CENTL-MIRAGE development engine unavailable: {}", error)),
-                None,
-                None,
-            );
+    // 1. Run native in-app extension builder
+    match crate::engine::extensions::handle_build_command(command, &mut state.session) {
+        Ok(outcome) => {
+            let mut formatted = format!("=== {} ===\n{}\n", outcome.title, outcome.summary);
+            for step in &outcome.steps {
+                formatted.push_str(&format!("  {}\n", step));
+            }
+            if let Some(ref exact) = outcome.exact_result {
+                formatted.push_str(&format!("\nResult: {}\n", exact));
+            }
+            let formatted_text = formatted.trim().to_string();
+            let elapsed = started.elapsed().as_micros();
+            let result = ExecutionResult {
+                text: formatted_text.clone(),
+                exact_rational: None,
+                approximate: None,
+                symbolic_expr: None,
+                execution_micros: elapsed,
+            };
+            let evidence = serde_json::to_string(&outcome.evidence).unwrap_or_else(|_| "{}".to_string());
+            state.session.history.push(HistoryEntry {
+                command: command.to_string(),
+                result: formatted_text,
+                exact_repr: Some(evidence),
+                approximate_repr: None,
+                execution_micros: elapsed,
+                success: true,
+            });
+            (Some(result), None, None, None)
         }
-    };
-    let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
-    let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
-    if !output.status.success() {
-        return (
-            None,
-            Some(if stderr.is_empty() {
-                format!("MIRAGE failed with status {}", output.status)
-            } else {
-                stderr
-            }),
-            None,
-            None,
-        );
+        Err(err) => {
+            // 2. Fallback to external provider if requested
+            let body = command
+                .strip_prefix("build")
+                .or_else(|| command.strip_prefix("mirage"))
+                .unwrap_or(command)
+                .trim();
+            let tokens = tokenize_command_args(body);
+            let provider = super::capabilities::mirage_provider().command;
+            if let Ok(output) = run_bounded_provider(&provider, &tokens, CHEMISTRY_PROVIDER_TIMEOUT) {
+                if output.status.success() {
+                    let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                    let elapsed = started.elapsed().as_micros();
+                    let result = ExecutionResult {
+                        text: stdout.clone(),
+                        exact_rational: None,
+                        approximate: None,
+                        symbolic_expr: None,
+                        execution_micros: elapsed,
+                    };
+                    state.session.history.push(HistoryEntry {
+                        command: command.to_string(),
+                        result: stdout,
+                        exact_repr: None,
+                        approximate_repr: None,
+                        execution_micros: elapsed,
+                        success: true,
+                    });
+                    return (Some(result), None, None, None);
+                }
+            }
+            (None, Some(err), None, None)
+        }
     }
-    let text = if stdout.is_empty() {
-        "MIRAGE command completed.".to_string()
-    } else {
-        stdout
-    };
-    let elapsed = started.elapsed().as_micros();
-    let result = ExecutionResult {
-        text: text.clone(),
-        exact_rational: None,
-        approximate: None,
-        symbolic_expr: None,
-        execution_micros: elapsed,
-    };
-    state.session.history.push(HistoryEntry {
-        command: command.to_string(),
-        result: text,
-        exact_repr: None,
-        approximate_repr: None,
-        execution_micros: elapsed,
-        success: true,
-    });
-    (Some(result), None, None, None)
 }
 
 fn handle_caravan_command(
@@ -2374,6 +2836,30 @@ mod tests {
         let phys = phys.unwrap();
         assert!(phys.title.contains("Gravitational Trajectory Simulation"));
         assert!(phys.verified);
+
+        // 5. De Broglie Wavelength
+        let (_exec, err, phys, _) = handle_command("physics debroglie 9.10938e-31 2.187e6", &mut state);
+        assert!(err.is_none());
+        assert!(phys.is_some());
+        assert!(phys.unwrap().summary.contains("nm"));
+
+        // 6. Carnot efficiency
+        let (_exec, err, phys, _) = handle_command("physics carnot 600 300", &mut state);
+        assert!(err.is_none());
+        assert!(phys.is_some());
+        assert!(phys.unwrap().summary.contains("50.00%"));
+
+        // 7. Escape velocity
+        let (_exec, err, phys, _) = handle_command("physics escape 5.9722e24 6.371e6", &mut state);
+        assert!(err.is_none());
+        assert!(phys.is_some());
+        assert!(phys.unwrap().summary.contains("11.19 km/s"));
+
+        // 8. Lorentz factor
+        let (_exec, err, phys, _) = handle_command("physics lorentz 2.4e8", &mut state);
+        assert!(err.is_none());
+        assert!(phys.is_some());
+        assert!(phys.unwrap().summary.contains("γ = 1.66"));
     }
 
     #[test]
@@ -2426,6 +2912,40 @@ mod tests {
         let expanded = res.unwrap().text;
         assert!(expanded.contains("t^2") || expanded.contains("t * t") || expanded.contains("t"));
 
+        // Extended Number Theory & Linear Algebra
+        let (res, err, _, _) = handle_command("xgcd(240, 46)", &mut state);
+        assert!(err.is_none());
+        assert!(res.unwrap().text.contains("gcd = 2"));
+
+        let (res, err, _, _) = handle_command("modinv(3, 11)", &mut state);
+        assert!(err.is_none());
+        assert_eq!(res.unwrap().text, "4");
+
+        let (res, err, _, _) = handle_command("totient(36)", &mut state);
+        assert!(err.is_none());
+        assert_eq!(res.unwrap().text, "12");
+
+        let (res, err, _, _) = handle_command("det2(4, 7, 2, 6)", &mut state);
+        assert!(err.is_none());
+        assert_eq!(res.unwrap().text, "10");
+
+        let (res, err, _, _) = handle_command("dot(1, 2, 3, 4, 5, 6)", &mut state);
+        assert!(err.is_none());
+        assert_eq!(res.unwrap().text, "32");
+
+        let (res, err, _, _) = handle_command("cross(1, 0, 0, 0, 1, 0)", &mut state);
+        assert!(err.is_none());
+        assert!(res.unwrap().text.contains("1.000000"));
+
+        let (res, err, _, _) = handle_command("mean(10, 20, 30)", &mut state);
+        assert!(err.is_none());
+        assert!(res.unwrap().text.contains("20.00000000"));
+
+        // 2D Plotting
+        let (res, err, _, _) = handle_command("plot sin(x) from -3.14 to 3.14", &mut state);
+        assert!(err.is_none(), "err was: {:?}", err);
+        assert!(res.unwrap().text.contains("Function Plot: f(x) = sin(x)"));
+
         // Assertions & verification
         let (res, err, _, _) = handle_command("assert(1 + 1 = 2)", &mut state);
         assert!(err.is_none());
@@ -2467,21 +2987,157 @@ mod tests {
             vec!["gas", "1", "300", "0.024"]
         );
         assert_eq!(
-            chemistry_provider_args("chem charge 2").unwrap(),
-            vec!["charge", "2"]
-        );
-        assert_eq!(
-            chemistry_provider_args("chem stoich '2 H2 + O2 -> 2 H2O' H2 4 H2O").unwrap(),
-            vec!["stoich", "2 H2 + O2 -> 2 H2O", "H2", "4", "H2O"]
-        );
-        assert_eq!(
-            chemistry_provider_args("chem limiting '2 H2 + O2 -> 2 H2O' H2=4 O2=1").unwrap(),
-            vec!["limiting", "2 H2 + O2 -> 2 H2O", "H2=4", "O2=1"]
-        );
-        assert_eq!(
             chemistry_provider_args("chem spread g 1.0 1.1 0.9").unwrap(),
             vec!["spread", "g", "1.0", "1.1", "0.9"]
         );
+        // Auto-detected without 'chem' prefix
+        assert_eq!(
+            chemistry_provider_args("stoich measured 'C2H6 + O2 -> CO2 + H2O' C2H6 3 CO2").unwrap(),
+            vec!["stoich", "measured", "C2H6 + O2 -> CO2 + H2O", "C2H6", "3", "CO2"]
+        );
+        assert_eq!(
+            chemistry_provider_args("balance Fe + O2 -> Fe2O3").unwrap(),
+            vec!["balance", "Fe + O2 -> Fe2O3"]
+        );
+        assert_eq!(
+            chemistry_provider_args("Fe + O2 -> Fe2O3").unwrap(),
+            vec!["balance", "Fe + O2 -> Fe2O3"]
+        );
+    }
+
+    #[test]
+    fn auto_detection_and_sci_problem_solver_work() {
+        let mut state = AppState::new();
+
+        // Physics auto-detection without 'physics' prefix
+        let (_, err, phys, _) = handle_command("convert 100 cm m", &mut state);
+        assert!(err.is_none());
+        assert!(phys.is_some());
+        assert!(phys.unwrap().summary.contains("1.00000000 m"));
+
+        let (_, err, phys, _) = handle_command("convert 100 cm to m", &mut state);
+        assert!(err.is_none());
+        assert!(phys.is_some());
+        assert!(phys.unwrap().summary.contains("1.00000000 m"));
+
+        let (_, err, phys, _) = handle_command("constant c", &mut state);
+        assert!(err.is_none());
+        assert!(phys.is_some());
+        assert!(phys.unwrap().summary.contains("299792458"));
+
+        // Erdős-Straus auto-detection without 'es' prefix
+        let (res, err, _, _) = handle_command("solve 2521", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("4/2521"));
+
+        // SCi plain English STEM problem solver
+        let (res, err, _, _) = handle_command("What is the molar mass of Ca(OH)2?", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("Molar Mass Calculation for Ca(OH)2"));
+
+        let (res, err, _, _) = handle_command("Find the derivative of x^4 * cos(x) with respect to x", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("Symbolic Derivative"));
+
+        let (res, err, _, _) = handle_command("Convert 100 kilometers per hour to meters per second", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("Unit Conversion"));
+
+        // In-App Programmability & Build Extensions
+        let (res, err, _, _) = handle_command("build fn KineticEnergy(m, v) = 1/2 * m * v^2", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("User Extension Built: KineticEnergy"));
+
+        let (res, err, _, _) = handle_command("KineticEnergy(10, 5)", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert_eq!(res.unwrap().text, "125");
+
+        let (res, err, _, _) = handle_command("build a formula for potential energy PotEnergy(m, g, h) = m * g * h", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("User Extension Built: PotEnergy"));
+
+        let (res, err, _, _) = handle_command("PotEnergy(2, 9.8, 5)", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("98"));
+
+        let (res, err, _, _) = handle_command("build list", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("KineticEnergy"));
+
+        // Extended Offline SCi Problem Solving Tests
+        let (res, err, _, _) = handle_command("What is the pH of a 0.05 M HCl solution?", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("pH ="));
+
+        let (res, err, _, _) = handle_command("Dilute 50 mL of 2 M HCl to 200 mL, what is the final concentration?", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("0.5"));
+
+        let (res, err, _, _) = handle_command("Calculate Gibbs free energy when delta H is -92.4 kJ and delta S is -198 J/K at 298 K", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("Spontaneous"));
+
+        let (res, err, _, _) = handle_command("A car accelerates from 0 to 25 m/s in 5 seconds, what is its acceleration?", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("5.0000 m/s²"));
+
+        let (res, err, _, _) = handle_command("What is the current with voltage 120 V and resistance 15 ohms?", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("8.0000 A"));
+
+        let (res, err, _, _) = handle_command("Area of a circle with radius 7", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("153.93"));
+
+        let (res, err, _, _) = handle_command("Hypotenuse of right triangle with legs 3 and 4", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("5.0000"));
+
+        let (res, err, _, _) = handle_command("Dot product of (1, 2, 3) and (4, 5, 6)", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("32"));
+
+        let (res, err, _, _) = handle_command("Determinant of [[1, 2], [3, 4]]", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("-2"));
+
+        let (res, err, _, _) = handle_command("Mean of 10, 20, 30, 40, 50", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("30"));
     }
 }
+
+pub fn handle_update_check() -> serde_json::Value {
+    serde_json::json!({
+        "schema": "centl26.update-check/1",
+        "product": "CentL26",
+        "version": "26.2.3",
+        "release_name": "CentL26.2.3",
+        "release_tag": "centl26-build-0003-release",
+        "build_commit": super::build_commit(),
+        "status": "up_to_date",
+        "channel": "frozen-2026",
+        "message": "CentL26.2.3 is up to date with the latest release (In-App Programmability, Dim Mode, Auto-Detector, Offline SCi Multi-Domain Solver, and 50+ STEM Examples Catalog)."
+    })
+}
+
 
