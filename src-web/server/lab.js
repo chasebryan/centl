@@ -711,38 +711,38 @@
     }
 
     if (target.matches("[data-update]")) {
-      const updater = window.webkit?.messageHandlers?.centl26Update;
-      if (updater && typeof updater.postMessage === "function") {
-        try {
-          updater.postMessage({ action: "check" });
-        } catch (_) {
-          showHostError("The CentL26 automatic updater could not start.");
-        }
-      } else {
-        showHostError("Checking origin/main for updates...");
-        fetch("/api/update")
-          .then((r) => r.json())
-          .then((data) => {
-            if (data.update_available) {
-              if (window.confirm(`${data.message}\n\nDo you want to pull and rebuild now?`)) {
-                showHostError("Updating repository and rebuilding CentL26 (release)... Please wait.");
-                fetch("/api/update", { method: "POST" })
-                  .then((r) => r.json())
-                  .then((res) => {
-                    showHostError(res.message);
-                  })
-                  .catch((err) => {
-                    showHostError("Update build failed: " + err);
-                  });
-              }
-            } else {
-              showHostError(data.message || `${data.product} ${data.version} is up to date.`);
+      showHostError("Checking origin/main for updates...");
+      fetch("/api/update")
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.update_available) {
+            if (window.confirm(`${data.message}\n\nDo you want to pull and rebuild now?`)) {
+              showHostError("Updating repository and rebuilding CentL26 (release)... Please wait.");
+              fetch("/api/update", { method: "POST" })
+                .then((r) => r.json())
+                .then((res) => {
+                  showHostError(res.message);
+                })
+                .catch((err) => {
+                  showHostError("Update build failed: " + err);
+                });
             }
-          })
-          .catch(() => {
+          } else {
+            showHostError(data.message || `${data.product} ${data.version} is up to date.`);
+          }
+        })
+        .catch(() => {
+          const updater = window.webkit?.messageHandlers?.centl26Update;
+          if (updater && typeof updater.postMessage === "function") {
+            try {
+              updater.postMessage({ action: "check" });
+            } catch (_) {
+              showHostError("Automatic updates are available in the CentL26 macOS app.");
+            }
+          } else {
             showHostError("Automatic updates are available in the CentL26 macOS app.");
-          });
-      }
+          }
+        });
     }
 
     if (target.matches("[data-toggle-theme], [data-toggle-theme] *")) {

@@ -2,7 +2,7 @@
   "schema": "centl.capability-registry/1",
   "product": {
     "name": "CentL26",
-    "version": "26.4.1",
+    "version": "26.5.0",
     "organization": "Free Computation Foundation",
     "organization_abbreviation": "FCF",
     "runtime": "offline-local"

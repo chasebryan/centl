@@ -44,8 +44,7 @@ then
     BUILD_SEQUENCE="$(git -C "$REPOSITORY_ROOT" rev-list --count "$BUILD_COMMIT")"
 fi
 if [[ ! "$BUILD_SEQUENCE" =~ ^[1-9][0-9]{0,3}$ ]]; then
-    echo "CENTL26_BUILD_SEQUENCE (1-9999) is required when full Git history is unavailable." >&2
-    exit 2
+    BUILD_SEQUENCE=1
 fi
 BUILD_SEQUENCE_TEXT="$(printf '%08d' "$BUILD_SEQUENCE")"
 BUNDLE_VERSION="$BUILD_SEQUENCE.0.0"

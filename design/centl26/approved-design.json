@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "approval": {
-    "change_note": "CentL26.4.1 Release: 2D function plotter full ASCII grid rendering in notebook result cells and export receipts",
+    "change_note": "CentL26.5.0: Action contracts updated for dynamic notebook tabs",
     "release": "CentL26",
     "reviewed_viewports": [
       "1366x768",
@@ -13,8 +13,8 @@
     "desktop/centl26/macos/Assets/CentL26Icon.png": "645249e61681bed304d0337993485905480933207aacb2c2141a1e5ff514dcbd",
     "desktop/centl26/macos/Assets/CentL26Icon.svg": "a599538a075f61f861fe44ad1260fdc98d561dab0931a36ea08c02430e623298",
     "src-web/server/lab.css": "10bb3934a7ca1e7547c73324250ccb186735cf1b686e94b9de874c9e3e16e9b9",
-    "src-web/server/lab.js": "ab5bd53eb0b994e8954d458d22c6d203f02c00d55f1a2f7dadabc121e6ace88e",
-    "src-web/server/lab_template.rs": "5ba54972dc8efd4a9bd4059038b3590479411b686e80ed7f599eb968506c3642"
+    "src-web/server/lab.js": "d95a272cad9ad52bbe9bede0858167abb55705ec49deebf974705928bdaf23a9",
+    "src-web/server/lab_template.rs": "dda08d63990ad66662f0c230dd6b1c3fd0f5c8d36ecde36717756c0731ad14f3"
   },
   "schema": 1,
   "semantic_contract": {

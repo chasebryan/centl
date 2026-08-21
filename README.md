@@ -5,7 +5,7 @@
 
 # CENTL / CentL26
 
-[![Version](https://img.shields.io/badge/version-26.4.1-blue.svg)](https://github.com/chasebryan/centl)
+[![Version](https://img.shields.io/badge/version-26.5.0-blue.svg)](https://github.com/chasebryan/centl)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-2021%20edition-orange.svg)](https://www.rust-lang.org/)
 [![Offline First](https://img.shields.io/badge/offline-100%25%20local-success.svg)](https://freecomputation.org/)
@@ -23,9 +23,35 @@
 
 ---
 
-## Key Highlights in CentL26.4
+## Key Highlights in CentL26.5
 
-### 1. In-App Programmability & Hackability (`build`)
+### 1. Visual Version Branding & Header Lockup
+- Clear version tag `v26.5` prominently displayed in the top-left branding lockup next to CentL26, in the kernel state badge, and in the status bar.
+
+### 2. Multi-Notebook Tabs & Workspaces
+- Seamless tab management: click the **`+`** tab button or **New computation** to open independent notebook tabs with isolated sessions.
+- Easily name, switch, and close notebooks without losing prior work.
+- **Export & Download**: Export the active notebook directly to clean Markdown (`/download/notebook.md`) or structured JSON (`/download/notebook.json`).
+
+### 3. Frictionless In-App & Fresh-Clone Updates
+- The in-app **Update** button automatically checks `origin/main` for new commits, pulls updates, and rebuilds release binaries in-place.
+- Enhanced fresh-clone script reliability supporting shallow clones and local source checkouts out of the box.
+
+### 4. 2D ASCII & Unicode Function Plotter
+- Full multi-line coordinate grid rendering directly inside notebook cells, export receipts, and the CLI.
+- **Syntax**: `plot <expression> from <x_min> to <x_max>`
+- **Examples**: `plot sin(x) from -3.14 to 3.14`, `plot x^3 - 3*x from -2.5 to 2.5`.
+
+### 5. In-App Programmability & Hackability (`build`)
+- Extend CentL26 dynamically in plain English or declarative syntax:
+  - `build fn KE(m, v) = 1/2 * m * v^2`
+  - `build const G_mars = 3.72`
+  - `build list`, `build test KE(10, 5)`, `build export`
+
+### 6. Free Computation Foundation (FCF) About Modal
+- Accessible via the `FCF` activity rail button, featuring direct links to [freecomputation.org](https://freecomputation.org/) and GitHub Sponsorship.
+
+### 7. Comprehensive Native Offline SCi Problem Solver
 Users can extend CentL26 dynamically without learning complex programming languages:
 - **Plain-English Synthesis**: `build a formula for kinetic energy KE(m, v) = 0.5 * m * v^2`
 - **Declarative Function Syntax**: `build fn lorentz(v) = 1 / sqrt(1 - (v / 299792458)^2)`

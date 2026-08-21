@@ -1,5 +1,17 @@
 ## Unreleased
 
+### CentL26.5.0 — Product Maturity & Full Capability Release (2026-08-21)
+
+- **Top-Left Version Branding**: Visual `v26.5` label directly embedded in the top-left branding lockup, kernel badge, and status bar.
+- **Multi-Notebook Tabs & Workspaces**: Direct in-app tab bar supporting `+` tab creation, tab switching, and notebook renaming.
+- **Save & Download Work**: Download active notebook sessions in clean Markdown (`/download/notebook.md`) or structured JSON (`/download/notebook.json`).
+- **2D Coordinate Grid Function Plotter**: Full multi-line ASCII/Unicode coordinate grid visualization rendered directly in notebook cells, evidence panels, exports, and CLI.
+- **In-App Repository Updater**: Bottom-right Update button checks `origin/main`, pulls latest commits, and rebuilds binaries in-place without Developer ID signature blocks on local builds.
+- **Fresh-Clone Reliability**: macOS build scripts hardened to support shallow git checkouts and source archives automatically.
+- **FCF About Modal**: Activity rail FCF icon opens modal dialog with links to `freecomputation.org` and GitHub sponsorship.
+- **Native SCi & In-App Programmability**: Multi-domain STEM problem solver (32 domains) and `build` extension system registered as native available capabilities.
+- **UI Redundancy Cleanup**: Consolidated status labels and explorer footers for a focused, clean scientific workbench.
+
 ### CentL26.4.1 (2026-08-21)
 
 - 2D Function Plotter: Fixed notebook cell history rendering to preserve and display the full multi-line ASCII/Unicode coordinate grid graph and axis metrics in result cells and export receipts.

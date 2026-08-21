@@ -23,7 +23,7 @@ enum CentL26UpdateContract {
 
     static let messageHandlerName = "centl26Update"
     static let productName = "CentL26"
-    static let productVersion = "26.4.1"
+    static let productVersion = "26.5.0"
     static let bundleIdentifier = "org.freecomputation.centl"
     static let releaseSchema = "org.freecomputation.centl.macos-release/2"
     static let buildSchema = "org.freecomputation.centl.build/1"
@@ -787,6 +787,16 @@ final class CentL26UpdateController {
         dispatchPrecondition(condition: .onQueue(.main))
         guard case .idle = state else {
             NSSound.beep()
+            return
+        }
+
+        let signingMode = bundle.object(forInfoDictionaryKey: "CentLSigningMode") as? String ?? "adhoc"
+        if signingMode != "developer-id" {
+            present(
+                title: "Local Repository Build",
+                message: "This is a local source build of CentL26. Click the Update button at the bottom-right of the window to check origin/main, pull commits, and rebuild.",
+                style: .informational
+            )
             return
         }
 
