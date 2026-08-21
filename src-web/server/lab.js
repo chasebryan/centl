@@ -645,9 +645,28 @@
     if (evidenceTab) activateInspectorTab(evidenceTab);
   }
 
+  const WELCOME_QUOTES = [
+    ["Good maths should be free.", "Exact rational arithmetic, physics kernels, and offline multi-domain STEM solver."],
+    ["The calm scientific workbench for verified computation.", "Think out loud in plain English or compute with exact rational precision."],
+    ["Explore the deterministic frontier.", "Instantaneous, offline, and mathematically uncompromised."],
+    ["What are you working on today?", "Enter any equation, plot a 2D function, balance a reaction, or synthesize a formula in plain English."],
+    ["Exact-first scientific computing.", "Never manufacture mathematical certainty — verified execution receipts every time."]
+  ];
+
+  function rotateWelcomeHeadline(root = document) {
+    const headline = root.querySelector?.("[data-welcome-headline]");
+    const subline = root.querySelector?.("[data-welcome-subline]");
+    if (headline && subline) {
+      const pick = WELCOME_QUOTES[Math.floor(Math.random() * WELCOME_QUOTES.length)];
+      headline.textContent = pick[0];
+      subline.textContent = pick[1];
+    }
+  }
+
   function initializeWorkspace(root = document) {
     initializeInspectorTabs(root);
     initializeReceipts(root);
+    rotateWelcomeHeadline(root);
     selectArea(selectedArea, { openExplorer: selectedArea !== "work", persist: false });
     applyInteractionMode(selectedMode, { persist: false });
     syncComposerActions();
@@ -672,7 +691,7 @@
       return;
     }
 
-    const target = event.target.closest("button, [data-open-palette]");
+    const target = event.target.closest("button, [data-open-palette], .tab-close, [data-switch-notebook]");
     if (!target) return;
 
     if (target.matches("[data-open-palette]")) openPalette();
@@ -689,6 +708,46 @@
     if (target.dataset.receiptTarget) {
       openEvidence();
       activateReceipt(target);
+    }
+
+    if (target.matches("[data-new-notebook], [data-new-notebook] *")) {
+      execute(new URLSearchParams({
+        lab_action: "calculate",
+        cmd: ":new-notebook",
+        interaction_mode: selectedMode
+      }), { restoreEditorFocus: true });
+    }
+
+    const switchBtn = target.closest("[data-switch-notebook]");
+    if (switchBtn && !target.closest("[data-close-notebook]")) {
+      const idx = switchBtn.dataset.switchNotebook;
+      execute(new URLSearchParams({
+        lab_action: "calculate",
+        cmd: `:switch-notebook ${idx}`,
+        interaction_mode: selectedMode
+      }), { restoreEditorFocus: true });
+    }
+
+    const closeBtn = target.closest("[data-close-notebook]");
+    if (closeBtn) {
+      const idx = closeBtn.dataset.closeNotebook;
+      if (window.confirm("Close this notebook tab?")) {
+        execute(new URLSearchParams({
+          lab_action: "calculate",
+          cmd: `:close-notebook ${idx}`,
+          interaction_mode: selectedMode
+        }), { restoreEditorFocus: true });
+      }
+    }
+
+    if (target.matches("[data-open-help], [data-open-help] *")) {
+      const modal = document.querySelector(".help-modal");
+      if (modal) modal.hidden = false;
+    }
+
+    if (target.matches("[data-close-help], [data-close-help] *") || (target.matches(".help-modal") && !target.closest(".help-dialog"))) {
+      const modal = document.querySelector(".help-modal");
+      if (modal) modal.hidden = true;
     }
 
     if (target.matches("[data-run-active]")) {
@@ -917,6 +976,26 @@
       if (event.key === "End") next = tabs.length - 1;
       event.preventDefault();
       activateInspectorTab(tabs[next], { focus: true });
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.target.matches("[data-rename-notebook]") && event.key === "Enter") {
+      event.preventDefault();
+      event.target.blur();
+    }
+  });
+
+  document.addEventListener("focusout", (event) => {
+    if (event.target.matches("[data-rename-notebook]")) {
+      const newName = event.target.textContent.trim();
+      if (newName) {
+        execute(new URLSearchParams({
+          lab_action: "calculate",
+          cmd: `:rename-notebook ${newName}`,
+          interaction_mode: selectedMode
+        }), { restoreEditorFocus: false });
+      }
     }
   });
 

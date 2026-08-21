@@ -19,6 +19,8 @@ use symbolic::{Expr, Parser};
 pub struct Session {
     pub variables: HashMap<String, Expr>,
     pub history: Vec<HistoryEntry>,
+    pub notebook_name: String,
+    pub notebook_tabs: Vec<(String, bool)>,
 }
 
 #[derive(Clone, Debug)]
@@ -40,6 +42,8 @@ impl Session {
         Session {
             variables,
             history: Vec::new(),
+            notebook_name: "Notebook 01".to_string(),
+            notebook_tabs: vec![("Notebook 01".to_string(), true)],
         }
     }
 }

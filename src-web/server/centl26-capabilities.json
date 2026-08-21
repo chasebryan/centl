@@ -104,6 +104,13 @@
       "assurance": ["exact", "deterministic", "user-defined"]
     },
     {
+      "id": "org.fcf.centl.data.manage",
+      "contract": 1,
+      "status": "available",
+      "provider": "centl26.datasets",
+      "assurance": ["bundled", "offline", "deterministic"]
+    },
+    {
       "id": "org.fcf.centl.caravan.retrieve",
       "contract": 1,
       "status": "integration-planned",

@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "approval": {
-    "change_note": "CentL26.5.0: Action contracts updated for dynamic notebook tabs",
+    "change_note": "CentL26.5: Dynamic tabs, help modal, rotating quotes, clean auto mode, and rename notebook",
     "release": "CentL26",
     "reviewed_viewports": [
       "1366x768",
@@ -12,9 +12,9 @@
   "files": {
     "desktop/centl26/macos/Assets/CentL26Icon.png": "645249e61681bed304d0337993485905480933207aacb2c2141a1e5ff514dcbd",
     "desktop/centl26/macos/Assets/CentL26Icon.svg": "a599538a075f61f861fe44ad1260fdc98d561dab0931a36ea08c02430e623298",
-    "src-web/server/lab.css": "10bb3934a7ca1e7547c73324250ccb186735cf1b686e94b9de874c9e3e16e9b9",
-    "src-web/server/lab.js": "d95a272cad9ad52bbe9bede0858167abb55705ec49deebf974705928bdaf23a9",
-    "src-web/server/lab_template.rs": "dda08d63990ad66662f0c230dd6b1c3fd0f5c8d36ecde36717756c0731ad14f3"
+    "src-web/server/lab.css": "c4a25ed36f3d2553017bedb11cb2571d7ab3a5f8de469bd326b2e8486bbe2469",
+    "src-web/server/lab.js": "395d244feece5234353977600088ce8a1190905e075f15c18a96ea44c7516d95",
+    "src-web/server/lab_template.rs": "d646e411dd89b458c04f88f96150a5f1809d3e61c67ad9f30578fc3b0e10c15c"
   },
   "schema": 1,
   "semantic_contract": {

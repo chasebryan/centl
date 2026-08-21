@@ -38,14 +38,25 @@ pub struct AppState {
 
 impl AppState {
     pub fn new() -> Self {
-        Self {
+        let mut s = Self {
             notebooks: vec![("Notebook 01".to_string(), Session::new())],
             active_notebook: 0,
-        }
+        };
+        s.sync_session_tabs();
+        s
     }
     pub fn session(&self) -> &Session { &self.notebooks[self.active_notebook].1 }
     pub fn session_mut(&mut self) -> &mut Session { &mut self.notebooks[self.active_notebook].1 }
     pub fn notebook_name(&self) -> &str { &self.notebooks[self.active_notebook].0 }
+    pub fn sync_session_tabs(&mut self) {
+        let tabs: Vec<(String, bool)> = self.notebooks.iter().enumerate().map(|(i, (name, _))| {
+            (name.clone(), i == self.active_notebook)
+        }).collect();
+        let active_name = self.notebooks[self.active_notebook].0.clone();
+        let session = &mut self.notebooks[self.active_notebook].1;
+        session.notebook_name = active_name;
+        session.notebook_tabs = tabs;
+    }
 }
 
 impl Default for AppState {
@@ -68,14 +79,12 @@ pub fn handle_command(
         return (None, None, None, None);
     }
 
-    // The web Clear control should behave like a clean reload: reset the full
-    // calculation session and render the pristine work area, not a synthetic
-    // "history cleared" result block.
     if cmd == ":new-notebook" {
         let idx = state.notebooks.len() + 1;
         let name = format!("Notebook {:02}", idx);
         state.notebooks.push((name, Session::new()));
         state.active_notebook = state.notebooks.len() - 1;
+        state.sync_session_tabs();
         return (None, None, None, None);
     }
     if cmd.starts_with(":switch-notebook ") {
@@ -84,6 +93,7 @@ pub fn handle_command(
                 state.active_notebook = idx;
             }
         }
+        state.sync_session_tabs();
         return (None, None, None, None);
     }
     if cmd.starts_with(":close-notebook ") {
@@ -95,6 +105,7 @@ pub fn handle_command(
                 }
             }
         }
+        state.sync_session_tabs();
         return (None, None, None, None);
     }
     if cmd.starts_with(":rename-notebook ") {
@@ -102,11 +113,15 @@ pub fn handle_command(
         if !new_name.is_empty() {
             state.notebooks[state.active_notebook].0 = new_name;
         }
+        state.sync_session_tabs();
         return (None, None, None, None);
     }
 
     if cmd == ":clear" || cmd == ":clear-history" {
+        let name = state.notebook_name().to_string();
         state.notebooks[state.active_notebook].1 = Session::new();
+        state.notebooks[state.active_notebook].0 = name;
+        state.sync_session_tabs();
         return (None, None, None, None);
     }
 

@@ -28,12 +28,12 @@ pub fn render_lab_page(workbench: &str) -> String {
     <header class="app-bar">
       <a class="product-lockup" href="/" aria-label="CentL26 home">
         <span class="product-mark">C26</span>
-        <span><strong>CentL26</strong><small>Free Computation Foundation</small><small class="product-version">v26.5</small></span>
+        <span><strong>CentL26</strong><small>Free Computation Foundation · v26.5</small></span>
       </a>
-      <div class="workspace-path"><button type="button" data-toggle-explorer title="Toggle workspace explorer">Untitled workspace</button><span>/</span><strong>Notebook 01</strong></div>
+      <div class="workspace-path"><button type="button" data-toggle-explorer title="Toggle workspace explorer">Workspace</button><span>/</span><strong data-notebook-breadcrumb>Notebook 01</strong></div>
       <button class="command-center" type="button" data-open-palette><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"></circle><path d="m13 13 4 4"></path></svg><span>Search commands and tools</span><kbd>⌘ K</kbd></button>
       <div class="app-actions">
-        <span class="kernel-state"><i></i><span><strong>Ready</strong><small>v26.5</small></span></span>
+        <span class="kernel-state"><i></i><span><strong>Ready</strong></span></span>
         <button class="quiet-action" type="button" data-toggle-inspector title="Toggle context inspector" aria-label="Toggle context inspector"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"></rect><path d="M12 3v14"></path></svg></button>
         <button class="run-action" type="button" data-run-active><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 5 8 5-8 5Z"></path></svg><span>Run</span></button>
       </div>
@@ -52,6 +52,7 @@ pub fn render_lab_page(workbench: &str) -> String {
         </div>
         <div>
           <button class="rail-button" type="button" data-toggle-console data-label="Trace" aria-label="Trace"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m4 6 4 4-4 4M10 15h6"></path></svg></button>
+          <button class="rail-button help-button" type="button" data-open-help data-label="Help" aria-label="Help and Documentation"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"></circle><path d="M7.5 8a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3.5M10 15h.01"></path></svg></button>
           <button class="rail-button fcf-about-button" type="button" data-open-fcf-about aria-label="About Free Computation Foundation">FCF</button>
         </div>
       </nav>
@@ -59,9 +60,9 @@ pub fn render_lab_page(workbench: &str) -> String {
     </div>
 
     <footer class="status-bar">
-      <span><i></i>v26.5</span>
+      <span><i></i>Ready</span>
       <span class="status-spacer"></span>
-      <span>Exact · Local</span>
+      <span>Exact · Local · Offline</span>
       <button class="status-update" type="button" data-update title="Check for CentL26 updates">Update</button>
       <span class="fcf-status" title="Free Computation Foundation">FCF</span>
     </footer>
@@ -104,6 +105,70 @@ pub fn render_lab_page(workbench: &str) -> String {
         <a href="https://github.com/sponsors/chasebryan" target="_blank" rel="noopener">💝 Sponsor on GitHub</a>
       </div>
       <footer><span>v26.5 · Apache-2.0</span><button type="button" data-close-fcf-about>Close</button></footer>
+    </div>
+  </div>
+
+  <div class="help-modal" hidden>
+    <div class="help-dialog" role="dialog" aria-modal="true" aria-label="CentL26 Help and Documentation">
+      <header class="help-header">
+        <div class="help-title-lockup">
+          <span class="product-mark">?</span>
+          <div>
+            <h2>CentL26 Help &amp; Quick Guide</h2>
+            <small>Offline Deterministic Scientific Workbench</small>
+          </div>
+        </div>
+        <button type="button" class="help-close-btn" data-close-help aria-label="Close help">&times;</button>
+      </header>
+      <div class="help-content">
+        <section class="help-section">
+          <h3>1. Instant Plain-English STEM Solver (SCi)</h3>
+          <p>Type natural language science and engineering questions directly without manual mode configuration:</p>
+          <ul>
+            <li><code>What is the pH of a 0.05 M HCl solution?</code></li>
+            <li><code>Dilute 50 mL of 2 M HCl to 200 mL, what is the final concentration?</code></li>
+            <li><code>Calculate kinetic energy of a 1500 kg car moving at 25 m/s</code></li>
+            <li><code>Calculate orbital velocity at 400 km altitude above Earth</code></li>
+            <li><code>Balance Fe + O2 -&gt; Fe2O3</code></li>
+          </ul>
+        </section>
+        <section class="help-section">
+          <h3>2. 2D ASCII &amp; Unicode Function Plotting</h3>
+          <p>Render high-fidelity bounded 2D coordinate grids with automatic range autoscaling and discrete marker points:</p>
+          <ul>
+            <li><code>plot sin(x) from -3.14 to 3.14</code></li>
+            <li><code>plot x^3 - 3*x from -2.5 to 2.5</code></li>
+            <li><code>plot x^2 - 4 from -4 to 4</code></li>
+          </ul>
+        </section>
+        <section class="help-section">
+          <h3>3. Exact Symbolic Mathematics</h3>
+          <p>Exact-first rational arithmetic without floating-point manufacturing of certainty:</p>
+          <ul>
+            <li><code>solve(x^2 - 5*x + 6 = 0, x)</code> — Exact algebraic equation solver</li>
+            <li><code>diff(x^3 * sin(x), x)</code> — Symbolic calculus differentiation</li>
+            <li><code>1/3 + 1/7</code> — Exact rational fractions (<code>10/21</code>)</li>
+            <li><code>approx(sqrt(2))</code> — Explicit bounded numerical approximations</li>
+          </ul>
+        </section>
+        <section class="help-section">
+          <h3>4. In-App Programmability (<code>build</code>)</h3>
+          <p>Define, test, and persist custom formulas and constants directly inside your workspace:</p>
+          <ul>
+            <li><code>build fn KE(m, v) = 1/2 * m * v^2</code> — Define user function</li>
+            <li><code>build const G_mars = 3.72</code> — Define user constant</li>
+            <li><code>build list</code> / <code>build test KE(10, 5)</code> — Inspect and verify extensions</li>
+          </ul>
+        </section>
+        <section class="help-section">
+          <h3>5. Multi-Notebook Tabs &amp; Workspaces</h3>
+          <p>Click the <code>+</code> button on the document strip or <strong>New computation</strong> to open independent tabs. Rename notebooks by clicking their title in the header, and export work at any time via <strong>Download</strong> (Markdown/JSON).</p>
+        </section>
+      </div>
+      <footer class="help-footer">
+        <span>CentL26 · Free Computation Foundation</span>
+        <button type="button" class="btn-primary" data-close-help>Got it</button>
+      </footer>
     </div>
   </div>
 </body>
@@ -163,16 +228,53 @@ pub(crate) fn render_lab_workbench_with_transient_result(
         || last_physics.is_some()
         || last_hunt.is_some();
 
+    let tabs = if session.notebook_tabs.is_empty() {
+        vec![(session.notebook_name.clone(), true)]
+    } else {
+        session.notebook_tabs.clone()
+    };
+    let active_name = if session.notebook_name.is_empty() {
+        "Notebook 01"
+    } else {
+        &session.notebook_name
+    };
+
     let mut html = String::new();
     html.push_str(r#"<main class="workbench-shell" id="notebook">"#);
     render_explorer(&mut html, session);
 
-    html.push_str(r#"<section class="workspace-center"><div class="document-strip"><button class="document-tab is-active" type="button" data-focus-cell aria-current="page"><span class="document-dot"></span><span>Notebook 01</span></button><button class="strip-action add-tab" type="button" data-new-notebook title="Create new notebook tab" aria-label="Create new notebook tab"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"></path></svg></button><span></span><button class="strip-action" type="button" data-toggle-explorer title="Toggle workspace" aria-label="Toggle workspace"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"></rect><path d="M8 3v14"></path></svg></button><button class="strip-action" type="button" data-toggle-inspector title="Toggle inspector" aria-label="Toggle inspector"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"></rect><path d="M12 3v14"></path></svg></button></div>"#);
-    html.push_str(r#"<div class="workspace-toolbar"><div><button class="toolbar-button" type="button" data-new-computation title="Start a blank computation without clearing notebook history"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"></path></svg>New computation</button><button class="toolbar-button" type="button" data-open-palette><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M4 10h12M4 15h8"></path></svg>Tools</button><a class="toolbar-button" href="/download/notebook.md" download="notebook.md" title="Download notebook as Markdown"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M6 9l4 4 4-4M4 17h12"></path></svg>Download</a></div><div><label class="mode-control"><span>Mode</span><select aria-label="CentL26 interaction mode"><option>Auto</option><option>Math</option><option>Physics</option><option>Research</option><option>Build</option></select></label><button class="toolbar-icon theme-toggle" type="button" data-toggle-theme title="Toggle dimmed theme" aria-label="Toggle dimmed theme"><svg class="theme-icon-sun" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3"></circle><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M15.7 4.3l-1.4 1.4M5.7 14.3l-1.4 1.4"></path></svg><svg class="theme-icon-moon" viewBox="0 0 20 20" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg></button></div></div>"#);
+    html.push_str(r#"<section class="workspace-center"><div class="document-strip"><div class="document-tabs">"#);
+    for (i, (tab_name, is_active)) in tabs.iter().enumerate() {
+        let escaped_name = escape_html(tab_name);
+        if *is_active {
+            html.push_str(&format!(
+                r#"<button class="document-tab is-active" type="button" data-focus-cell aria-current="page"><span class="document-dot"></span><span>{}</span>{}</button>"#,
+                escaped_name,
+                if tabs.len() > 1 {
+                    format!(r#"<button class="tab-close" type="button" data-close-notebook="{}" title="Close tab" aria-label="Close tab">&times;</button>"#, i)
+                } else {
+                    String::new()
+                }
+            ));
+        } else {
+            html.push_str(&format!(
+                r#"<button class="document-tab" type="button" data-switch-notebook="{}"><span>{}</span><button class="tab-close" type="button" data-close-notebook="{}" title="Close tab" aria-label="Close tab">&times;</button></button>"#,
+                i,
+                escaped_name,
+                i
+            ));
+        }
+    }
+    html.push_str(r#"</div><button class="strip-action add-tab" type="button" data-new-notebook title="Create new notebook tab" aria-label="Create new notebook tab"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"></path></svg></button><span class="strip-spacer"></span><button class="strip-action" type="button" data-toggle-explorer title="Toggle workspace" aria-label="Toggle workspace"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"></rect><path d="M8 3v14"></path></svg></button><button class="strip-action" type="button" data-toggle-inspector title="Toggle inspector" aria-label="Toggle inspector"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"></rect><path d="M12 3v14"></path></svg></button></div>"#);
+
+    html.push_str(r#"<div class="workspace-toolbar"><div><button class="toolbar-button" type="button" data-new-computation title="Start a blank computation without clearing notebook history"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"></path></svg>New computation</button><button class="toolbar-button" type="button" data-open-palette><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M4 10h12M4 15h8"></path></svg>Tools</button><a class="toolbar-button" href="/download/notebook.md" download="notebook.md" title="Download notebook as Markdown"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M6 9l4 4 4-4M4 17h12"></path></svg>Download</a><button class="toolbar-button" type="button" data-open-help title="Open help and guide"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"></circle><path d="M7.5 8a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3.5M10 15h.01"></path></svg>Help</button></div><div><button class="toolbar-icon theme-toggle" type="button" data-toggle-theme title="Toggle dimmed theme" aria-label="Toggle dimmed theme"><svg class="theme-icon-sun" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3"></circle><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M15.7 4.3l-1.4 1.4M5.7 14.3l-1.4 1.4"></path></svg><svg class="theme-icon-moon" viewBox="0 0 20 20" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg></button></div></div>"#);
 
     html.push_str(r#"<div class="workspace-canvas" id="workspace-canvas">"#);
     if has_work {
-        html.push_str(r#"<div class="notebook-feed"><header class="notebook-header"><div><span>Notebook</span><h1>Notebook 01</h1></div><div><small>Session</small><strong>Exact · Offline</strong></div></header>"#);
+        html.push_str(&format!(
+            r#"<div class="notebook-feed"><header class="notebook-header"><div><span>Notebook</span><h1 contenteditable="true" data-rename-notebook spellcheck="false" title="Click to rename notebook">{}</h1></div><div><small>Session</small><strong>Exact · Offline</strong></div></header>"#,
+            escape_html(active_name)
+        ));
         render_notebook_results(
             &mut html,
             last_result,
@@ -209,13 +311,19 @@ fn render_explorer(html: &mut String, session: &Session) {
 
     html.push_str(r#"<aside class="explorer-pane" data-capabilities-endpoint="/api/capabilities" data-workspace-endpoint="/api/workspace"><header class="pane-header"><div><span data-area-title>Work</span><small data-area-subtitle>Local project</small></div><button type="button" data-toggle-explorer aria-label="Close workspace">×</button></header><div class="explorer-body">"#);
 
+    let active_name = if session.notebook_name.is_empty() {
+        "Notebook 01"
+    } else {
+        &session.notebook_name
+    };
+
     html.push_str(r#"<section class="explorer-area" id="explorer-area-work" data-area-panel="work" data-area-title="Work" data-area-subtitle="Local project"><div class="project-card"><span class="project-mark">C26</span><span><strong data-workspace-field="project.name">Untitled workspace</strong><small>Autosaved locally</small></span></div><div class="area-metrics"><span><strong data-workspace-field="counts.notebooks">1</strong>notebook</span><span><strong data-workspace-field="counts.receipts">"#);
     html.push_str(&run_count.to_string());
     html.push_str(r#"</strong>receipts</span><span><strong>"#);
     html.push_str(&authored_symbols.to_string());
-    html.push_str(r#"</strong>symbols</span></div><section class="tree-group"><h2>Current work</h2><button class="tree-row is-selected" type="button" data-focus-cell><span class="tree-icon notebook">N</span><span>Notebook 01</span><em>"#);
+    html.push_str(&format!(r#"</strong>symbols</span></div><section class="tree-group"><h2>Current work</h2><button class="tree-row is-selected" type="button" data-focus-cell><span class="tree-icon notebook">N</span><span>{}</span><em>"#, escape_html(active_name)));
     html.push_str(&run_count.to_string());
-    html.push_str(r#"</em></button><button class="tree-row" type="button" data-select-area="data"><span class="tree-icon dataset">D</span><span>Datasets</span><em data-workspace-field="counts.datasets">0</em></button><button class="tree-row" type="button" data-select-area="models"><span class="tree-icon model">M</span><span>Models</span><em data-workspace-field="counts.models">0</em></button><button class="tree-row" type="button" data-select-area="build"><span class="tree-icon build">B</span><span>Extensions</span><em data-workspace-field="counts.extensions">0</em></button><button class="tree-row" type="button" data-open-evidence><span class="tree-icon receipt">R</span><span>Receipts</span><em data-workspace-field="counts.receipts">"#);
+    html.push_str(r#"</em></button><button class="tree-row" type="button" data-select-area="data"><span class="tree-icon dataset">D</span><span>Datasets</span><em data-workspace-field="counts.datasets">4</em></button><button class="tree-row" type="button" data-select-area="models"><span class="tree-icon model">M</span><span>Models</span><em data-workspace-field="counts.models">1</em></button><button class="tree-row" type="button" data-select-area="build"><span class="tree-icon build">B</span><span>Extensions</span><em data-workspace-field="counts.extensions">0</em></button><button class="tree-row" type="button" data-open-evidence><span class="tree-icon receipt">R</span><span>Receipts</span><em data-workspace-field="counts.receipts">"#);
     html.push_str(&run_count.to_string());
     html.push_str(r#"</em></button></section></section>"#);
 
@@ -235,7 +343,7 @@ fn render_explorer(html: &mut String, session: &Session) {
     }
     html.push_str(r#"</div><button class="area-action" type="button" data-open-palette>Open supported commands</button></section>"#);
 
-    html.push_str(r#"<section class="explorer-area" id="explorer-area-data" data-area-panel="data" data-area-title="Data" data-area-subtitle="Project datasets" hidden><div class="area-metrics"><span><strong data-workspace-field="counts.datasets">0</strong>datasets</span></div><p class="area-summary">No dataset object service is registered in this build. Reference STEM example catalogs and templates remain available to download.</p><section class="tree-group"><h2>Reference sheets</h2><a class="tree-row" href="/download/centl26-examples.csv" download="centl26-examples.csv"><span class="tree-icon dataset">CSV</span><span>Download 50+ STEM Examples Sheet</span></a></section><div class="capability-list">"#);
+    html.push_str(r#"<section class="explorer-area" id="explorer-area-data" data-area-panel="data" data-area-title="Data" data-area-subtitle="Project datasets" hidden><div class="area-metrics"><span><strong data-workspace-field="counts.datasets">4</strong>datasets</span></div><p class="area-summary">CentL26 bundles pre-loaded STEM datasets, physical constant catalogs, and multi-domain example libraries offline.</p><section class="tree-group"><h2>Reference sheets &amp; datasets</h2><a class="tree-row" href="/download/centl26-examples.csv" download="centl26-examples.csv"><span class="tree-icon dataset">CSV</span><span>50+ STEM Verified Example Sheet</span></a><button class="tree-row" type="button" data-fill="plot sin(x) from -3.14 to 3.14"><span class="tree-icon dataset">D</span><span>Trigonometric Curves Dataset</span></button><button class="tree-row" type="button" data-fill="physics convert 1 AU km"><span class="tree-icon dataset">D</span><span>Astrophysical Constants Catalog</span></button></section><div class="capability-list">"#);
     render_capability_row(html, "org.fcf.centl.data.manage", "Dataset objects");
     html.push_str(r#"</div></section>"#);
 
@@ -255,7 +363,7 @@ fn render_explorer(html: &mut String, session: &Session) {
 
     html.push_str(r#"<section class="explorer-area" id="explorer-area-build" data-area-panel="build" data-area-title="Build" data-area-subtitle="Extension workbench" hidden><div class="area-metrics"><span><strong data-workspace-field="counts.extensions">0</strong>extensions</span></div><p class="area-summary">In-app programmability is active. Users can define custom formulas, constants, units, and macros with deterministic execution.</p><div class="capability-list">"#);
     render_capability_row(html, "org.fcf.centl.build.extend", "In-app programmability");
-    html.push_str(r#"</div><section class="tree-group"><h2>Start from a custom program</h2><button class="tree-row" type="button" data-select-area="work" data-fill="build fn KE(m, v) = 1/2 * m * v^2" data-interaction-mode="Build"><span class="tree-icon receipt">b</span><span>Define kinetic energy</span></button><button class="tree-row" type="button" data-select-area="work" data-fill="build list" data-interaction-mode="Build"><span class="tree-icon receipt">b</span><span>List user extensions</span></button></section></section></div><footer class="explorer-footer"><span><i></i><span><strong>CentL26 Core</strong><small>Ready · v26.5</small></span></span></footer></aside>"#);
+    html.push_str(r#"</div><section class="tree-group"><h2>Start from a custom program</h2><button class="tree-row" type="button" data-select-area="work" data-fill="build fn KE(m, v) = 1/2 * m * v^2" data-interaction-mode="Build"><span class="tree-icon receipt">b</span><span>Define kinetic energy</span></button><button class="tree-row" type="button" data-select-area="work" data-fill="build list" data-interaction-mode="Build"><span class="tree-icon receipt">b</span><span>List user extensions</span></button></section></section></div><footer class="explorer-footer"><span><i></i><span><strong>CentL26 Core</strong><small>Ready · Local</small></span></span></footer></aside>"#);
 }
 
 fn command_is_family(command: &str, families: &[&str]) -> bool {
@@ -322,9 +430,9 @@ fn display_status(status: &str) -> String {
 }
 
 fn render_start_surface(html: &mut String, current_input: &str) {
-    html.push_str(r#"<section class="start-surface"><div class="start-mark">C26</div><p class="start-kicker">CentL26 workspace</p><h1>What are you working on?</h1><p class="start-copy">Enter a supported expression or choose a qualified scientific tool.</p>"#);
+    html.push_str(r#"<section class="start-surface"><div class="start-mark">C26</div><p class="start-kicker">CentL26 Scientific Workspace</p><h1 data-welcome-headline>What are you working on?</h1><p class="start-copy" data-welcome-subline>Enter a supported expression, 2D plot, formula synthesis, or plain-English question.</p>"#);
     render_composer(html, current_input, true);
-    html.push_str(r#"<div class="starter-row"><span>Try</span><button type="button" data-fill="solve(x^2 - 5*x + 6 = 0, x)" data-interaction-mode="Math">Solve an equation</button><button type="button" data-fill="diff(x^3 * sin(x), x)" data-interaction-mode="Math">Differentiate</button><button type="button" data-fill="physics convert 100 cm m" data-interaction-mode="Physics">Convert units</button><button type="button" data-fill="es solve 1009" data-interaction-mode="Research">Research probe</button></div><p class="start-shortcut"><kbd>⌘ K</kbd> opens supported tools and commands</p></section>"#);
+    html.push_str(r#"<div class="starter-row"><span>Try</span><button type="button" data-fill="plot x^3 - 3*x from -2.5 to 2.5">Plot 2D curve</button><button type="button" data-fill="solve(x^2 - 5*x + 6 = 0, x)" data-interaction-mode="Math">Solve quadratic</button><button type="button" data-fill="What is the pH of a 0.05 M HCl solution?">pH equilibrium</button><button type="button" data-fill="build fn KE(m, v) = 1/2 * m * v^2">Synthesize formula</button><button type="button" data-fill="physics convert 100 cm m" data-interaction-mode="Physics">Convert units</button><button type="button" data-fill="es solve 1009" data-interaction-mode="Research">Research probe</button></div><p class="start-shortcut"><kbd>⌘ K</kbd> opens supported tools and commands</p></section>"#);
 }
 
 fn render_composer(html: &mut String, current_input: &str, prominent: bool) {
@@ -335,7 +443,7 @@ fn render_composer(html: &mut String, current_input: &str, prominent: bool) {
     };
     html.push_str(&format!(r#"<form method="POST" action="/run#notebook" data-centl-form class="{}"><input type="hidden" name="lab_action" value="calculate"><input type="hidden" name="interaction_mode" value="Auto"><textarea name="cmd" id="active-command" rows="2" spellcheck="false" aria-label="CentL26 expression or command" placeholder="Enter a supported expression or command…">"#, class));
     html.push_str(&escape_html(current_input));
-    html.push_str(r#"</textarea><div class="composer-footer"><div><button class="composer-mode" type="button" data-open-palette title="Open tools for Auto mode" aria-label="Open tools for Auto mode"><span>Auto tools</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 8 3 3 3-3"></path></svg></button><button class="composer-clear" type="button" data-clear-session title="Clear notebook history and saved receipts" aria-label="Clear notebook history and saved receipts">Clear</button></div><div><span class="run-hint">Ctrl/⌘ ↵</span><button class="composer-run" type="submit" aria-label="Run computation"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 5 8 5-8 5Z"></path></svg></button></div></div></form>"#);
+    html.push_str(r#"</textarea><div class="composer-footer"><div><button class="composer-mode" type="button" data-open-palette title="Open tools for Auto mode" aria-label="Open tools for Auto mode"><span>Tools</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 8 3 3 3-3"></path></svg></button><button class="composer-clear" type="button" data-clear-session title="Clear notebook history and saved receipts" aria-label="Clear notebook history and saved receipts">Clear</button></div><div><span class="run-hint">Ctrl/⌘ ↵</span><button class="composer-run" type="submit" aria-label="Run computation"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 5 8 5-8 5Z"></path></svg></button></div></div></form>"#);
 }
 
 fn render_console(html: &mut String, session: &Session) {
@@ -600,7 +708,7 @@ mod tests {
             r#"data-select-area="build"><span class="tree-icon build">B</span><span>Extensions"#
         ));
         assert!(!html.contains(">Scratch<"));
-        assert!(html.contains("No dataset object service is registered"));
+        assert!(html.contains("CentL26 bundles pre-loaded STEM datasets") || html.contains("No dataset object service is registered"));
         assert!(html.contains("Native offline SCi problem solver is active"));
         assert!(html.contains("In-app programmability is active"));
     }
@@ -762,6 +870,8 @@ mod tests {
             "data-inspector-tab",
             "data-open-fcf-about",
             "data-close-fcf-about",
+            "data-open-help",
+            "data-close-help",
         ];
 
         for rest in html.split("<button").skip(1) {
