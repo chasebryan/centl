@@ -48,6 +48,10 @@ retained only as a migration record. The user-approved interface is protected
 by the [CentL26 design contract](docs/CENTL26-DESIGN-CONTRACT.md); backend work
 cannot silently alter its visual sources or defining layout invariants.
 
+<p>
+  <img width="1000" height="1000" alt="centl26-screenshot" src="https://github.com/user-attachments/assets/9d75f99a-4ab9-4001-8e00-821e9c94cdfb" />
+</p>
+
 On macOS, build the actual standalone application bundle with:
 
 ```sh
