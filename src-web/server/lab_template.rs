@@ -46,6 +46,7 @@ pub fn render_lab_page(workbench: &str) -> String {
           <button class="rail-button" type="button" data-select-area="models" data-label="Models" aria-label="Models" aria-controls="explorer-area-models" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="2"></circle><ellipse cx="10" cy="10" rx="8" ry="3.5"></ellipse><ellipse cx="10" cy="10" rx="3.5" ry="8" transform="rotate(45 10 10)"></ellipse></svg></button>
           <button class="rail-button" type="button" data-select-area="research" data-label="Research" aria-label="Research" aria-controls="explorer-area-research" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3h6M8 3v5l-4 7c-.5 1 .1 2 1.3 2h9.4c1.2 0 1.8-1 1.3-2l-4-7V3"></path><path d="M6.5 13h7"></path></svg></button>
           <button class="rail-button" type="button" data-select-area="build" data-label="Build" aria-label="Build" aria-controls="explorer-area-build" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 5-4 5 4 5M13 5l4 5-4 5M11.5 3 8.5 17"></path></svg></button>
+          <button class="rail-button gemini-rail-button" type="button" data-select-area="gemini" data-label="Gemini AI" aria-label="Gemini AI Co-Pilot" aria-controls="explorer-area-gemini" aria-pressed="false"><svg viewBox="0 0 24 24" class="gemini-sparkle-icon" aria-hidden="true"><defs><linearGradient id="gemini-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color='#4E82EE'/><stop offset="35%" stop-color='#7B61FF'/><stop offset="70%" stop-color='#C259D4'/><stop offset="100%" stop-color='#FA6076'/></linearGradient></defs><path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="url(#gemini-grad)"/></svg></button>
         </div>
         <div>
           <button class="rail-button" type="button" data-toggle-console data-label="Trace" aria-label="Trace"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m4 6 4 4-4 4M10 15h6"></path></svg></button>
@@ -348,7 +349,7 @@ fn render_explorer(html: &mut String, session: &Session) {
     html.push_str(&authored_symbols.to_string());
     html.push_str(&format!(r#"</strong>symbols</span></div><section class="tree-group"><h2>Current work</h2><button class="tree-row is-selected" type="button" data-focus-cell><span class="tree-icon notebook">N</span><span>{}</span><em>"#, escape_html(active_name)));
     html.push_str(&run_count.to_string());
-    html.push_str(r#"</em></button><button class="tree-row" type="button" data-select-area="data"><span class="tree-icon dataset">D</span><span>Datasets</span><em data-workspace-field="counts.datasets">4</em></button><button class="tree-row" type="button" data-select-area="models"><span class="tree-icon model">M</span><span>Models</span><em data-workspace-field="counts.models">1</em></button><button class="tree-row" type="button" data-select-area="build"><span class="tree-icon build">B</span><span>Extensions</span><em data-workspace-field="counts.extensions">0</em></button><button class="tree-row" type="button" data-open-evidence><span class="tree-icon receipt">R</span><span>Receipts</span><em data-workspace-field="counts.receipts">"#);
+    html.push_str(r#"</em></button><button class="tree-row" type="button" data-select-area="data"><span class="tree-icon dataset">D</span><span>Datasets</span><em data-workspace-field="counts.datasets">4</em></button><button class="tree-row" type="button" data-select-area="models"><span class="tree-icon model">M</span><span>Models</span><em data-workspace-field="counts.models">1</em></button><button class="tree-row" type="button" data-select-area="build"><span class="tree-icon build">B</span><span>Extensions</span><em data-workspace-field="counts.extensions">0</em></button><button class="tree-row" type="button" data-select-area="gemini"><span class="tree-icon gemini">✦</span><span>Gemini AI</span><em class="gemini-tree-badge">Co-Pilot</em></button><button class="tree-row" type="button" data-open-evidence><span class="tree-icon receipt">R</span><span>Receipts</span><em data-workspace-field="counts.receipts">"#);
     html.push_str(&run_count.to_string());
     html.push_str(r#"</em></button></section></section>"#);
 
@@ -390,7 +391,51 @@ fn render_explorer(html: &mut String, session: &Session) {
 
     html.push_str(r#"<section class="explorer-area" id="explorer-area-build" data-area-panel="build" data-area-title="Build" data-area-subtitle="Extension workbench" hidden><div class="area-metrics"><span><strong data-workspace-field="counts.extensions">0</strong>extensions</span></div><p class="area-summary">In-app programmability is active. Users can define custom formulas, constants, units, and macros with deterministic execution.</p><div class="capability-list">"#);
     render_capability_row(html, "org.fcf.centl.build.extend", "In-app programmability");
-    html.push_str(r#"</div><section class="tree-group"><h2>Start from a custom program</h2><button class="tree-row" type="button" data-select-area="work" data-fill="build fn KE(m, v) = 1/2 * m * v^2" data-interaction-mode="Build"><span class="tree-icon receipt">b</span><span>Define kinetic energy</span></button><button class="tree-row" type="button" data-select-area="work" data-fill="build list" data-interaction-mode="Build"><span class="tree-icon receipt">b</span><span>List user extensions</span></button></section></section></div><footer class="explorer-footer"><span><i></i><span><strong>CentL26 Core</strong><small>Ready · Local</small></span></span></footer></aside>"#);
+    html.push_str(r#"</div><section class="tree-group"><h2>Start from a custom program</h2><button class="tree-row" type="button" data-select-area="work" data-fill="build fn KE(m, v) = 1/2 * m * v^2" data-interaction-mode="Build"><span class="tree-icon receipt">b</span><span>Define kinetic energy</span></button><button class="tree-row" type="button" data-select-area="work" data-fill="build list" data-interaction-mode="Build"><span class="tree-icon receipt">b</span><span>List user extensions</span></button></section></section>"#);
+
+    // Dedicated Gemini AI Area
+    let (gemini_configured, gemini_key_mask, gemini_source, gemini_model) = crate::engine::sci::get_gemini_status_info();
+    let status_badge_class = if gemini_configured { "gemini-badge-connected" } else { "gemini-badge-unconfigured" };
+    let status_badge_text = if gemini_configured { "Active & Connected" } else { "Offline / Setup Required" };
+
+    html.push_str(r#"<section class="explorer-area" id="explorer-area-gemini" data-area-panel="gemini" data-area-title="Gemini AI" data-area-subtitle="Strategic STEM co-pilot" hidden><div class="gemini-hero-card"><div class="gemini-hero-header"><div class="gemini-sparkle-lockup"><svg viewBox="0 0 24 24" class="gemini-sparkle-emblem" aria-hidden="true"><defs><linearGradient id="gemini-grad-hero" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color='#4E82EE'/><stop offset="35%" stop-color='#7B61FF'/><stop offset="70%" stop-color='#C259D4'/><stop offset="100%" stop-color='#FA6076'/></linearGradient></defs><path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="url(#gemini-grad-hero)"/></svg><div><strong>Google Gemini AI</strong><small>Strategic STEM Intelligence</small></div></div><span class="gemini-status-badge "#);
+    html.push_str(status_badge_class);
+    html.push_str(r#"">"#);
+    html.push_str(status_badge_text);
+    html.push_str(r#"</span></div><p class="gemini-hero-desc">CentL26 pairs exact offline rational mathematics with Google Gemini for theoretical proofs, conceptual breakdowns, and code synthesis.</p></div>"#);
+
+    html.push_str(r#"<section class="tree-group"><h2>Integration &amp; Credentials</h2><div class="gemini-config-box">"#);
+    if gemini_configured {
+        html.push_str(&format!(
+            r#"<div class="gemini-key-info"><span class="gemini-source-tag">Source: {}</span><code class="gemini-key-mask">{}</code></div>"#,
+            escape_html(gemini_source),
+            escape_html(&gemini_key_mask.unwrap_or_default())
+        ));
+    } else {
+        html.push_str(r#"<p class="gemini-help-note">Auto-detects <code>GEMINI_API_KEY</code> or <code>GOOGLE_API_KEY</code> from your environment or enter below:</p>"#);
+    }
+    html.push_str(r#"<form class="gemini-key-form" data-gemini-key-form><input type="password" class="gemini-key-input" placeholder="Enter Gemini API key (AIzaSy...)" aria-label="Gemini API Key" spellcheck="false"><button type="submit" class="gemini-key-save-btn">Save Key</button></form><div class="gemini-sub-links"><a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Get key at Google AI Studio ↗</a><button type="button" class="gemini-test-btn" data-gemini-test data-command=":gemini-status">Test Connection</button></div></div></section>"#);
+
+    html.push_str(r#"<section class="tree-group"><h2>Strategic STEM Architecture</h2><div class="gemini-policy-card"><div class="policy-item"><span class="policy-bullet exact">ℚ</span><div><strong>100% Offline Exact Core (Zero Tokens)</strong><small>Arithmetic, calculus, chemistry, physics, and geometry run locally with zero API latency and zero cost.</small></div></div><div class="policy-item"><span class="policy-bullet gemini">✦</span><div><strong>Strategic Cloud Co-Pilot</strong><small>Gemini is invoked for deep multi-step literature reviews, LaTeX formatting, theoretical proofs, and open-ended synthesis.</small></div></div></div></section>"#);
+
+    html.push_str(r#"<section class="tree-group"><h2>Active Model</h2><div class="gemini-model-selector" data-gemini-model-selector><button type="button" class="gemini-model-chip"#);
+    if gemini_model == "gemini-2.5-flash" {
+        html.push_str(" is-active");
+    }
+    html.push_str(r#" data-gemini-model data-model="gemini-2.5-flash" data-command=":gemini-model gemini-2.5-flash"><strong>Gemini 2.5 Flash</strong><small>Fast · High rate limits</small></button><button type="button" class="gemini-model-chip"#);
+    if gemini_model == "gemini-2.5-pro" {
+        html.push_str(" is-active");
+    }
+    html.push_str(r#" data-gemini-model data-model="gemini-2.5-pro" data-command=":gemini-model gemini-2.5-pro"><strong>Gemini 2.5 Pro</strong><small>Deep reasoning &amp; proofs</small></button><button type="button" class="gemini-model-chip"#);
+    if gemini_model == "gemini-1.5-flash" {
+        html.push_str(" is-active");
+    }
+    html.push_str(r#" data-gemini-model data-model="gemini-1.5-flash" data-command=":gemini-model gemini-1.5-flash"><strong>Gemini 1.5 Flash</strong><small>Standard speed</small></button></div></section>"#);
+
+    html.push_str(r#"<section class="tree-group"><h2>Quick Co-Pilot Actions</h2><button class="tree-row" type="button" data-select-area="work" data-fill=":gemini Explain the last calculation in depth with LaTeX proofs" data-interaction-mode="Math"><span class="tree-icon gemini">✦</span><span>Explain Last Calculation</span></button><button class="tree-row" type="button" data-select-area="work" data-fill=":gemini Derive the theoretical foundation and proof of " data-interaction-mode="Math"><span class="tree-icon gemini">✦</span><span>Derive Mathematical Proof</span></button><button class="tree-row" type="button" data-select-area="work" data-fill=":gemini Generate Python SymPy script and verified tests for " data-interaction-mode="Build"><span class="tree-icon gemini">✦</span><span>Generate SymPy / Python Script</span></button><button class="tree-row" type="button" data-select-area="work" data-fill=":gemini Synthesize research background and literature review on " data-interaction-mode="Research"><span class="tree-icon gemini">✦</span><span>Synthesize Research Summary</span></button></section>"#);
+
+    render_capability_row(html, "org.fcf.centl.gemini.copilot", "Gemini Co-Pilot");
+    html.push_str(r#"</section></div><footer class="explorer-footer"><span><i></i><span><strong>CentL26 Core</strong><small>Ready · Local</small></span></span></footer></aside>"#);
 }
 
 fn command_is_family(command: &str, families: &[&str]) -> bool {
@@ -718,7 +763,7 @@ mod tests {
         let html = render_lab_page(&workbench);
 
         for area in [
-            "work", "projects", "tools", "data", "models", "research", "build",
+            "work", "projects", "tools", "data", "models", "research", "build", "gemini",
         ] {
             assert!(html.contains(&format!(r#"data-select-area="{}""#, area)));
             assert!(html.contains(&format!(r#"data-area-panel="{}""#, area)));
@@ -734,10 +779,14 @@ mod tests {
         assert!(html.contains(
             r#"data-select-area="build"><span class="tree-icon build">B</span><span>Extensions"#
         ));
+        assert!(html.contains(
+            r#"data-select-area="gemini"><span class="tree-icon gemini">✦</span><span>Gemini AI"#
+        ));
         assert!(!html.contains(">Scratch<"));
         assert!(html.contains("CentL26 bundles pre-loaded STEM datasets") || html.contains("No dataset object service is registered"));
         assert!(html.contains("Native offline SCi problem solver is active"));
         assert!(html.contains("In-app programmability is active"));
+        assert!(html.contains("Google Gemini AI"));
     }
 
     #[test]
@@ -900,6 +949,8 @@ mod tests {
             "data-open-help",
             "data-close-help",
             "data-save-project",
+            "data-gemini-",
+            "data-model",
         ];
 
         for rest in html.split("<button").skip(1) {

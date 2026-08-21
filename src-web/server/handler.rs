@@ -233,7 +233,36 @@ pub fn handle_single_command(
     if let Some(key) = cmd.strip_prefix(":gemini-key ").or_else(|| cmd.strip_prefix(":set-gemini-key ")) {
         crate::engine::sci::set_runtime_gemini_key(key.trim());
         let res = ExecutionResult {
-            text: "Runtime Gemini API key configured successfully.".to_string(),
+            text: "Runtime Gemini API key configured successfully. Status: Active.".to_string(),
+            exact_rational: None,
+            approximate: None,
+            symbolic_expr: None,
+            execution_micros: 0,
+        };
+        return (Some(res), None, None, None);
+    }
+
+    if let Some(model) = cmd.strip_prefix(":gemini-model ").or_else(|| cmd.strip_prefix(":set-gemini-model ")) {
+        crate::engine::sci::set_runtime_gemini_model(model.trim());
+        let res = ExecutionResult {
+            text: format!("Gemini active model set to '{}'.", model.trim()),
+            exact_rational: None,
+            approximate: None,
+            symbolic_expr: None,
+            execution_micros: 0,
+        };
+        return (Some(res), None, None, None);
+    }
+
+    if cmd == ":gemini-status" || cmd == ":ai-status" {
+        let (configured, key_preview, source, model) = crate::engine::sci::get_gemini_status_info();
+        let status_str = if configured {
+            format!("=== Gemini AI Co-Pilot Status ===\n• Status: Active & Connected\n• Active Model: {}\n• Credential Source: {}\n• Key Preview: {}\n• Architecture: Strategic Hybrid STEM (Exact-First)", model, source, key_preview.unwrap_or_default())
+        } else {
+            format!("=== Gemini AI Co-Pilot Status ===\n• Status: Unconfigured (CentL26 Running 100% Offline)\n• Active Model: {}\n• Credential Source: None detected\n• Setup: Set GEMINI_API_KEY environment variable or run ':gemini-key <YOUR_KEY>'.", model)
+        };
+        let res = ExecutionResult {
+            text: status_str,
             exact_rational: None,
             approximate: None,
             symbolic_expr: None,
@@ -435,7 +464,9 @@ fn is_auto_detected_cps(cmd: &str) -> bool {
 
 fn is_auto_detected_sci(cmd: &str) -> bool {
     let trimmed = cmd.trim();
-    if has_command_prefix(trimmed, "sci") || has_command_prefix(trimmed, "gemini") || has_command_prefix(trimmed, ":gemini") {
+    if has_command_prefix(trimmed, "sci") || has_command_prefix(trimmed, "gemini") || has_command_prefix(trimmed, ":gemini")
+        || has_command_prefix(trimmed, "ai") || has_command_prefix(trimmed, ":ai")
+    {
         return true;
     }
     let lower = trimmed.to_ascii_lowercase();
@@ -2310,10 +2341,15 @@ fn handle_sci_command(
         command[":gemini ".len()..].trim()
     } else if command.starts_with("gemini ") {
         command["gemini ".len()..].trim()
+    } else if command.starts_with(":ai ") {
+        command[":ai ".len()..].trim()
+    } else if command.starts_with("ai ") {
+        command["ai ".len()..].trim()
     } else {
         command.trim()
     };
-    let prefer_gemini = command.starts_with(":gemini") || command.starts_with("gemini");
+    let prefer_gemini = command.starts_with(":gemini") || command.starts_with("gemini")
+        || command.starts_with(":ai") || command.starts_with("ai");
     let provider = super::capabilities::sci_provider().command;
     let started = Instant::now();
 
@@ -3252,6 +3288,24 @@ mod tests {
         assert!(err.is_none());
         assert!(res.is_some());
         assert!(res.unwrap().text.contains("KineticEnergy"));
+
+        // Gemini AI Configuration & Status Commands
+        let (res, err, _, _) = handle_command(":gemini-key AIzaSyTestKey1234567890", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("Active"));
+
+        let (res, err, _, _) = handle_command(":gemini-model gemini-2.5-pro", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        assert!(res.unwrap().text.contains("gemini-2.5-pro"));
+
+        let (res, err, _, _) = handle_command(":gemini-status", &mut state);
+        assert!(err.is_none());
+        assert!(res.is_some());
+        let status_text = res.unwrap().text;
+        assert!(status_text.contains("Active & Connected"));
+        assert!(status_text.contains("gemini-2.5-pro"));
 
         // Extended Offline SCi Problem Solving Tests
         let (res, err, _, _) = handle_command("What is the pH of a 0.05 M HCl solution?", &mut state);

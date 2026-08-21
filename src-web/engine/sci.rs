@@ -9,6 +9,7 @@ use std::env;
 use std::sync::Mutex;
 
 static RUNTIME_GEMINI_KEY: Mutex<Option<String>> = Mutex::new(None);
+static RUNTIME_GEMINI_MODEL: Mutex<Option<String>> = Mutex::new(None);
 
 pub fn set_runtime_gemini_key(key: &str) {
     let mut lock = RUNTIME_GEMINI_KEY.lock().unwrap_or_else(|p| p.into_inner());
@@ -18,6 +19,29 @@ pub fn set_runtime_gemini_key(key: &str) {
     } else {
         *lock = Some(trimmed);
     }
+}
+
+pub fn set_runtime_gemini_model(model: &str) {
+    let mut lock = RUNTIME_GEMINI_MODEL.lock().unwrap_or_else(|p| p.into_inner());
+    let trimmed = model.trim().to_string();
+    if trimmed.is_empty() {
+        *lock = None;
+    } else {
+        *lock = Some(trimmed);
+    }
+}
+
+pub fn get_runtime_gemini_model() -> String {
+    let lock = RUNTIME_GEMINI_MODEL.lock().unwrap_or_else(|p| p.into_inner());
+    if let Some(ref m) = *lock {
+        return m.clone();
+    }
+    if let Ok(m) = env::var("GEMINI_MODEL") {
+        if !m.trim().is_empty() {
+            return m.trim().to_string();
+        }
+    }
+    "gemini-2.5-flash".to_string()
 }
 
 pub fn get_runtime_gemini_key() -> Option<String> {
@@ -35,7 +59,69 @@ pub fn get_runtime_gemini_key() -> Option<String> {
             return Some(k.trim().to_string());
         }
     }
+    if let Ok(k) = env::var("GOOGLE_API_KEY") {
+        if !k.trim().is_empty() {
+            return Some(k.trim().to_string());
+        }
+    }
+    if let Ok(k) = env::var("GOOGLE_AI_API_KEY") {
+        if !k.trim().is_empty() {
+            return Some(k.trim().to_string());
+        }
+    }
+    // Check ~/.centl/gemini.key
+    if let Ok(home) = env::var("HOME") {
+        let key_path = std::path::Path::new(&home).join(".centl").join("gemini.key");
+        if let Ok(content) = std::fs::read_to_string(key_path) {
+            let trimmed = content.trim().to_string();
+            if !trimmed.is_empty() {
+                return Some(trimmed);
+            }
+        }
+    }
     None
+}
+
+pub fn get_gemini_status_info() -> (bool, Option<String>, &'static str, String) {
+    let model = get_runtime_gemini_model();
+    let lock = RUNTIME_GEMINI_KEY.lock().unwrap_or_else(|p| p.into_inner());
+    if let Some(ref k) = *lock {
+        let masked = if k.len() > 8 {
+            format!("{}...{}", &k[..4], &k[k.len() - 4..])
+        } else {
+            "Active".to_string()
+        };
+        return (true, Some(masked), "Session Configuration", model);
+    }
+    if let Ok(k) = env::var("CENTL_GEMINI_KEY") {
+        if !k.trim().is_empty() {
+            let masked = format!("{}...{}", &k[..4.min(k.len())], &k[k.len().saturating_sub(4)..]);
+            return (true, Some(masked), "CENTL_GEMINI_KEY env", model);
+        }
+    }
+    if let Ok(k) = env::var("GEMINI_API_KEY") {
+        if !k.trim().is_empty() {
+            let masked = format!("{}...{}", &k[..4.min(k.len())], &k[k.len().saturating_sub(4)..]);
+            return (true, Some(masked), "GEMINI_API_KEY env", model);
+        }
+    }
+    if let Ok(k) = env::var("GOOGLE_API_KEY") {
+        if !k.trim().is_empty() {
+            let masked = format!("{}...{}", &k[..4.min(k.len())], &k[k.len().saturating_sub(4)..]);
+            return (true, Some(masked), "GOOGLE_API_KEY env", model);
+        }
+    }
+    if let Ok(home) = env::var("HOME") {
+        let key_path = std::path::Path::new(&home).join(".centl").join("gemini.key");
+        if let Ok(content) = std::fs::read_to_string(key_path) {
+            let trimmed = content.trim().to_string();
+            if !trimmed.is_empty() {
+                let masked = format!("{}...{}", &trimmed[..4.min(trimmed.len())], &trimmed[trimmed.len().saturating_sub(4)..]);
+                return (true, Some(masked), "~/.centl/gemini.key", model);
+            }
+        }
+    }
+    (false, None, "Unconfigured", model)
 }
 
 #[derive(Clone, Debug)]
@@ -2698,8 +2784,10 @@ fn solve_with_gemini_hybrid(
         }
     });
 
+    let model = get_runtime_gemini_model();
     let endpoint = format!(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={}",
+        "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent?key={}",
+        model,
         api_key
     );
 

@@ -111,6 +111,13 @@
       "assurance": ["bundled", "offline", "deterministic"]
     },
     {
+      "id": "org.fcf.centl.gemini.copilot",
+      "contract": 1,
+      "status": "available",
+      "provider": "google.gemini",
+      "assurance": ["strategic-hybrid", "exact-first", "quota-aware", "stem-grounded"]
+    },
+    {
       "id": "org.fcf.centl.caravan.retrieve",
       "contract": 1,
       "status": "integration-planned",

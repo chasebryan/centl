@@ -20,7 +20,7 @@
   let selectedInspectorTab = "result";
   let capabilitiesRequest = null;
 
-  const areaNames = new Set(["work", "projects", "tools", "data", "models", "research", "build"]);
+  const areaNames = new Set(["work", "projects", "tools", "data", "models", "research", "build", "gemini"]);
   const interactionModes = new Set(["Auto", "Math", "Physics", "Research", "Build"]);
   const inspectorTabs = new Set(["result", "variables", "evidence"]);
 
@@ -687,6 +687,22 @@
   }
 
   document.addEventListener("submit", (event) => {
+    const geminiForm = event.target.closest("[data-gemini-key-form]");
+    if (geminiForm) {
+      event.preventDefault();
+      const input = geminiForm.querySelector(".gemini-key-input");
+      const keyVal = input?.value.trim();
+      if (keyVal) {
+        execute(new URLSearchParams({
+          lab_action: "calculate",
+          cmd: `:gemini-key ${keyVal}`,
+          interaction_mode: selectedMode
+        }), { restoreEditorFocus: false });
+        input.value = "";
+      }
+      return;
+    }
+
     const form = event.target.closest("[data-centl-form]");
     if (!form) return;
     event.preventDefault();
@@ -720,6 +736,26 @@
     if (target.dataset.receiptTarget) {
       openEvidence();
       activateReceipt(target);
+    }
+
+    const modelChip = target.closest(".gemini-model-chip");
+    if (modelChip && modelChip.dataset.model) {
+      const modelName = modelChip.dataset.model;
+      document.querySelectorAll(".gemini-model-chip").forEach((c) => c.classList.remove("is-active"));
+      modelChip.classList.add("is-active");
+      execute(new URLSearchParams({
+        lab_action: "calculate",
+        cmd: `:gemini-model ${modelName}`,
+        interaction_mode: selectedMode
+      }), { restoreEditorFocus: false });
+    }
+
+    if (target.matches("[data-gemini-test]")) {
+      execute(new URLSearchParams({
+        lab_action: "calculate",
+        cmd: ":gemini-status",
+        interaction_mode: selectedMode
+      }), { restoreEditorFocus: false });
     }
 
     if (target.matches("[data-new-notebook], [data-new-notebook] *")) {

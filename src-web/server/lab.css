@@ -964,6 +964,271 @@ body.hide-console .trace-console { display: none; }
 }
 .btn-primary:hover { background: var(--brand-hover); }
 
+/* Gemini AI Co-Pilot Styling */
+.gemini-rail-button .gemini-sparkle-icon {
+  width: 20px;
+  height: 20px;
+  filter: drop-shadow(0 2px 5px rgba(123, 97, 255, 0.35));
+  transition: transform 140ms ease, filter 140ms ease;
+}
+.gemini-rail-button:hover .gemini-sparkle-icon,
+.gemini-rail-button.is-active .gemini-sparkle-icon {
+  transform: scale(1.15) rotate(4deg);
+  filter: drop-shadow(0 3px 8px rgba(194, 89, 212, 0.6));
+}
+.gemini-rail-button.is-active {
+  background: rgba(123, 97, 255, 0.12);
+}
+.gemini-rail-button.is-active::before {
+  background: linear-gradient(180deg, #4E82EE, #C259D4);
+}
+.tree-icon.gemini {
+  color: #fff;
+  background: linear-gradient(135deg, #4E82EE 0%, #7B61FF 50%, #FA6076 100%);
+  box-shadow: 0 1px 4px rgba(123, 97, 255, 0.3);
+  font-size: 11px;
+}
+.gemini-tree-badge {
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(78, 130, 238, 0.15), rgba(194, 89, 212, 0.15));
+  color: #7B61FF;
+}
+
+.gemini-hero-card {
+  padding: 12px 14px;
+  background: linear-gradient(145deg, var(--surface) 0%, var(--surface-subtle) 100%);
+  border: 1px solid rgba(123, 97, 255, 0.25);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(123, 97, 255, 0.06);
+  margin-bottom: 12px;
+}
+.gemini-hero-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.gemini-sparkle-lockup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.gemini-sparkle-emblem {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 6px rgba(123, 97, 255, 0.4));
+}
+.gemini-sparkle-lockup strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 680;
+  letter-spacing: -0.01em;
+  background: linear-gradient(90deg, var(--ink), #7B61FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.gemini-sparkle-lockup small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+}
+.gemini-hero-desc {
+  margin: 9px 0 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.gemini-status-badge {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.gemini-badge-connected {
+  background: rgba(16, 185, 129, 0.14);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.gemini-badge-unconfigured {
+  background: rgba(245, 158, 11, 0.14);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.gemini-config-box {
+  display: grid;
+  gap: 8px;
+}
+.gemini-help-note {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.gemini-help-note code {
+  font-size: 11px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: var(--surface-muted);
+}
+.gemini-key-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: var(--surface-muted);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+}
+.gemini-source-tag {
+  color: var(--muted);
+}
+.gemini-key-mask {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.gemini-key-form {
+  display: flex;
+  gap: 6px;
+}
+.gemini-key-input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 9px;
+  font-size: 11.5px;
+  font-family: var(--mono);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+}
+.gemini-key-input:focus {
+  border-color: #7B61FF;
+  outline: 2px solid rgba(123, 97, 255, 0.2);
+}
+.gemini-key-save-btn {
+  padding: 6px 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #4E82EE, #7B61FF);
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.gemini-key-save-btn:hover {
+  background: linear-gradient(135deg, #3B6BDE, #6849F7);
+}
+.gemini-sub-links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+}
+.gemini-sub-links a {
+  color: var(--brand);
+  text-decoration: none;
+}
+.gemini-sub-links a:hover {
+  text-decoration: underline;
+}
+.gemini-test-btn {
+  padding: 2px 7px;
+  font-size: 10.5px;
+  background: var(--surface-muted);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.gemini-test-btn:hover {
+  background: var(--surface-subtle);
+  color: var(--ink);
+}
+
+.gemini-policy-card {
+  display: grid;
+  gap: 8px;
+}
+.policy-item {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+}
+.policy-bullet {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.policy-bullet.exact {
+  color: #059669;
+  background: rgba(16, 185, 129, 0.16);
+}
+.policy-bullet.gemini {
+  color: #7B61FF;
+  background: rgba(123, 97, 255, 0.16);
+}
+.policy-item strong {
+  display: block;
+  font-size: 11.5px;
+  color: var(--ink);
+}
+.policy-item small {
+  display: block;
+  font-size: 10.5px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.gemini-model-selector {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 5px;
+}
+.gemini-model-chip {
+  text-align: left;
+  padding: 6px 9px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 100ms ease, background 100ms ease;
+}
+.gemini-model-chip:hover {
+  background: var(--surface-muted);
+}
+.gemini-model-chip.is-active {
+  border-color: #7B61FF;
+  background: rgba(123, 97, 255, 0.08);
+}
+.gemini-model-chip strong {
+  display: block;
+  font-size: 11.5px;
+}
+.gemini-model-chip small {
+  display: block;
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
 /* Compact desktops: side panes become transient overlays. */
 @media (max-width: 1099px) {
   .app-bar { grid-template-columns: 220px minmax(240px, 1fr) auto; }
