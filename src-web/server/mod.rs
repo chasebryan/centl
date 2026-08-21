@@ -3,6 +3,7 @@
 
 mod capabilities;
 pub mod examples_data;
+pub mod fcf_docs;
 pub mod handler;
 pub mod lab_template;
 pub mod template;
@@ -472,6 +473,17 @@ fn lab_api_response(
         let update_doc = handler::handle_update_check();
         let body = serde_json::to_vec_pretty(&update_doc).map_err(|e| {
             io::Error::new(io::ErrorKind::InvalidData, format!("failed to encode update check: {e}"))
+        })?;
+        return Ok(Some(LabApiResponse {
+            content_type: "application/json; charset=utf-8",
+            body,
+        }));
+    }
+
+    if path == "/api/fcf-docs" {
+        let docs = fcf_docs::get_all_docs_json();
+        let body = serde_json::to_vec_pretty(&docs).map_err(|e| {
+            io::Error::new(io::ErrorKind::InvalidData, format!("failed to encode fcf docs: {e}"))
         })?;
         return Ok(Some(LabApiResponse {
             content_type: "application/json; charset=utf-8",
@@ -1283,6 +1295,59 @@ fn handle_lab_connection(mut stream: TcpStream, server_state: Arc<ServerState>) 
         );
     }
 
+    if (method == "POST" || method == "GET") && path == "/api/open-chrome" {
+        let mut target_url = String::new();
+        if method == "GET" {
+            if let Some(query) = request.target.split('?').nth(1) {
+                for pair in query.split('&') {
+                    if let Some((k, v)) = pair.split_once('=') {
+                        if k == "url" {
+                            target_url = decode_percent_string(v);
+                        }
+                    }
+                }
+            }
+        } else {
+            let body_str = String::from_utf8_lossy(&request.body);
+            if let Ok(json) = serde_json::from_str::<serde_json::Value>(&body_str) {
+                if let Some(u) = json.get("url").and_then(|v| v.as_str()) {
+                    target_url = u.to_string();
+                }
+            }
+            if target_url.is_empty() {
+                for pair in body_str.split('&') {
+                    if let Some((k, v)) = pair.split_once('=') {
+                        if k == "url" {
+                            target_url = decode_percent_string(v);
+                        }
+                    }
+                }
+            }
+        }
+
+        let opened = if !target_url.is_empty() {
+            open_in_chrome(&target_url)
+        } else {
+            false
+        };
+
+        let res = serde_json::json!({
+            "success": opened,
+            "url": target_url,
+            "message": if opened { "Launched Google Chrome successfully." } else { "Could not launch Google Chrome automatically." }
+        });
+        let body = serde_json::to_vec_pretty(&res).unwrap_or_default();
+        return write_response(
+            &mut stream,
+            200,
+            "OK",
+            "application/json; charset=utf-8",
+            &body,
+            &[("Cache-Control", "no-store".to_string())],
+            false,
+        );
+    }
+
     let is_page = path == "/" || path == "/index.html" || path == "/run";
     let is_api_run = path == "/api/run";
     if !is_page && !is_api_run {
@@ -1971,6 +2036,65 @@ fn extract_form_value(body: &str, key: &str) -> String {
         }
     }
     String::new()
+}
+
+pub fn open_in_chrome(url: &str) -> bool {
+    if !url.starts_with("http://") && !url.starts_with("https://") {
+        return false;
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        if let Ok(status) = std::process::Command::new("open")
+            .args(["-a", "Google Chrome", url])
+            .status()
+        {
+            if status.success() {
+                return true;
+            }
+        }
+        if let Ok(status) = std::process::Command::new("open").arg(url).status() {
+            return status.success();
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        for bin in ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser"] {
+            if let Ok(status) = std::process::Command::new(bin).arg(url).status() {
+                if status.success() {
+                    return true;
+                }
+            }
+        }
+        if let Ok(status) = std::process::Command::new("xdg-open").arg(url).status() {
+            return status.success();
+        }
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        if let Ok(status) = std::process::Command::new("cmd")
+            .args(["/C", "start", "chrome", url])
+            .status()
+        {
+            if status.success() {
+                return true;
+            }
+        }
+        if let Ok(status) = std::process::Command::new("cmd")
+            .args(["/C", "start", url])
+            .status()
+        {
+            return status.success();
+        }
+    }
+
+    false
+}
+
+pub fn decode_percent_string(value: &str) -> String {
+    url_decode(value)
 }
 
 fn url_decode(value: &str) -> String {

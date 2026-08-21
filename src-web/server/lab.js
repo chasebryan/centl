@@ -439,6 +439,427 @@
     window.setTimeout(() => notice.remove(), 5000);
   }
 
+  // --- STEM Academic Omnibar & FCF Knowledge Router ---
+  let fcfDocsCache = [];
+  let omnibarActiveCategory = "all";
+  let omnibarActiveIndex = -1;
+  let activeDoc = null;
+
+  async function loadFcfDocs() {
+    try {
+      const res = await fetch("/api/fcf-docs", { credentials: "same-origin" });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.documents && Array.isArray(json.documents)) {
+          fcfDocsCache = json.documents;
+        }
+      }
+    } catch (_) {}
+  }
+
+  function omnibar() {
+    return document.querySelector(".header-omnibar");
+  }
+
+  function omnibarInput() {
+    return document.querySelector("[data-omnibar-input]");
+  }
+
+  function omnibarDropdown() {
+    return document.querySelector("[data-omnibar-dropdown]");
+  }
+
+  function omnibarResults() {
+    return document.querySelector("[data-omnibar-results]");
+  }
+
+  function omnibarClear() {
+    return document.querySelector("[data-omnibar-clear]");
+  }
+
+  function escapeHtml(text) {
+    if (!text) return "";
+    return String(text)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function renderMarkdownToHtml(md) {
+    if (!md) return "";
+    let html = escapeHtml(md)
+      .replace(/```([a-z0-9_-]*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+      .replace(/^\&gt; (.*$)/gim, '<blockquote style="margin: 8px 0; padding: 6px 12px; border-left: 3px solid #1A73E8; background: var(--surface-subtle); color: var(--muted);">$1</blockquote>')
+      .replace(/^\s*[-*]\s+(.*$)/gim, '<li style="margin-left: 18px;">$1</li>')
+      .replace(/\n\n/g, '</p><p>');
+
+    return `<p>${html}</p>`
+      .replace(/<p><\/p>/g, '')
+      .replace(/<p>(<h[1-3]>.*?<\/h[1-3]>)<\/p>/g, '$1')
+      .replace(/<p>(<pre>.*?<\/pre>)<\/p>/gs, '$1');
+  }
+
+  function getChromeProviders(query) {
+    const term = (query || "quantum mechanics").trim();
+    const q = encodeURIComponent(term);
+    return [
+      {
+        id: "google-scholar",
+        category: "chrome",
+        source: "Google Scholar",
+        title: `Google Scholar: Search "${term}"`,
+        subtitle: "Peer-reviewed scientific research, citations, patents and preprints",
+        url: `https://scholar.google.com/scholar?q=${q}`
+      },
+      {
+        id: "arxiv",
+        category: "chrome",
+        source: "arXiv.org",
+        title: `arXiv Preprints: Search "${term}"`,
+        subtitle: "Physics, Mathematics, Quantitative Biology, CS & Machine Learning",
+        url: `https://arxiv.org/search/?query=${q}&searchtype=all`
+      },
+      {
+        id: "pubmed",
+        category: "chrome",
+        source: "PubMed / NCBI",
+        title: `PubMed Central: Search "${term}"`,
+        subtitle: "Biomedical articles, molecular biology, genetics & pharmacology",
+        url: `https://pubmed.ncbi.nlm.nih.gov/?term=${q}`
+      },
+      {
+        id: "mathworld",
+        category: "chrome",
+        source: "Wolfram MathWorld",
+        title: `Wolfram MathWorld: Lookup "${term}"`,
+        subtitle: "Definitive mathematical definitions, derivations, theorems and proofs",
+        url: `https://mathworld.wolfram.com/search/?query=${q}`
+      },
+      {
+        id: "nist",
+        category: "chrome",
+        source: "NIST Chemistry WebBook",
+        title: `NIST Chemistry WebBook: "${term}"`,
+        subtitle: "Thermochemical kinetics, IR/UV/MS spectra & reaction equilibrium constants",
+        url: `https://webbook.nist.gov/cgi/cbook.cgi?Name=${q}`
+      },
+      {
+        id: "oeis",
+        category: "chrome",
+        source: "OEIS Database",
+        title: `OEIS Integer Sequences: "${term}"`,
+        subtitle: "On-Line Encyclopedia of Integer Sequences and generating series",
+        url: `https://oeis.org/search?q=${q}`
+      },
+      {
+        id: "ieee-xplore",
+        category: "chrome",
+        source: "IEEE Xplore",
+        title: `IEEE Xplore Research: "${term}"`,
+        subtitle: "Electrical engineering, computer science & applied physics literature",
+        url: `https://ieeexplore.ieee.org/search/searchresult.jsp?newsearch=true&queryText=${q}`
+      },
+      {
+        id: "nasa-ads",
+        category: "chrome",
+        source: "NASA Astrophysics (ADS)",
+        title: `NASA ADS: Search "${term}"`,
+        subtitle: "Astrophysics, planetary sciences & high-energy particle physics",
+        url: `https://ui.adsabs.harvard.edu/search/q=${q}`
+      }
+    ];
+  }
+
+  function getCentlSolverSuggestions(query) {
+    const q = query.trim();
+    if (!q) {
+      return [
+        {
+          id: "solver-calc",
+          category: "tools",
+          source: "Exact Math",
+          title: "Exact Rational Arithmetic (1/3 + 5/7)",
+          subtitle: "Arbitrary-precision fractions and integer computation",
+          command: "1/3 + 5/7"
+        },
+        {
+          id: "solver-solve",
+          category: "tools",
+          source: "Algebra",
+          title: "Solve Equation (solve(x^2 - 5*x + 6 = 0, x))",
+          subtitle: "Exact symbolic polynomial roots",
+          command: "solve(x^2 - 5*x + 6 = 0, x)"
+        },
+        {
+          id: "solver-diff",
+          category: "tools",
+          source: "Calculus",
+          title: "Differentiate (diff(x^3 * sin(x), x))",
+          subtitle: "Exact symbolic derivative",
+          command: "diff(x^3 * sin(x), x)"
+        },
+        {
+          id: "solver-chem",
+          category: "tools",
+          source: "Chemistry",
+          title: "Balance Reaction (chem balance C3H8 + O2 = CO2 + H2O)",
+          subtitle: "Stoichiometric matrix balancing",
+          command: "chem balance C3H8 + O2 = CO2 + H2O"
+        },
+        {
+          id: "solver-physics",
+          category: "tools",
+          source: "Physics",
+          title: "SI Unit Conversion (physics convert 100 km/h m/s)",
+          subtitle: "Typed dimensional analysis",
+          command: "physics convert 100 km/h m/s"
+        },
+        {
+          id: "solver-es",
+          category: "tools",
+          source: "Research",
+          title: "Erdős–Straus Solver (es solve 1009)",
+          subtitle: "Exact 4/p Egyptian fraction decomposition",
+          command: "es solve 1009"
+        }
+      ];
+    }
+
+    return [
+      {
+        id: "solver-eval",
+        category: "tools",
+        source: "CentL Engine",
+        title: `Run in Notebook: "${q}"`,
+        subtitle: "Execute in active CentL26 workspace session",
+        command: q
+      }
+    ];
+  }
+
+  function renderOmnibarResults(query = "", category = omnibarActiveCategory) {
+    const container = omnibarResults();
+    if (!container) return;
+
+    const rawQuery = query.trim();
+    const q = rawQuery.toLowerCase();
+    const tokens = q.split(/\s+/).filter(Boolean);
+    const items = [];
+
+    // 1. Google Chrome Academic Suggestions
+    if (category === "all" || category === "chrome") {
+      const providers = getChromeProviders(rawQuery);
+      providers.forEach((p) => {
+        items.push({
+          type: "chrome",
+          iconClass: "chrome",
+          iconSvg: `<svg viewBox="0 0 24 24" class="fcf-chrome-emblem" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.2"/><path d="M12 2a10 10 0 0 1 8.66 5H12z" fill="#EA4335"/><path d="M20.66 7A10 10 0 0 1 15 21.32L10.67 13.82z" fill="#FBBC05"/><path d="M15 21.32A10 10 0 0 1 3.34 12.5L7.67 5z" fill="#34A853"/><path d="M3.34 12.5A10 10 0 0 1 12 2l4.33 7.5H7.67z" fill="#4285F4"/><circle cx="12" cy="12" r="4.5" fill="#ffffff" stroke="#cbd5e1" stroke-width="0.8"/><circle cx="12" cy="12" r="2.8" fill="#1A73E8"/></svg>`,
+          source: p.source,
+          title: p.title,
+          subtitle: p.subtitle,
+          actionLabel: "Search in Chrome ↗",
+          actionClass: "chrome-action",
+          url: p.url
+        });
+      });
+    }
+
+    // 2. FCF Manuals & Documentation
+    if (category === "all" || category === "docs") {
+      const docs = fcfDocsCache.filter(d => d.category === "manual" || d.category === "spec");
+      const matchedDocs = tokens.length === 0 ? docs : docs.filter(d => {
+        const text = `${d.title} ${d.summary} ${d.tags ? d.tags.join(" ") : ""}`.toLowerCase();
+        return tokens.some(t => text.includes(t));
+      });
+      matchedDocs.forEach(d => {
+        items.push({
+          type: "doc",
+          iconClass: "doc",
+          iconText: "📖",
+          source: d.category === "manual" ? "FCF Manual" : "FCF Spec",
+          title: d.title,
+          subtitle: d.summary,
+          actionLabel: "Read In-App",
+          actionClass: "",
+          docId: d.id
+        });
+      });
+    }
+
+    // 3. FCF Research Papers & Preprints
+    if (category === "all" || category === "research") {
+      const papers = fcfDocsCache.filter(d => d.category === "research");
+      const matchedPapers = tokens.length === 0 ? papers : papers.filter(d => {
+        const text = `${d.title} ${d.summary} ${d.tags ? d.tags.join(" ") : ""}`.toLowerCase();
+        return tokens.some(t => text.includes(t));
+      });
+      matchedPapers.forEach(p => {
+        items.push({
+          type: "research",
+          iconClass: "research",
+          iconText: "📑",
+          source: "FCF Preprint",
+          title: p.title,
+          subtitle: p.summary,
+          actionLabel: "Read Paper In-App",
+          actionClass: "",
+          docId: p.id
+        });
+      });
+    }
+
+    // 4. CentL Tools & Solvers
+    if (category === "all" || category === "tools") {
+      const solvers = getCentlSolverSuggestions(rawQuery);
+      solvers.forEach(s => {
+        items.push({
+          type: "solver",
+          iconClass: "solver",
+          iconText: "⚙",
+          source: s.source,
+          title: s.title,
+          subtitle: s.subtitle,
+          actionLabel: "Run in Notebook ↵",
+          actionClass: "",
+          command: s.command
+        });
+      });
+    }
+
+    if (items.length === 0) {
+      container.innerHTML = `
+        <div style="padding: 24px 16px; text-align: center; color: var(--muted); font-size: 12.5px;">
+          No local results found.<br>
+          <button type="button" class="doc-btn doc-chrome-btn" data-omnibar-url="https://scholar.google.com/scholar?q=${encodeURIComponent(rawQuery)}" style="margin-top: 10px;">
+            Search "${escapeHtml(rawQuery)}" on Google Scholar with Chrome ↗
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    let html = "";
+    let currentGroup = null;
+
+    items.forEach((item, index) => {
+      if (item.type !== currentGroup) {
+        currentGroup = item.type;
+        const groupLabels = {
+          chrome: "Academic Literature (Google Chrome Router)",
+          doc: "FCF Manuals & Documentation",
+          research: "FCF Theoretical Research Papers",
+          solver: "CentL Tools & Exact Solvers"
+        };
+        html += `<div class="omnibar-group-header">${groupLabels[currentGroup] || "Suggestions"}</div>`;
+      }
+
+      const icon = item.iconSvg || `<span class="omnibar-item-icon ${item.iconClass}">${item.iconText || "•"}</span>`;
+      const actionAttr = item.url
+        ? `data-omnibar-url="${escapeHtml(item.url)}"`
+        : item.docId
+        ? `data-omnibar-doc="${escapeHtml(item.docId)}"`
+        : item.command
+        ? `data-omnibar-cmd="${escapeHtml(item.command)}"`
+        : "";
+
+      html += `
+        <button type="button" class="omnibar-item" role="option" tabindex="-1" ${actionAttr} data-item-index="${index}">
+          <span class="omnibar-item-icon ${item.iconClass}">${item.iconSvg || item.iconText || "•"}</span>
+          <span class="omnibar-item-content">
+            <strong>${escapeHtml(item.title)}</strong>
+            <small>${escapeHtml(item.subtitle)}</small>
+          </span>
+          <span class="omnibar-item-action ${item.actionClass || ''}">${escapeHtml(item.actionLabel || '')}</span>
+        </button>
+      `;
+    });
+
+    container.innerHTML = html;
+    setOmnibarActiveIndex(0);
+  }
+
+  function setOmnibarActiveIndex(index) {
+    const container = omnibarResults();
+    if (!container) return;
+    const items = Array.from(container.querySelectorAll(".omnibar-item"));
+    items.forEach(i => i.classList.remove("is-highlighted"));
+
+    if (items.length === 0) {
+      omnibarActiveIndex = -1;
+      return;
+    }
+
+    omnibarActiveIndex = ((index % items.length) + items.length) % items.length;
+    const active = items[omnibarActiveIndex];
+    if (active) {
+      active.classList.add("is-highlighted");
+      active.scrollIntoView({ block: "nearest" });
+    }
+  }
+
+  function openInChrome(url) {
+    if (!url) return;
+    showHostNotice("Opening in Google Chrome...");
+    try {
+      fetch("/api/open-chrome", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url })
+      }).catch(() => {});
+    } catch (_) {}
+    const launchBrowser = window["open"];
+    if (launchBrowser) launchBrowser(url, "_blank");
+    closeOmnibar();
+  }
+
+  function openFcfDoc(docId) {
+    const doc = fcfDocsCache.find(d => d.id === docId);
+    if (!doc) return;
+    activeDoc = doc;
+    const modal = document.querySelector("[data-fcf-doc-modal]");
+    const title = document.querySelector("#fcf-doc-title");
+    const content = document.querySelector("[data-fcf-doc-content]");
+    if (modal && title && content) {
+      title.textContent = doc.title;
+      content.innerHTML = renderMarkdownToHtml(doc.content);
+      modal.hidden = false;
+      closeOmnibar();
+    }
+  }
+
+  function closeFcfDoc() {
+    const modal = document.querySelector("[data-fcf-doc-modal]");
+    if (modal) modal.hidden = true;
+    activeDoc = null;
+  }
+
+  function focusOmnibar() {
+    const input = omnibarInput();
+    const dropdown = omnibarDropdown();
+    const clearBtn = omnibarClear();
+    if (input) {
+      input.focus();
+      input.select();
+      if (dropdown) dropdown.hidden = false;
+      if (clearBtn) clearBtn.hidden = !input.value.trim();
+      renderOmnibarResults(input.value, omnibarActiveCategory);
+    }
+  }
+
+  function closeOmnibar() {
+    const dropdown = omnibarDropdown();
+    if (dropdown) dropdown.hidden = true;
+    omnibarActiveIndex = -1;
+  }
+
   function palette() {
     return document.querySelector(".command-palette");
   }
@@ -980,10 +1401,82 @@
       selectArea("build", { openExplorer: true });
     }
 
+    // Omnibar Category Chips
+    if (target.matches("[data-chip]") || target.closest("[data-chip]")) {
+      const chip = target.matches("[data-chip]") ? target : target.closest("[data-chip]");
+      const cat = chip.dataset.chip;
+      if (cat) {
+        omnibarActiveCategory = cat;
+        document.querySelectorAll("[data-chip]").forEach(c => c.classList.toggle("is-active", c === chip));
+        const input = omnibarInput();
+        renderOmnibarResults(input ? input.value : "", cat);
+      }
+    }
+
+    // Omnibar Clear Button
+    if (target.matches("[data-omnibar-clear]") || target.closest("[data-omnibar-clear]")) {
+      const input = omnibarInput();
+      if (input) {
+        input.value = "";
+        input.focus();
+        target.hidden = true;
+        renderOmnibarResults("", omnibarActiveCategory);
+      }
+    }
+
+    // Omnibar Item Selection
+    const omniUrlItem = target.closest("[data-omnibar-url]");
+    if (omniUrlItem) {
+      openInChrome(omniUrlItem.dataset.omnibarUrl);
+      return;
+    }
+
+    const omniDocItem = target.closest("[data-omnibar-doc]");
+    if (omniDocItem) {
+      openFcfDoc(omniDocItem.dataset.omnibarDoc);
+      return;
+    }
+
+    const omniCmdItem = target.closest("[data-omnibar-cmd]");
+    if (omniCmdItem) {
+      closeOmnibar();
+      runCommand(omniCmdItem.dataset.omnibarCmd);
+      return;
+    }
+
+    // FCF Document Reader Modal Controls
+    if (target.matches("[data-doc-close]") || target.closest("[data-doc-close]") || (target.matches(".fcf-doc-modal") && !target.closest(".fcf-doc-dialog"))) {
+      closeFcfDoc();
+      return;
+    }
+
+    if (target.matches("[data-doc-open-chrome]") || target.closest("[data-doc-open-chrome]")) {
+      if (activeDoc) {
+        openInChrome(`https://scholar.google.com/scholar?q=${encodeURIComponent(activeDoc.title)}`);
+      }
+      return;
+    }
+
+    // Click outside Omnibar closes dropdown
+    if (!target.closest(".header-omnibar")) {
+      closeOmnibar();
+    }
+
     if (target.matches("[data-inspector-tab]")) activateInspectorTab(target);
   });
 
+  document.addEventListener("focusin", (event) => {
+    if (event.target.matches("[data-omnibar-input]")) {
+      focusOmnibar();
+    }
+  });
+
   document.addEventListener("pointermove", (event) => {
+    const omniItem = event.target.closest(".omnibar-item");
+    if (omniItem) {
+      const index = parseInt(omniItem.dataset.itemIndex, 10);
+      if (!isNaN(index) && index !== omnibarActiveIndex) setOmnibarActiveIndex(index);
+    }
     const option = event.target.closest(".palette-results > button");
     if (!option || palette()?.hidden) return;
     const index = visiblePaletteOptions().indexOf(option);
@@ -991,6 +1484,13 @@
   });
 
   document.addEventListener("input", (event) => {
+    if (event.target.matches("[data-omnibar-input]")) {
+      const clearBtn = omnibarClear();
+      if (clearBtn) clearBtn.hidden = !event.target.value.trim();
+      const dropdown = omnibarDropdown();
+      if (dropdown) dropdown.hidden = false;
+      renderOmnibarResults(event.target.value, omnibarActiveCategory);
+    }
     if (event.target.matches("#palette-search")) filterPalette(event.target.value);
     if (event.target.matches("#active-command")) {
       writeStorage(draftKey, event.target.value);
@@ -1008,8 +1508,45 @@
   document.addEventListener("keydown", (event) => {
     const primary = event.metaKey || event.ctrlKey;
     const key = event.key.toLowerCase();
-    const paletteIsOpen = palette() && !palette().hidden;
+    const omnibarDropdownEl = omnibarDropdown();
+    const omnibarIsOpen = omnibarDropdownEl && !omnibarDropdownEl.hidden;
+    const docModal = document.querySelector("[data-fcf-doc-modal]");
+    const docModalIsOpen = docModal && !docModal.hidden;
 
+    if (docModalIsOpen && event.key === "Escape") {
+      event.preventDefault();
+      closeFcfDoc();
+      return;
+    }
+
+    if (omnibarIsOpen) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeOmnibar();
+        return;
+      }
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        setOmnibarActiveIndex(omnibarActiveIndex + (event.key === "ArrowDown" ? 1 : -1));
+        return;
+      }
+      if (event.key === "Enter") {
+        event.preventDefault();
+        const resultsEl = omnibarResults();
+        const active = resultsEl?.querySelector(".omnibar-item.is-highlighted");
+        if (active) {
+          active.click();
+        } else {
+          const val = omnibarInput()?.value.trim();
+          if (val) {
+            openInChrome(`https://scholar.google.com/scholar?q=${encodeURIComponent(val)}`);
+          }
+        }
+        return;
+      }
+    }
+
+    const paletteIsOpen = palette() && !palette().hidden;
     if (paletteIsOpen) {
       if (event.key === "Escape") {
         event.preventDefault();
@@ -1036,15 +1573,21 @@
       }
     }
 
-    if (primary && !event.altKey && key === "p") {
+    if (primary && !event.altKey && key === "k") {
       event.preventDefault();
-      openPalette(event.shiftKey ? "commands" : "quick-open");
+      focusOmnibar();
       return;
     }
 
-    if (primary && !event.altKey && key === "k") {
+    if (!primary && event.key === "/" && !["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName)) {
       event.preventDefault();
-      openPalette("quick-open");
+      focusOmnibar();
+      return;
+    }
+
+    if (primary && !event.altKey && key === "p") {
+      event.preventDefault();
+      openPalette(event.shiftKey ? "commands" : "quick-open");
       return;
     }
 
@@ -1135,6 +1678,7 @@
   preparePalette();
   restoreLayout();
   initializeWorkspace();
+  loadFcfDocs();
   const savedTheme = readStorage(themeKey);
   if (savedTheme) applyTheme(savedTheme);
 

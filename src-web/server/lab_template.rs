@@ -33,7 +33,48 @@ pub fn render_lab_page(workbench: &str) -> String {
         </div>
       </a>
       <div class="workspace-path"><button type="button" data-toggle-explorer title="Toggle workspace explorer">Workspace</button><span>/</span><input type="text" class="notebook-rename-input" data-rename-notebook value="Notebook 01" aria-label="Rename active notebook" spellcheck="false" title="Click to rename active notebook"></div>
-      <button class="command-center" type="button" data-open-palette><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"></circle><path d="m13 13 4 4"></path></svg><span>Search commands and tools</span><kbd>⌘ K</kbd></button>
+      <div class="header-omnibar" role="search">
+        <div class="omnibar-input-wrap">
+          <span class="omnibar-fcf-chrome-icon" title="FCF STEM Chrome Academic Router">
+            <svg viewBox="0 0 24 24" class="fcf-chrome-emblem" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.2"/>
+              <path d="M12 2a10 10 0 0 1 8.66 5H12z" fill="#EA4335"/>
+              <path d="M20.66 7A10 10 0 0 1 15 21.32L10.67 13.82z" fill="#FBBC05"/>
+              <path d="M15 21.32A10 10 0 0 1 3.34 12.5L7.67 5z" fill="#34A853"/>
+              <path d="M3.34 12.5A10 10 0 0 1 12 2l4.33 7.5H7.67z" fill="#4285F4"/>
+              <circle cx="12" cy="12" r="4.5" fill="#ffffff" stroke="#cbd5e1" stroke-width="0.8"/>
+              <circle cx="12" cy="12" r="2.8" fill="#1A73E8"/>
+            </svg>
+          </span>
+          <input type="text" class="header-omnibar-input" data-omnibar-input placeholder="Search STEM papers, FCF manuals, or Chrome..." spellcheck="false" autocomplete="off" aria-label="Search STEM academic papers, FCF documentation, and Google Chrome" aria-expanded="false" aria-controls="omnibar-dropdown">
+          <div class="omnibar-actions">
+            <button type="button" class="omnibar-clear" data-omnibar-clear title="Clear query" hidden>×</button>
+            <span class="chrome-status-pill" title="Automatic Google Chrome Academic Router">Chrome</span>
+            <kbd>⌘ K</kbd>
+          </div>
+        </div>
+
+        <div class="header-omnibar-dropdown" id="omnibar-dropdown" data-omnibar-dropdown hidden>
+          <div class="omnibar-categories">
+            <button type="button" class="category-chip is-active" data-chip="all">All STEM</button>
+            <button type="button" class="category-chip" data-chip="docs">FCF Manuals &amp; Docs</button>
+            <button type="button" class="category-chip" data-chip="research">FCF Research Papers</button>
+            <button type="button" class="category-chip" data-chip="chrome">Academic Papers (Chrome)</button>
+            <button type="button" class="category-chip" data-chip="tools">CentL Solvers</button>
+          </div>
+          
+          <div class="omnibar-results" data-omnibar-results role="listbox">
+            <!-- Populated dynamically with live results and rich previews -->
+          </div>
+          
+          <div class="omnibar-footer">
+            <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+            <span><kbd>↵</kbd> select / open in Chrome</span>
+            <span><kbd>esc</kbd> close</span>
+            <span class="omnibar-footer-note">Free Computation Foundation · STEM Academic Router</span>
+          </div>
+        </div>
+      </div>
     </header>
 
     <div class="app-body">
@@ -105,6 +146,35 @@ pub fn render_lab_page(workbench: &str) -> String {
         <a href="https://github.com/sponsors/chasebryan" target="_blank" rel="noopener">💝 Sponsor on GitHub</a>
       </div>
       <footer><span>v26.8 · Apache-2.0</span><button type="button" data-close-fcf-about>Close</button></footer>
+    </div>
+  </div>
+
+  <div class="fcf-doc-modal" data-fcf-doc-modal hidden>
+    <div class="fcf-doc-dialog" role="dialog" aria-modal="true" aria-labelledby="fcf-doc-title">
+      <header class="fcf-doc-header">
+        <div class="fcf-doc-brand">
+          <span class="fcf-doc-badge">FCF KNOWLEDGE BASE</span>
+          <h2 id="fcf-doc-title">Document Title</h2>
+        </div>
+        <div class="fcf-doc-controls">
+          <button type="button" class="doc-btn doc-chrome-btn" data-doc-open-chrome title="Open this paper in Google Chrome">
+            <svg viewBox="0 0 24 24" class="fcf-chrome-emblem" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.2"/>
+              <path d="M12 2a10 10 0 0 1 8.66 5H12z" fill="#EA4335"/>
+              <path d="M20.66 7A10 10 0 0 1 15 21.32L10.67 13.82z" fill="#FBBC05"/>
+              <path d="M15 21.32A10 10 0 0 1 3.34 12.5L7.67 5z" fill="#34A853"/>
+              <path d="M3.34 12.5A10 10 0 0 1 12 2l4.33 7.5H7.67z" fill="#4285F4"/>
+              <circle cx="12" cy="12" r="4.5" fill="#ffffff" stroke="#cbd5e1" stroke-width="0.8"/>
+              <circle cx="12" cy="12" r="2.8" fill="#1A73E8"/>
+            </svg>
+            Open in Chrome
+          </button>
+          <button type="button" class="doc-btn doc-close-btn" data-doc-close aria-label="Close document">✕</button>
+        </div>
+      </header>
+      <div class="fcf-doc-body" data-fcf-doc-content>
+        <!-- Markdown rendered content -->
+      </div>
     </div>
   </div>
 
@@ -941,6 +1011,9 @@ mod tests {
             "data-save-project",
             "data-gemini-",
             "data-model",
+            "data-omnibar-",
+            "data-chip",
+            "data-doc-",
         ];
 
         for rest in html.split("<button").skip(1) {
@@ -1122,5 +1195,32 @@ mod tests {
         let pi = html.find("<code>pi</code>").unwrap();
         let tau = html.find("<code>tau</code>").unwrap();
         assert!(e < pi && pi < tau);
+    }
+
+    #[test]
+    fn test_header_omnibar_and_fcf_doc_reader() {
+        let session = Session::new();
+        let workbench = render_lab_workbench("", None, None, None, None, &session);
+        let html = render_lab_page(&workbench);
+
+        assert!(html.contains(r#"class="header-omnibar""#));
+        assert!(html.contains(r#"data-omnibar-input"#));
+        assert!(html.contains(r#"id="omnibar-dropdown""#));
+        assert!(html.contains(r#"data-chip="all""#));
+        assert!(html.contains(r#"data-chip="chrome""#));
+        assert!(html.contains(r#"data-chip="docs""#));
+        assert!(html.contains(r#"data-chip="research""#));
+        assert!(html.contains(r#"class="fcf-doc-modal""#));
+        assert!(html.contains(r#"data-doc-open-chrome"#));
+
+        assert!(LAB_JS.contains("function renderOmnibarResults"));
+        assert!(LAB_JS.contains("function getChromeProviders"));
+        assert!(LAB_JS.contains("function openInChrome"));
+        assert!(LAB_JS.contains("function openFcfDoc"));
+        assert!(LAB_JS.contains("Google Scholar"));
+        assert!(LAB_JS.contains("arXiv.org"));
+        assert!(LAB_JS.contains("PubMed"));
+        assert!(LAB_JS.contains("Wolfram MathWorld"));
+        assert!(LAB_JS.contains("NIST Chemistry"));
     }
 }
