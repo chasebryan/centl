@@ -363,10 +363,43 @@ pub(crate) fn render_lab_workbench_with_transient_result(
     }
     html.push_str(r#"</div><button class="strip-action add-tab" type="button" data-new-notebook data-new-computation title="Start a blank computation without clearing notebook history" aria-label="Create new notebook tab"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"></path></svg></button><span class="strip-spacer"></span><button class="strip-action" type="button" data-toggle-explorer title="Toggle workspace" aria-label="Toggle workspace"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"></rect><path d="M8 3v14"></path></svg></button><button class="strip-action" type="button" data-toggle-inspector title="Toggle inspector" aria-label="Toggle inspector"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"></rect><path d="M12 3v14"></path></svg></button></div>"#);
 
-    html.push_str(r#"<div class="workspace-toolbar"><div><button class="toolbar-button" type="button" data-open-palette><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M4 10h12M4 15h8"></path></svg>Tools</button><button class="toolbar-button" type="button" data-save-project title="Save workspace (Ctrl / ⌘ S)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h9l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm2 0v4h6V4M6 13h8v4H6v-4Z"></path></svg>Save</button><a class="toolbar-button" href="/download/notebook.md" download="notebook.md" title="Download notebook as Markdown"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M6 9l4 4 4-4M4 17h12"></path></svg>Download</a><button class="toolbar-button" type="button" data-open-help title="Open help and guide"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"></circle><path d="M7.5 8a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3.5M10 15h.01"></path></svg>Help</button></div><div><button class="toolbar-icon theme-toggle" type="button" data-toggle-theme title="Toggle dimmed theme" aria-label="Toggle dimmed theme"><svg class="theme-icon-sun" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3"></circle><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M15.7 4.3l-1.4 1.4M5.7 14.3l-1.4 1.4"></path></svg><svg class="theme-icon-moon" viewBox="0 0 20 20" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg></button></div></div>"#);
+    html.push_str(r#"<div class="workspace-toolbar"><div><button class="toolbar-button" type="button" data-open-welcome title="Open Welcome Screen"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 9.5 10 4l7 5.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z"></path><path d="M9 18v-6h2v6"></path></svg>Welcome</button><button class="toolbar-button" type="button" data-open-palette><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M4 10h12M4 15h8"></path></svg>Tools</button><button class="toolbar-button" type="button" data-save-project title="Save workspace (Ctrl / ⌘ S)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h9l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm2 0v4h6V4M6 13h8v4H6v-4Z"></path></svg>Save</button><a class="toolbar-button" href="/download/notebook.md" download="notebook.md" title="Download notebook as Markdown"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M6 9l4 4 4-4M4 17h12"></path></svg>Download</a><button class="toolbar-button" type="button" data-open-help title="Open help and guide"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"></circle><path d="M7.5 8a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3.5M10 15h.01"></path></svg>Help</button></div><div><button class="toolbar-icon theme-toggle" type="button" data-toggle-theme title="Toggle dimmed theme" aria-label="Toggle dimmed theme"><svg class="theme-icon-sun" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3"></circle><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M15.7 4.3l-1.4 1.4M5.7 14.3l-1.4 1.4"></path></svg><svg class="theme-icon-moon" viewBox="0 0 20 20" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg></button></div></div>"#);
+
+    let show_welcome_surface = current_input.is_empty()
+        && last_result.is_none()
+        && last_error.is_none()
+        && last_physics.is_none()
+        && last_hunt.is_none();
 
     html.push_str(r#"<div class="workspace-canvas" id="workspace-canvas">"#);
-    if has_work {
+    if show_welcome_surface {
+        html.push_str(r#"<div class="start-surface-wrap" data-start-surface-wrap>"#);
+        render_start_surface(&mut html, current_input, session);
+        html.push_str(r#"</div>"#);
+        if has_work {
+            html.push_str(r#"<div class="notebook-wrap" data-notebook-wrap hidden>"#);
+            html.push_str(&format!(
+                r#"<div class="notebook-feed"><header class="notebook-header"><div><span>Notebook</span><h1 contenteditable="true" data-rename-notebook spellcheck="false" title="Click to rename notebook">{}</h1></div><div><small>Session</small><strong>Exact · Offline</strong></div></header>"#,
+                escape_html(active_name)
+            ));
+            render_notebook_results(
+                &mut html,
+                last_result,
+                last_error,
+                last_physics,
+                last_hunt,
+                show_transient_result,
+                session,
+            );
+            html.push_str(r#"</div>"#);
+            render_composer(&mut html, current_input, false);
+            html.push_str(r#"</div>"#);
+        }
+    } else if has_work {
+        html.push_str(r#"<div class="start-surface-wrap" data-start-surface-wrap hidden>"#);
+        render_start_surface(&mut html, current_input, session);
+        html.push_str(r#"</div>"#);
+        html.push_str(r#"<div class="notebook-wrap" data-notebook-wrap>"#);
         html.push_str(&format!(
             r#"<div class="notebook-feed"><header class="notebook-header"><div><span>Notebook</span><h1 contenteditable="true" data-rename-notebook spellcheck="false" title="Click to rename notebook">{}</h1></div><div><small>Session</small><strong>Exact · Offline</strong></div></header>"#,
             escape_html(active_name)
@@ -382,8 +415,11 @@ pub(crate) fn render_lab_workbench_with_transient_result(
         );
         html.push_str(r#"</div>"#);
         render_composer(&mut html, current_input, false);
+        html.push_str(r#"</div>"#);
     } else {
-        render_start_surface(&mut html, current_input);
+        html.push_str(r#"<div class="start-surface-wrap" data-start-surface-wrap>"#);
+        render_start_surface(&mut html, current_input, session);
+        html.push_str(r#"</div>"#);
     }
     html.push_str(r#"</div>"#);
     render_console(&mut html, session);
@@ -562,10 +598,59 @@ fn display_status(status: &str) -> String {
     }
 }
 
-fn render_start_surface(html: &mut String, current_input: &str) {
-    html.push_str(r#"<section class="start-surface"><p class="start-kicker">CentL26 Scientific Workspace</p><h1 data-welcome-headline>What are you working on?</h1><p class="start-copy" data-welcome-subline>Enter a supported expression, 2D plot, formula synthesis, or plain-English question.</p>"#);
+fn render_start_surface(html: &mut String, current_input: &str, session: &Session) {
+    let history_count = session.history.len();
+    let variable_count = session.variables.len().saturating_sub(3);
+    let active_name = if session.notebook_name.is_empty() {
+        "Notebook 01"
+    } else {
+        &session.notebook_name
+    };
+    let last_cmd = session.history.last().map(|e| e.command.as_str()).unwrap_or("1/3 + 5/7");
+
+    html.push_str(r#"<section class="start-surface" data-welcome-boot data-start-surface>"#);
+    html.push_str(r#"<div class="welcome-aura" aria-hidden="true"></div>"#);
+
+    html.push_str(r#"<div class="welcome-header">"#);
+    html.push_str(r#"<div class="welcome-pill"><span class="pill-dot"></span><span>FREE COMPUTATION FOUNDATION</span><span class="pill-badge">v26.8.2</span></div>"#);
+    html.push_str(r#"<h1 data-welcome-headline class="welcome-title">What are you working on?</h1>"#);
+    html.push_str(r#"<p class="start-copy" data-welcome-subline>Autonomous scientific workspace for exact mathematics, symbolic calculus, stoichiometric chemistry, and theoretical physics.</p>"#);
+    html.push_str(r#"</div>"#);
+
+    html.push_str(r#"<div class="welcome-action-cards">"#);
+    if history_count > 0 {
+        html.push_str(&format!(
+            r#"<div class="welcome-card welcome-card-resume" data-resume-session><div class="welcome-card-top"><span class="welcome-card-icon resume-icon">🚀</span><div><h3>Resume Previous Session</h3><span class="session-badge">Active: {}</span></div></div><p class="welcome-card-desc">Continue your mathematical workflow with {} preserved calculations and receipts.</p><div class="welcome-card-meta"><span><strong>{}</strong> receipts</span><span><strong>{}</strong> variables</span><span>Last: <code>{}</code></span></div><button type="button" class="welcome-card-btn resume-btn" data-resume-session>Resume Notebook →</button></div>"#,
+            escape_html(active_name),
+            history_count,
+            history_count,
+            variable_count,
+            escape_html(last_cmd)
+        ));
+    } else {
+        html.push_str(r#"<div class="welcome-card welcome-card-resume is-empty" data-resume-session><div class="welcome-card-top"><span class="welcome-card-icon resume-icon">🚀</span><div><h3>Resume Previous Session</h3><span class="session-badge">Pristine</span></div></div><p class="welcome-card-desc">Your session history is clean and ready. Any calculations will be saved locally.</p><div class="welcome-card-meta"><span><strong>0</strong> receipts</span><span><strong>Exact</strong> core</span></div><button type="button" class="welcome-card-btn resume-btn" data-resume-session>Open Workspace →</button></div>"#);
+    }
+
+    html.push_str(r#"<div class="welcome-card welcome-card-fresh" data-start-fresh data-new-computation><div class="welcome-card-top"><span class="welcome-card-icon fresh-icon">✦</span><div><h3>Start Fresh Computation</h3><span class="session-badge new-badge">Pristine State</span></div></div><p class="welcome-card-desc">Initialize a clean workspace tab with fresh memory and blank arithmetic history.</p><div class="welcome-card-meta"><span><strong>Clean</strong> slate</span><span><strong>Exact</strong> rational core</span></div><button type="button" class="welcome-card-btn fresh-btn" data-start-fresh data-new-computation>New Blank Tab →</button></div>"#);
+    html.push_str(r#"</div>"#);
+
+    html.push_str(r#"<div class="welcome-composer-wrap">"#);
     render_composer(html, current_input, true);
-    html.push_str(r#"<div class="starter-row"><span>Try</span><button type="button" data-fill="plot x^3 - 3*x from -2.5 to 2.5">Plot 2D curve</button><button type="button" data-fill="solve(x^2 - 5*x + 6 = 0, x)" data-interaction-mode="Math">Solve quadratic</button><button type="button" data-fill="What is the pH of a 0.05 M HCl solution?">pH equilibrium</button><button type="button" data-fill="build fn KE(m, v) = 1/2 * m * v^2">Synthesize formula</button><button type="button" data-fill="physics convert 100 cm m" data-interaction-mode="Physics">Convert units</button><button type="button" data-fill="es solve 1009" data-interaction-mode="Research">Research probe</button></div><p class="start-shortcut"><kbd>⌘ K</kbd> opens supported tools and commands</p></section>"#);
+    html.push_str(r#"</div>"#);
+
+    html.push_str(r#"<div class="welcome-launchpad"><div class="launchpad-title">STEM Quick Launchpads</div><div class="launchpad-grid">"#);
+    html.push_str(r#"<button type="button" class="launchpad-tile" data-fill="1/3 + 5/7" data-interaction-mode="Math"><span class="tile-icon math">🧮</span><strong>Exact Math</strong><small>1/3 + 5/7</small></button>"#);
+    html.push_str(r#"<button type="button" class="launchpad-tile" data-fill="solve(x^2 - 5*x + 6 = 0, x)" data-interaction-mode="Math"><span class="tile-icon math">√x</span><strong>Algebra</strong><small>solve(x² - 5x + 6 = 0)</small></button>"#);
+    html.push_str(r#"<button type="button" class="launchpad-tile" data-fill="diff(x^3 * sin(x), x)" data-interaction-mode="Math"><span class="tile-icon calc">∫dx</span><strong>Calculus</strong><small>diff(x³ · sin(x), x)</small></button>"#);
+    html.push_str(r#"<button type="button" class="launchpad-tile" data-fill="chem balance C3H8 + O2 = CO2 + H2O"><span class="tile-icon chem">🧪</span><strong>Chemistry</strong><small>Balance propane</small></button>"#);
+    html.push_str(r#"<button type="button" class="launchpad-tile" data-fill="What is the pH of a 0.05 M HCl solution?"><span class="tile-icon chem">⚗</span><strong>pH Equilibrium</strong><small>0.05 M HCl</small></button>"#);
+    html.push_str(r#"<button type="button" class="launchpad-tile" data-fill="physics convert 100 km/h m/s" data-interaction-mode="Physics"><span class="tile-icon phys">⚡</span><strong>Physics Units</strong><small>100 km/h in m/s</small></button>"#);
+    html.push_str(r#"<button type="button" class="launchpad-tile" data-fill="plot sin(x) from -3.14 to 3.14"><span class="tile-icon plot">📈</span><strong>2D Curve</strong><small>plot sin(x) [-π, π]</small></button>"#);
+    html.push_str(r#"<button type="button" class="launchpad-tile" data-fill="es solve 1009" data-interaction-mode="Research"><span class="tile-icon res">🔬</span><strong>FCF Preprint</strong><small>es solve 1009</small></button>"#);
+    html.push_str(r#"</div></div>"#);
+
+    html.push_str(r#"<div class="starter-row"><span>Try</span><button type="button" data-fill="plot x^3 - 3*x from -2.5 to 2.5">Plot 2D curve</button><button type="button" data-fill="solve(x^2 - 5*x + 6 = 0, x)" data-interaction-mode="Math">Solve quadratic</button><button type="button" data-fill="What is the pH of a 0.05 M HCl solution?">pH equilibrium</button><button type="button" data-fill="build fn KE(m, v) = 1/2 * m * v^2">Synthesize formula</button><button type="button" data-fill="physics convert 100 cm m" data-interaction-mode="Physics">Convert units</button><button type="button" data-fill="es solve 1009" data-interaction-mode="Research">Research probe</button></div>"#);
+    html.push_str(r#"<p class="start-shortcut"><kbd>⌘ K</kbd> opens supported tools and commands</p></section>"#);
 }
 
 fn render_composer(html: &mut String, current_input: &str, prominent: bool) {
@@ -1014,6 +1099,9 @@ mod tests {
             "data-omnibar-",
             "data-chip",
             "data-doc-",
+            "data-open-welcome",
+            "data-resume-session",
+            "data-start-fresh",
         ];
 
         for rest in html.split("<button").skip(1) {
@@ -1222,5 +1310,34 @@ mod tests {
         assert!(LAB_JS.contains("PubMed"));
         assert!(LAB_JS.contains("Wolfram MathWorld"));
         assert!(LAB_JS.contains("NIST Chemistry"));
+    }
+
+    #[test]
+    fn test_welcome_surface_cards_and_boot_in() {
+        use crate::engine::HistoryEntry;
+
+        let mut session = Session::new();
+        session.history.push(HistoryEntry {
+            command: "1/3 + 5/7".to_string(),
+            result: "22/21".to_string(),
+            exact_repr: Some("22/21".to_string()),
+            approximate_repr: None,
+            execution_micros: 2,
+            success: true,
+        });
+
+        let workbench = render_lab_workbench("", None, None, None, None, &session);
+        let html = render_lab_page(&workbench);
+
+        assert!(html.contains(r#"data-welcome-boot"#));
+        assert!(html.contains(r#"data-resume-session"#));
+        assert!(html.contains(r#"data-start-fresh"#));
+        assert!(html.contains(r#"data-open-welcome"#));
+        assert!(html.contains(r#"class="welcome-aura""#));
+        assert!(html.contains(r#"class="welcome-pill""#));
+        assert!(html.contains(r#"class="launchpad-grid""#));
+
+        assert!(LAB_JS.contains("data-resume-session"));
+        assert!(LAB_JS.contains("data-open-welcome"));
     }
 }

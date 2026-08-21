@@ -1457,6 +1457,32 @@
       return;
     }
 
+    // Welcome Screen Actions
+    if (target.matches("[data-resume-session]") || target.closest("[data-resume-session]")) {
+      const startWrap = document.querySelector("[data-start-surface-wrap]");
+      const noteWrap = document.querySelector("[data-notebook-wrap]");
+      if (startWrap && noteWrap) {
+        startWrap.hidden = true;
+        noteWrap.hidden = false;
+        activeEditor()?.focus({ preventScroll: true });
+      } else {
+        activeEditor()?.focus({ preventScroll: true });
+      }
+      return;
+    }
+
+    if (target.matches("[data-open-welcome]") || target.closest("[data-open-welcome]")) {
+      const startWrap = document.querySelector("[data-start-surface-wrap]");
+      const noteWrap = document.querySelector("[data-notebook-wrap]");
+      if (startWrap) {
+        startWrap.hidden = false;
+        if (noteWrap) noteWrap.hidden = true;
+        const comp = startWrap.querySelector("#active-command");
+        comp?.focus({ preventScroll: true });
+      }
+      return;
+    }
+
     // Click outside Omnibar closes dropdown
     if (!target.closest(".header-omnibar")) {
       closeOmnibar();
