@@ -15,7 +15,7 @@ from typing import Any
 
 
 DEFAULT_MANIFEST = "design/centl26/approved-design.json"
-VERSION_PATTERN = re.compile(r"CentL26(?:\.[0-9]+)*")
+VERSION_PATTERN = re.compile(r"CentL26")
 HASH_PATTERN = re.compile(r"[0-9a-f]{64}")
 
 
@@ -99,7 +99,7 @@ def validate_structure(contract: dict[str, Any]) -> dict[str, str]:
         raise ContractError("approval.status must be user-approved")
     version = approval.get("release")
     if not isinstance(version, str) or VERSION_PATTERN.fullmatch(version) is None:
-        raise ContractError("approval.release must use the CentL26 / CentL26.1 version scheme")
+        raise ContractError("approval.release must remain CentL26")
     note = approval.get("change_note")
     if not isinstance(note, str) or not note.strip():
         raise ContractError("approval.change_note must explain the approved baseline")
@@ -262,7 +262,7 @@ def approve_contract(
     reason: str,
 ) -> tuple[int, int]:
     if VERSION_PATTERN.fullmatch(version) is None:
-        raise ContractError("--version must use the CentL26 / CentL26.1 version scheme")
+        raise ContractError("--version must remain CentL26")
     reason = reason.strip()
     if not reason:
         raise ContractError("--reason must describe the intentionally approved visual change")
@@ -298,7 +298,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("check", help="verify hashes and semantic invariants")
     approve = subparsers.add_parser("approve", help="record an intentionally reviewed design")
-    approve.add_argument("--version", required=True, help="approved release, for example CentL26.1")
+    approve.add_argument("--version", required=True, help="approved release (CentL26)")
     approve.add_argument("--reason", required=True, help="concise reason for the approved change")
     approve.add_argument(
         "--confirm-visual-review",

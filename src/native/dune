@@ -8,8 +8,13 @@
   (language c)
   (names centl_arb_stubs)
   (flags
-   (:standard %{env:CENTL_GMP_INCLUDE=} %{env:CENTL_MPFR_INCLUDE=}
-    %{env:CENTL_FLINT_INCLUDE=} -Wall -Wextra -Werror)))
+   (:standard
+    %{env:CENTL_GMP_INCLUDE=-I.}
+    %{env:CENTL_MPFR_INCLUDE=-I.}
+    %{env:CENTL_FLINT_INCLUDE=-I.}
+    -Wall
+    -Wextra
+    -Werror)))
  (c_library_flags
   %{env:CENTL_FLINT_LIBRARY=-lflint}
   %{env:CENTL_MPFR_LIBRARY=-lmpfr}

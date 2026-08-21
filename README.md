@@ -13,7 +13,8 @@
 
 > **CentL26 is the single flagship product of CENTL.** The “26” identifies the
 > product year. Every new capability and backend is prepared for this one
-> cohesive, mutable CentL26 release channel.
+> cohesive CentL26 product; each published application build is an immutable
+> release snapshot.
 
 ---
 
@@ -36,11 +37,12 @@ cargo run --bin centl26           # standalone graphical scientific work environ
 
 **CentL26** is the new standalone desktop product line: a calm, project-based
 scientific IDE that composes CENTL capabilities behind one local execution
-boundary. The product year is part of its name; maintenance updates replace
-the same CentL26 channel rather than creating separate product editions. It is
+boundary. The product year is part of its name; maintenance updates publish
+new immutable CentL26 build snapshots rather than creating separate product
+editions or rewriting an existing release. It is
 not part of the public website and it does not load the website
 at runtime. See [the CentL26 architecture](docs/CENTL26-ARCHITECTURE.md) for the
-desktop boundary, annual version scheme, project model, capability broker, and
+desktop boundary, stable product identity, project model, capability broker, and
 backend-unification plan. The former [CENTL Lab document](docs/CENTL-LAB.md) is
 retained only as a migration record. The user-approved interface is protected
 by the [CentL26 design contract](docs/CENTL26-DESIGN-CONTRACT.md); backend work
@@ -59,6 +61,11 @@ internal implementation boundary owned by the application; users do not need
 to operate a browser or manage a URL. See the
 [native packaging guide](desktop/centl26/macos/README.md) for build,
 self-test, signing, and current release limits.
+
+The status-bar **Update** control is handled by the native app. It checks the
+repository for the newest qualified, immutable CentL26 snapshot and can install
+and relaunch that build; it is not a shortcut to the GitHub website. Source
+builds with ad-hoc signing remain clearly local development builds.
 
 CentL26 now restores its default notebook across application restarts. Exact
 chemistry formula and conservation work is available from the same command

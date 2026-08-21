@@ -327,6 +327,34 @@ private final class DiagnosticLogger {
             record("backend | \(message)")
         }
     }
+
+    func makeChildOutputHandle() throws -> FileHandle {
+        let descriptor = url.path.withCString {
+            Darwin.open($0, O_WRONLY | O_APPEND | O_NOFOLLOW | O_CLOEXEC)
+        }
+        guard descriptor >= 0 else {
+            throw NSError(
+                domain: NSPOSIXErrorDomain,
+                code: Int(errno),
+                userInfo: [NSFilePathErrorKey: url.path]
+            )
+        }
+        var metadata = stat()
+        guard Darwin.fstat(descriptor, &metadata) == 0,
+              metadata.st_mode & S_IFMT == S_IFREG,
+              metadata.st_uid == geteuid(),
+              metadata.st_mode & (S_IRWXG | S_IRWXO) == 0
+        else {
+            let code = errno == 0 ? EACCES : errno
+            Darwin.close(descriptor)
+            throw NSError(
+                domain: NSPOSIXErrorDomain,
+                code: Int(code),
+                userInfo: [NSFilePathErrorKey: url.path]
+            )
+        }
+        return FileHandle(fileDescriptor: descriptor, closeOnDealloc: true)
+    }
 }
 
 private struct BackendConnection {
@@ -950,6 +978,29 @@ private final class WorkspaceNavigationDelegate: NSObject, WKNavigationDelegate,
         return nil
     }
 
+    func webView(
+        _ webView: WKWebView,
+        runJavaScriptConfirmPanelWithMessage message: String,
+        initiatedByFrame frame: WKFrameInfo,
+        completionHandler: @escaping (Bool) -> Void
+    ) {
+        guard permits(frame.request.url), let window = webView.window else {
+            completionHandler(false)
+            return
+        }
+
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = Product.name
+        alert.informativeText = message
+        let confirmsNotebookClear = message == "Clear this CentL26 notebook and its saved receipts?"
+        alert.addButton(withTitle: confirmsNotebookClear ? "Clear Notebook" : "OK")
+        alert.addButton(withTitle: "Cancel")
+        alert.beginSheetModal(for: window) { response in
+            completionHandler(response == .alertFirstButtonReturn)
+        }
+    }
+
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         onLoadFailure?(error)
     }
@@ -962,16 +1013,29 @@ private final class WorkspaceNavigationDelegate: NSObject, WKNavigationDelegate,
 private final class WorkspaceController {
     let webView: WKWebView
     private let navigationDelegate: WorkspaceNavigationDelegate
+    private let updateMessageHandler: CentL26UpdateMessageHandler
     private let baseURL: URL
 
-    init(connection: BackendConnection, onLoadFailure: @escaping (Error) -> Void) {
+    init(
+        connection: BackendConnection,
+        onLoadFailure: @escaping (Error) -> Void,
+        onUpdateRequested: @escaping () -> Void
+    ) {
         baseURL = connection.baseURL
         navigationDelegate = WorkspaceNavigationDelegate(port: connection.port)
+        updateMessageHandler = CentL26UpdateMessageHandler(
+            port: connection.port,
+            onCheck: onUpdateRequested
+        )
 
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .default()
         configuration.applicationNameForUserAgent = Product.name
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
+        configuration.userContentController.add(
+            updateMessageHandler,
+            name: CentL26UpdateContract.messageHandlerName
+        )
 
         webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = navigationDelegate
@@ -987,6 +1051,12 @@ private final class WorkspaceController {
         reload()
     }
 
+    deinit {
+        webView.configuration.userContentController.removeScriptMessageHandler(
+            forName: CentL26UpdateContract.messageHandlerName
+        )
+    }
+
     func reload() {
         var request = URLRequest(url: baseURL)
         request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
@@ -994,7 +1064,7 @@ private final class WorkspaceController {
     }
 
     func focusNewCell() {
-        webView.evaluateJavaScript("document.querySelector('[data-focus-cell]')?.click()")
+        webView.evaluateJavaScript("document.querySelector('[data-new-computation]')?.click()")
     }
 
     func runActiveCell() {
@@ -1007,9 +1077,13 @@ private final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
     private var startupView: StartupView!
     private var workspaceController: WorkspaceController?
     private var backend: BackendController!
+    private var updateController: CentL26UpdateController?
     private var launchInProgress = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        DispatchQueue.global(qos: .utility).async {
+            CentL26UpdateContract.cleanupStagingDirectories(near: Bundle.main.bundleURL)
+        }
         configureWindow()
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
@@ -1043,6 +1117,23 @@ private final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
         workspaceController?.runActiveCell()
     }
 
+    @objc func checkForUpdates(_ sender: Any?) {
+        guard let updateController else {
+            let alert = NSAlert()
+            alert.alertStyle = .informational
+            alert.messageText = "Automatic Updates Unavailable"
+            alert.informativeText = "CentL26 has not finished preparing its native update service."
+            alert.addButton(withTitle: "OK")
+            if let window, window.attachedSheet == nil {
+                alert.beginSheetModal(for: window)
+            } else {
+                NSSound.beep()
+            }
+            return
+        }
+        updateController.checkForUpdates()
+    }
+
     private func prepareBackendAndLaunch() {
         do {
             guard let resources = Bundle.main.resourceURL else {
@@ -1054,6 +1145,14 @@ private final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
             let context = try RuntimeContext.prepare()
             let logger = try DiagnosticLogger(url: context.diagnosticsURL)
             logger.record("CentL26 \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown") build \(context.buildCommit)")
+
+            updateController = CentL26UpdateController(
+                bundle: .main,
+                presentingWindow: { [weak self] in self?.window },
+                beforeRelaunch: { [weak self] in self?.backend?.stop() },
+                logger: { [weak logger] message in logger?.record("updater | \(message)") },
+                helperOutputHandle: { try logger.makeChildOutputHandle() }
+            )
 
             let backendURL = resources.appendingPathComponent("bin/centl26", isDirectory: false)
             let supervisorURL = Bundle.main.bundleURL
@@ -1146,9 +1245,11 @@ private final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
             ? "Local kernel \u{00b7} fallback port \(connection.port)"
             : "Local kernel \u{00b7} 127.0.0.1:\(connection.port)"
 
-        let workspace = WorkspaceController(connection: connection) { [weak self] error in
-            self?.showLoadFailure(error)
-        }
+        let workspace = WorkspaceController(
+            connection: connection,
+            onLoadFailure: { [weak self] error in self?.showLoadFailure(error) },
+            onUpdateRequested: { [weak self] in self?.checkForUpdates(nil) }
+        )
         workspace.webView.frame = window.contentView?.bounds ?? .zero
         window.contentView = workspace.webView
         workspaceController = workspace
@@ -1194,6 +1295,8 @@ private enum MainMenu {
         let application = NSMenu(title: Product.name)
         applicationItem.submenu = application
         application.addItem(withTitle: "About \(Product.name)", action: #selector(NSApplication.orderFrontStandardAboutPanel(_:)), keyEquivalent: "")
+        let updates = application.addItem(withTitle: "Check for Updates…", action: #selector(AppDelegate.checkForUpdates(_:)), keyEquivalent: "")
+        updates.target = delegate
         application.addItem(.separator())
 
         let servicesItem = NSMenuItem(title: "Services", action: nil, keyEquivalent: "")
@@ -1213,7 +1316,7 @@ private enum MainMenu {
         main.addItem(fileItem)
         let file = NSMenu(title: "File")
         fileItem.submenu = file
-        let newCell = file.addItem(withTitle: "New Cell", action: #selector(AppDelegate.focusNewCell(_:)), keyEquivalent: "n")
+        let newCell = file.addItem(withTitle: "New Computation", action: #selector(AppDelegate.focusNewCell(_:)), keyEquivalent: "n")
         newCell.target = delegate
         file.addItem(.separator())
         file.addItem(withTitle: "Close Window", action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w")
@@ -1289,18 +1392,50 @@ private enum CommandLineMode {
 
     static func runSelfTest() -> Never {
         let backend: BackendController
+        let context: RuntimeContext
         do {
-            (backend, _) = try controller()
+            try validateFormEncoding()
+            print("CentL26 self-test: form encoding contract passed")
+            (backend, context) = try controller()
         } catch {
             fputs("CentL26 self-test setup failed: \(error.localizedDescription)\n", stderr)
+            exit(EXIT_FAILURE)
+        }
+        guard context.providerEnvironment["CENTL26_CENTL_BIN"] != nil else {
+            fputs("CentL26 self-test failed: centl is not declared in the provider manifest.\n", stderr)
             exit(EXIT_FAILURE)
         }
         switch backend.start() {
         case .success(let connection):
             print("CentL26 self-test: ready at \(connection.baseURL.absoluteString)")
-            backend.stop()
-            print("CentL26 self-test: backend terminated cleanly")
-            exit(EXIT_SUCCESS)
+            do {
+                let cookie = try initialSessionCookie(for: connection)
+                let result = try submit(command: "approx(pi, 50)", to: connection, cookie: cookie)
+                if result.contains("error-result") {
+                    throw BackendLaunchError(
+                        summary: "The packaged rigorous-numerics request was rejected.",
+                        detail: "approx(pi, 50) returned an error result."
+                    )
+                }
+                for marker in [
+                    "approx(pi, 50)",
+                    "kind-bounded",
+                    "3.141592653589793238462643383279502884197169399375",
+                ] where !result.contains(marker) {
+                    throw BackendLaunchError(
+                        summary: "The packaged rigorous-numerics response was incomplete.",
+                        detail: "Missing marker: \(marker)"
+                    )
+                }
+                backend.stop()
+                print("CentL26 self-test: rigorous numerics passed")
+                print("CentL26 self-test: backend terminated cleanly")
+                exit(EXIT_SUCCESS)
+            } catch {
+                backend.stop()
+                fputs("CentL26 self-test failed: \(error.localizedDescription)\n", stderr)
+                exit(EXIT_FAILURE)
+            }
         case .failure(let error):
             fputs("CentL26 self-test failed: \(error.summary)\n\(error.detail)\n", stderr)
             backend.stop()
@@ -1391,23 +1526,55 @@ private enum CommandLineMode {
         return cookie
     }
 
+    private static func formEncode(_ value: String) -> String {
+        var encoded = String()
+        for byte in value.utf8 {
+            switch byte {
+            case 0x2A, 0x2D, 0x2E, 0x30...0x39, 0x41...0x5A, 0x5F, 0x61...0x7A:
+                encoded.append(Character(UnicodeScalar(byte)))
+            case 0x20:
+                encoded.append("+")
+            default:
+                encoded.append(String(format: "%%%02X", byte))
+            }
+        }
+        return encoded
+    }
+
+    private static func formBody(_ fields: [(String, String)]) -> Data {
+        let encoded = fields
+            .map { "\(formEncode($0.0))=\(formEncode($0.1))" }
+            .joined(separator: "&")
+        return Data(encoded.utf8)
+    }
+
+    private static func validateFormEncoding() throws {
+        let encoded = String(
+            decoding: formBody([
+                ("cmd", "chem balance Fe + O2 -> Fe2O3"),
+                ("note", "π & x=2"),
+            ]),
+            as: UTF8.self
+        )
+        let expected = "cmd=chem+balance+Fe+%2B+O2+-%3E+Fe2O3&note=%CF%80+%26+x%3D2"
+        guard encoded == expected else {
+            throw BackendLaunchError(
+                summary: "The application form encoder failed its contract test.",
+                detail: "Expected \(expected), received \(encoded)."
+            )
+        }
+    }
+
     private static func submit(
         command: String,
         to connection: BackendConnection,
         cookie: String
     ) throws -> String {
         let endpoint = connection.baseURL.appendingPathComponent("api/run", isDirectory: false)
-        var form = URLComponents()
-        form.queryItems = [
-            URLQueryItem(name: "lab_action", value: "calculate"),
-            URLQueryItem(name: "cmd", value: command),
-        ]
-        guard let encoded = form.percentEncodedQuery?.data(using: .utf8) else {
-            throw BackendLaunchError(
-                summary: "The chemistry smoke command could not be encoded.",
-                detail: command
-            )
-        }
+        let encoded = formBody([
+            ("lab_action", "calculate"),
+            ("cmd", command),
+        ])
 
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
@@ -1420,7 +1587,7 @@ private enum CommandLineMode {
         let response = try perform(request)
         guard response.statusCode == 200 else {
             throw BackendLaunchError(
-                summary: "The chemistry smoke command returned an unexpected response.",
+                summary: "The packaged smoke command returned an unexpected response.",
                 detail: "\(command): HTTP \(response.statusCode)"
             )
         }
@@ -1501,6 +1668,17 @@ private enum CommandLineMode {
             exit(EXIT_FAILURE)
         }
     }
+
+    static func runUpdaterSelfTest() -> Never {
+        do {
+            try CentL26UpdateContract.runSelfTest(bundle: .main)
+            print("CentL26 updater self-test: release and installer contracts passed")
+            exit(EXIT_SUCCESS)
+        } catch {
+            fputs("CentL26 updater self-test failed: \(error.localizedDescription)\n", stderr)
+            exit(EXIT_FAILURE)
+        }
+    }
 }
 
 @main
@@ -1514,6 +1692,9 @@ private enum CentL26EntryPoint {
         }
         if CommandLine.arguments.contains("--self-test-chemistry") {
             CommandLineMode.runChemistrySelfTest()
+        }
+        if CommandLine.arguments.contains("--self-test-updater") {
+            CommandLineMode.runUpdaterSelfTest()
         }
 
         let application = NSApplication.shared

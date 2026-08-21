@@ -7,6 +7,7 @@ set -euo pipefail
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 REPOSITORY_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/../../.." && pwd)"
 SOURCE_FILE="$SCRIPT_DIR/Sources/CentL26App.swift"
+UPDATER_SOURCE="$SCRIPT_DIR/Sources/CentL26Updater.swift"
 SUPERVISOR_SOURCE="$SCRIPT_DIR/Sources/CentL26Supervisor.c"
 ATOMIC_PUBLISH_SOURCE="$SCRIPT_DIR/Sources/CentL26AtomicPublish.c"
 PLIST_TEMPLATE="$SCRIPT_DIR/Info.plist"
@@ -19,7 +20,7 @@ DEPLOYMENT_TARGET="${CENTL26_DEPLOYMENT_TARGET:-13.0}"
 HOST_ARCHITECTURE="$(uname -m)"
 TARGET_ARCHITECTURE="${CENTL26_ARCHITECTURE:-$HOST_ARCHITECTURE}"
 PROVIDER_DIRECTORY="${CENTL26_PROVIDER_DIR:-$REPOSITORY_ROOT/_build/default/src}"
-REQUESTED_PROVIDERS="${CENTL26_PROVIDERS:-centl-chem}"
+REQUESTED_PROVIDERS="${CENTL26_PROVIDERS:-centl,centl-chem}"
 SIGN_IDENTITY="${CENTL26_SIGN_IDENTITY:--}"
 NATIVE_POLICY="${CENTL26_NATIVE_POLICY:-permissive}"
 SOURCE_DATE_EPOCH_VALUE="${SOURCE_DATE_EPOCH:-${CENTL26_SOURCE_DATE_EPOCH:-}}"
@@ -30,6 +31,24 @@ if [ -z "$BUILD_COMMIT" ] && command -v git >/dev/null 2>&1; then
     BUILD_COMMIT="$(git -C "$REPOSITORY_ROOT" rev-parse --verify HEAD 2>/dev/null || true)"
 fi
 BUILD_COMMIT="${BUILD_COMMIT:-unknown}"
+
+# Public builds keep the product version at 26.0.0. The reachable Git commit
+# count strictly increases for descendants without a clock-resolution collision.
+# Shallow/source-archive builds must carry the sequence in explicitly.
+BUILD_SEQUENCE="${CENTL26_BUILD_SEQUENCE:-}"
+if [ -z "$BUILD_SEQUENCE" ] && command -v git >/dev/null 2>&1 \
+    && [[ "$BUILD_COMMIT" =~ ^[0-9a-f]{40}$ ]] \
+    && git -C "$REPOSITORY_ROOT" cat-file -e "$BUILD_COMMIT^{commit}" 2>/dev/null \
+    && [ "$(git -C "$REPOSITORY_ROOT" rev-parse --is-shallow-repository)" = "false" ]
+then
+    BUILD_SEQUENCE="$(git -C "$REPOSITORY_ROOT" rev-list --count "$BUILD_COMMIT")"
+fi
+if [[ ! "$BUILD_SEQUENCE" =~ ^[1-9][0-9]{0,3}$ ]]; then
+    echo "CENTL26_BUILD_SEQUENCE (1-9999) is required when full Git history is unavailable." >&2
+    exit 2
+fi
+BUILD_SEQUENCE_TEXT="$(printf '%08d' "$BUILD_SEQUENCE")"
+BUNDLE_VERSION="$BUILD_SEQUENCE.0.0"
 PROVIDER_BUILD_COMMIT=""
 if [[ "$BUILD_COMMIT" =~ ^[0-9a-f]{40}$|^[0-9a-f]{64}$ ]]; then
     PROVIDER_BUILD_COMMIT="$BUILD_COMMIT"
@@ -44,8 +63,8 @@ if command -v git >/dev/null 2>&1 && git -C "$REPOSITORY_ROOT" rev-parse --verif
     fi
 fi
 
-if [[ ! "$VERSION" =~ ^26(\.[0-9]+){0,2}$ ]]; then
-    echo "CENTL26_VERSION must remain on the 26 release train (for example, 26.1 or 26.1.0)." >&2
+if [ "$VERSION" != "26.0.0" ]; then
+    echo "CENTL26_VERSION must remain 26.0.0 for CentL26." >&2
     exit 2
 fi
 if [[ ! "$DEPLOYMENT_TARGET" =~ ^[0-9]+(\.[0-9]+){1,2}$ ]]; then
@@ -130,7 +149,8 @@ if [ "$(uname -s)" != "Darwin" ]; then
     exit 1
 fi
 
-if [ ! -f "$SOURCE_FILE" ] || [ ! -f "$SUPERVISOR_SOURCE" ] || [ ! -f "$ATOMIC_PUBLISH_SOURCE" ] \
+if [ ! -f "$SOURCE_FILE" ] || [ ! -f "$UPDATER_SOURCE" ] \
+    || [ ! -f "$SUPERVISOR_SOURCE" ] || [ ! -f "$ATOMIC_PUBLISH_SOURCE" ] \
     || [ ! -f "$PLIST_TEMPLATE" ] || [ ! -f "$ICON_SOURCE" ] \
     || [ ! -x "$VERIFY_SCRIPT" ]; then
     echo "CentL26 native source, verifier, Info.plist, or application icon is missing." >&2
@@ -242,7 +262,9 @@ for candidate in "${SDK_CANDIDATES[@]}"; do
         -module-cache-path "$MODULE_CACHE" \
         "${SWIFT_OPTIMIZATION[@]}" \
         "$SOURCE_FILE" \
+        "$UPDATER_SOURCE" \
         -framework AppKit \
+        -framework CryptoKit \
         -framework WebKit \
         -o "$STAGING_APPLICATION/Contents/MacOS/CentL26" \
         2>"$SWIFT_ERROR_LOG"
@@ -277,6 +299,17 @@ echo "Building native atomic publication helper"
     -Wall \
     -Wextra \
     -Werror \
+    -arch "$TARGET_ARCHITECTURE" \
+    -isysroot "$SELECTED_SDK" \
+    "-mmacosx-version-min=$DEPLOYMENT_TARGET" \
+    "$ATOMIC_PUBLISH_SOURCE" \
+    -o "$STAGING_APPLICATION/Contents/Helpers/centl26-update-installer"
+
+"$CLANG" \
+    -std=c11 \
+    -Wall \
+    -Wextra \
+    -Werror \
     -arch "$HOST_ARCHITECTURE" \
     -isysroot "$SELECTED_SDK" \
     "-mmacosx-version-min=$DEPLOYMENT_TARGET" \
@@ -285,10 +318,11 @@ echo "Building native atomic publication helper"
 
 cp "$PLIST_TEMPLATE" "$STAGING_APPLICATION/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$STAGING_APPLICATION/Contents/Info.plist"
-/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $VERSION" "$STAGING_APPLICATION/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUNDLE_VERSION" "$STAGING_APPLICATION/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :LSMinimumSystemVersion $DEPLOYMENT_TARGET" "$STAGING_APPLICATION/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CentLBuildArchitecture $TARGET_ARCHITECTURE" "$STAGING_APPLICATION/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CentLBuildCommit $BUILD_COMMIT" "$STAGING_APPLICATION/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CentLBuildSequence $BUILD_SEQUENCE" "$STAGING_APPLICATION/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CentLBuildConfiguration $CONFIGURATION" "$STAGING_APPLICATION/Contents/Info.plist"
 
 if [ "${CENTL26_SKIP_CODESIGN:-0}" = "1" ]; then
@@ -753,6 +787,7 @@ if [ "$SIGNING_MODE" != "unsigned" ]; then
 fi
 sign_code "$STAGING_APPLICATION/Contents/Resources/bin/centl26"
 sign_code "$STAGING_APPLICATION/Contents/Helpers/centl26-supervisor"
+sign_code "$STAGING_APPLICATION/Contents/Helpers/centl26-update-installer"
 sign_code "$STAGING_APPLICATION/Contents/MacOS/CentL26"
 if [ "${#BUNDLED_LIBRARY_NAMES[@]}" -gt 0 ]; then
     for library_name in "${BUNDLED_LIBRARY_NAMES[@]}"; do
@@ -771,6 +806,7 @@ PROVIDER_MANIFEST="$STAGING_APPLICATION/Contents/Resources/providers/providers.j
     printf '  "schema": "org.freecomputation.centl.provider-inventory/1",\n'
     printf '  "product_version": "%s",\n' "$VERSION"
     printf '  "build_commit": "%s",\n' "$BUILD_COMMIT"
+    printf '  "build_sequence": %s,\n' "$BUILD_SEQUENCE"
     printf '  "integration": "explicit-environment",\n'
     printf '  "providers": ['
     for ((index = 0; index < ${#BUNDLED_PROVIDER_IDS[@]}; index++)); do
@@ -781,14 +817,23 @@ PROVIDER_MANIFEST="$STAGING_APPLICATION/Contents/Resources/providers/providers.j
         printf '\n    {'
         printf '"id":"%s","path":"bin/%s","sha256":"%s",' "$provider" "$provider" "$provider_hash"
         printf '"source":"%s","provenance":"%s",' "$PROVIDER_SOURCE_MODE" "$PROVIDER_PROVENANCE"
-        if [ "$provider" = "centl-chem" ]; then
-            printf '"role":"%s","capabilities":[' "$role"
-            printf '"org.fcf.centl.chemistry.compute"],'
-            printf '"operations":["atoms","balance"],'
-            printf '"activation":"backend-adapter"}'
-        else
-            printf '"role":"%s","capabilities":[],"activation":"broker-contract-required"}' "$role"
-        fi
+        case "$provider" in
+            centl)
+                printf '"role":"%s","capabilities":[' "$role"
+                printf '"org.fcf.centl.numerics.enclose"],'
+                printf '"operations":["approx"],'
+                printf '"activation":"backend-adapter"}'
+                ;;
+            centl-chem)
+                printf '"role":"%s","capabilities":[' "$role"
+                printf '"org.fcf.centl.chemistry.compute"],'
+                printf '"operations":["atoms","balance"],'
+                printf '"activation":"backend-adapter"}'
+                ;;
+            *)
+                printf '"role":"%s","capabilities":[],"activation":"broker-contract-required"}' "$role"
+                ;;
+        esac
     done
     if [ "${#BUNDLED_PROVIDER_IDS[@]}" -gt 0 ]; then
         printf '\n  '
@@ -798,6 +843,7 @@ PROVIDER_MANIFEST="$STAGING_APPLICATION/Contents/Resources/providers/providers.j
 plutil -convert json -o /dev/null -- "$PROVIDER_MANIFEST"
 
 SUPERVISOR_HASH="$(sha256_file "$STAGING_APPLICATION/Contents/Helpers/centl26-supervisor")"
+UPDATE_INSTALLER_HASH="$(sha256_file "$STAGING_APPLICATION/Contents/Helpers/centl26-update-installer")"
 BACKEND_HASH="$(sha256_file "$STAGING_APPLICATION/Contents/Resources/bin/centl26")"
 BUILD_MANIFEST="$STAGING_APPLICATION/Contents/Resources/build-manifest.json"
 PINNED_GMP_VERSION="$(toolchain_lock_value gmp)"
@@ -810,6 +856,7 @@ PINNED_FLINT_VERSION="$(toolchain_lock_value flint)"
     printf '  "product_version": "%s",\n' "$VERSION"
     printf '  "bundle_identifier": "org.freecomputation.centl",\n'
     printf '  "build_commit": "%s",\n' "$BUILD_COMMIT"
+    printf '  "build_sequence": %s,\n' "$BUILD_SEQUENCE"
     printf '  "source_state": "%s",\n' "$SOURCE_STATE"
     printf '  "configuration": "%s",\n' "$CONFIGURATION"
     printf '  "deployment_target": "%s",\n' "$DEPLOYMENT_TARGET"
@@ -848,6 +895,7 @@ PINNED_FLINT_VERSION="$(toolchain_lock_value flint)"
     printf '  "components": {\n'
     printf '    "launcher": {"path":"MacOS/CentL26","integrity":"%s"},\n' "$LAUNCHER_INTEGRITY"
     printf '    "supervisor": {"path":"Helpers/centl26-supervisor","sha256":"%s"},\n' "$SUPERVISOR_HASH"
+    printf '    "update_installer": {"path":"Helpers/centl26-update-installer","sha256":"%s"},\n' "$UPDATE_INSTALLER_HASH"
     printf '    "backend": {"path":"Resources/bin/centl26","sha256":"%s"}\n' "$BACKEND_HASH"
     printf '  }\n}\n'
 } >"$BUILD_MANIFEST"
@@ -867,6 +915,7 @@ fi
 echo "Verifying staged application composition"
 CENTL26_EXPECTED_VERSION="$VERSION" \
 CENTL26_EXPECTED_ARCHITECTURE="$TARGET_ARCHITECTURE" \
+CENTL26_EXPECTED_PROVIDERS="$REQUESTED_PROVIDERS" \
 CENTL26_RUN_SELF_TEST="$RUN_BUNDLE_SELF_TEST" \
 CENTL26_RUN_CHEMISTRY_SMOKE="$RUN_BUNDLE_SELF_TEST" \
     "$VERIFY_SCRIPT" "$STAGING_APPLICATION"

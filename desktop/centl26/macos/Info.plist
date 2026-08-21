@@ -21,11 +21,13 @@
     <key>CFBundleShortVersionString</key>
     <string>26.0.0</string>
     <key>CFBundleVersion</key>
-    <string>26.0.0</string>
+    <string>0.0.0</string>
     <key>CentLBuildArchitecture</key>
     <string>unknown</string>
     <key>CentLBuildCommit</key>
     <string>unknown</string>
+    <key>CentLBuildSequence</key>
+    <integer>0</integer>
     <key>CentLBuildConfiguration</key>
     <string>release</string>
     <key>CentLProviderManifest</key>

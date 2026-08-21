@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "approval": {
-    "change_note": "Functional integration only: deterministic symbol order and accurate chemistry executor metadata; no layout or style change.",
+    "change_note": "Approved CentL26 control wiring, truthful action states, and native update integration.",
     "release": "CentL26",
     "reviewed_viewports": [
       "1366x768",
@@ -12,9 +12,9 @@
   "files": {
     "desktop/centl26/macos/Assets/CentL26Icon.png": "645249e61681bed304d0337993485905480933207aacb2c2141a1e5ff514dcbd",
     "desktop/centl26/macos/Assets/CentL26Icon.svg": "a599538a075f61f861fe44ad1260fdc98d561dab0931a36ea08c02430e623298",
-    "src-web/server/lab.css": "5bce65bff2df4c00b5088c32ce51519f4982c266d67cbbb2ae77093849a082d7",
-    "src-web/server/lab.js": "9f756e568f95a2529f44461963883a5bfbef10aabdf4651365373995d640d4a6",
-    "src-web/server/lab_template.rs": "bc1c2431d14f43acff6286b134405841e3ea75eeee4d68f9bc28ceb4ebabef37"
+    "src-web/server/lab.css": "80757ad185ed4d9527a55beaff0bb3147757b14c99ac9f5d93a17807a2d900cd",
+    "src-web/server/lab.js": "b1179178f664501ee50e9f902532f2de1a10132f60fb91eeb78c35519db13746",
+    "src-web/server/lab_template.rs": "6459aaa2839afd0343c5dd55eebc9738367d44a45cefca90977838d0db68205c"
   },
   "schema": 1,
   "semantic_contract": {
@@ -74,7 +74,19 @@
         "explorer: \"hide-explorer\"",
         "inspector: \"hide-inspector\"",
         "console: \"hide-console\"",
-        "document.body.classList.toggle(className);",
+        "document.body.classList.toggle(className, !visible);",
+        "function selectArea(area",
+        "panel.hidden = panel.dataset.areaPanel !== area;",
+        "function hydrateCapabilities",
+        "interaction_mode: selectedMode",
+        "const prioritizeRunInput",
+        "function startNewComputation",
+        "editor.value = \"\";",
+        "function clearNotebook",
+        "cmd: \":clear\"",
+        "button.disabled = !hasInput",
+        "button.disabled = !canClear",
+        "window.webkit?.messageHandlers?.centl26Update",
         "key === \"k\""
       ],
       "src-web/server/lab_template.rs": [
@@ -83,6 +95,14 @@
         "What are you working on?",
         "class=\"command-center\"",
         "class=\"activity-rail\"",
+        "data-area-panel=\"data\"",
+        "data-area-panel=\"models\"",
+        "data-area-panel=\"build\"",
+        "data-new-computation",
+        "data-clear-session",
+        "data-command-mode=\"Auto\"",
+        "data-update title=\"Check for CentL26 updates\"",
+        "name=\"interaction_mode\" value=\"Auto\"",
         "CentL26 Core"
       ]
     }

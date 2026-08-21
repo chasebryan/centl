@@ -6,10 +6,12 @@ set -euo pipefail
 
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 REPOSITORY_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
+UPDATE_PUBLISHER="$SCRIPT_DIR/publish-centl26-macos-update"
 APPLICATION="${1:-$REPOSITORY_ROOT/build/centl26/macos/CentL26.app}"
 EXPECTED_VERSION="${CENTL26_EXPECTED_VERSION:-}"
 EXPECTED_ARCHITECTURE="${CENTL26_EXPECTED_ARCHITECTURE:-}"
 EXPECTED_TEAM_ID="${CENTL26_EXPECTED_TEAM_ID:-}"
+EXPECTED_PROVIDERS="${CENTL26_EXPECTED_PROVIDERS:-centl,centl-chem}"
 RUN_SELF_TEST="${CENTL26_RUN_SELF_TEST:-0}"
 RUN_CHEMISTRY_SMOKE="${CENTL26_RUN_CHEMISTRY_SMOKE:-0}"
 RUN_STATE_SECURITY_TEST="${CENTL26_RUN_STATE_SECURITY_TEST:-$RUN_SELF_TEST}"
@@ -99,10 +101,14 @@ done
 
 [ "$(uname -s)" = "Darwin" ] || fail "macOS is required"
 [ -d "$APPLICATION/Contents" ] || fail "application bundle not found: $APPLICATION"
+[ -x "$UPDATE_PUBLISHER" ] || fail "automatic-update publisher contract is unavailable"
+"$UPDATE_PUBLISHER" --self-test >/dev/null \
+    || fail "automatic-update publication ordering contract failed"
 
 INFO="$APPLICATION/Contents/Info.plist"
 LAUNCHER="$APPLICATION/Contents/MacOS/CentL26"
 SUPERVISOR="$APPLICATION/Contents/Helpers/centl26-supervisor"
+UPDATE_INSTALLER="$APPLICATION/Contents/Helpers/centl26-update-installer"
 BACKEND="$APPLICATION/Contents/Resources/bin/centl26"
 ICON="$APPLICATION/Contents/Resources/CentL26.icns"
 BUILD_MANIFEST="$APPLICATION/Contents/Resources/build-manifest.json"
@@ -110,10 +116,10 @@ PROVIDER_MANIFEST="$APPLICATION/Contents/Resources/providers/providers.json"
 LICENSE_NOTICE="$APPLICATION/Contents/Resources/licenses/THIRD_PARTY_NOTICES.md"
 PRODUCT_LICENSE="$APPLICATION/Contents/Resources/licenses/CentL26-Apache-2.0.txt"
 
-for file in "$INFO" "$LAUNCHER" "$SUPERVISOR" "$BACKEND" "$ICON" "$BUILD_MANIFEST" "$PROVIDER_MANIFEST" "$LICENSE_NOTICE" "$PRODUCT_LICENSE"; do
+for file in "$INFO" "$LAUNCHER" "$SUPERVISOR" "$UPDATE_INSTALLER" "$BACKEND" "$ICON" "$BUILD_MANIFEST" "$PROVIDER_MANIFEST" "$LICENSE_NOTICE" "$PRODUCT_LICENSE"; do
     [ -f "$file" ] || fail "required bundle file is missing: $file"
 done
-for executable in "$LAUNCHER" "$SUPERVISOR" "$BACKEND"; do
+for executable in "$LAUNCHER" "$SUPERVISOR" "$UPDATE_INSTALLER" "$BACKEND"; do
     [ -x "$executable" ] || fail "bundle executable is not executable: $executable"
 done
 
@@ -136,16 +142,19 @@ plutil -convert json -o /dev/null -- "$PROVIDER_MANIFEST"
 
 VERSION="$(plist_value CFBundleShortVersionString "$INFO")"
 BUNDLE_VERSION="$(plist_value CFBundleVersion "$INFO")"
-[ "$VERSION" = "$BUNDLE_VERSION" ] || fail "short version and bundle version differ"
-[[ "$VERSION" =~ ^26(\.[0-9]+){0,2}$ ]] || fail "bundle is not on the CentL26 version train"
+[ "$VERSION" = "26.0.0" ] || fail "public CentL26 version must remain 26.0.0"
+[[ "$BUNDLE_VERSION" =~ ^[1-9][0-9]{0,3}\.0\.0$ ]] \
+    || fail "bundle build version is not a monotonic CentL26 sequence"
 if [ -n "$EXPECTED_VERSION" ] && [ "$VERSION" != "$EXPECTED_VERSION" ]; then
     fail "expected version $EXPECTED_VERSION, found $VERSION"
 fi
 
 LAUNCHER_ARCHS="$(architectures "$LAUNCHER")"
 SUPERVISOR_ARCHS="$(architectures "$SUPERVISOR")"
+UPDATE_INSTALLER_ARCHS="$(architectures "$UPDATE_INSTALLER")"
 BACKEND_ARCHS="$(architectures "$BACKEND")"
 [ "$LAUNCHER_ARCHS" = "$SUPERVISOR_ARCHS" ] || fail "launcher and supervisor architectures differ"
+[ "$LAUNCHER_ARCHS" = "$UPDATE_INSTALLER_ARCHS" ] || fail "launcher and update-installer architectures differ"
 [ "$LAUNCHER_ARCHS" = "$BACKEND_ARCHS" ] || fail "launcher and backend architectures differ"
 if [ -n "$EXPECTED_ARCHITECTURE" ] && ! grep -Eq "(^| )$EXPECTED_ARCHITECTURE( |$)" <<<"$LAUNCHER_ARCHS"; then
     fail "expected architecture $EXPECTED_ARCHITECTURE, found $LAUNCHER_ARCHS"
@@ -153,6 +162,7 @@ fi
 
 check_system_dependencies "$LAUNCHER"
 check_system_dependencies "$SUPERVISOR"
+check_system_dependencies "$UPDATE_INSTALLER"
 check_system_dependencies "$BACKEND"
 
 SIGNING_MODE="$(plist_value CentLSigningMode "$INFO")"
@@ -161,7 +171,7 @@ if [ "$SIGNING_MODE" = "unsigned" ]; then
     [ "${CENTL26_REQUIRE_SIGNING:-0}" != "1" ] || fail "signed bundle required"
 else
     codesign --verify --deep --strict "$APPLICATION"
-    for executable in "$LAUNCHER" "$SUPERVISOR" "$BACKEND"; do
+    for executable in "$LAUNCHER" "$SUPERVISOR" "$UPDATE_INSTALLER" "$BACKEND"; do
         codesign --verify --strict "$executable"
     done
 fi
@@ -192,6 +202,13 @@ fi
     || fail "deployment target differs between build manifest and Info.plist"
 [ "$(plist_value build_commit "$BUILD_MANIFEST")" = "$(plist_value CentLBuildCommit "$INFO")" ] \
     || fail "build commit differs between build manifest and Info.plist"
+BUILD_SEQUENCE="$(plist_value build_sequence "$BUILD_MANIFEST")"
+[[ "$BUILD_SEQUENCE" =~ ^[1-9][0-9]{0,3}$ ]] || fail "build sequence must be an integer from 1 through 9999"
+[ "$BUILD_SEQUENCE" = "$(plist_value CentLBuildSequence "$INFO")" ] \
+    || fail "build sequence differs between build manifest and Info.plist"
+EXPECTED_BUNDLE_VERSION="$BUILD_SEQUENCE.0.0"
+[ "$BUNDLE_VERSION" = "$EXPECTED_BUNDLE_VERSION" ] \
+    || fail "CFBundleVersion does not encode the CentL26 build sequence"
 [ "$(plist_value configuration "$BUILD_MANIFEST")" = "$(plist_value CentLBuildConfiguration "$INFO")" ] \
     || fail "configuration differs between build manifest and Info.plist"
 [ "$(plist_value signing "$BUILD_MANIFEST")" = "$SIGNING_MODE" ] \
@@ -237,15 +254,18 @@ for native_family in gmp mpfr flint; do
     fi
 done
 
-for component in supervisor backend; do
+for component in supervisor update_installer backend; do
     case "$component" in
         supervisor) component_file="$SUPERVISOR" ;;
+        update_installer) component_file="$UPDATE_INSTALLER" ;;
         backend) component_file="$BACKEND" ;;
     esac
     expected_hash="$(plist_value "components.$component.sha256" "$BUILD_MANIFEST")"
     actual_hash="$(sha256_file "$component_file")"
     [ "$expected_hash" = "$actual_hash" ] || fail "$component hash differs: $component"
 done
+[ "$(plist_value components.update_installer.path "$BUILD_MANIFEST")" = "Helpers/centl26-update-installer" ] \
+    || fail "update-installer path differs in build manifest"
 [ "$(plist_value components.launcher.path "$BUILD_MANIFEST")" = "MacOS/CentL26" ] \
     || fail "launcher path differs in build manifest"
 EXPECTED_LAUNCHER_INTEGRITY="code-signature"
@@ -305,9 +325,23 @@ fi
     || fail "provider manifest version differs"
 [ "$(plist_value build_commit "$PROVIDER_MANIFEST")" = "$(plist_value build_commit "$BUILD_MANIFEST")" ] \
     || fail "provider manifest build commit differs"
+[ "$(plist_value build_sequence "$PROVIDER_MANIFEST")" = "$(plist_value build_sequence "$BUILD_MANIFEST")" ] \
+    || fail "provider manifest build sequence differs"
 PROVIDER_COUNT=0
 SEEN_PROVIDER_IDS=","
 SEEN_PROVIDER_PATHS=","
+EXPECTED_PROVIDER_COUNT=0
+EXPECTED_PROVIDER_IDS=","
+for expected_provider in ${EXPECTED_PROVIDERS//,/ }; do
+    case "$expected_provider" in
+        centl|centl-sci|centl-chem|centl-cps|centl-mirage) ;;
+        *) fail "unknown expected provider identifier: $expected_provider" ;;
+    esac
+    [[ "$EXPECTED_PROVIDER_IDS" != *",$expected_provider,"* ]] \
+        || fail "duplicate expected provider identifier: $expected_provider"
+    EXPECTED_PROVIDER_IDS+="$expected_provider,"
+    EXPECTED_PROVIDER_COUNT=$((EXPECTED_PROVIDER_COUNT + 1))
+done
 PROVIDER_BIN_DIRECTORY="$APPLICATION/Contents/Resources/providers/bin"
 [ -d "$PROVIDER_BIN_DIRECTORY" ] || fail "provider bin directory is missing"
 [ -z "$(find "$PROVIDER_BIN_DIRECTORY" -mindepth 1 -maxdepth 1 ! -type f -print -quit)" ] \
@@ -353,16 +387,26 @@ while provider_id="$(plist_value "providers.$PROVIDER_COUNT.id" "$PROVIDER_MANIF
         *) fail "unknown provider source mode: $provider_source" ;;
     esac
     check_provider_dependencies "$provider_file"
-    if [ "$provider_id" = "centl-chem" ]; then
-        [ "$(plist_value "providers.$index.activation" "$PROVIDER_MANIFEST")" = "backend-adapter" ] \
-            || fail "centl-chem is not marked for backend-adapter activation"
-        [ "$(plist_value "providers.$index.capabilities.0" "$PROVIDER_MANIFEST")" = "org.fcf.centl.chemistry.compute" ] \
-            || fail "centl-chem canonical compute capability is absent"
-        [ "$(plist_value "providers.$index.operations.0" "$PROVIDER_MANIFEST")" = "atoms" ] \
-            || fail "centl-chem atoms operation is absent"
-        [ "$(plist_value "providers.$index.operations.1" "$PROVIDER_MANIFEST")" = "balance" ] \
-            || fail "centl-chem balance operation is absent"
-    fi
+    case "$provider_id" in
+        centl)
+            [ "$(plist_value "providers.$index.activation" "$PROVIDER_MANIFEST")" = "backend-adapter" ] \
+                || fail "centl is not marked for backend-adapter activation"
+            [ "$(plist_value "providers.$index.capabilities.0" "$PROVIDER_MANIFEST")" = "org.fcf.centl.numerics.enclose" ] \
+                || fail "centl rigorous-numerics capability is absent"
+            [ "$(plist_value "providers.$index.operations.0" "$PROVIDER_MANIFEST")" = "approx" ] \
+                || fail "centl approximation operation is absent"
+            ;;
+        centl-chem)
+            [ "$(plist_value "providers.$index.activation" "$PROVIDER_MANIFEST")" = "backend-adapter" ] \
+                || fail "centl-chem is not marked for backend-adapter activation"
+            [ "$(plist_value "providers.$index.capabilities.0" "$PROVIDER_MANIFEST")" = "org.fcf.centl.chemistry.compute" ] \
+                || fail "centl-chem canonical compute capability is absent"
+            [ "$(plist_value "providers.$index.operations.0" "$PROVIDER_MANIFEST")" = "atoms" ] \
+                || fail "centl-chem atoms operation is absent"
+            [ "$(plist_value "providers.$index.operations.1" "$PROVIDER_MANIFEST")" = "balance" ] \
+                || fail "centl-chem balance operation is absent"
+            ;;
+    esac
     if [ "$SIGNING_MODE" != "unsigned" ]; then
         codesign --verify --strict "$provider_file"
     fi
@@ -371,10 +415,37 @@ done
 ACTUAL_PROVIDER_COUNT="$(find "$PROVIDER_BIN_DIRECTORY" -mindepth 1 -maxdepth 1 -type f | wc -l | tr -d ' ')"
 [ "$ACTUAL_PROVIDER_COUNT" = "$PROVIDER_COUNT" ] \
     || fail "provider manifest does not exactly match providers/bin"
+[ "$PROVIDER_COUNT" = "$EXPECTED_PROVIDER_COUNT" ] \
+    || fail "provider inventory count differs from expected set $EXPECTED_PROVIDERS"
+for expected_provider in ${EXPECTED_PROVIDERS//,/ }; do
+    [[ "$SEEN_PROVIDER_IDS" == *",$expected_provider,"* ]] \
+        || fail "expected provider is absent: $expected_provider"
+done
 
 if [ "$REQUIRE_NOTARIZATION" = "1" ]; then
     xcrun stapler validate "$APPLICATION" >/dev/null
 fi
+
+"$LAUNCHER" --self-test-updater \
+    || fail "packaged automatic-updater contract self-test failed"
+
+ROLLBACK_TEST_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/centl26-update-rollback.XXXXXX")"
+cleanup_rollback_test() {
+    rm -rf -- "$ROLLBACK_TEST_ROOT"
+}
+trap cleanup_rollback_test EXIT INT TERM
+ROLLBACK_INSTALLED="$ROLLBACK_TEST_ROOT/CentL26.app"
+ROLLBACK_STAGED="$ROLLBACK_TEST_ROOT/.CentL26-update-00000000-0000-0000-0000-000000000000/expanded/CentL26.app"
+mkdir -p "$ROLLBACK_INSTALLED" "$ROLLBACK_STAGED"
+touch "$ROLLBACK_INSTALLED/original-copy" "$ROLLBACK_STAGED/candidate-copy"
+"$UPDATE_INSTALLER" --self-test-rollback "$ROLLBACK_STAGED" "$ROLLBACK_INSTALLED" \
+    || fail "automatic-update swap rollback self-test failed"
+[ -f "$ROLLBACK_INSTALLED/original-copy" ] && [ ! -e "$ROLLBACK_INSTALLED/candidate-copy" ] \
+    || fail "automatic-update rollback did not restore the installed copy"
+[ -f "$ROLLBACK_STAGED/candidate-copy" ] && [ ! -e "$ROLLBACK_STAGED/original-copy" ] \
+    || fail "automatic-update rollback did not restore the staged copy"
+cleanup_rollback_test
+trap - EXIT INT TERM
 
 if [ "$RUN_SELF_TEST" = "1" ] || [ "$RUN_CHEMISTRY_SMOKE" = "1" ] || [ "$RUN_STATE_SECURITY_TEST" = "1" ]; then
     # The backend intentionally refuses project roots anywhere under a shared
@@ -424,6 +495,8 @@ if [ "$RUN_SELF_TEST" = "1" ] || [ "$RUN_CHEMISTRY_SMOKE" = "1" ] || [ "$RUN_STA
             || fail "diagnostics mode wrote through a symlinked launcher log"
     fi
     if [ "$RUN_SELF_TEST" = "1" ]; then
+        [ -x "$APPLICATION/Contents/Resources/providers/bin/centl" ] \
+            || fail "lifecycle/numerics smoke requested but centl is not bundled"
         SELF_TEST_OUTPUT="$(CENTL26_STATE_DIR="$SELF_TEST_STATE" "$LAUNCHER" --self-test)" \
             || fail "packaged lifecycle self-test failed"
         echo "$SELF_TEST_OUTPUT"

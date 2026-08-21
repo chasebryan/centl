@@ -56,7 +56,7 @@ centl26-design-contract-test:
 	$(PYTHON) tests/test_centl26_design_contract.py
 
 centl26-design-approve:
-	test -n "$(DESIGN_VERSION)" || { echo "DESIGN_VERSION=CentL26 or CentL26.N is required" >&2; exit 2; }
+	test "$(DESIGN_VERSION)" = "CentL26" || { echo "DESIGN_VERSION=CentL26 is required" >&2; exit 2; }
 	test -n "$(DESIGN_REASON)" || { echo "DESIGN_REASON='approved change' is required" >&2; exit 2; }
 	$(PYTHON) scripts/centl26-design-contract.py approve \
 		--version "$(DESIGN_VERSION)" \

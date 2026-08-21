@@ -1,0 +1,310 @@
+#!/bin/bash
+# SPDX-License-Identifier: Apache-2.0
+# Publish one already-qualified CentL26 macOS snapshot as an immutable GitHub release.
+
+set -euo pipefail
+
+publication_plan() {
+    local release_state="$1"
+    local asset_state="$2"
+    case "$release_state:$asset_state" in
+        absent:absent)
+            printf '%s\n' \
+                create-draft \
+                upload-archive \
+                upload-checksum \
+                upload-manifest \
+                publish-freeze
+            ;;
+        draft:identical)
+            printf '%s\n' publish-freeze
+            ;;
+        draft:absent|draft:different)
+            printf '%s\n' \
+                upload-archive \
+                upload-checksum \
+                upload-manifest \
+                publish-freeze
+            ;;
+        published:identical)
+            printf '%s\n' reuse-snapshot
+            ;;
+        published:absent|published:different)
+            printf '%s\n' reject-mutation
+            ;;
+        *)
+            printf '%s\n' reject-mutation
+            ;;
+    esac
+}
+
+if [ "${1:-}" = "--self-test" ]; then
+    IDENTICAL_PLAN="$(publication_plan published identical)"
+    [ "$IDENTICAL_PLAN" = "reuse-snapshot" ] \
+        || { echo "CentL26 update publisher self-test failed: identical frozen snapshot was not reused" >&2; exit 1; }
+    CREATE_PLAN="$(publication_plan absent absent)"
+    EXPECTED_CREATE="$(printf '%s\n' create-draft upload-archive upload-checksum upload-manifest publish-freeze)"
+    [ "$CREATE_PLAN" = "$EXPECTED_CREATE" ] \
+        || { echo "CentL26 update publisher self-test failed: new snapshot publication order differs" >&2; exit 1; }
+    DRAFT_PLAN="$(publication_plan draft absent)"
+    EXPECTED_DRAFT="$(printf '%s\n' upload-archive upload-checksum upload-manifest publish-freeze)"
+    [ "$DRAFT_PLAN" = "$EXPECTED_DRAFT" ] \
+        || { echo "CentL26 update publisher self-test failed: draft completion order differs" >&2; exit 1; }
+    REJECT_PLAN="$(publication_plan published different)"
+    [ "$REJECT_PLAN" = "reject-mutation" ] \
+        || { echo "CentL26 update publisher self-test failed: published snapshot mutation was not rejected" >&2; exit 1; }
+    echo "CentL26 update publisher self-test: immutable snapshot publication contract passed"
+    exit 0
+fi
+
+SCRIPT_DIRECTORY="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+REPOSITORY_ROOT="$(CDPATH= cd -- "$SCRIPT_DIRECTORY/.." && pwd)"
+REPOSITORY="chasebryan/centl"
+VERSION="26.0.0"
+ARCHITECTURE="${CENTL26_ARCHITECTURE:-$(uname -m)}"
+DIST_DIRECTORY="${CENTL26_DIST_DIR:-$REPOSITORY_ROOT/dist/centl26/macos}"
+VERIFY_SCRIPT="$SCRIPT_DIRECTORY/verify-centl26-macos"
+
+fail() {
+    echo "CentL26 update publication failed: $*" >&2
+    exit 1
+}
+
+plist_value() {
+    plutil -extract "$1" raw "$2"
+}
+
+sha256_file() {
+    shasum -a 256 "$1" | awk '{print $1}'
+}
+
+padded_sequence() {
+    printf '%08d' "$1"
+}
+
+case "$ARCHITECTURE" in arm64|x86_64) ;; *) fail "architecture must be arm64 or x86_64" ;; esac
+for required in gh plutil shasum ditto cmp find; do
+    command -v "$required" >/dev/null 2>&1 || fail "required publication tool is missing: $required"
+done
+[ "$(uname -s)" = "Darwin" ] || fail "macOS is required"
+
+if [ -n "${1:-}" ]; then
+    RELEASE_DIRECTORY="$1"
+else
+    shopt -s nullglob
+    CANDIDATES=( "$DIST_DIRECTORY"/CentL26-"$VERSION"-build-*-macos-"$ARCHITECTURE".release )
+    QUALIFIED=()
+    for candidate in "${CANDIDATES[@]}"; do
+        case "$candidate" in
+            *-local.release) continue ;;
+        esac
+        QUALIFIED+=("$candidate")
+    done
+    [ "${#QUALIFIED[@]}" -eq 1 ] \
+        || fail "pass the exact .release directory (found ${#QUALIFIED[@]} qualified $ARCHITECTURE snapshots)"
+    RELEASE_DIRECTORY="${QUALIFIED[0]}"
+fi
+
+[ -d "$RELEASE_DIRECTORY" ] || fail "qualified package is missing: $RELEASE_DIRECTORY"
+[ ! -L "$RELEASE_DIRECTORY" ] || fail "release directory may not be a symbolic link"
+RELEASE_NAME="$(basename -- "$RELEASE_DIRECTORY")"
+case "$RELEASE_NAME" in
+    *.release) RELEASE_NAME="${RELEASE_NAME%.release}" ;;
+    *) fail "release directory must end in .release: $RELEASE_DIRECTORY" ;;
+esac
+case "$RELEASE_NAME" in
+    *-local) fail "local-unqualified packages cannot enter the frozen update channel" ;;
+esac
+
+ARCHIVE_NAME="$RELEASE_NAME.zip"
+CHECKSUM_NAME="$ARCHIVE_NAME.sha256"
+MANIFEST_NAME="$RELEASE_NAME.release.json"
+ARCHIVE="$RELEASE_DIRECTORY/$ARCHIVE_NAME"
+CHECKSUM="$RELEASE_DIRECTORY/$CHECKSUM_NAME"
+MANIFEST="$RELEASE_DIRECTORY/$MANIFEST_NAME"
+
+for artifact in "$ARCHIVE" "$CHECKSUM" "$MANIFEST"; do
+    [ -f "$artifact" ] && [ ! -L "$artifact" ] \
+        || fail "required regular release asset is missing: $artifact"
+done
+[ "$(find "$RELEASE_DIRECTORY" -maxdepth 1 -type f | wc -l | tr -d ' ')" = "3" ] \
+    || fail "release directory must contain exactly three files"
+[ -z "$(find "$RELEASE_DIRECTORY" -mindepth 1 -maxdepth 1 ! -type f -print -quit)" ] \
+    || fail "release directory contains an unexpected entry"
+
+[ "$(plist_value schema "$MANIFEST")" = "org.freecomputation.centl.macos-release/2" ] \
+    || fail "release manifest schema differs"
+[ "$(plist_value product "$MANIFEST")" = "CentL26" ] || fail "release product differs"
+[ "$(plist_value product_version "$MANIFEST")" = "$VERSION" ] || fail "release version differs"
+[ "$(plist_value bundle_identifier "$MANIFEST")" = "org.freecomputation.centl" ] \
+    || fail "release bundle identifier differs"
+[ "$(plist_value architecture "$MANIFEST")" = "$ARCHITECTURE" ] || fail "release architecture differs"
+[ "$(plist_value source_state "$MANIFEST")" = "clean" ] || fail "release source is not clean"
+[ "$(plist_value qualification "$MANIFEST")" = "release-qualified" ] \
+    || fail "package is not release-qualified"
+[ "$(plist_value native_runtime_qualification "$MANIFEST")" = "pinned-match" ] \
+    || fail "release native runtime does not match the pins"
+[ "$(plist_value signing "$MANIFEST")" = "developer-id" ] || fail "release is not Developer ID signed"
+[ "$(plist_value notarized "$MANIFEST")" = "true" ] || fail "release is not notarized"
+[ "$(plist_value archive "$MANIFEST")" = "$ARCHIVE_NAME" ] || fail "release archive name differs"
+BUILD_COMMIT="$(plist_value build_commit "$MANIFEST")"
+BUILD_SEQUENCE="$(plist_value build_sequence "$MANIFEST")"
+[[ "$BUILD_COMMIT" =~ ^[0-9a-f]{40}$ ]] || fail "release build commit must be a 40-character SHA-1"
+[[ "$BUILD_SEQUENCE" =~ ^[1-9][0-9]{0,3}$ ]] || fail "release build sequence must be an integer from 1 through 9999"
+BUILD_SEQUENCE_PADDED="$(padded_sequence "$BUILD_SEQUENCE")"
+BUILD_COMMIT_SHORT="${BUILD_COMMIT:0:12}"
+EXPECTED_RELEASE_NAME="CentL26-$VERSION-build-$BUILD_SEQUENCE_PADDED-$BUILD_COMMIT_SHORT-macos-$ARCHITECTURE"
+[ "$RELEASE_NAME" = "$EXPECTED_RELEASE_NAME" ] || fail "release directory name does not match snapshot identity"
+
+EXPECTED_HASH="$(plist_value sha256 "$MANIFEST")"
+[[ "$EXPECTED_HASH" =~ ^[0-9a-f]{64}$ ]] || fail "release manifest SHA-256 is invalid"
+[ "$(sha256_file "$ARCHIVE")" = "$EXPECTED_HASH" ] || fail "archive SHA-256 differs from release manifest"
+[ "$(cat "$CHECKSUM")" = "$EXPECTED_HASH  $ARCHIVE_NAME" ] \
+    || fail "checksum asset differs from release manifest"
+
+WORK_DIRECTORY="$(mktemp -d "${TMPDIR:-/tmp}/centl26-update-publication.XXXXXX")"
+cleanup() {
+    rm -rf -- "$WORK_DIRECTORY"
+}
+trap cleanup EXIT INT TERM
+
+ditto -x -k "$ARCHIVE" "$WORK_DIRECTORY/extracted"
+EXTRACTED_APPLICATION="$WORK_DIRECTORY/extracted/CentL26.app"
+[ -d "$EXTRACTED_APPLICATION/Contents" ] || fail "archive does not contain exactly CentL26.app"
+[ "$(find "$WORK_DIRECTORY/extracted" -mindepth 1 -maxdepth 1 | wc -l | tr -d ' ')" = "1" ] \
+    || fail "archive has an unexpected top-level layout"
+CENTL26_EXPECTED_VERSION="$VERSION" \
+CENTL26_EXPECTED_ARCHITECTURE="$ARCHITECTURE" \
+CENTL26_REQUIRE_SIGNING=1 \
+CENTL26_REQUIRE_NOTARIZATION=1 \
+    "$VERIFY_SCRIPT" "$EXTRACTED_APPLICATION"
+
+IMMUTABLE_ENABLED="$(gh api "repos/$REPOSITORY/immutable-releases" --jq .enabled)"
+[ "$IMMUTABLE_ENABLED" = "true" ] \
+    || fail "enable GitHub immutable releases before publishing a CentL26 snapshot"
+
+RELEASE_TAG="centl26-build-$BUILD_SEQUENCE_PADDED-$BUILD_COMMIT"
+NOTES="$(printf '%s\n' \
+    "CentL26 immutable macOS snapshot ${BUILD_SEQUENCE}/${BUILD_COMMIT_SHORT}." \
+    "" \
+    "The public product name remains exactly CentL26. This technical tag freezes one" \
+    "qualified application build so it cannot be rewritten. Later maintenance publishes" \
+    "a new snapshot instead of mutating this one.")"
+
+release_view() {
+    gh api "repos/$REPOSITORY/releases/tags/$RELEASE_TAG" "$@"
+}
+
+RELEASE_STATE="absent"
+if release_view --jq .tag_name >/dev/null 2>&1; then
+    [ "$(release_view --jq .tag_name)" = "$RELEASE_TAG" ] \
+        || fail "GitHub snapshot tag identity differs"
+    [ "$(release_view --jq .name)" = "CentL26" ] \
+        || fail "GitHub release title must remain exactly CentL26"
+    if [ "$(release_view --jq .draft)" = "true" ]; then
+        RELEASE_STATE="draft"
+    else
+        RELEASE_STATE="published"
+        [ "$(release_view --jq .prerelease)" = "false" ] \
+            || fail "CentL26 snapshot is marked as a prerelease"
+    fi
+fi
+
+ASSET_STATE="absent"
+if [ "$RELEASE_STATE" != "absent" ]; then
+    ASSET_ROWS="$(gh api --paginate "repos/$REPOSITORY/releases/$(release_view --jq .id)/assets?per_page=100" --jq '.[] | [.id, .name] | @tsv')"
+    asset_ids() {
+        local name="$1"
+        awk -F $'\t' -v expected="$name" '$2 == expected {print $1}' <<<"$ASSET_ROWS"
+    }
+    for name in "$ARCHIVE_NAME" "$CHECKSUM_NAME" "$MANIFEST_NAME"; do
+        count="$(asset_ids "$name" | wc -l | tr -d ' ')"
+        [ "$count" -le 1 ] || fail "GitHub snapshot contains duplicate assets named $name"
+    done
+    MATCHED=0
+    EXPECTED=0
+    for artifact in "$ARCHIVE" "$CHECKSUM" "$MANIFEST"; do
+        EXPECTED=$((EXPECTED + 1))
+        name="$(basename -- "$artifact")"
+        if [ -n "$(asset_ids "$name")" ]; then
+            download_directory="$WORK_DIRECTORY/compare-$name"
+            mkdir "$download_directory"
+            gh release download "$RELEASE_TAG" --repo "$REPOSITORY" --pattern "$name" --dir "$download_directory"
+            if cmp -s "$artifact" "$download_directory/$name"; then
+                MATCHED=$((MATCHED + 1))
+            else
+                ASSET_STATE="different"
+            fi
+        fi
+    done
+    if [ "$ASSET_STATE" != "different" ]; then
+        if [ "$MATCHED" -eq "$EXPECTED" ]; then
+            ASSET_STATE="identical"
+        elif [ "$MATCHED" -eq 0 ]; then
+            ASSET_STATE="absent"
+        else
+            ASSET_STATE="different"
+        fi
+    fi
+fi
+
+PLAN="$(publication_plan "$RELEASE_STATE" "$ASSET_STATE")"
+case "$PLAN" in
+    reuse-snapshot)
+        echo "Frozen CentL26 snapshot already has identical bytes"
+        ;;
+    reject-mutation)
+        fail "refusing to mutate published snapshot $RELEASE_TAG"
+        ;;
+    *)
+        if [ "$RELEASE_STATE" = "absent" ]; then
+            gh release create "$RELEASE_TAG" \
+                --repo "$REPOSITORY" \
+                --target "$BUILD_COMMIT" \
+                --title "CentL26" \
+                --notes "$NOTES" \
+                --draft
+        fi
+        if [ "$ASSET_STATE" != "identical" ]; then
+            if [ "$RELEASE_STATE" = "draft" ] && [ "$ASSET_STATE" = "different" ]; then
+                ASSET_ROWS="$(gh api --paginate "repos/$REPOSITORY/releases/$(release_view --jq .id)/assets?per_page=100" --jq '.[] | [.id, .name] | @tsv')"
+                for name in "$MANIFEST_NAME" "$ARCHIVE_NAME" "$CHECKSUM_NAME"; do
+                    identifier="$(awk -F $'\t' -v expected="$name" '$2 == expected {print $1}' <<<"$ASSET_ROWS")"
+                    if [ -n "$identifier" ]; then
+                        [[ "$identifier" =~ ^[0-9]+$ ]] || fail "invalid GitHub asset ID for $name"
+                        gh api --method DELETE "repos/$REPOSITORY/releases/assets/$identifier"
+                    fi
+                done
+            fi
+            gh release upload "$RELEASE_TAG" --repo "$REPOSITORY" "$ARCHIVE" "$CHECKSUM"
+            gh release upload "$RELEASE_TAG" --repo "$REPOSITORY" "$MANIFEST"
+        fi
+        gh release edit "$RELEASE_TAG" --repo "$REPOSITORY" --draft=false
+        [ "$(release_view --jq .draft)" = "false" ] || fail "snapshot remained a draft after publish"
+        [ "$(release_view --jq .immutable)" = "true" ] \
+            || fail "published snapshot was not frozen by GitHub immutable releases"
+        ;;
+esac
+
+for artifact in "$ARCHIVE" "$CHECKSUM" "$MANIFEST"; do
+    name="$(basename -- "$artifact")"
+    readback_directory="$WORK_DIRECTORY/final-$name"
+    mkdir "$readback_directory"
+    gh release download "$RELEASE_TAG" --repo "$REPOSITORY" --pattern "$name" --dir "$readback_directory"
+    cmp -s "$artifact" "$readback_directory/$name" \
+        || fail "final GitHub readback differs: $name"
+done
+
+[ "$(release_view --jq .name)" = "CentL26" ] || fail "published title must remain exactly CentL26"
+[ "$(release_view --jq .prerelease)" = "false" ] || fail "published snapshot is marked as a prerelease"
+[ "$(release_view --jq .immutable)" = "true" ] || fail "published snapshot is not immutable"
+
+trap - EXIT INT TERM
+rm -rf -- "$WORK_DIRECTORY"
+
+echo "CentL26 immutable snapshot published and read back"
+echo "  release: $REPOSITORY@$RELEASE_TAG"
+echo "  title: CentL26"
+echo "  architecture: $ARCHITECTURE"
+echo "  build sequence: $BUILD_SEQUENCE"
+echo "  build commit: $BUILD_COMMIT"
