@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "approval": {
-    "change_note": "Dedicated Gemini AI Co-Pilot activity tab and strategic STEM architecture",
+    "change_note": "Streamlined Gemini AI panel, moved Clear button, hidden auto-mode",
     "release": "CentL26",
     "reviewed_viewports": [
       "1366x768",
@@ -13,8 +13,8 @@
     "desktop/centl26/macos/Assets/CentL26Icon.png": "f8654785b5f6441a1b54a0859490dd09a4447b00547209f6ada2fb26b663baef",
     "desktop/centl26/macos/Assets/CentL26Icon.svg": "a62da90372e32287849ea8d33bb6ed2fa5ec1f314528924f1fd4ff01bfc7acc7",
     "src-web/server/lab.css": "dd03841672f85f5c2e4ee7329f94ea84a672ef25766451f0418a306897977c5d",
-    "src-web/server/lab.js": "ced98ea1167e2a251721d8520d0e292d45b49767375f12dba75bb5a45292e7a1",
-    "src-web/server/lab_template.rs": "e554eccdbbcc3f8f359cb24d61dfd412027b8bfa54640a5365bb82eda46b64ed"
+    "src-web/server/lab.js": "26d1155d3578188da8202d78be617053f91405abd56cd053bb2a7d3d9d1d7ee0",
+    "src-web/server/lab_template.rs": "576150431527ad0c96d052e409bf5e8cbceb820594fd6e1961423b38b974ac6f"
   },
   "schema": 1,
   "semantic_contract": {

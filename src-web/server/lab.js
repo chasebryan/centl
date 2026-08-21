@@ -213,13 +213,6 @@
     document.querySelectorAll(".mode-control select").forEach((select) => {
       select.value = mode;
     });
-    document.querySelectorAll(".composer-mode span").forEach((label) => {
-      label.textContent = `${mode} tools`;
-    });
-    document.querySelectorAll(".composer-mode").forEach((button) => {
-      button.title = `Open tools for ${mode} mode`;
-      button.setAttribute("aria-label", `Open tools for ${mode} mode`);
-    });
     document.querySelectorAll('input[type="hidden"][name="interaction_mode"]').forEach((input) => {
       input.value = mode;
     });
@@ -1137,7 +1130,7 @@
   });
 
   selectedArea = storedChoice(areaKey, areaNames, "work");
-  selectedMode = storedChoice(modeKey, interactionModes, "Auto");
+  selectedMode = "Auto"; // Always auto-detect mode behind the scenes
   selectedInspectorTab = storedChoice(inspectorTabKey, inspectorTabs, "result");
   preparePalette();
   restoreLayout();
