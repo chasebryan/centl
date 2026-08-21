@@ -1,5 +1,11 @@
 ## Unreleased
 
+### CentL26.7.3 — In-App Rust Toolchain & Repository Discovery (2026-08-21)
+
+- **Universal Cargo & Git Discovery for In-App Updates**: `execute_repo_update` dynamically locates user Rust toolchains (`~/.cargo/bin/cargo`, Homebrew, system binaries) and auto-augments process `PATH` in GUI AppKit/WebKit desktop bundles to eliminate missing path / `os error 2` failures.
+- **Dynamic Repository Root Resolver**: Accurately resolves repository root from current working directory or binary ancestor paths when updating local checkouts.
+- **Clear Guidance for Binary Standalone Users**: If `CentL26` is run outside a git clone or without a local Rust toolchain, the update dialog provides crystal-clear links and instructions for downloading binary releases or installing Rust.
+
 ### CentL26.7.2 — Multi-Statement Cell Engine & Multi-Platform Updates (2026-08-21)
 
 - **Large Multi-Statement Computations in Single Cells**: Write and run compound mathematical scripts, multi-step derivations, and mixed-domain calculations directly inside a single cell (split by newlines or semicolons `;`), featuring full step-by-step block transparency, inter-step variable persistence, comment support (`#` and `//`), and exact rational result enclosures.

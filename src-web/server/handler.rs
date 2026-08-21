@@ -241,7 +241,7 @@ pub fn handle_single_command(
 
     if cmd == ":release" || cmd == ":version" || cmd == ":releases" {
         let res = ExecutionResult {
-            text: "=== CentL26.7 Official Release (Standard Freeze) ===\nVersion: 26.7.2 (Rock Standard)\nCapabilities:\n• Multi-Platform Standard: native support for Windows 11, macOS Arm64, and Debian/Fedora Linux.\n• Multi-Notebook Tabs & Workspaces: seamlessly organize independent computations in named tabs.\n• Save & Download: export active notebooks to clean Markdown and structured JSON.\n• In-App Programmability (build): define, inspect, and test custom STEM functions & constants in plain English.\n• 2D Function Plotter: multi-line ASCII/Unicode coordinate grid visualization.\n• Dim Mode Theme: toggle between standard light and dimmed matte slate palettes.\n• Smart Multi-Domain Auto-Detector: direct stoichiometry, reactions, physics conversions, and constants.\n• CentL-SCi Natural Language STEM Solver: comprehensive step-by-step offline verified problem solving across chemistry, mechanics, circuits, thermodynamics, geometry, linear algebra, and statistics without external dependencies.\n• Rigorous Interval Numerics: arbitrary-precision interval enclosures and transcendental constants.\n• Hybrid Gemini Support: online/offline LLM STEM decomposition with exact rational verification.\n• 50+ STEM Examples Sheet: multi-domain reference dataset available via /download/centl26-examples.csv.\n• In-App Updates: verified multi-channel update checks via WebKit message bridge and git repository synchronization.".to_string(),
+            text: "=== CentL26.7 Official Release (Standard Freeze) ===\nVersion: 26.7.3 (Rock Standard)\nCapabilities:\n• Multi-Platform Standard: native support for Windows 11, macOS Arm64, and Debian/Fedora Linux.\n• Multi-Notebook Tabs & Workspaces: seamlessly organize independent computations in named tabs.\n• Save & Download: export active notebooks to clean Markdown and structured JSON.\n• In-App Programmability (build): define, inspect, and test custom STEM functions & constants in plain English.\n• 2D Function Plotter: multi-line ASCII/Unicode coordinate grid visualization.\n• Dim Mode Theme: toggle between standard light and dimmed matte slate palettes.\n• Smart Multi-Domain Auto-Detector: direct stoichiometry, reactions, physics conversions, and constants.\n• CentL-SCi Natural Language STEM Solver: comprehensive step-by-step offline verified problem solving across chemistry, mechanics, circuits, thermodynamics, geometry, linear algebra, and statistics without external dependencies.\n• Rigorous Interval Numerics: arbitrary-precision interval enclosures and transcendental constants.\n• Hybrid Gemini Support: online/offline LLM STEM decomposition with exact rational verification.\n• 50+ STEM Examples Sheet: multi-domain reference dataset available via /download/centl26-examples.csv.\n• In-App Updates: verified multi-channel update checks via WebKit message bridge and git repository synchronization.".to_string(),
             exact_rational: None,
             approximate: None,
             symbolic_expr: None,
@@ -3364,6 +3364,17 @@ mod tests {
         let r3 = res3.unwrap();
         assert!(r3.text.contains("Result: 200000"));
     }
+
+    #[test]
+    fn test_repo_root_and_executable_discovery() {
+        let root = find_repo_root();
+        assert!(root.is_some());
+        assert!(root.unwrap().join("Cargo.toml").exists());
+
+        // Cargo / git discovery should resolve
+        let cargo = find_executable("cargo");
+        assert!(cargo.is_some());
+    }
 }
 
 pub fn handle_update_check() -> serde_json::Value {
@@ -3371,9 +3382,9 @@ pub fn handle_update_check() -> serde_json::Value {
     serde_json::json!({
         "schema": "centl26.update-check/1",
         "product": "CentL26",
-        "version": "26.7.2",
-        "release_name": "CentL26.7.2",
-        "release_tag": "v26.7.2",
+        "version": "26.7.3",
+        "release_name": "CentL26.7.3",
+        "release_tag": "v26.7.3",
         "build_commit": super::build_commit(),
         "status": if git_status.update_available { "update_available" } else { "up_to_date" },
         "update_available": git_status.update_available,
@@ -3381,7 +3392,7 @@ pub fn handle_update_check() -> serde_json::Value {
         "message": if git_status.update_available {
             format!("New updates found on origin/main ({} commit(s) behind). Click Update to pull and rebuild.", git_status.commits_behind)
         } else {
-            "CentL26 v26.7.2 is up to date.".to_string()
+            "CentL26 v26.7.3 is up to date.".to_string()
         }
     })
 }
@@ -3391,18 +3402,89 @@ pub struct GitUpdateStatus {
     pub commits_behind: usize,
 }
 
+pub fn find_repo_root() -> Option<std::path::PathBuf> {
+    // 1. Check current working directory
+    if let Ok(cwd) = env::current_dir() {
+        if cwd.join("Cargo.toml").exists() {
+            return Some(cwd);
+        }
+    }
+
+    // 2. Check executable directory and ancestor directories
+    if let Ok(exe_path) = env::current_exe() {
+        let mut cur = exe_path.parent();
+        while let Some(dir) = cur {
+            if dir.join("Cargo.toml").exists() {
+                return Some(dir.to_path_buf());
+            }
+            cur = dir.parent();
+        }
+    }
+
+    None
+}
+
+pub fn find_executable(name: &str) -> Option<std::path::PathBuf> {
+    let mut candidates = Vec::new();
+
+    if let Ok(home) = env::var("HOME").or_else(|_| env::var("USERPROFILE")) {
+        let cargo_bin = std::path::Path::new(&home).join(".cargo").join("bin");
+        candidates.push(cargo_bin.join(name));
+        #[cfg(windows)]
+        candidates.push(cargo_bin.join(format!("{}.exe", name)));
+    }
+
+    candidates.push(std::path::PathBuf::from(format!("/opt/homebrew/bin/{}", name)));
+    candidates.push(std::path::PathBuf::from(format!("/usr/local/bin/{}", name)));
+    candidates.push(std::path::PathBuf::from(format!("/usr/bin/{}", name)));
+    candidates.push(std::path::PathBuf::from(format!("/bin/{}", name)));
+
+    for candidate in candidates {
+        if candidate.is_file() {
+            return Some(candidate);
+        }
+    }
+
+    None
+}
+
+pub fn create_system_command(name: &str) -> std::process::Command {
+    let exe_path = find_executable(name).unwrap_or_else(|| std::path::PathBuf::from(name));
+    let mut cmd = std::process::Command::new(&exe_path);
+
+    // Augment PATH for macOS GUI apps / non-login shells
+    let mut path_entries = Vec::new();
+    if let Ok(home) = env::var("HOME").or_else(|_| env::var("USERPROFILE")) {
+        path_entries.push(format!("{}/.cargo/bin", home));
+    }
+    path_entries.push("/opt/homebrew/bin".to_string());
+    path_entries.push("/usr/local/bin".to_string());
+    path_entries.push("/usr/bin".to_string());
+    path_entries.push("/bin".to_string());
+    if let Ok(existing) = env::var("PATH") {
+        path_entries.push(existing);
+    }
+    cmd.env("PATH", path_entries.join(":"));
+
+    if let Some(root) = find_repo_root() {
+        cmd.current_dir(root);
+    }
+
+    cmd
+}
+
 pub fn check_git_update_available() -> GitUpdateStatus {
-    let _ = std::process::Command::new("git")
+    let _ = create_system_command("git")
         .args(["fetch", "--all", "--quiet"])
         .output();
 
-    let local_head = std::process::Command::new("git")
+    let local_head = create_system_command("git")
         .args(["rev-parse", "HEAD"])
         .output()
         .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
         .unwrap_or_default();
 
-    let remote_head = std::process::Command::new("git")
+    let remote_head = create_system_command("git")
         .args(["rev-parse", "@{u}"])
         .output()
         .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
@@ -3414,7 +3496,7 @@ pub fn check_git_update_available() -> GitUpdateStatus {
         "origin/main"
     };
 
-    let count_output = std::process::Command::new("git")
+    let count_output = create_system_command("git")
         .args(["rev-list", "--count", &format!("{}..{}", local_head, target_remote)])
         .output()
         .map(|o| String::from_utf8_lossy(&o.stdout).trim().parse::<usize>().unwrap_or(0))
@@ -3427,33 +3509,54 @@ pub fn check_git_update_available() -> GitUpdateStatus {
 }
 
 pub fn execute_repo_update() -> serde_json::Value {
-    // 1. Check if git worktree is dirty; if so, stash to ensure smooth pull
-    let status_out = std::process::Command::new("git").args(["status", "--porcelain"]).output();
-    let is_dirty = status_out.as_ref().map(|s| !s.stdout.is_empty()).unwrap_or(false);
-    if is_dirty {
-        let _ = std::process::Command::new("git").args(["stash"]).output();
-    }
-
-    // 2. Fetch and pull
-    let _ = std::process::Command::new("git").args(["fetch", "--all", "--quiet"]).output();
-    let pull = std::process::Command::new("git").args(["pull", "origin", "main"]).output();
-    let pull_success = match pull {
-        Ok(ref o) if o.status.success() => true,
-        _ => {
-            std::process::Command::new("git").args(["pull"]).output().map(|o| o.status.success()).unwrap_or(false)
+    let repo_root = match find_repo_root() {
+        Some(r) => r,
+        None => {
+            return serde_json::json!({
+                "success": false,
+                "updated": false,
+                "message": "CentL26 is running outside of a git repository clone. To update standalone binary packages, download the latest release from https://github.com/chasebryan/centl/releases"
+            });
         }
     };
 
-    // 3. Always run cargo build --release --bin centl26
-    let build = std::process::Command::new("cargo")
+    // 1. Check if git worktree is dirty; if so, stash to ensure smooth pull
+    let status_out = create_system_command("git").args(["status", "--porcelain"]).output();
+    let is_dirty = status_out.as_ref().map(|s| !s.stdout.is_empty()).unwrap_or(false);
+    if is_dirty {
+        let _ = create_system_command("git").args(["stash", "save", "centl26-autoupdate-stash"]).output();
+    }
+
+    // 2. Fetch and pull
+    let _ = create_system_command("git").args(["fetch", "--all", "--quiet"]).output();
+    let pull = create_system_command("git").args(["pull", "origin", "main"]).output();
+    let pull_success = match pull {
+        Ok(ref o) if o.status.success() => true,
+        _ => {
+            create_system_command("git").args(["pull"]).output().map(|o| o.status.success()).unwrap_or(false)
+        }
+    };
+
+    // 3. Ensure cargo is found
+    if find_executable("cargo").is_none() {
+        return serde_json::json!({
+            "success": false,
+            "updated": false,
+            "message": "Rust toolchain (cargo) was not found in ~/.cargo/bin or system PATH. Please ensure Rust is installed (https://rustup.rs) or update via GitHub Releases."
+        });
+    }
+
+    // 4. Run cargo build --release --bin centl26
+    let build = create_system_command("cargo")
         .args(["build", "--release", "--bin", "centl26"])
         .output();
 
     match build {
         Ok(b_out) if b_out.status.success() => {
             // If on macOS and build.sh exists, also refresh .app bundle
-            if cfg!(target_os = "macos") && std::path::Path::new("desktop/centl26/macos/build.sh").exists() {
-                let _ = std::process::Command::new("./desktop/centl26/macos/build.sh").output();
+            let macos_build_sh = repo_root.join("desktop/centl26/macos/build.sh");
+            if cfg!(target_os = "macos") && macos_build_sh.exists() {
+                let _ = create_system_command("bash").arg(&macos_build_sh).output();
             }
 
             serde_json::json!({
@@ -3482,7 +3585,7 @@ pub fn execute_repo_update() -> serde_json::Value {
 pub fn export_notebook_markdown(state: &AppState) -> String {
     let name = state.notebook_name();
     let session = state.session();
-    let mut md = format!("# {}\n\nExported from CentL26 v26.7.2\n\n", name);
+    let mut md = format!("# {}\n\nExported from CentL26 v26.7.3\n\n", name);
     for entry in &session.history {
         md.push_str(&format!("## `{}`\n\n", entry.command));
         md.push_str(&format!("**Result:** {}\n\n", entry.result));
@@ -3504,7 +3607,7 @@ pub fn export_notebook_json(state: &AppState) -> String {
             e.exact_repr.as_ref().map(|s| serde_json_str(s)).unwrap_or("null".to_string())
         )
     }).collect();
-    format!("{{\"schema\":\"centl26.notebook/1\",\"name\":{},\"version\":\"26.7.2\",\"entries\":[{}]}}",
+    format!("{{\"schema\":\"centl26.notebook/1\",\"name\":{},\"version\":\"26.7.3\",\"entries\":[{}]}}",
         serde_json_str(name), entries.join(","))
 }
 

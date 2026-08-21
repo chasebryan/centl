@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "approval": {
-    "change_note": "Bumped version to CentL26.7.2 in update dialog and header",
+    "change_note": "Bumped version to CentL26.7.3",
     "release": "CentL26",
     "reviewed_viewports": [
       "1366x768",
@@ -14,7 +14,7 @@
     "desktop/centl26/macos/Assets/CentL26Icon.svg": "a62da90372e32287849ea8d33bb6ed2fa5ec1f314528924f1fd4ff01bfc7acc7",
     "src-web/server/lab.css": "eaf4b83684a6c50c63cfa7bccfcc7b1e12fa89983b8aadc58579d02102ec5329",
     "src-web/server/lab.js": "d7661ea49c370f682ee655b2ba8f87f5c4ebcb5abf5648127120fa8f4e06e1a8",
-    "src-web/server/lab_template.rs": "1235eaadeb142a31378b9e5b2675d1839316d0cabd35d26244a5723d56aea72d"
+    "src-web/server/lab_template.rs": "e6367fe3d646fefafaaaec267ee72c6e738b9d630eddb6beaf8b3ad65fd22af1"
   },
   "schema": 1,
   "semantic_contract": {
