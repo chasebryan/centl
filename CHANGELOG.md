@@ -30,8 +30,11 @@
   makes Clear persist a pristine notebook after one confirmation, disables
   empty Run/Clear actions, and keeps starters and reruns mode-compatible.
 - Replaces the status-bar repository redirect with the native CentL26 updater:
-  it checks the mutable `centl26` release channel, accepts only a complete
-  qualified macOS artifact set, installs it atomically, and relaunches the app.
+  it discovers the newest immutable CentL26 build snapshot, accepts only a
+  complete qualified macOS artifact set, installs it atomically, and relaunches
+  the app without rewriting a previously published release. Each snapshot uses a
+  unique `centl26-build-<sequence>-<commit>` tag titled CentL26 and is frozen on
+  publish.
 - Adds the native macOS application-bundle path; the application owns and
   terminates its private backend rather than asking the user to operate a
   browser-hosted website.

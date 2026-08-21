@@ -38,6 +38,7 @@ SIGNING_MODE="$(plutil -extract CentLSigningMode raw "$APPLICATION/Contents/Info
 ARCHITECTURES="$(lipo -archs "$APPLICATION/Contents/MacOS/CentL26" | tr ' ' '-')"
 DEPLOYMENT_TARGET="$(plutil -extract deployment_target raw "$APPLICATION/Contents/Resources/build-manifest.json")"
 BUILD_COMMIT="$(plutil -extract build_commit raw "$APPLICATION/Contents/Resources/build-manifest.json")"
+BUILD_SEQUENCE="$(plutil -extract build_sequence raw "$APPLICATION/Contents/Resources/build-manifest.json")"
 SOURCE_STATE="$(plutil -extract source_state raw "$APPLICATION/Contents/Resources/build-manifest.json")"
 NATIVE_QUALIFICATION="$(plutil -extract native_runtime.qualification raw "$APPLICATION/Contents/Resources/build-manifest.json")"
 case "$VERSION" in
@@ -48,9 +49,10 @@ case "$ARCHITECTURES" in
 esac
 [[ "$DEPLOYMENT_TARGET" =~ ^[0-9]+(\.[0-9]+){1,2}$ ]] \
     || fail "invalid deployment target in build manifest: $DEPLOYMENT_TARGET"
-case "$BUILD_COMMIT" in
-    *[!A-Za-z0-9_-]*|'') fail "build commit is not safe for release metadata: $BUILD_COMMIT" ;;
-esac
+case "$BUILD_COMMIT" in *[!A-Za-z0-9_-]*|'') fail "build commit is not safe for release metadata: $BUILD_COMMIT" ;; esac
+[[ "$BUILD_SEQUENCE" =~ ^[1-9][0-9]{0,3}$ ]] || fail "build sequence must be an integer from 1 through 9999"
+BUILD_SEQUENCE_PADDED="$(printf '%08d' "$BUILD_SEQUENCE")"
+BUILD_COMMIT_SHORT="${BUILD_COMMIT:0:12}"
 case "$SOURCE_STATE" in clean|dirty|unknown) ;; *) fail "invalid source state: $SOURCE_STATE" ;; esac
 case "$NATIVE_QUALIFICATION" in
     pinned-match|permissive-unqualified|external-unqualified|not-applicable) ;;
@@ -99,7 +101,7 @@ STAGING_DIRECTORY="$(mktemp -d "$DIST_DIRECTORY/.centl26-package.XXXXXX")"
 STAGED_APPLICATION="$STAGING_DIRECTORY/CentL26.app"
 SUBMISSION_ARCHIVE="$STAGING_DIRECTORY/CentL26-notary.zip"
 ATOMIC_PUBLISH_HELPER="$STAGING_DIRECTORY/centl26-atomic-publish"
-RELEASE_NAME="CentL26-$VERSION-macos-$ARCHITECTURES"
+RELEASE_NAME="CentL26-$VERSION-build-$BUILD_SEQUENCE_PADDED-$BUILD_COMMIT_SHORT-macos-$ARCHITECTURES"
 if [ "$PACKAGE_QUALIFICATION" != "release-qualified" ]; then
     RELEASE_NAME="$RELEASE_NAME-local"
 fi
@@ -197,12 +199,13 @@ ARCHIVE_HASH="$(shasum -a 256 "$ARCHIVE_STAGE" | awk '{print $1}')"
 MANIFEST_STAGE="$PUBLISH_STAGE/$MANIFEST_NAME"
 {
     printf '{\n'
-    printf '  "schema": "org.freecomputation.centl.macos-release/1",\n'
+    printf '  "schema": "org.freecomputation.centl.macos-release/2",\n'
     printf '  "product": "CentL26",\n'
     printf '  "product_version": "%s",\n' "$VERSION"
     printf '  "bundle_identifier": "org.freecomputation.centl",\n'
     printf '  "architecture": "%s",\n' "$ARCHITECTURES"
     printf '  "build_commit": "%s",\n' "$BUILD_COMMIT"
+    printf '  "build_sequence": %s,\n' "$BUILD_SEQUENCE"
     printf '  "source_state": "%s",\n' "$SOURCE_STATE"
     printf '  "qualification": "%s",\n' "$PACKAGE_QUALIFICATION"
     printf '  "native_runtime_qualification": "%s",\n' "$NATIVE_QUALIFICATION"

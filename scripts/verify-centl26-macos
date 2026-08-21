@@ -142,8 +142,9 @@ plutil -convert json -o /dev/null -- "$PROVIDER_MANIFEST"
 
 VERSION="$(plist_value CFBundleShortVersionString "$INFO")"
 BUNDLE_VERSION="$(plist_value CFBundleVersion "$INFO")"
-[ "$VERSION" = "$BUNDLE_VERSION" ] || fail "short version and bundle version differ"
-[[ "$VERSION" =~ ^26(\.[0-9]+){0,2}$ ]] || fail "bundle is not on the CentL26 version train"
+[ "$VERSION" = "26.0.0" ] || fail "public CentL26 version must remain 26.0.0"
+[[ "$BUNDLE_VERSION" =~ ^[1-9][0-9]{0,3}\.0\.0$ ]] \
+    || fail "bundle build version is not a monotonic CentL26 sequence"
 if [ -n "$EXPECTED_VERSION" ] && [ "$VERSION" != "$EXPECTED_VERSION" ]; then
     fail "expected version $EXPECTED_VERSION, found $VERSION"
 fi
@@ -201,6 +202,13 @@ fi
     || fail "deployment target differs between build manifest and Info.plist"
 [ "$(plist_value build_commit "$BUILD_MANIFEST")" = "$(plist_value CentLBuildCommit "$INFO")" ] \
     || fail "build commit differs between build manifest and Info.plist"
+BUILD_SEQUENCE="$(plist_value build_sequence "$BUILD_MANIFEST")"
+[[ "$BUILD_SEQUENCE" =~ ^[1-9][0-9]{0,3}$ ]] || fail "build sequence must be an integer from 1 through 9999"
+[ "$BUILD_SEQUENCE" = "$(plist_value CentLBuildSequence "$INFO")" ] \
+    || fail "build sequence differs between build manifest and Info.plist"
+EXPECTED_BUNDLE_VERSION="$BUILD_SEQUENCE.0.0"
+[ "$BUNDLE_VERSION" = "$EXPECTED_BUNDLE_VERSION" ] \
+    || fail "CFBundleVersion does not encode the CentL26 build sequence"
 [ "$(plist_value configuration "$BUILD_MANIFEST")" = "$(plist_value CentLBuildConfiguration "$INFO")" ] \
     || fail "configuration differs between build manifest and Info.plist"
 [ "$(plist_value signing "$BUILD_MANIFEST")" = "$SIGNING_MODE" ] \
@@ -317,6 +325,8 @@ fi
     || fail "provider manifest version differs"
 [ "$(plist_value build_commit "$PROVIDER_MANIFEST")" = "$(plist_value build_commit "$BUILD_MANIFEST")" ] \
     || fail "provider manifest build commit differs"
+[ "$(plist_value build_sequence "$PROVIDER_MANIFEST")" = "$(plist_value build_sequence "$BUILD_MANIFEST")" ] \
+    || fail "provider manifest build sequence differs"
 PROVIDER_COUNT=0
 SEEN_PROVIDER_IDS=","
 SEEN_PROVIDER_PATHS=","

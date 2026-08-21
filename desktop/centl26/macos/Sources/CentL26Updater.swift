@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
-// Native automatic-update channel for the mutable CentL26 macOS product.
+// Native automatic-update channel for immutable CentL26 macOS snapshots.
 
 import AppKit
 import CryptoKit
@@ -11,51 +11,159 @@ import WebKit
 enum CentL26UpdateContract {
     enum Decision: Equatable {
         case upToDate
-        case offerDifferentPublishedBuild
+        case offerNewerPublishedBuild
+        case installedBuildIsNewer
+        case conflictingBuildIdentity
+    }
+
+    struct SnapshotIdentity: Equatable {
+        let buildSequence: UInt64
+        let buildCommit: String
     }
 
     static let messageHandlerName = "centl26Update"
     static let productName = "CentL26"
     static let productVersion = "26.0.0"
     static let bundleIdentifier = "org.freecomputation.centl"
-    static let releaseSchema = "org.freecomputation.centl.macos-release/1"
+    static let releaseSchema = "org.freecomputation.centl.macos-release/2"
     static let buildSchema = "org.freecomputation.centl.build/1"
     static let releaseURL = URL(
-        string: "https://api.github.com/repos/chasebryan/centl/releases/tags/centl26"
+        string: "https://api.github.com/repos/chasebryan/centl/releases?per_page=100"
     )!
     static let maximumMetadataBytes = 256 * 1024
     static let maximumReleaseListBytes = 2 * 1024 * 1024
     static let maximumArchiveBytes: Int64 = 1_073_741_824
 
-    static func manifestName(architecture: String) -> String {
-        "CentL26-\(productVersion)-macos-\(architecture).release.json"
+    static func manifestName(
+        architecture: String,
+        buildSequence: UInt64,
+        buildCommit: String
+    ) -> String {
+        archiveBaseName(
+            architecture: architecture,
+            buildSequence: buildSequence,
+            buildCommit: buildCommit
+        ) + ".release.json"
     }
 
-    static func archiveName(architecture: String) -> String {
-        "CentL26-\(productVersion)-macos-\(architecture).zip"
+    static func archiveName(
+        architecture: String,
+        buildSequence: UInt64,
+        buildCommit: String
+    ) -> String {
+        archiveBaseName(
+            architecture: architecture,
+            buildSequence: buildSequence,
+            buildCommit: buildCommit
+        ) + ".zip"
     }
 
-    static func checksumName(architecture: String) -> String {
-        archiveName(architecture: architecture) + ".sha256"
+    static func checksumName(
+        architecture: String,
+        buildSequence: UInt64,
+        buildCommit: String
+    ) -> String {
+        archiveName(
+            architecture: architecture,
+            buildSequence: buildSequence,
+            buildCommit: buildCommit
+        ) + ".sha256"
     }
 
-    static func decision(installedCommit: String, publishedCommit: String) -> Decision {
-        installedCommit == publishedCommit ? .upToDate : .offerDifferentPublishedBuild
+    static func decision(
+        installedSequence: UInt64,
+        installedCommit: String,
+        publishedSequence: UInt64,
+        publishedCommit: String
+    ) -> Decision {
+        if publishedSequence > installedSequence { return .offerNewerPublishedBuild }
+        if publishedSequence < installedSequence { return .installedBuildIsNewer }
+        return installedCommit == publishedCommit ? .upToDate : .conflictingBuildIdentity
     }
 
-    static func isMutableChannelRelease(
+    static func releaseTag(buildSequence: UInt64, buildCommit: String) -> String {
+        "centl26-build-\(paddedSequence(buildSequence))-\(buildCommit)"
+    }
+
+    static func snapshotIdentity(tagName: String) -> SnapshotIdentity? {
+        let prefix = "centl26-build-"
+        guard tagName.hasPrefix(prefix) else { return nil }
+        let fields = tagName.dropFirst(prefix.count).split(separator: "-", omittingEmptySubsequences: false)
+        guard fields.count == 2,
+              fields[0].count == 8,
+              fields[0].allSatisfy(\.isNumber),
+              let buildSequence = UInt64(fields[0]),
+              buildSequence >= 1,
+              buildSequence <= 9_999,
+              isSafeCommit(String(fields[1])),
+              tagName == releaseTag(buildSequence: buildSequence, buildCommit: String(fields[1]))
+        else { return nil }
+        return SnapshotIdentity(buildSequence: buildSequence, buildCommit: String(fields[1]))
+    }
+
+    static func isImmutableSnapshotRelease(
         tagName: String,
         name: String?,
         draft: Bool,
-        prerelease: Bool
+        prerelease: Bool,
+        immutable: Bool
     ) -> Bool {
-        tagName == "centl26" && name == productName && !draft && !prerelease
+        snapshotIdentity(tagName: tagName) != nil
+            && name == productName
+            && !draft
+            && !prerelease
+            && immutable
+    }
+
+    enum SnapshotSelection: Equatable {
+        case none
+        case selected(Int)
+        case conflicting
+    }
+
+    static func selectNewestCompleteSnapshot(
+        identities: [(tag: String, name: String?, draft: Bool, prerelease: Bool, immutable: Bool)],
+        assetSets: [[String: [Int64]]],
+        architecture: String
+    ) -> SnapshotSelection {
+        guard identities.count == assetSets.count else { return .conflicting }
+        var complete: [(index: Int, identity: SnapshotIdentity)] = []
+        for (index, identity) in identities.enumerated() {
+            guard isImmutableSnapshotRelease(
+                tagName: identity.tag,
+                name: identity.name,
+                draft: identity.draft,
+                prerelease: identity.prerelease,
+                immutable: identity.immutable
+            ), let snapshot = snapshotIdentity(tagName: identity.tag) else {
+                continue
+            }
+            guard firstCompleteReleaseIndex(
+                [assetSets[index]],
+                architecture: architecture,
+                buildSequence: snapshot.buildSequence,
+                buildCommit: snapshot.buildCommit
+            ) == 0 else {
+                continue
+            }
+            complete.append((index, snapshot))
+        }
+        guard let newestSequence = complete.map(\.identity.buildSequence).max() else {
+            return .none
+        }
+        let newest = complete.filter { $0.identity.buildSequence == newestSequence }
+        let commits = Set(newest.map(\.identity.buildCommit))
+        guard newest.count == 1, commits.count == 1 else {
+            return .conflicting
+        }
+        return .selected(newest[0].index)
     }
 
     static func validate(
         manifestData: Data,
         architecture: String,
-        assetName: String
+        assetName: String,
+        releaseTag: String
     ) throws -> CentL26ReleaseManifest {
         guard manifestData.count <= maximumMetadataBytes else {
             throw CentL26UpdateError("The published update manifest is unexpectedly large.")
@@ -67,14 +175,27 @@ enum CentL26UpdateContract {
             throw CentL26UpdateError("The published update manifest is not valid JSON.")
         }
 
-        let expectedManifest = manifestName(architecture: architecture)
-        let expectedArchive = archiveName(architecture: architecture)
+        guard let snapshot = snapshotIdentity(tagName: releaseTag) else {
+            throw CentL26UpdateError("The published update tag is not a CentL26 snapshot identity.")
+        }
+        let expectedManifest = manifestName(
+            architecture: architecture,
+            buildSequence: manifest.buildSequence,
+            buildCommit: manifest.buildCommit
+        )
+        let expectedArchive = archiveName(
+            architecture: architecture,
+            buildSequence: manifest.buildSequence,
+            buildCommit: manifest.buildCommit
+        )
         guard assetName == expectedManifest,
               manifest.schema == releaseSchema,
               manifest.product == productName,
               manifest.productVersion == productVersion,
               manifest.bundleIdentifier == bundleIdentifier,
               manifest.architecture == architecture,
+              manifest.buildSequence == snapshot.buildSequence,
+              manifest.buildCommit == snapshot.buildCommit,
               manifest.sourceState == "clean",
               manifest.qualification == "release-qualified",
               manifest.nativeRuntimeQualification == "pinned-match",
@@ -102,7 +223,11 @@ enum CentL26UpdateContract {
             throw CentL26UpdateError("The published update checksum is invalid.")
         }
         let fields = text.split(whereSeparator: { $0 == " " || $0 == "\t" || $0 == "\r" || $0 == "\n" })
-        let expectedArchive = archiveName(architecture: architecture)
+        let expectedArchive = archiveName(
+            architecture: architecture,
+            buildSequence: manifest.buildSequence,
+            buildCommit: manifest.buildCommit
+        )
         guard fields.count == 2,
               fields[0].lowercased() == manifest.sha256.lowercased(),
               fields[1] == Substring(expectedArchive)
@@ -182,7 +307,14 @@ enum CentL26UpdateContract {
     static func runSelfTest(bundle: Bundle) throws {
         let architecture = (bundle.object(forInfoDictionaryKey: "CentLBuildArchitecture") as? String)
             ?? "arm64"
-        let archive = archiveName(architecture: architecture)
+        let buildSequence: UInt64 = 852
+        let buildCommit = "0123456789abcdef0123456789abcdef01234567"
+        let releaseTag = self.releaseTag(buildSequence: buildSequence, buildCommit: buildCommit)
+        let archive = archiveName(
+            architecture: architecture,
+            buildSequence: buildSequence,
+            buildCommit: buildCommit
+        )
         let digest = String(repeating: "a", count: 64)
         let json = """
         {
@@ -191,7 +323,8 @@ enum CentL26UpdateContract {
           "product_version":"\(productVersion)",
           "bundle_identifier":"\(bundleIdentifier)",
           "architecture":"\(architecture)",
-          "build_commit":"0123456789abcdef0123456789abcdef01234567",
+          "build_commit":"\(buildCommit)",
+          "build_sequence":\(buildSequence),
           "source_state":"clean",
           "qualification":"release-qualified",
           "native_runtime_qualification":"pinned-match",
@@ -204,7 +337,12 @@ enum CentL26UpdateContract {
         let manifest = try validate(
             manifestData: Data(json.utf8),
             architecture: architecture,
-            assetName: manifestName(architecture: architecture)
+            assetName: manifestName(
+                architecture: architecture,
+                buildSequence: buildSequence,
+                buildCommit: buildCommit
+            ),
+            releaseTag: releaseTag
         )
         try validateChecksum(
             Data("\(digest)  \(archive)\n".utf8),
@@ -226,8 +364,16 @@ enum CentL26UpdateContract {
             throw CentL26UpdateError("The updater accepted a checksum mismatch.")
         }
 
-        let manifestAssetName = self.manifestName(architecture: architecture)
-        let checksumAssetName = self.checksumName(architecture: architecture)
+        let manifestAssetName = self.manifestName(
+            architecture: architecture,
+            buildSequence: buildSequence,
+            buildCommit: buildCommit
+        )
+        let checksumAssetName = self.checksumName(
+            architecture: architecture,
+            buildSequence: buildSequence,
+            buildCommit: buildCommit
+        )
         let releaseSets: [[String: [Int64]]] = [
             [
                 manifestAssetName: [512],
@@ -239,37 +385,99 @@ enum CentL26UpdateContract {
                 checksumAssetName: [96],
             ],
         ]
-        guard firstCompleteReleaseIndex(releaseSets, architecture: architecture) == 1 else {
+        guard firstCompleteReleaseIndex(
+            releaseSets,
+            architecture: architecture,
+            buildSequence: buildSequence,
+            buildCommit: buildCommit
+        ) == 1 else {
             throw CentL26UpdateError("The updater did not skip an incomplete release asset set deterministically.")
         }
         let releaseIdentities = [
-            (tag: "some-other-release", name: Optional(productName), draft: false, prerelease: false),
-            (tag: "centl26", name: Optional(productName), draft: false, prerelease: false),
+            (tag: "some-other-release", name: Optional(productName), draft: false, prerelease: false, immutable: true),
+            (tag: releaseTag, name: Optional(productName), draft: false, prerelease: false, immutable: false),
+            (tag: releaseTag, name: Optional(productName), draft: false, prerelease: false, immutable: true),
         ]
-        let eligibleAssetSets = zip(releaseIdentities, [releaseSets[1], releaseSets[0]])
+        let eligibleAssetSets = zip(releaseIdentities, [releaseSets[1], releaseSets[1], releaseSets[0]])
             .filter { entry in
                 let identity = entry.0
-                return isMutableChannelRelease(
+                return isImmutableSnapshotRelease(
                     tagName: identity.tag,
                     name: identity.name,
                     draft: identity.draft,
-                    prerelease: identity.prerelease
+                    prerelease: identity.prerelease,
+                    immutable: identity.immutable
                 )
             }
             .map { $0.1 }
         guard eligibleAssetSets.count == 1,
-              firstCompleteReleaseIndex(eligibleAssetSets, architecture: architecture) == nil
+              firstCompleteReleaseIndex(
+                eligibleAssetSets,
+                architecture: architecture,
+                buildSequence: buildSequence,
+                buildCommit: buildCommit
+              ) == nil
         else {
             throw CentL26UpdateError("The updater accepted assets outside the exact CentL26 release channel.")
         }
+        let olderTag = self.releaseTag(buildSequence: buildSequence - 1, buildCommit: buildCommit)
+        let completeSet = [
+            manifestAssetName: [512],
+            archive: [4096],
+            checksumAssetName: [96],
+        ]
+        let selectionIdentities = [
+            (tag: "centl26", name: Optional(productName), draft: false, prerelease: false, immutable: false),
+            (tag: olderTag, name: Optional(productName), draft: false, prerelease: false, immutable: true),
+            (tag: releaseTag, name: Optional(productName), draft: false, prerelease: false, immutable: true),
+        ]
+        guard selectNewestCompleteSnapshot(
+            identities: selectionIdentities,
+            assetSets: [completeSet, completeSet, completeSet],
+            architecture: architecture
+        ) == .selected(2),
+        selectNewestCompleteSnapshot(
+            identities: [
+                (tag: releaseTag, name: Optional(productName), draft: false, prerelease: false, immutable: true),
+                (tag: releaseTag, name: Optional(productName), draft: false, prerelease: false, immutable: true),
+            ],
+            assetSets: [completeSet, completeSet],
+            architecture: architecture
+        ) == .conflicting,
+        selectNewestCompleteSnapshot(
+            identities: [
+                (tag: "centl26", name: Optional(productName), draft: false, prerelease: false, immutable: false),
+            ],
+            assetSets: [completeSet],
+            architecture: architecture
+        ) == .none
+        else {
+            throw CentL26UpdateError("The updater snapshot-selection contract differs.")
+        }
         guard decision(
+            installedSequence: buildSequence,
             installedCommit: manifest.buildCommit,
+            publishedSequence: buildSequence,
             publishedCommit: manifest.buildCommit
         ) == .upToDate,
         decision(
-            installedCommit: String(repeating: "f", count: 40),
+            installedSequence: buildSequence - 1,
+            installedCommit: manifest.buildCommit,
+            publishedSequence: buildSequence,
             publishedCommit: manifest.buildCommit
-        ) == .offerDifferentPublishedBuild
+        ) == .offerNewerPublishedBuild,
+        decision(
+            installedSequence: buildSequence + 1,
+            installedCommit: manifest.buildCommit,
+            publishedSequence: buildSequence,
+            publishedCommit: manifest.buildCommit
+        ) == .installedBuildIsNewer,
+        decision(
+            installedSequence: buildSequence,
+            installedCommit: String(repeating: "f", count: 40),
+            publishedSequence: buildSequence,
+            publishedCommit: manifest.buildCommit
+        ) == .conflictingBuildIdentity
         else {
             throw CentL26UpdateError("The updater build-identity decision contract differs.")
         }
@@ -290,8 +498,21 @@ enum CentL26UpdateContract {
         }
     }
 
+    private static func paddedSequence(_ buildSequence: UInt64) -> String {
+        String(format: "%08llu", buildSequence)
+    }
+
+    private static func archiveBaseName(
+        architecture: String,
+        buildSequence: UInt64,
+        buildCommit: String
+    ) -> String {
+        "CentL26-\(productVersion)-build-\(paddedSequence(buildSequence))-" +
+            "\(buildCommit.prefix(12))-macos-\(architecture)"
+    }
+
     private static func isSafeCommit(_ value: String) -> Bool {
-        guard (value.count == 40 || value.count == 64) else { return false }
+        guard value.count == 40 else { return false }
         return value.allSatisfy { $0.isHexDigit && !$0.isUppercase }
     }
 
@@ -301,11 +522,25 @@ enum CentL26UpdateContract {
 
     static func firstCompleteReleaseIndex(
         _ releaseAssetSizes: [[String: [Int64]]],
-        architecture: String
+        architecture: String,
+        buildSequence: UInt64,
+        buildCommit: String
     ) -> Int? {
-        let manifest = manifestName(architecture: architecture)
-        let archive = archiveName(architecture: architecture)
-        let checksum = checksumName(architecture: architecture)
+        let manifest = manifestName(
+            architecture: architecture,
+            buildSequence: buildSequence,
+            buildCommit: buildCommit
+        )
+        let archive = archiveName(
+            architecture: architecture,
+            buildSequence: buildSequence,
+            buildCommit: buildCommit
+        )
+        let checksum = checksumName(
+            architecture: architecture,
+            buildSequence: buildSequence,
+            buildCommit: buildCommit
+        )
         return releaseAssetSizes.firstIndex { sizes in
             guard let manifests = sizes[manifest], manifests.count == 1,
                   manifests[0] > 0,
@@ -329,6 +564,7 @@ struct CentL26ReleaseManifest: Decodable {
     let bundleIdentifier: String
     let architecture: String
     let buildCommit: String
+    let buildSequence: UInt64
     let sourceState: String
     let qualification: String
     let nativeRuntimeQualification: String
@@ -342,6 +578,7 @@ struct CentL26ReleaseManifest: Decodable {
         case productVersion = "product_version"
         case bundleIdentifier = "bundle_identifier"
         case buildCommit = "build_commit"
+        case buildSequence = "build_sequence"
         case sourceState = "source_state"
         case qualification
         case nativeRuntimeQualification = "native_runtime_qualification"
@@ -353,11 +590,22 @@ private struct CentL26GitHubRelease: Decodable {
     let name: String?
     let draft: Bool
     let prerelease: Bool
+    let immutable: Bool
     let assets: [CentL26GitHubAsset]
 
     enum CodingKeys: String, CodingKey {
-        case name, draft, prerelease, assets
+        case name, draft, prerelease, immutable, assets
         case tagName = "tag_name"
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        tagName = try container.decode(String.self, forKey: .tagName)
+        name = try container.decodeIfPresent(String.self, forKey: .name)
+        draft = try container.decode(Bool.self, forKey: .draft)
+        prerelease = try container.decode(Bool.self, forKey: .prerelease)
+        immutable = try container.decodeIfPresent(Bool.self, forKey: .immutable) ?? false
+        assets = try container.decode([CentL26GitHubAsset].self, forKey: .assets)
     }
 }
 
@@ -565,19 +813,38 @@ final class CentL26UpdateController {
                     self.logger("update check failed: \(error.localizedDescription)")
                     self.present(title: "Update Check Failed", message: error.localizedDescription, style: .warning)
                 case .success(let candidate):
-                    if CentL26UpdateContract.decision(
+                    switch CentL26UpdateContract.decision(
+                        installedSequence: installed.buildSequence,
                         installedCommit: installed.buildCommit,
+                        publishedSequence: candidate.manifest.buildSequence,
                         publishedCommit: candidate.manifest.buildCommit
-                    ) == .upToDate {
+                    ) {
+                    case .upToDate:
                         self.state = .idle
-                        self.logger("CentL26 is current at \(installed.buildCommit)")
+                        self.logger("CentL26 is current at \(installed.buildSequence)/\(installed.buildCommit)")
                         self.present(
                             title: "CentL26 Is Up to Date",
-                            message: "This copy already matches the newest published CentL26 build.",
+                            message: "This copy already matches the newest frozen CentL26 snapshot.",
                             style: .informational
                         )
-                    } else {
+                    case .offerNewerPublishedBuild:
                         self.confirmDownload(candidate: candidate, installed: installed)
+                    case .installedBuildIsNewer:
+                        self.state = .idle
+                        self.logger("installed CentL26 \(installed.buildSequence) is newer than frozen snapshot \(candidate.manifest.buildSequence)")
+                        self.present(
+                            title: "CentL26 Is Ahead of the Frozen Channel",
+                            message: "This copy is newer than the newest frozen CentL26 snapshot and will not be replaced.",
+                            style: .informational
+                        )
+                    case .conflictingBuildIdentity:
+                        self.state = .idle
+                        self.logger("frozen snapshot identity conflicts at sequence \(installed.buildSequence)")
+                        self.present(
+                            title: "Update Channel Conflict",
+                            message: "A frozen CentL26 snapshot uses the same build sequence with a different source identity. This copy will not be replaced.",
+                            style: .warning
+                        )
                     }
                 }
             }
@@ -588,6 +855,7 @@ final class CentL26UpdateController {
         let application: URL
         let architecture: String
         let buildCommit: String
+        let buildSequence: UInt64
         let signingTeam: String
         let helper: URL
     }
@@ -608,8 +876,11 @@ final class CentL26UpdateController {
         guard let architecture = bundle.object(forInfoDictionaryKey: "CentLBuildArchitecture") as? String,
               ["arm64", "x86_64"].contains(architecture),
               let buildCommit = bundle.object(forInfoDictionaryKey: "CentLBuildCommit") as? String,
-              (buildCommit.count == 40 || buildCommit.count == 64),
-              buildCommit.allSatisfy({ $0.isHexDigit && !$0.isUppercase })
+              buildCommit.count == 40,
+              buildCommit.allSatisfy({ $0.isHexDigit && !$0.isUppercase }),
+              let buildSequence = unsignedInteger(bundle.object(forInfoDictionaryKey: "CentLBuildSequence")),
+              buildSequence >= 1,
+              buildSequence <= 9_999
         else {
             throw CentL26UpdateError("This CentL26 copy has incomplete build identity metadata.")
         }
@@ -623,6 +894,7 @@ final class CentL26UpdateController {
               buildDocument["bundle_identifier"] as? String == CentL26UpdateContract.bundleIdentifier,
               buildDocument["architecture"] as? String == architecture,
               buildDocument["build_commit"] as? String == buildCommit,
+              unsignedInteger(buildDocument["build_sequence"]) == buildSequence,
               buildDocument["source_state"] as? String == "clean",
               buildDocument["signing"] as? String == "developer-id",
               let native = buildDocument["native_runtime"] as? [String: Any],
@@ -644,6 +916,7 @@ final class CentL26UpdateController {
             application: application,
             architecture: architecture,
             buildCommit: buildCommit,
+            buildSequence: buildSequence,
             signingTeam: signingTeam,
             helper: helper
         )
@@ -658,26 +931,45 @@ final class CentL26UpdateController {
             guard let self else { return }
             do {
                 let data = try result.get()
-                let release = try JSONDecoder().decode(CentL26GitHubRelease.self, from: data)
-                guard CentL26UpdateContract.isMutableChannelRelease(
-                    tagName: release.tagName,
-                    name: release.name,
-                    draft: release.draft,
-                    prerelease: release.prerelease
-                ) else {
-                    throw CentL26UpdateError("The CentL26 release channel identity differs.")
+                let releases = try JSONDecoder().decode([CentL26GitHubRelease].self, from: data)
+                let identities = releases.map { release in
+                    (
+                        tag: release.tagName,
+                        name: release.name,
+                        draft: release.draft,
+                        prerelease: release.prerelease,
+                        immutable: release.immutable
+                    )
                 }
-                let assetSizes = Dictionary(grouping: release.assets, by: \.name)
-                    .mapValues { $0.map(\.size) }
-                let manifestName = CentL26UpdateContract.manifestName(architecture: architecture)
-                guard CentL26UpdateContract.firstCompleteReleaseIndex(
-                    [assetSizes],
+                let assetSets = releases.map { release in
+                    Dictionary(grouping: release.assets, by: \.name).mapValues { $0.map(\.size) }
+                }
+                let selectedIndex: Int
+                switch CentL26UpdateContract.selectNewestCompleteSnapshot(
+                    identities: identities,
+                    assetSets: assetSets,
                     architecture: architecture
-                ) == 0 else {
+                ) {
+                case .none:
                     throw CentL26UpdateError(
                         "No published CentL26 update is available for this Mac architecture."
                     )
+                case .conflicting:
+                    throw CentL26UpdateError(
+                        "Published CentL26 snapshots conflict at the same build sequence."
+                    )
+                case .selected(let index):
+                    selectedIndex = index
                 }
+                let release = releases[selectedIndex]
+                guard let snapshot = CentL26UpdateContract.snapshotIdentity(tagName: release.tagName) else {
+                    throw CentL26UpdateError("The CentL26 release channel identity differs.")
+                }
+                let manifestName = CentL26UpdateContract.manifestName(
+                    architecture: architecture,
+                    buildSequence: snapshot.buildSequence,
+                    buildCommit: snapshot.buildCommit
+                )
                 let manifestAssets = release.assets.filter { $0.name == manifestName }
                 guard manifestAssets.count == 1,
                       manifestAssets[0].size > 0,
@@ -693,10 +985,15 @@ final class CentL26UpdateController {
                         let manifest = try CentL26UpdateContract.validate(
                             manifestData: manifestData,
                             architecture: architecture,
-                            assetName: manifestAsset.name
+                            assetName: manifestAsset.name,
+                            releaseTag: release.tagName
                         )
                         let archiveMatches = release.assets.filter { $0.name == manifest.archive }
-                        let checksumName = CentL26UpdateContract.checksumName(architecture: architecture)
+                        let checksumName = CentL26UpdateContract.checksumName(
+                            architecture: architecture,
+                            buildSequence: manifest.buildSequence,
+                            buildCommit: manifest.buildCommit
+                        )
                         let checksumMatches = release.assets.filter { $0.name == checksumName }
                         guard archiveMatches.count == 1,
                               archiveMatches[0].size > 0,
@@ -784,9 +1081,9 @@ final class CentL26UpdateController {
         alert.alertStyle = .informational
         alert.messageText = "A Published CentL26 Build Is Available"
         alert.informativeText =
-            "This keeps the public product name CentL26 and replaces build " +
-            "\(shortCommit(installed.buildCommit)) with published build " +
-            "\(shortCommit(candidate.manifest.buildCommit))."
+            "This keeps the public product name CentL26 and replaces snapshot " +
+            "\(installed.buildSequence)/\(shortCommit(installed.buildCommit)) with frozen snapshot " +
+            "\(candidate.manifest.buildSequence)/\(shortCommit(candidate.manifest.buildCommit))."
         alert.addButton(withTitle: "Download Update")
         alert.addButton(withTitle: "Not Now")
         alert.beginSheetModal(for: window) { [weak self] response in
@@ -801,7 +1098,7 @@ final class CentL26UpdateController {
 
     private func downloadAndPrepare(candidate: CentL26UpdateCandidate, installed: InstalledIdentity) {
         state = .downloading
-        logger("downloading CentL26 build \(candidate.manifest.buildCommit)")
+        logger("downloading CentL26 snapshot \(candidate.manifest.buildSequence)/\(candidate.manifest.buildCommit)")
         let staging: URL
         do {
             staging = try CentL26UpdateContract.stagingDirectory(for: installed.application)
@@ -950,6 +1247,8 @@ final class CentL26UpdateController {
                 == manifest.architecture,
               candidateBundle.object(forInfoDictionaryKey: "CentLBuildCommit") as? String
                 == manifest.buildCommit,
+              unsignedInteger(candidateBundle.object(forInfoDictionaryKey: "CentLBuildSequence"))
+                == manifest.buildSequence,
               candidateBundle.object(forInfoDictionaryKey: "CentLSigningMode") as? String == "developer-id"
         else {
             throw CentL26UpdateError("The downloaded application identity differs from its release manifest.")
@@ -965,6 +1264,7 @@ final class CentL26UpdateController {
               document["bundle_identifier"] as? String == CentL26UpdateContract.bundleIdentifier,
               document["architecture"] as? String == manifest.architecture,
               document["build_commit"] as? String == manifest.buildCommit,
+              unsignedInteger(document["build_sequence"]) == manifest.buildSequence,
               document["source_state"] as? String == "clean",
               document["signing"] as? String == "developer-id",
               let native = document["native_runtime"] as? [String: Any],
@@ -1046,5 +1346,18 @@ final class CentL26UpdateController {
 
     private func shortCommit(_ commit: String) -> String {
         String(commit.prefix(12))
+    }
+
+    private func unsignedInteger(_ value: Any?) -> UInt64? {
+        if let number = value as? NSNumber {
+            let converted = number.uint64Value
+            return NSDecimalNumber(value: converted) == NSDecimalNumber(decimal: number.decimalValue)
+                ? converted
+                : nil
+        }
+        if let text = value as? String {
+            return UInt64(text)
+        }
+        return nil
     }
 }

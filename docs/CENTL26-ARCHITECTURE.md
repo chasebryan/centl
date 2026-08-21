@@ -175,17 +175,20 @@ restored separately, but it must not change a project's computational revision.
 
 The status-line **Update** action is a native application operation, not a link
 to the source repository. On macOS it asks the host to check the repository's
-published `centl26` release, offers the newest complete build for the current
-architecture, downloads it after confirmation, replaces `CentL26.app`, and
+published immutable CentL26 snapshots, offers the newest qualified build for
+the current architecture, downloads it after confirmation, replaces
+`CentL26.app`, and
 relaunches the application. A browser-hosted development surface reports that
 updates require the native app and does not redirect elsewhere.
 
 The public name and bundle version remain CentL26 and `26.0.0`; the release and
-build manifests compare source commits to identify an update. The channel
-publishes one architecture-specific ZIP, adjacent checksum, and release
-manifest. The manifest is published last so a partially uploaded update is not
-offered. Local ad-hoc or unpinned builds remain development artifacts and do not
-masquerade as installable channel updates.
+build manifests carry an internal build identity and monotonic sequence. Each
+technical release tag is unique, while its human-facing title remains exactly
+CentL26. A draft receives one architecture-specific ZIP, adjacent checksum, and
+release manifest; it becomes discoverable only when publishing freezes its tag
+and assets. Published snapshots are never replaced or deleted. Local ad-hoc or
+unpinned builds remain development artifacts and do not masquerade as
+installable updates.
 
 ## 5. Capability broker
 

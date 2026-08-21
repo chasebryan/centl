@@ -31,6 +31,24 @@ if [ -z "$BUILD_COMMIT" ] && command -v git >/dev/null 2>&1; then
     BUILD_COMMIT="$(git -C "$REPOSITORY_ROOT" rev-parse --verify HEAD 2>/dev/null || true)"
 fi
 BUILD_COMMIT="${BUILD_COMMIT:-unknown}"
+
+# Public builds keep the product version at 26.0.0. The reachable Git commit
+# count strictly increases for descendants without a clock-resolution collision.
+# Shallow/source-archive builds must carry the sequence in explicitly.
+BUILD_SEQUENCE="${CENTL26_BUILD_SEQUENCE:-}"
+if [ -z "$BUILD_SEQUENCE" ] && command -v git >/dev/null 2>&1 \
+    && [[ "$BUILD_COMMIT" =~ ^[0-9a-f]{40}$ ]] \
+    && git -C "$REPOSITORY_ROOT" cat-file -e "$BUILD_COMMIT^{commit}" 2>/dev/null \
+    && [ "$(git -C "$REPOSITORY_ROOT" rev-parse --is-shallow-repository)" = "false" ]
+then
+    BUILD_SEQUENCE="$(git -C "$REPOSITORY_ROOT" rev-list --count "$BUILD_COMMIT")"
+fi
+if [[ ! "$BUILD_SEQUENCE" =~ ^[1-9][0-9]{0,3}$ ]]; then
+    echo "CENTL26_BUILD_SEQUENCE (1-9999) is required when full Git history is unavailable." >&2
+    exit 2
+fi
+BUILD_SEQUENCE_TEXT="$(printf '%08d' "$BUILD_SEQUENCE")"
+BUNDLE_VERSION="$BUILD_SEQUENCE.0.0"
 PROVIDER_BUILD_COMMIT=""
 if [[ "$BUILD_COMMIT" =~ ^[0-9a-f]{40}$|^[0-9a-f]{64}$ ]]; then
     PROVIDER_BUILD_COMMIT="$BUILD_COMMIT"
@@ -46,7 +64,7 @@ if command -v git >/dev/null 2>&1 && git -C "$REPOSITORY_ROOT" rev-parse --verif
 fi
 
 if [ "$VERSION" != "26.0.0" ]; then
-    echo "CENTL26_VERSION must remain 26.0.0 for the mutable CentL26 channel." >&2
+    echo "CENTL26_VERSION must remain 26.0.0 for CentL26." >&2
     exit 2
 fi
 if [[ ! "$DEPLOYMENT_TARGET" =~ ^[0-9]+(\.[0-9]+){1,2}$ ]]; then
@@ -300,10 +318,11 @@ echo "Building native atomic publication helper"
 
 cp "$PLIST_TEMPLATE" "$STAGING_APPLICATION/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$STAGING_APPLICATION/Contents/Info.plist"
-/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $VERSION" "$STAGING_APPLICATION/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUNDLE_VERSION" "$STAGING_APPLICATION/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :LSMinimumSystemVersion $DEPLOYMENT_TARGET" "$STAGING_APPLICATION/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CentLBuildArchitecture $TARGET_ARCHITECTURE" "$STAGING_APPLICATION/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CentLBuildCommit $BUILD_COMMIT" "$STAGING_APPLICATION/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CentLBuildSequence $BUILD_SEQUENCE" "$STAGING_APPLICATION/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CentLBuildConfiguration $CONFIGURATION" "$STAGING_APPLICATION/Contents/Info.plist"
 
 if [ "${CENTL26_SKIP_CODESIGN:-0}" = "1" ]; then
@@ -787,6 +806,7 @@ PROVIDER_MANIFEST="$STAGING_APPLICATION/Contents/Resources/providers/providers.j
     printf '  "schema": "org.freecomputation.centl.provider-inventory/1",\n'
     printf '  "product_version": "%s",\n' "$VERSION"
     printf '  "build_commit": "%s",\n' "$BUILD_COMMIT"
+    printf '  "build_sequence": %s,\n' "$BUILD_SEQUENCE"
     printf '  "integration": "explicit-environment",\n'
     printf '  "providers": ['
     for ((index = 0; index < ${#BUNDLED_PROVIDER_IDS[@]}; index++)); do
@@ -836,6 +856,7 @@ PINNED_FLINT_VERSION="$(toolchain_lock_value flint)"
     printf '  "product_version": "%s",\n' "$VERSION"
     printf '  "bundle_identifier": "org.freecomputation.centl",\n'
     printf '  "build_commit": "%s",\n' "$BUILD_COMMIT"
+    printf '  "build_sequence": %s,\n' "$BUILD_SEQUENCE"
     printf '  "source_state": "%s",\n' "$SOURCE_STATE"
     printf '  "configuration": "%s",\n' "$CONFIGURATION"
     printf '  "deployment_target": "%s",\n' "$DEPLOYMENT_TARGET"

@@ -78,9 +78,9 @@ CENTL26_SKIP_SELF_TEST=1 ./scripts/build-centl26-macos
 CENTL26_SKIP_CODESIGN=1 ./scripts/build-centl26-macos
 ```
 
-The bundle's internal version remains `26.0.0` throughout the mutable CentL26
-channel; the source commit and build manifest identify its exact composition.
-The stable bundle identifier is `org.freecomputation.centl`.
+The public version remains `26.0.0`. `CFBundleVersion` and the build manifest
+carry a monotonic snapshot sequence, and the source commit identifies exact
+composition. The stable bundle identifier is `org.freecomputation.centl`.
 
 The default provider set is `centl,centl-chem`. Both executables have explicit
 backend adapters: `centl` owns rigorous `approx(...)` enclosures and `centl-chem`
@@ -121,11 +121,12 @@ and FLINT exactly match `toolchain.lock`.
 7. The Update control posts `{action: "check"}` only to the native
    `centl26Update` WebKit handler. An ordinary browser reports that automatic
    updates require the macOS app; it never redirects to a repository page.
-8. A release build reads only the exact GitHub release tagged `centl26` and
-   titled `CentL26`, then requires its complete architecture-specific asset set.
-   The same build commit reports up to date. A different build is downloaded
-   only after user confirmation, verified, then handed to the atomic installer
-   for replacement and relaunch.
+8. A release build lists published GitHub releases, accepts only immutable tags
+   of the form `centl26-build-<8-digit-sequence>-<40-character-commit>` titled
+   `CentL26`, and requires a complete architecture-specific asset set. A newer
+   sequence is downloaded only after user confirmation, verified, then handed
+   to the atomic installer for replacement and relaunch. Published snapshots
+   are never rewritten.
 
 Persistent project/session state lives at:
 
@@ -216,25 +217,27 @@ Credentials are never accepted as command-line values or written into output.
 
 ### Automatic-update publication
 
-CentL26 stays publicly named **CentL26** and keeps internal version `26.0.0`.
-Automatic updates use the immutable `build_commit` inside the release manifest;
-they do not create a numbered public suffix or another product name.
+CentL26 stays publicly named **CentL26** and keeps marketing version `26.0.0`.
+Each qualified application build is a unique frozen snapshot. The updater
+compares monotonic `build_sequence` values and refuses to rewrite history.
 
-For each architecture, the published GitHub release tagged `centl26` and titled
-`CentL26` must contain this exact qualified asset set:
+For each architecture, a published GitHub release tagged
+`centl26-build-<sequence>-<commit>` and titled `CentL26` must contain this
+exact qualified asset set:
 
 ```text
-CentL26-26.0.0-macos-arm64.zip
-CentL26-26.0.0-macos-arm64.zip.sha256
-CentL26-26.0.0-macos-arm64.release.json
+CentL26-26.0.0-build-00000852-0123456789ab-macos-arm64.zip
+CentL26-26.0.0-build-00000852-0123456789ab-macos-arm64.zip.sha256
+CentL26-26.0.0-build-00000852-0123456789ab-macos-arm64.release.json
 ```
 
 Use `x86_64` in all three names for that architecture. The updater ignores
-drafts, prereleases, incomplete sets, `-local` packages, and differently named
-assets. It also requires the manifest to say clean source, pinned native
-runtime, Developer ID signing, and notarization; it verifies both published
-digest records, the extracted app/build identities, Gatekeeper acceptance, and
-the same Developer ID team as the installed copy.
+drafts, prereleases, mutable releases, incomplete sets, `-local` packages, the
+legacy `centl26` tag, and differently named assets. It also requires the
+manifest to say clean source, pinned native runtime, Developer ID signing, and
+notarization; it verifies both published digest records, the extracted
+app/build identities, Gatekeeper acceptance, and the same Developer ID team as
+the installed copy.
 
 After the notarized package command above succeeds, publish its exact bytes with:
 
@@ -242,12 +245,11 @@ After the notarized package command above succeeds, publish its exact bytes with
 ./scripts/publish-centl26-macos-update
 ```
 
-The publisher revalidates the local asset topology and bytes. It reuses the
-remote triplet only when all three files are byte-identical. For a different
-qualified build it removes the old manifest first, replaces the old archive and
-checksum, uploads the new manifest last, and reads all three assets back. A
-failed replacement is therefore incomplete and invisible to the updater rather
-than mixed-generation. The current
+The publisher requires GitHub immutable releases to be enabled. It creates a
+draft for a new snapshot identity, uploads archive and checksum first, uploads
+the manifest last, then publishes the draft so GitHub freezes the tag and
+assets. Identical frozen bytes are reused. A published snapshot with different
+bytes is refused rather than mutated. The current
 `CentL26-26.0.0-controls-macos-arm64` local assets do not satisfy this contract
 and are intentionally not auto-installable.
 
