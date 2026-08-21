@@ -9,12 +9,11 @@
 *Good maths should be free.*  
 *Never manufacture mathematical certainty.*
 
-**CentL26 · Flagship main release** · [freecomputation.org](https://freecomputation.org/) · Apache-2.0
+**CentL26** · [freecomputation.org](https://freecomputation.org/) · Apache-2.0
 
-> **CentL26 is now the flagship direction of CENTL.** Every new capability,
-> scientific backend, and product release is prepared for the standalone
-> CentL26 work environment. Oasis remains the quality lineage beneath this
-> release; CentL26 is the user-facing product train.
+> **CentL26 is the single flagship product of CENTL.** The “26” identifies the
+> product year. Every new capability and backend is prepared for this one
+> cohesive, mutable CentL26 release channel.
 
 ---
 
@@ -37,7 +36,9 @@ cargo run --bin centl26           # standalone graphical scientific work environ
 
 **CentL26** is the new standalone desktop product line: a calm, project-based
 scientific IDE that composes CENTL capabilities behind one local execution
-boundary. It is not part of the public website and it does not load the website
+boundary. The product year is part of its name; maintenance updates replace
+the same CentL26 channel rather than creating separate product editions. It is
+not part of the public website and it does not load the website
 at runtime. See [the CentL26 architecture](docs/CENTL26-ARCHITECTURE.md) for the
 desktop boundary, annual version scheme, project model, capability broker, and
 backend-unification plan. The former [CENTL Lab document](docs/CENTL-LAB.md) is

@@ -10,9 +10,11 @@ The repository remains canonical.
 
 ### CentL26 — flagship main release
 
-[CentL26](CENTL26-ARCHITECTURE.md) is now the main product direction of CENTL:
-the standalone, offline scientific IDE where all future computation, research,
-and capability work is assembled for users. The 26.0.0 release combines the
+[CentL26](CENTL26-ARCHITECTURE.md) is the single cohesive product direction of
+CENTL: the standalone, offline scientific IDE where all future computation,
+research, and capability work is assembled for users. The 26 identifies the
+product year; maintenance updates replace the same mutable CentL26 channel.
+The current release combines the
 approved visual system, durable project notebooks, exact-first computation,
 authenticated local execution, and the native macOS application shell.
 
