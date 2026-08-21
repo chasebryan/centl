@@ -5,7 +5,7 @@
 
 # CENTL / CentL26
 
-[![Version](https://img.shields.io/badge/version-26.6.1-blue.svg)](https://github.com/chasebryan/centl)
+[![Version](https://img.shields.io/badge/version-26.7.0-blue.svg)](https://github.com/chasebryan/centl)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-2021%20edition-orange.svg)](https://www.rust-lang.org/)
 [![Offline First](https://img.shields.io/badge/offline-100%25%20local-success.svg)](https://freecomputation.org/)
@@ -20,72 +20,89 @@
 
 > **CentL26 is the flagship standalone scientific computing environment of CENTL.**  
 > The "26" represents the 2026 flagship product line. CentL26 provides a calm, offline, deterministic scientific workbench that combines exact rational arithmetic, symbolic algebra, physics kernels, chemical stoichiometry, in-app hackability, 2D function plotting, and a comprehensive offline natural language problem solver.
+> 
+> **CentL26.7 is frozen as the rock standard foundation across all supported desktop and web environments.**
 
 ---
 
-## How to Run CentL26 (Web & Desktop Application)
+## Simple & Easy Setup Across All Ecosystems
 
-CentL26 is distributed with full feature parity across both local web browser and native desktop application environments. Both run the exact same offline Rust core engine with zero cloud dependencies.
+CentL26 runs natively on Windows 11, macOS Arm64, and Debian/Fedora Linux distros with 100% feature parity. All modes run the exact same offline Rust core engine with zero cloud dependencies.
 
-### Option A: Local Web Server (Cross-Platform)
-
-```sh
-# 1. Clone repository
-git clone https://github.com/chasebryan/centl.git
-cd centl
-
-# 2. Build and launch
-cargo run --release --bin centl26
-
-# 3. Open in browser:
-# http://127.0.0.1:2626
-```
-
-### Option B: Native macOS Desktop Application (`CentL26.app`)
+### 1. macOS (Apple Silicon Arm64 & Intel)
 
 ```sh
-# 1. Build host-native macOS bundle (AppKit + WebKit + Rust core)
+# 1-Command Universal Setup:
+./install.sh
+
+# Or build native AppKit/WebKit application:
 ./desktop/centl26/macos/build.sh
-
-# 2. Open application
 open build/centl26/macos/CentL26.app
 ```
 
+### 2. Linux (Debian, Ubuntu, Fedora, RHEL, Arch)
+
+```sh
+# 1-Command Universal Setup (Installs binary, desktop launcher, and hicolor icons):
+./install.sh
+
+# Or build standalone package:
+./desktop/centl26/linux/build.sh
+./build/centl26/linux/CentL26
+```
+
+### 3. Windows 11 (PowerShell & Terminal)
+
+```powershell
+# 1-Command PowerShell Setup (Installs binary, Start Menu & Desktop shortcuts):
+.\install.ps1
+
+# Or 1-click batch launcher:
+.\desktop\centl26\windows\CentL26.bat
+```
+
+### 4. Cross-Platform Local Web Browser
+
+```sh
+cargo run --release --bin centl26
+# Open http://127.0.0.1:2626
+```
+
 ---
 
-## Key Highlights in CentL26.6.1
+## Key Highlights in CentL26.7
 
-### 1. Expanded Exact Combinatorics & Number Theory
-- Exact computation for Catalan numbers `catalan(n)`, Stirling numbers of the second kind `stirling2(n, k)`, Bell numbers `bell(n)`, and derangements `derangements(n)`.
-- Deterministic number-theoretic tools: `is_prime(n)`, `next_prime(n)`, `prev_prime(n)`, `is_square(n)`, `collatz(n)`, `divisors(n)`, `sum_divisors(n)`, `is_perfect(n)`.
+### 1. Multi-Platform Rock Standard Freeze
+- Unified 1-command installer and packaging pipelines across **Windows 11**, **macOS Arm64**, and **Debian/Fedora Linux**.
+- Full standalone native bundles, system application launchers (`.desktop`, `CentL26.app`, `.lnk`), and offline web servers.
+
+### 2. Google-Grade App Icon
+- Handcrafted vector icon featuring harmonious layered geometry, fluid mathematical continuous ribbons, vibrant scientific blues (`#1A73E8`, `#4285F4`, `#24C1E0`), and ambient elevation lighting.
+- Multi-resolution assets bundled in `.icns`, `.ico`, `.svg`, and multi-res PNGs.
+
+### 3. Verified Multi-Channel Update Mechanic
+- **macOS Desktop App**: Direct WebKit message bridge integration (`CentL26Updater.swift`) with signature and atomic replace verification.
+- **Git Clone Workspaces**: In-app **Update** button fetches remote commits, offers rebuild confirmation, pulls `origin/main`, rebuilds release binaries, and reloads seamlessly.
+- **Release Binary Archives**: Automatically queries latest releases from GitHub.
+
+### 4. Expanded Exact Combinatorics & Number Theory
+- Exact computation for `catalan(n)`, `stirling2(n, k)`, `bell(n)`, `derangements(n)`, `is_prime(n)`, `next_prime(n)`, `prev_prime(n)`, `is_square(n)`, `collatz(n)`, `divisors(n)`, `sum_divisors(n)`, `is_perfect(n)`.
 - Statistical routines: `mean`, `median`, `variance`, `stddev`, `zscore`, `normal_pdf`, `normal_cdf`, `binomial_pmf`, `poisson_pmf`.
 
-### 2. Deep Native Offline SCi Problem Solver
-Think out loud and type plain-English questions across 32 STEM domains without cloud connections:
-- **Classical Mechanics**: Kinetic energy ($E_k = \frac{1}{2}mv^2$), gravitational potential energy ($E_p = mgh$), work ($W = Fd$), power ($P = W/t$), centripetal force ($F_c = mv^2/r$).
-- **Electromagnetism & Circuits**: Ohm's law ($V = IR$), electrical power ($P = IV$), circuit resistance, capacitance, electrostatic energy ($U = \frac{1}{2}CV^2$).
-- **Thermodynamics & Physical Chemistry**: Solution pH/pOH, dilutions ($M_1 V_1 = M_2 V_2$), ideal gas law ($PV = nRT$), Gibbs free energy ($\Delta G = \Delta H - T\Delta S$), Nernst cell potentials ($E = E^\circ - \frac{0.0592}{n}\log_{10} Q$), reaction balancing, and molar masses.
-- **Wave Dynamics & Quantum**: Wave speed ($v = f\lambda$), photon energy ($E = hf$), hydrogen Rydberg lines, photoelectric stopping potential, de Broglie matter waves.
-- **Geometry & Vectors**: Area, perimeter, volume, surface area, 3D dot products, cross products, determinants, and matrix inverses.
+### 5. Native Offline SCi Problem Solver
+Think out loud and type plain-English questions across 32 STEM domains without internet:
+- **Classical Mechanics**: Kinetic energy ($E_k = \frac{1}{2}mv^2$), potential energy ($E_p = mgh$), work ($W = Fd$), power ($P = W/t$), centripetal force ($F_c = mv^2/r$).
+- **Electromagnetism & Circuits**: Ohm's law ($V = IR$), electrical power ($P = IV$), resistance, capacitance, electrostatic energy ($U = \frac{1}{2}CV^2$).
+- **Thermodynamics & Chemistry**: Solution pH/pOH, dilutions ($M_1 V_1 = M_2 V_2$), ideal gas law ($PV = nRT$), Gibbs free energy, Nernst potentials, reaction balancing.
+- **Waves & Quantum**: Wave dynamics ($v = f\lambda$), photon energy ($E = hf$), Rydberg spectral lines, photoelectric effect, matter waves.
 
-### 3. Rigorous Interval Numerics Active
-- Native arbitrary-precision interval enclosures and transcendental approximations registered as available capability `org.fcf.centl.numerics.enclose`.
-
-### 4. Dynamic Multi-Notebook Workspaces & In-Place Renaming
+### 6. Dynamic Multi-Notebook Workspaces & In-Place Renaming
 - Create independent notebook tabs with the **`+`** button.
-- Click directly on the notebook title in the breadcrumb (`Workspace / [Notebook 01]`) to rename active tabs with automatic synchronization across downloads and exports.
+- Click directly on the notebook title in the breadcrumb (`Workspace / [Notebook 01]`) to rename active tabs.
 - Export active work anytime as Markdown (`/download/notebook.md`) or structured JSON (`/download/notebook.json`).
 
-### 5. 2D Coordinate Grid Function Plotter
-- Full multi-line ASCII/Unicode coordinate grid visualization rendered directly in notebook cells, evidence panels, exports, and CLI.
-- **Syntax**: `plot <expression> from <x_min> to <x_max>`
-- **Examples**: `plot sin(x) from -3.14 to 3.14`, `plot x^3 - 3*x from -2.5 to 2.5`.
-
-### 6. In-App Programmability & Extensions (`build`)
-- Extend CentL26 dynamically in plain English or declarative syntax:
-  - `build fn KE(m, v) = 1/2 * m * v^2`
-  - `build const G_mars = 3.72`
-  - `build list`, `build test KE(10, 5)`, `build export`
+### 7. 2D Coordinate Grid Function Plotter
+- Full multi-line ASCII/Unicode coordinate grid visualization rendered directly in notebook cells, evidence panels, exports, and CLI (`plot sin(x) from -3.14 to 3.14`).
 
 ---
 

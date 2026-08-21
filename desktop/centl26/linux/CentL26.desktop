@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=CentL26
+GenericName=Scientific Computing Workbench
+Comment=Exact-first mathematics, physics, chemistry, and offline STEM computing environment
+Exec=centl26
+Icon=centl26
+Terminal=false
+Categories=Science;Math;Education;Development;
+Keywords=math;physics;chemistry;exact;symbolic;computation;science;
+StartupNotify=true
+StartupWMClass=centl26

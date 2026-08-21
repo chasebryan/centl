@@ -29,7 +29,7 @@ pub fn render_lab_page(workbench: &str) -> String {
       <a class="product-lockup" href="/" aria-label="CentL26 home">
         <div class="product-brand">
           <strong>CentL26</strong>
-          <small>Free Computation Foundation · v26.6.1</small>
+          <small>Free Computation Foundation · v26.7</small>
         </div>
       </a>
       <div class="workspace-path"><button type="button" data-toggle-explorer title="Toggle workspace explorer">Workspace</button><span>/</span><input type="text" class="notebook-rename-input" data-rename-notebook value="Notebook 01" aria-label="Rename active notebook" spellcheck="false" title="Click to rename active notebook"></div>

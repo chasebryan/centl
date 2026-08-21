@@ -814,6 +814,7 @@ body.hide-console .trace-console { display: none; }
 .palette-icon.neutral { color: var(--ink-soft); background: var(--surface-muted); }
 .workbench-shell.is-loading .workspace-center::after { content: "Running locally…"; position: absolute; top: 91px; right: 16px; z-index: 35; padding: 8px 11px; color: #fff; background: var(--ink); border-radius: 6px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18); font-size: 11px; font-weight: 620; }
 .host-error { position: fixed; right: 16px; bottom: 40px; z-index: 100; max-width: min(420px, calc(100vw - 32px)); padding: 11px 13px; color: #fff; background: var(--danger); border-radius: 7px; box-shadow: 0 14px 38px rgba(127, 29, 29, 0.24); font-size: 12px; font-weight: 600; }
+.host-notice { position: fixed; right: 16px; bottom: 40px; z-index: 100; max-width: min(420px, calc(100vw - 32px)); padding: 11px 13px; color: #fff; background: var(--brand); border-radius: 7px; box-shadow: 0 14px 38px rgba(37, 99, 235, 0.28); font-size: 12px; font-weight: 600; }
 .product-version { display: block; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
 .fcf-about-modal[hidden] { display: none; }
 .fcf-about-modal { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; background: var(--scrim); backdrop-filter: blur(4px); }

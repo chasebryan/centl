@@ -1,5 +1,12 @@
 ## Unreleased
 
+### CentL26.7.0 — Rock Standard Multi-Platform Release (2026-08-21)
+
+- **Multi-Platform Standard Freeze**: Official native build and packaging automation for **Windows 11** (`install.ps1`, `desktop/centl26/windows/build.ps1`, `CentL26.bat`, `CentL26.ico`), **macOS Arm64** (`install.sh`, `./desktop/centl26/macos/build.sh`, `CentL26.app`), and **Debian / Ubuntu / Fedora / RHEL / Arch Linux** (`scripts/install-linux.sh`, `desktop/centl26/linux/build.sh`, `CentL26.desktop`, hicolor icon set).
+- **Google-Grade Modern App Icon**: Designed and rendered a layered geometric mathematical icon with Google-grade visual harmony, radiant scientific blues (`#1A73E8`, `#4285F4`, `#24C1E0`), ambient elevation shadow, and multi-resolution packaging (`.icns`, `.ico`, `.svg`, and multi-res PNGs).
+- **Verified Multi-Channel Update Mechanic**: Prioritizes native AppKit/WebKit updater message bridge (`CentL26Updater.swift`) in standalone desktop mode, automatic `origin/main` git synchronization with in-place rebuild and auto-reload for local clones, and informative release status for binary archives.
+- **Stable Foundation Freeze**: Frozen CentL26.7 as the baseline rock standard for all subsequent development.
+
 ### CentL26.6.1 — Full Backend Sweep & Capabilities Release (2026-08-21)
 
 - **Backend Mathematical & Number-Theoretic Sweep**: Native exact implementations added for `catalan(n)`, `stirling2(n, k)`, `bell(n)`, `derangements(n)`, `is_square(n)`, `next_prime(n)`, `prev_prime(n)`, `collatz(n)`, `divisors(n)`, `sum_divisors(n)`, `is_perfect(n)`, `median`, and `zscore`.

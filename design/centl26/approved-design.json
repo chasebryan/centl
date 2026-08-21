@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "approval": {
-    "change_note": "CentL26.6.1 release: full backend improvement sweep, native rigorous numerics enclosure, and unified web/app instructions",
+    "change_note": "CentL26.7 standard freeze",
     "release": "CentL26",
     "reviewed_viewports": [
       "1366x768",
@@ -10,11 +10,11 @@
     "status": "user-approved"
   },
   "files": {
-    "desktop/centl26/macos/Assets/CentL26Icon.png": "645249e61681bed304d0337993485905480933207aacb2c2141a1e5ff514dcbd",
-    "desktop/centl26/macos/Assets/CentL26Icon.svg": "a599538a075f61f861fe44ad1260fdc98d561dab0931a36ea08c02430e623298",
-    "src-web/server/lab.css": "dd41272db426e415edab22d5ab2e478bfc2f16aa89cccdb572e7b30d5fbb8177",
-    "src-web/server/lab.js": "27bc6f83178f466e3f088c7635d7b559b72d7b617331fd6351eb02fbe64cb4f0",
-    "src-web/server/lab_template.rs": "262e7c92e87ddf8caff3bae74dee07ddaa45a5caf9534f2080df2502cc1a5210"
+    "desktop/centl26/macos/Assets/CentL26Icon.png": "f8654785b5f6441a1b54a0859490dd09a4447b00547209f6ada2fb26b663baef",
+    "desktop/centl26/macos/Assets/CentL26Icon.svg": "a62da90372e32287849ea8d33bb6ed2fa5ec1f314528924f1fd4ff01bfc7acc7",
+    "src-web/server/lab.css": "d2f8640a688b720438f8cecbfcbbdcdeacedef10b6dbb57a510764d977e9f3ad",
+    "src-web/server/lab.js": "9dc598a2a0716ef145e452996fc9a7c49090fa70145e8652bbadedf5efd4f5f6",
+    "src-web/server/lab_template.rs": "a26bcf6c83e96dd226f5a3d008761a90dfdbca79c901ff622dd24a99e4af2c73"
   },
   "schema": 1,
   "semantic_contract": {
