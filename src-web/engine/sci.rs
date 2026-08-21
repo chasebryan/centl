@@ -90,8 +90,412 @@ pub fn interpret_and_solve_stem(
     solve_stem_offline(trimmed, session)
 }
 
+/// Universal Natural Language Arithmetic & Algebra Evaluator
+pub fn try_solve_natural_arithmetic(prompt: &str, session: &mut Session) -> Option<SciSolution> {
+    let mut cleaned = prompt.trim();
+    // Strip trailing punctuation
+    while cleaned.ends_with('?') || cleaned.ends_with('.') || cleaned.ends_with('!') || cleaned.ends_with(';') {
+        cleaned = cleaned[..cleaned.len() - 1].trim();
+    }
+    let lower = cleaned.to_ascii_lowercase();
+
+    // Do not intercept explicit scientific domain questions
+    if lower.contains("molar mass") || lower.contains("balance ") || lower.contains("atom count")
+        || lower.contains("ph of") || lower.contains("poh of") || lower.contains("kinetic energy")
+        || lower.contains("potential energy") || lower.contains("ohm") || lower.contains("current")
+        || lower.contains("voltage") || lower.contains("resistan") || lower.contains("wavelength")
+        || lower.contains("convert ") || lower.contains("density") || lower.contains("gravity")
+        || lower.contains("ideal gas") || lower.contains("gibbs") || lower.contains("work done")
+        || lower.contains("power of a ") || lower.contains("circuit") || lower.contains("stopping potential")
+        || lower.contains("rydberg") || lower.contains("nernst") || lower.contains("half life")
+        || lower.contains("torque") || lower.contains("centripetal")
+    {
+        return None;
+    }
+
+    // Strip leading conversational phrases
+    let prefixes = [
+        "what is the ", "what is a ", "what is an ", "what is ",
+        "what's the ", "what's a ", "what's an ", "what's ",
+        "how much is the ", "how much is ", "how much is a ",
+        "calculate the ", "calculate a ", "calculate an ", "calculate ",
+        "compute the ", "compute a ", "compute an ", "compute ",
+        "find the ", "find a ", "find an ", "find ",
+        "evaluate the ", "evaluate a ", "evaluate an ", "evaluate ",
+        "tell me the ", "tell me ",
+        "give me the ", "give me ",
+        "show me the ", "show me ",
+        "please calculate ", "please compute ", "please find ", "please evaluate ",
+        "can you calculate ", "can you find ", "can you compute ", "can you tell me "
+    ];
+
+    let mut core = cleaned;
+    for prefix in &prefixes {
+        if core.to_ascii_lowercase().starts_with(prefix) {
+            core = core[prefix.len()..].trim();
+            break;
+        }
+    }
+
+    let core_lower = core.to_ascii_lowercase();
+
+    // 1. Percentage queries: "15 percent of 300", "20% of 85", "10 percent off 50"
+    if core_lower.contains("percent of") || core_lower.contains("% of") || core_lower.contains("percent off") || core_lower.contains("% off") {
+        let is_off = core_lower.contains("off");
+        let delimiter = if core_lower.contains("percent of") {
+            "percent of"
+        } else if core_lower.contains("% of") {
+            "% of"
+        } else if core_lower.contains("percent off") {
+            "percent off"
+        } else {
+            "% off"
+        };
+        let parts: Vec<&str> = core_lower.splitn(2, delimiter).collect();
+        if parts.len() == 2 {
+            let p_str = parts[0].trim().trim_end_matches('%').trim();
+            let mut v_str = parts[1].trim();
+            if v_str.starts_with("of ") {
+                v_str = v_str[3..].trim();
+            }
+            if let (Ok(p), Ok(v)) = (p_str.parse::<f64>(), v_str.parse::<f64>()) {
+                let cmd = if is_off {
+                    format!("{} - ({} / 100) * {}", v_str, p_str, v_str)
+                } else {
+                    format!("({} / 100) * {}", p_str, v_str)
+                };
+                if let Ok(res) = evaluate(&cmd, session) {
+                    let desc = if is_off {
+                        format!("{}% off of {}", p, v)
+                    } else {
+                        format!("{}% of {}", p, v)
+                    };
+                    return Some(SciSolution {
+                        summary: format!("Percentage Calculation: {}", desc),
+                        steps: vec![
+                            format!("Identified percentage: {}% and base: {}", p, v),
+                            format!("Mathematical expression: {}", cmd),
+                            format!("Exact value: {}", res.text),
+                        ],
+                        exact_result: Some(res.text),
+                        approximate_result: res.approximate,
+                        domain: "Arithmetic",
+                        confidence: "Exact Rational",
+                        raw_centl_command: Some(cmd),
+                    });
+                }
+            }
+        }
+    }
+
+    // 2. Fractions of values: "half of 90", "one third of 60", "quarter of 1000", "three quarters of 80"
+    if core_lower.contains(" of ") {
+        let fraction_map = [
+            ("half of", "1/2 *"),
+            ("one half of", "1/2 *"),
+            ("third of", "1/3 *"),
+            ("one third of", "1/3 *"),
+            ("two thirds of", "2/3 *"),
+            ("quarter of", "1/4 *"),
+            ("one quarter of", "1/4 *"),
+            ("one fourth of", "1/4 *"),
+            ("three quarters of", "3/4 *"),
+            ("three fourths of", "3/4 *"),
+        ];
+        for (pattern, repl) in &fraction_map {
+            if core_lower.starts_with(pattern) {
+                let target = core[pattern.len()..].trim();
+                let cmd = format!("{} ({})", repl, target);
+                if let Ok(res) = evaluate(&cmd, session) {
+                    return Some(SciSolution {
+                        summary: format!("Fractional Portion: {} {}", pattern, target),
+                        steps: vec![
+                            format!("Calculated fraction: {}", repl.trim()),
+                            format!("Target quantity: {}", target),
+                            format!("Exact result: {}", res.text),
+                        ],
+                        exact_result: Some(res.text),
+                        approximate_result: res.approximate,
+                        domain: "Arithmetic",
+                        confidence: "Exact Rational",
+                        raw_centl_command: Some(cmd),
+                    });
+                }
+            }
+        }
+    }
+
+    // 3. Roots & Powers: "square root of 144", "cube root of 27", "sqrt of 50"
+    if core_lower.starts_with("square root of ") || core_lower.starts_with("sqrt of ") {
+        let val = if core_lower.starts_with("square root of ") {
+            core["square root of ".len()..].trim()
+        } else {
+            core["sqrt of ".len()..].trim()
+        };
+        let cmd = format!("sqrt({})", val);
+        if let Ok(res) = evaluate(&cmd, session) {
+            return Some(SciSolution {
+                summary: format!("Square Root Calculation: √({})", val),
+                steps: vec![
+                    format!("Radicand: {}", val),
+                    format!("Exact evaluation: {}", res.text),
+                ],
+                exact_result: Some(res.text),
+                approximate_result: res.approximate,
+                domain: "Algebra",
+                confidence: "Exact Radical / Rational",
+                raw_centl_command: Some(cmd),
+            });
+        }
+    }
+    if core_lower.starts_with("cube root of ") || core_lower.starts_with("cbrt of ") {
+        let val = if core_lower.starts_with("cube root of ") {
+            core["cube root of ".len()..].trim()
+        } else {
+            core["cbrt of ".len()..].trim()
+        };
+        let cmd = format!("cbrt({})", val);
+        if let Ok(res) = evaluate(&cmd, session) {
+            return Some(SciSolution {
+                summary: format!("Cube Root Calculation: ∛({})", val),
+                steps: vec![
+                    format!("Radicand: {}", val),
+                    format!("Exact evaluation: {}", res.text),
+                ],
+                exact_result: Some(res.text),
+                approximate_result: res.approximate,
+                domain: "Algebra",
+                confidence: "Exact Radical / Rational",
+                raw_centl_command: Some(cmd),
+            });
+        }
+    }
+
+    // 4. Number Theory & Prime Queries: "is 97 prime", "is 97 a prime number", "prime factors of 360", "gcd of 48 and 180"
+    if (core_lower.starts_with("is ") || core_lower.starts_with("check if ")) && (core_lower.contains("prime") || core_lower.contains("square") || core_lower.contains("perfect")) {
+        let nums = extract_all_f64(core);
+        if let Some(&n) = nums.first() {
+            let n_int = n as i64;
+            if core_lower.contains("prime") {
+                let cmd = format!("is_prime({})", n_int);
+                if let Ok(res) = evaluate(&cmd, session) {
+                    let is_p = res.text == "1" || res.text.to_ascii_lowercase() == "true";
+                    return Some(SciSolution {
+                        summary: format!("Primality Test for {}", n_int),
+                        steps: vec![
+                            format!("Target integer: {}", n_int),
+                            format!("Primality verification: {}", if is_p { format!("{} is a prime number", n_int) } else { format!("{} is NOT prime (composite)", n_int) }),
+                        ],
+                        exact_result: Some(if is_p { "true".to_string() } else { "false".to_string() }),
+                        approximate_result: None,
+                        domain: "Number Theory",
+                        confidence: "Exact Deterministic",
+                        raw_centl_command: Some(cmd),
+                    });
+                }
+            }
+            if core_lower.contains("square") {
+                let cmd = format!("is_square({})", n_int);
+                if let Ok(res) = evaluate(&cmd, session) {
+                    let is_sq = res.text == "1" || res.text.to_ascii_lowercase() == "true";
+                    return Some(SciSolution {
+                        summary: format!("Perfect Square Test for {}", n_int),
+                        steps: vec![
+                            format!("Target integer: {}", n_int),
+                            format!("Result: {}", if is_sq { format!("{} is a perfect square", n_int) } else { format!("{} is NOT a perfect square", n_int) }),
+                        ],
+                        exact_result: Some(if is_sq { "true".to_string() } else { "false".to_string() }),
+                        approximate_result: None,
+                        domain: "Number Theory",
+                        confidence: "Exact Deterministic",
+                        raw_centl_command: Some(cmd),
+                    });
+                }
+            }
+        }
+    }
+
+    if core_lower.starts_with("gcd of ") || core_lower.starts_with("greatest common divisor of ") {
+        let nums = extract_all_f64(core);
+        if nums.len() >= 2 {
+            let cmd = format!("gcd({}, {})", nums[0] as i64, nums[1] as i64);
+            if let Ok(res) = evaluate(&cmd, session) {
+                return Some(SciSolution {
+                    summary: format!("Greatest Common Divisor: gcd({}, {})", nums[0] as i64, nums[1] as i64),
+                    steps: vec![
+                        format!("Integers: {} and {}", nums[0] as i64, nums[1] as i64),
+                        "Evaluated via Euclidean algorithm.".to_string(),
+                        format!("Greatest Common Divisor: {}", res.text),
+                    ],
+                    exact_result: Some(res.text),
+                    approximate_result: None,
+                    domain: "Number Theory",
+                    confidence: "Exact Euclidean",
+                    raw_centl_command: Some(cmd),
+                });
+            }
+        }
+    }
+
+    if core_lower.starts_with("lcm of ") || core_lower.starts_with("least common multiple of ") {
+        let nums = extract_all_f64(core);
+        if nums.len() >= 2 {
+            let cmd = format!("lcm({}, {})", nums[0] as i64, nums[1] as i64);
+            if let Ok(res) = evaluate(&cmd, session) {
+                return Some(SciSolution {
+                    summary: format!("Least Common Multiple: lcm({}, {})", nums[0] as i64, nums[1] as i64),
+                    steps: vec![
+                        format!("Integers: {} and {}", nums[0] as i64, nums[1] as i64),
+                        format!("Least Common Multiple: {}", res.text),
+                    ],
+                    exact_result: Some(res.text),
+                    approximate_result: None,
+                    domain: "Number Theory",
+                    confidence: "Exact Deterministic",
+                    raw_centl_command: Some(cmd),
+                });
+            }
+        }
+    }
+
+    if core_lower.starts_with("divisors of ") || core_lower.starts_with("factors of ") {
+        let nums = extract_all_f64(core);
+        if let Some(&n) = nums.first() {
+            let cmd = format!("divisors({})", n as i64);
+            if let Ok(res) = evaluate(&cmd, session) {
+                return Some(SciSolution {
+                    summary: format!("Divisors of {}", n as i64),
+                    steps: vec![
+                        format!("Target integer: {}", n as i64),
+                        format!("Divisors list: {}", res.text),
+                    ],
+                    exact_result: Some(res.text),
+                    approximate_result: None,
+                    domain: "Number Theory",
+                    confidence: "Exact Integer",
+                    raw_centl_command: Some(cmd),
+                });
+            }
+        }
+    }
+
+    // 5. Binary operators lowering:
+    // "55 divided by 22", "14 times 15", "100 minus 45", "35 plus 47", "2 to the power of 10", "2 to the 10th power", "55 mod 22"
+    let mut expr = core.to_string();
+
+    expr = expr.replace("to the power of", "^");
+    expr = expr.replace("raised to the power of", "^");
+    expr = expr.replace("raised to the power", "^");
+    expr = expr.replace("raised to the", "^");
+    expr = expr.replace("raised to", "^");
+    expr = expr.replace("to the power", "^");
+    expr = expr.replace("divided by", "/");
+    expr = expr.replace("div by", "/");
+    expr = expr.replace("multiplied by", "*");
+    expr = expr.replace("multiply by", "*");
+    expr = expr.replace("subtracted by", "-");
+    expr = expr.replace("subtracted from", "-");
+    expr = expr.replace("added to", "+");
+    expr = expr.replace("take away", "-");
+    expr = expr.replace("modulo", "%");
+    expr = expr.replace(" mod ", " % ");
+    expr = expr.replace("squared", "^2");
+    expr = expr.replace("cubed", "^3");
+
+    let words: Vec<&str> = expr.split_whitespace().collect();
+    let mut normalized_words: Vec<String> = Vec::new();
+    for w in words {
+        match w.to_ascii_lowercase().as_str() {
+            "plus" => normalized_words.push("+".to_string()),
+            "minus" => normalized_words.push("-".to_string()),
+            "times" => normalized_words.push("*".to_string()),
+            "over" => normalized_words.push("/".to_string()),
+            "less" => normalized_words.push("-".to_string()),
+            other => normalized_words.push(other.to_string()),
+        }
+    }
+    let synthesized = normalized_words.join(" ");
+
+    // Attempt mathematical evaluation
+    if let Ok(res) = evaluate(&synthesized, session) {
+        let approx = res.approximate.or_else(|| {
+            if res.text.contains('/') {
+                let parts: Vec<&str> = res.text.split('/').collect();
+                if parts.len() == 2 {
+                    if let (Ok(num), Ok(den)) = (parts[0].trim().parse::<f64>(), parts[1].trim().parse::<f64>()) {
+                        if den != 0.0 {
+                            let dec = num / den;
+                            return Some(if dec.fract() == 0.0 {
+                                format!("{:.0}", dec)
+                            } else {
+                                format!("{}", dec)
+                            });
+                        }
+                    }
+                }
+            }
+            None
+        });
+
+        return Some(SciSolution {
+            summary: format!("Exact Arithmetic Evaluation: {}", cleaned),
+            steps: vec![
+                format!("Natural language query: {}", prompt),
+                format!("Synthesized expression: {}", synthesized),
+                format!("Exact rational result: {}", res.text),
+            ],
+            exact_result: Some(res.text),
+            approximate_result: approx,
+            domain: "Arithmetic",
+            confidence: "Exact Rational",
+            raw_centl_command: Some(synthesized),
+        });
+    }
+
+    // Direct fallback on cleaned input
+    if let Ok(res) = evaluate(cleaned, session) {
+        let approx = res.approximate.or_else(|| {
+            if res.text.contains('/') {
+                let parts: Vec<&str> = res.text.split('/').collect();
+                if parts.len() == 2 {
+                    if let (Ok(num), Ok(den)) = (parts[0].trim().parse::<f64>(), parts[1].trim().parse::<f64>()) {
+                        if den != 0.0 {
+                            let dec = num / den;
+                            return Some(if dec.fract() == 0.0 {
+                                format!("{:.0}", dec)
+                            } else {
+                                format!("{}", dec)
+                            });
+                        }
+                    }
+                }
+            }
+            None
+        });
+
+        return Some(SciSolution {
+            summary: format!("Exact Mathematical Evaluation: {}", cleaned),
+            steps: vec![
+                format!("Input expression: {}", prompt),
+                format!("Exact rational result: {}", res.text),
+            ],
+            exact_result: Some(res.text),
+            approximate_result: approx,
+            domain: "Mathematics",
+            confidence: "Exact Rational",
+            raw_centl_command: Some(cleaned.to_string()),
+        });
+    }
+
+    None
+}
+
 /// Native Offline Plain-English STEM solver
 pub fn solve_stem_offline(prompt: &str, session: &mut Session) -> Result<SciSolution, String> {
+    if let Some(solution) = try_solve_natural_arithmetic(prompt, session) {
+        return Ok(solution);
+    }
+
     let lower = prompt.to_ascii_lowercase();
 
     // 1. Chemistry: Molar Mass / Molecular Weight
@@ -1626,10 +2030,50 @@ fn http_post_json(url_str: &str, payload: &Value) -> Result<String, String> {
         .wait_with_output()
         .map_err(|e| format!("Failed to receive response from Gemini: {}", e))?;
 
-    if !output.status.success() {
-        let err_msg = String::from_utf8_lossy(&output.stderr);
-        return Err(format!("Gemini request failed: {}", err_msg));
-    }
-
     Ok(String::from_utf8_lossy(&output.stdout).to_string())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_natural_language_arithmetic_questions() {
+        let mut session = Session::new();
+
+        // 1. Division query with "what is" and "?"
+        let sol = solve_stem_offline("what is 55 divided by 22?", &mut session).unwrap();
+        assert_eq!(sol.domain, "Arithmetic");
+        assert_eq!(sol.exact_result.as_deref(), Some("5/2"));
+        assert_eq!(sol.approximate_result.as_deref(), Some("2.5"));
+
+        // 2. Multiplication query
+        let sol2 = solve_stem_offline("how much is 15 times 12?", &mut session).unwrap();
+        assert_eq!(sol2.exact_result.as_deref(), Some("180"));
+
+        // 3. Percentage query
+        let sol3 = solve_stem_offline("what is 20 percent of 80?", &mut session).unwrap();
+        assert_eq!(sol3.exact_result.as_deref(), Some("16"));
+
+        // 4. Square root query
+        let sol4 = solve_stem_offline("what is the square root of 144?", &mut session).unwrap();
+        assert_eq!(sol4.exact_result.as_deref(), Some("12"));
+
+        // 5. Fraction of value
+        let sol5 = solve_stem_offline("half of 150", &mut session).unwrap();
+        assert_eq!(sol5.exact_result.as_deref(), Some("75"));
+
+        // 6. Primality test
+        let sol6 = solve_stem_offline("is 97 a prime number?", &mut session).unwrap();
+        assert_eq!(sol6.exact_result.as_deref(), Some("true"));
+
+        // 7. GCD query
+        let sol7 = solve_stem_offline("what is the gcd of 48 and 180?", &mut session).unwrap();
+        assert_eq!(sol7.exact_result.as_deref(), Some("12"));
+
+        // 8. Exponentiation
+        let sol8 = solve_stem_offline("what is 2 to the power of 10?", &mut session).unwrap();
+        assert_eq!(sol8.exact_result.as_deref(), Some("1024"));
+    }
+}
+

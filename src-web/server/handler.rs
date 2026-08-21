@@ -3294,9 +3294,16 @@ pub fn check_git_update_available() -> GitUpdateStatus {
 }
 
 pub fn execute_repo_update() -> serde_json::Value {
-    let pull = std::process::Command::new("git")
+    // 1. Try git pull origin main, fallback to generic git pull
+    let mut pull = std::process::Command::new("git")
         .args(["pull", "origin", "main", "--ff-only"])
         .output();
+
+    if pull.as_ref().map(|o| !o.status.success()).unwrap_or(true) {
+        pull = std::process::Command::new("git")
+            .args(["pull", "--ff-only"])
+            .output();
+    }
 
     match pull {
         Ok(output) if output.status.success() => {
@@ -3305,10 +3312,15 @@ pub fn execute_repo_update() -> serde_json::Value {
                 .output();
             match build {
                 Ok(b_out) if b_out.status.success() => {
+                    // If on macOS and build script exists, refresh the .app bundle in background
+                    if cfg!(target_os = "macos") && std::path::Path::new("desktop/centl26/macos/build.sh").exists() {
+                        let _ = std::process::Command::new("./desktop/centl26/macos/build.sh").output();
+                    }
+
                     serde_json::json!({
                         "success": true,
                         "updated": true,
-                        "message": "CentL26 updated and rebuilt successfully! Restart the application to load the newest version."
+                        "message": "CentL26 updated and rebuilt successfully! Reloading session..."
                     })
                 }
                 Ok(b_out) => {
@@ -3331,14 +3343,14 @@ pub fn execute_repo_update() -> serde_json::Value {
             serde_json::json!({
                 "success": false,
                 "updated": false,
-                "message": format!("Git pull failed: {}", String::from_utf8_lossy(&output.stderr))
+                "message": format!("Git update could not fast-forward: {}", String::from_utf8_lossy(&output.stderr))
             })
         }
         Err(err) => {
             serde_json::json!({
                 "success": false,
                 "updated": false,
-                "message": format!("Could not run git pull: {}", err)
+                "message": format!("Could not run git update: {}", err)
             })
         }
     }

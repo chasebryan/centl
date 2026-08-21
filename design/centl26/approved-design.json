@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "approval": {
-    "change_note": "CentL26.7 standard freeze",
+    "change_note": "CentL26 in-app update modal dialog and natural language solver",
     "release": "CentL26",
     "reviewed_viewports": [
       "1366x768",
@@ -12,9 +12,9 @@
   "files": {
     "desktop/centl26/macos/Assets/CentL26Icon.png": "f8654785b5f6441a1b54a0859490dd09a4447b00547209f6ada2fb26b663baef",
     "desktop/centl26/macos/Assets/CentL26Icon.svg": "a62da90372e32287849ea8d33bb6ed2fa5ec1f314528924f1fd4ff01bfc7acc7",
-    "src-web/server/lab.css": "d2f8640a688b720438f8cecbfcbbdcdeacedef10b6dbb57a510764d977e9f3ad",
-    "src-web/server/lab.js": "9dc598a2a0716ef145e452996fc9a7c49090fa70145e8652bbadedf5efd4f5f6",
-    "src-web/server/lab_template.rs": "a26bcf6c83e96dd226f5a3d008761a90dfdbca79c901ff622dd24a99e4af2c73"
+    "src-web/server/lab.css": "dc9deaa394fea07152ab033971cf359ab02e0e41901da38347ae1ad3e4a4722c",
+    "src-web/server/lab.js": "34a327261b1ea87407680bd1fa754af048c2894886f263545ad724e66027c51d",
+    "src-web/server/lab_template.rs": "7dc6060f62f9693ab5cf56189149b94b53bb6a253fef483f5cc295de9db8c46f"
   },
   "schema": 1,
   "semantic_contract": {

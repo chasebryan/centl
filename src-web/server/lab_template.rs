@@ -103,7 +103,33 @@ pub fn render_lab_page(workbench: &str) -> String {
         <a href="https://freecomputation.org/" target="_blank" rel="noopener">🔗 freecomputation.org</a>
         <a href="https://github.com/sponsors/chasebryan" target="_blank" rel="noopener">💝 Sponsor on GitHub</a>
       </div>
-      <footer><span>v26.5 · Apache-2.0</span><button type="button" data-close-fcf-about>Close</button></footer>
+      <footer><span>v26.7 · Apache-2.0</span><button type="button" data-close-fcf-about>Close</button></footer>
+    </div>
+  </div>
+
+  <div class="fcf-update-modal" hidden>
+    <div class="fcf-update-dialog" role="dialog" aria-modal="true" aria-label="CentL26 Software Update">
+      <div class="update-dialog-header">
+        <div class="update-badge-icon">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2v10M6 8l4 4 4-4M3 14v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"></path></svg>
+        </div>
+        <div>
+          <h2>CentL26 Software Update</h2>
+          <small class="update-current-version">Installed: CentL26 v26.7.0</small>
+        </div>
+      </div>
+      <div class="update-body">
+        <div class="update-status-box" data-update-status-box>
+          <div class="update-spinner" data-update-spinner></div>
+          <div class="update-status-text" data-update-status-text>Checking for available updates...</div>
+        </div>
+        <p class="update-details" data-update-details></p>
+      </div>
+      <footer class="update-dialog-footer">
+        <button type="button" class="update-action-btn" data-update-check>Check Again</button>
+        <button type="button" class="update-primary-btn" data-update-install hidden>Install Update</button>
+        <button type="button" class="update-close-btn" data-update-close>Close</button>
+      </footer>
     </div>
   </div>
 

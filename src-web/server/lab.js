@@ -781,44 +781,93 @@
       if (modal) modal.hidden = true;
     }
 
-    if (target.matches("[data-update]")) {
+    function runUpdateCheck() {
+      const modal = document.querySelector(".fcf-update-modal");
+      if (modal) modal.hidden = false;
+
+      const statusBox = document.querySelector("[data-update-status-box]");
+      const spinnerText = document.querySelector("[data-update-status-text]");
+      const details = document.querySelector("[data-update-details]");
+      const installBtn = document.querySelector("[data-update-install]");
+      const spinner = document.querySelector("[data-update-spinner]");
+
+      if (spinner) spinner.hidden = false;
+      if (installBtn) installBtn.hidden = true;
+      if (spinnerText) spinnerText.textContent = "Checking for available updates...";
+      if (details) details.textContent = "Connecting to repository origin and inspecting build tags...";
+
       const updater = window.webkit?.messageHandlers?.centl26Update;
       if (updater && typeof updater.postMessage === "function") {
-        showHostNotice("Checking for CentL26 application updates...");
+        if (spinnerText) spinnerText.textContent = "Checking for CentL26 application updates...";
         try {
           updater.postMessage({ action: "check" });
+          if (details) details.textContent = "Delegated to native macOS AppKit updater bridge.";
           return;
         } catch (_) {
           showHostNotice("Automatic updates are available in the CentL26 macOS app.");
         }
       }
 
-      showHostNotice("Checking for updates...");
       fetch("/api/update")
         .then((r) => r.json())
         .then((data) => {
+          if (spinner) spinner.hidden = true;
           if (data.update_available) {
-            if (window.confirm(`${data.message}\n\nDo you want to pull and rebuild now?`)) {
-              showHostNotice("Updating repository and rebuilding CentL26 (release)... Please wait.");
-              fetch("/api/update", { method: "POST" })
-                .then((r) => r.json())
-                .then((res) => {
-                  showHostNotice(res.message);
-                  if (res.updated) {
-                    setTimeout(() => window.location.reload(), 2500);
-                  }
-                })
-                .catch((err) => {
-                  showHostError("Update build failed: " + err);
-                });
-            }
+            if (spinnerText) spinnerText.textContent = data.message;
+            if (details) details.textContent = "A newer build is published on origin/main. Click 'Install Update' to pull and recompile in-place.";
+            if (installBtn) installBtn.hidden = false;
           } else {
-            showHostNotice(data.message || `${data.product} ${data.version} is up to date.`);
+            if (spinnerText) spinnerText.textContent = "✓ " + (data.message || `${data.product} ${data.version} is up to date.`);
+            if (details) details.textContent = "You are running the official release version. No newer commits found on origin/main.";
+            if (installBtn) installBtn.hidden = true;
           }
         })
         .catch((err) => {
-          showHostError("Update check failed: " + err);
+          if (spinner) spinner.hidden = true;
+          if (spinnerText) spinnerText.textContent = "Update check failed";
+          if (details) details.textContent = String(err);
         });
+    }
+
+    if (target.matches("[data-update], [data-update-check]")) {
+      runUpdateCheck();
+    }
+
+    if (target.matches("[data-update-install]")) {
+      const spinnerText = document.querySelector("[data-update-status-text]");
+      const details = document.querySelector("[data-update-details]");
+      const installBtn = document.querySelector("[data-update-install]");
+      const spinner = document.querySelector("[data-update-spinner]");
+
+      if (spinner) spinner.hidden = false;
+      if (installBtn) installBtn.disabled = true;
+      if (spinnerText) spinnerText.textContent = "Updating repository & rebuilding CentL26...";
+      if (details) details.textContent = "Executing git pull and cargo release compilation in-place. Please wait...";
+
+      fetch("/api/update", { method: "POST" })
+        .then((r) => r.json())
+        .then((res) => {
+          if (spinner) spinner.hidden = true;
+          if (spinnerText) spinnerText.textContent = res.message;
+          if (res.updated) {
+            if (details) details.textContent = "Rebuild completed successfully. Reloading workbench...";
+            setTimeout(() => window.location.reload(), 1500);
+          } else {
+            if (details) details.textContent = "Update could not complete. Check terminal logs for details.";
+            if (installBtn) installBtn.disabled = false;
+          }
+        })
+        .catch((err) => {
+          if (spinner) spinner.hidden = true;
+          if (spinnerText) spinnerText.textContent = "Update build failed";
+          if (details) details.textContent = String(err);
+          if (installBtn) installBtn.disabled = false;
+        });
+    }
+
+    if (target.matches("[data-update-close], [data-update-close] *") || (target.matches(".fcf-update-modal") && !target.closest(".fcf-update-dialog"))) {
+      const modal = document.querySelector(".fcf-update-modal");
+      if (modal) modal.hidden = true;
     }
 
     if (target.matches("[data-toggle-theme], [data-toggle-theme] *")) {
