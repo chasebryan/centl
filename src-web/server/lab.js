@@ -141,6 +141,7 @@
 
       current.replaceWith(next);
       removeStorage(draftKey);
+      preparePalette();
       initializeInspectorTabs(next);
       syncLayoutControls();
 
@@ -361,6 +362,15 @@
       }
     }
 
+    if (target.matches(".toolbar-button") && target.textContent.includes("New cell")) {
+      const editor = activeEditor();
+      if (editor) {
+        editor.value = "";
+        removeStorage(draftKey);
+        editor.focus({ preventScroll: true });
+      }
+    }
+
     if (target.matches("[data-focus-cell]")) activeEditor()?.focus({ preventScroll: true });
 
     if (target.dataset.paletteAction === "focus") {
@@ -391,6 +401,25 @@
   document.addEventListener("input", (event) => {
     if (event.target.matches("#palette-search")) filterPalette(event.target.value);
     if (event.target.matches("#active-command")) writeStorage(draftKey, event.target.value);
+  });
+
+  document.addEventListener("change", (event) => {
+    const select = event.target.closest(".mode-control select");
+    if (!select) return;
+    const mode = select.value || "Auto";
+    const composerMode = document.querySelector(".composer-mode");
+    if (composerMode) {
+      const label = composerMode.querySelector("span");
+      if (label) label.textContent = mode;
+    }
+    if (mode !== "Auto") {
+      openPalette("quick-open");
+      const input = paletteInput();
+      if (input) {
+        input.value = mode;
+        filterPalette(mode);
+      }
+    }
   });
 
   document.addEventListener("keydown", (event) => {

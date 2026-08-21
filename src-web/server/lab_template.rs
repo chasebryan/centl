@@ -216,7 +216,7 @@ fn render_inspector(
             } else {
                 "exact"
             };
-            html.push_str(&format!(r#"<button type="button"><span>{:02}</span><span><strong>{}</strong><small>{} · {} µs</small></span></button>"#, session.history.len().saturating_sub(index), escape_html(&entry.command), kind, entry.execution_micros));
+            html.push_str(&format!(r#"<button type="button" data-command="{}" title="Run again"><span>{:02}</span><span><strong>{}</strong><small>{} · {} µs</small></span></button>"#, escape_html(&entry.command), session.history.len().saturating_sub(index), escape_html(&entry.command), kind, entry.execution_micros));
         }
     }
     html.push_str(r#"</div><div class="assurance-note"><span>◇</span><p><strong>Honesty is structural.</strong> Unsupported work stays visible; bounded results never masquerade as exact values.</p></div></section></div></aside>"#);
