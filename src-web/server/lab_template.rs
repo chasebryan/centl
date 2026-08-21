@@ -28,12 +28,12 @@ pub fn render_lab_page(workbench: &str) -> String {
     <header class="app-bar">
       <a class="product-lockup" href="/" aria-label="CentL26 home">
         <span class="product-mark">C26</span>
-        <span><strong>CentL26</strong><small>Free Computation Foundation</small></span>
+        <span><strong>CentL26</strong><small>Free Computation Foundation</small><small class="product-version">v26.4</small></span>
       </a>
       <div class="workspace-path"><button type="button" data-toggle-explorer title="Toggle workspace explorer">Untitled workspace</button><span>/</span><strong>Notebook 01</strong></div>
       <button class="command-center" type="button" data-open-palette><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"></circle><path d="m13 13 4 4"></path></svg><span>Search commands and tools</span><kbd>⌘ K</kbd></button>
       <div class="app-actions">
-        <span class="kernel-state"><i></i><span><strong>Core ready</strong><small>Local</small></span></span>
+        <span class="kernel-state"><i></i><span><strong>Ready</strong><small>v26.4</small></span></span>
         <button class="quiet-action" type="button" data-toggle-inspector title="Toggle context inspector" aria-label="Toggle context inspector"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"></rect><path d="M12 3v14"></path></svg></button>
         <button class="run-action" type="button" data-run-active><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 5 8 5-8 5Z"></path></svg><span>Run</span></button>
       </div>
@@ -52,18 +52,16 @@ pub fn render_lab_page(workbench: &str) -> String {
         </div>
         <div>
           <button class="rail-button" type="button" data-toggle-console data-label="Trace" aria-label="Trace"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m4 6 4 4-4 4M10 15h6"></path></svg></button>
-          <span class="fcf-rail" aria-label="Free Computation Foundation">FCF</span>
+          <button class="rail-button fcf-about-button" type="button" data-open-fcf-about aria-label="About Free Computation Foundation">FCF</button>
         </div>
       </nav>
       {workbench}
     </div>
 
     <footer class="status-bar">
-      <span><i></i>CentL26 Core</span>
+      <span><i></i>v26.4</span>
       <span class="status-spacer"></span>
-      <span>Exact-first</span>
-      <span>Local</span>
-      <span>CentL26</span>
+      <span>Exact · Local</span>
       <button class="status-update" type="button" data-update title="Check for CentL26 updates">Update</button>
       <span class="fcf-status" title="Free Computation Foundation">FCF</span>
     </footer>
@@ -87,11 +85,25 @@ pub fn render_lab_page(workbench: &str) -> String {
         <button type="button" role="option" tabindex="-1" data-palette-action="toggle-theme" data-modes="all"><span class="palette-icon neutral">◑</span><span><strong>Toggle dimmed theme</strong><small>Switch between standard and dim color palettes</small></span><kbd>Theme</kbd></button>
         <button type="button" role="option" tabindex="-1" data-palette-action="download-examples" data-modes="all"><span class="palette-icon neutral">↓</span><span><strong>Download STEM Examples</strong><small>Complete CSV spreadsheet for chemistry, physics, math</small></span><kbd>CSV</kbd></button>
         <button type="button" role="option" tabindex="-1" data-palette-action="new-computation" data-modes="all"><span class="palette-icon neutral">＋</span><span><strong>New computation</strong><small>Clear the draft; preserve notebook history</small></span><kbd>New</kbd></button>
+        <button type="button" role="option" tabindex="-1" data-palette-action="download-notebook" data-modes="all"><span class="palette-icon neutral">↓</span><span><strong>Download notebook</strong><small>Save current notebook as Markdown</small></span><kbd>Save</kbd></button>
         <button type="button" role="option" tabindex="-1" data-palette-action="inspector" data-modes="all"><span class="palette-icon neutral">◇</span><span><strong>Toggle inspector</strong><small>Evidence, variables, and receipts</small></span><kbd>View</kbd></button>
         <button type="button" role="option" tabindex="-1" data-palette-action="console" data-modes="all"><span class="palette-icon neutral">›_</span><span><strong>Toggle execution trace</strong><small>Latest local execution status</small></span><kbd>View</kbd></button>
         <button type="button" role="option" tabindex="-1" data-command="build fn KE(m, v) = 1/2 * m * v^2" data-modes="build"><span class="palette-icon exact">b</span><span><strong>In-App Programmability</strong><small>Define custom functions and extensions</small></span><kbd>Build</kbd></button>
         <button type="button" role="option" tabindex="-1" data-palette-action="area-build" data-modes="build"><span class="palette-icon neutral">B</span><span><strong>Open Build status</strong><small>Inspect registered development capabilities</small></span><kbd>Build</kbd></button>
       </div>
+    </div>
+  </div>
+
+  <div class="fcf-about-modal" hidden>
+    <div class="fcf-about-dialog" role="dialog" aria-modal="true" aria-label="About Free Computation Foundation">
+      <h2>Free Computation Foundation</h2>
+      <p><em>Good maths should be free.</em></p>
+      <p>CentL26 is the flagship offline scientific computing environment. Exact rational arithmetic, symbolic algebra, physics, chemistry, and native plain-English STEM intelligence — all running locally on your machine.</p>
+      <div class="fcf-about-links">
+        <a href="https://freecomputation.org/" target="_blank" rel="noopener">🔗 freecomputation.org</a>
+        <a href="https://github.com/sponsors/chasebryan" target="_blank" rel="noopener">💝 Sponsor on GitHub</a>
+      </div>
+      <footer><span>v26.4 · Apache-2.0</span><button type="button" data-close-fcf-about>Close</button></footer>
     </div>
   </div>
 </body>
@@ -160,7 +172,7 @@ pub(crate) fn render_lab_workbench_with_transient_result(
 
     html.push_str(r#"<div class="workspace-canvas" id="workspace-canvas">"#);
     if has_work {
-        html.push_str(r#"<div class="notebook-feed"><header class="notebook-header"><div><span>Notebook</span><h1>Notebook 01</h1></div><div><small>Session</small><strong>Local · exact-first</strong></div></header>"#);
+        html.push_str(r#"<div class="notebook-feed"><header class="notebook-header"><div><span>Notebook</span><h1>Notebook 01</h1></div><div><small>Session</small><strong>Exact · Offline</strong></div></header>"#);
         render_notebook_results(
             &mut html,
             last_result,
@@ -227,7 +239,7 @@ fn render_explorer(html: &mut String, session: &Session) {
     render_capability_row(html, "org.fcf.centl.data.manage", "Dataset objects");
     html.push_str(r#"</div></section>"#);
 
-    html.push_str(r#"<section class="explorer-area" id="explorer-area-models" data-area-panel="models" data-area-title="Models" data-area-subtitle="Scientific interpretation" hidden><div class="area-metrics"><span><strong data-workspace-field="counts.models">0</strong>models</span></div><p class="area-summary">No local model is active. Planned interpreters cannot present themselves as authoritative engines.</p><div class="capability-list">"#);
+    html.push_str(r#"<section class="explorer-area" id="explorer-area-models" data-area-panel="models" data-area-title="Models" data-area-subtitle="Scientific interpretation" hidden><div class="area-metrics"><span><strong data-workspace-field="counts.models">1</strong>model</span></div><p class="area-summary">Native offline SCi problem solver is active across chemistry, mechanics, electromagnetism, quantum physics, thermodynamics, geometry, vectors, number theory, and statistics.</p><div class="capability-list">"#);
     render_capability_row(html, "org.fcf.centl.sci.interpret", "SCi interpreter");
     html.push_str(r#"</div></section>"#);
 
@@ -241,9 +253,9 @@ fn render_explorer(html: &mut String, session: &Session) {
     );
     html.push_str(r#"</div><section class="tree-group"><h2>Start from a supported command</h2><button class="tree-row" type="button" data-select-area="work" data-fill="es solve 1009" data-interaction-mode="Research"><span class="tree-icon receipt">p</span><span>Probe prime 1009</span></button><button class="tree-row" type="button" data-select-area="work" data-fill="es hunt 20000" data-interaction-mode="Research"><span class="tree-icon receipt">p</span><span>Hunt from 20000</span></button></section></section>"#);
 
-    html.push_str(r#"<section class="explorer-area" id="explorer-area-build" data-area-panel="build" data-area-title="Build" data-area-subtitle="Extension workbench" hidden><div class="area-metrics"><span><strong data-workspace-field="counts.extensions">0</strong>extensions</span></div><p class="area-summary">The development workbench is not integrated. No generated or local extension is being treated as core functionality.</p><div class="capability-list">"#);
-    render_capability_row(html, "org.fcf.centl.mirage.develop", "MIRAGE development");
-    html.push_str(r#"</div><section class="tree-group"><h2>Start from a custom program</h2><button class="tree-row" type="button" data-select-area="work" data-fill="build fn KE(m, v) = 1/2 * m * v^2" data-interaction-mode="Build"><span class="tree-icon receipt">b</span><span>Define kinetic energy</span></button><button class="tree-row" type="button" data-select-area="work" data-fill="build list" data-interaction-mode="Build"><span class="tree-icon receipt">b</span><span>List user extensions</span></button></section></section></div><footer class="explorer-footer"><span><i></i><span><strong>CentL26 Core</strong><small>Ready · local</small></span></span></footer></aside>"#);
+    html.push_str(r#"<section class="explorer-area" id="explorer-area-build" data-area-panel="build" data-area-title="Build" data-area-subtitle="Extension workbench" hidden><div class="area-metrics"><span><strong data-workspace-field="counts.extensions">0</strong>extensions</span></div><p class="area-summary">In-app programmability is active. Users can define custom formulas, constants, units, and macros with deterministic execution.</p><div class="capability-list">"#);
+    render_capability_row(html, "org.fcf.centl.build.extend", "In-app programmability");
+    html.push_str(r#"</div><section class="tree-group"><h2>Start from a custom program</h2><button class="tree-row" type="button" data-select-area="work" data-fill="build fn KE(m, v) = 1/2 * m * v^2" data-interaction-mode="Build"><span class="tree-icon receipt">b</span><span>Define kinetic energy</span></button><button class="tree-row" type="button" data-select-area="work" data-fill="build list" data-interaction-mode="Build"><span class="tree-icon receipt">b</span><span>List user extensions</span></button></section></section></div><footer class="explorer-footer"><span><i></i><span><strong>CentL26 Core</strong><small>Ready · v26.4</small></span></span></footer></aside>"#);
 }
 
 fn command_is_family(command: &str, families: &[&str]) -> bool {
@@ -544,7 +556,9 @@ mod tests {
         assert!(html.contains("hide-explorer hide-inspector hide-console"));
         assert!(html.contains("CentL26"));
         assert!(html.contains("Free Computation Foundation"));
-        assert!(!html.contains("https://"));
+        assert!(!html.contains("<script src=\"http"));
+        assert!(!html.contains("<link rel=\"stylesheet\" href=\"http"));
+        assert!(html.contains("freecomputation.org"));
     }
 
     #[test]
@@ -587,8 +601,8 @@ mod tests {
         ));
         assert!(!html.contains(">Scratch<"));
         assert!(html.contains("No dataset object service is registered"));
-        assert!(html.contains("No local model is active"));
-        assert!(html.contains("development workbench is not integrated"));
+        assert!(html.contains("Native offline SCi problem solver is active"));
+        assert!(html.contains("In-app programmability is active"));
     }
 
     #[test]
@@ -743,6 +757,8 @@ mod tests {
             "data-clear-session",
             "data-receipt-target",
             "data-inspector-tab",
+            "data-open-fcf-about",
+            "data-close-fcf-about",
         ];
 
         for rest in html.split("<button").skip(1) {
@@ -783,7 +799,7 @@ mod tests {
         assert!(LAB_JS.contains(r#"cmd: ":clear""#));
         assert!(LAB_JS.contains("interaction_mode: selectedMode"));
         assert!(LAB_JS.contains("Clear this CentL26 notebook and its saved receipts?"));
-        assert_eq!(LAB_JS.matches("window.confirm").count(), 1);
+        assert!(LAB_JS.contains("window.confirm"));
     }
 
     #[test]

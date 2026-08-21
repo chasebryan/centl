@@ -1,5 +1,17 @@
 ## Unreleased
 
+### CentL26.4.0 — Product Maturity Release (2026-08-21)
+
+- Version display: Running version now visible in top-left branding lockup and status bar
+- Notebook tabs: "New Computation" creates independent notebook tabs with separate sessions
+- Save & download: Name, save, and download notebooks as Markdown or JSON
+- Working updater: Update button pulls latest from main and rebuilds for repo-clone users
+- FCF about panel: Activity rail FCF button opens about modal with sponsorship and website links
+- SCi interpreter: Registered as native available capability (no longer integration-planned)
+- Build system: In-app programmability registered as native capability; mirage references removed
+- Redundancy cleanup: Consolidated duplicate CentL26 Core / Local / Exact-first status labels
+- Fresh-clone reliability: Improved install pipeline for first-time users
+
 ### CentL26.2.3 release (Offline Multi-Domain SCi Solver & Plain English Reasoning)
 
 - **Comprehensive Native Offline SCi Solver**: Substantially upgraded offline natural language problem understanding without external API dependencies. Users can think out loud and type plain-English questions across:

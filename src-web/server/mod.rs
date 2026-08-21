@@ -163,7 +163,7 @@ impl ServerState {
         let session_id = server.new_secure_token()?;
         server.lab_project = Some(LabProject {
             session_id,
-            state: Arc::new(Mutex::new(AppState { session })),
+            state: Arc::new(Mutex::new(AppState { notebooks: vec![("Notebook 01".to_string(), session)], active_notebook: 0 })),
             store: Mutex::new(store),
         });
         Ok(server)
@@ -205,7 +205,7 @@ impl ServerState {
 
         let id = self.new_token();
         let state = Arc::new(Mutex::new(AppState {
-            session: Session::new(),
+            notebooks: vec![("Notebook 01".to_string(), Session::new())], active_notebook: 0,
         }));
         sessions.insert(
             id.clone(),
@@ -290,7 +290,7 @@ impl ServerState {
             .store
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner())
-            .save(&state.session)
+            .save(&state.session())
     }
 
     fn authorizes_lab_session(&self, requested_id: Option<&str>) -> bool {
@@ -314,7 +314,7 @@ impl ServerState {
             .store
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner());
-        let run_count = state.session.history.len();
+        let run_count = state.session().history.len();
         let available_tools = capabilities::available_capability_count(registry);
         let research_status =
             capabilities::capability_status(registry, "org.fcf.centl.research.erdos_straus")
@@ -374,6 +374,38 @@ fn lab_api_response(path: &str, server_state: &ServerState) -> io::Result<Option
         return Ok(Some(LabApiResponse {
             content_type: "text/tab-separated-values; charset=utf-8",
             body: tsv.into_bytes(),
+        }));
+    }
+
+    if path == "/download/notebook.md" {
+        let md = if let Some(ref project) = server_state.lab_project {
+            let state = project.state.lock().map_err(|_| {
+                io::Error::new(io::ErrorKind::Other, "poisoned session state lock")
+            })?;
+            handler::export_notebook_markdown(&state)
+        } else {
+            let state = AppState::new();
+            handler::export_notebook_markdown(&state)
+        };
+        return Ok(Some(LabApiResponse {
+            content_type: "text/markdown; charset=utf-8",
+            body: md.into_bytes(),
+        }));
+    }
+
+    if path == "/download/notebook.json" || path == "/api/export-notebook" {
+        let json = if let Some(ref project) = server_state.lab_project {
+            let state = project.state.lock().map_err(|_| {
+                io::Error::new(io::ErrorKind::Other, "poisoned session state lock")
+            })?;
+            handler::export_notebook_json(&state)
+        } else {
+            let state = AppState::new();
+            handler::export_notebook_json(&state)
+        };
+        return Ok(Some(LabApiResponse {
+            content_type: "application/json; charset=utf-8",
+            body: json.into_bytes(),
         }));
     }
 
@@ -1193,6 +1225,20 @@ fn handle_lab_connection(mut stream: TcpStream, server_state: Arc<ServerState>) 
         );
     }
 
+    if method == "POST" && path == "/api/update" {
+        let res = handler::execute_repo_update();
+        let body = serde_json::to_vec_pretty(&res).unwrap_or_default();
+        return write_response(
+            &mut stream,
+            200,
+            "OK",
+            "application/json; charset=utf-8",
+            &body,
+            &[("Cache-Control", "no-store".to_string())],
+            false,
+        );
+    }
+
     let is_page = path == "/" || path == "/index.html" || path == "/run";
     let is_api_run = path == "/api/run";
     if !is_page && !is_api_run {
@@ -1247,13 +1293,13 @@ fn handle_lab_connection(mut stream: TcpStream, server_state: Arc<ServerState>) 
         let mut app_state = session_state
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner());
-        let previous_session = app_state.session.clone();
+        let previous_session = app_state.session().clone();
         let (mut last_result, mut last_error, mut last_physics, mut last_hunt) =
             handle_lab_command_for_mode(&interaction_mode, &command, &mut app_state);
         trim_lab_history(&mut app_state);
         if last_error.is_none() && lab_command_requires_persistence(&command) {
             if let Err(error) = server_state.persist_lab_project(&app_state) {
-                app_state.session = previous_session;
+                 *app_state.session_mut() = previous_session;
                 last_result = None;
                 last_physics = None;
                 last_hunt = None;
@@ -1277,7 +1323,7 @@ fn handle_lab_connection(mut stream: TcpStream, server_state: Arc<ServerState>) 
                 last_physics.as_ref(),
                 last_hunt.as_ref(),
                 show_transient_result,
-                &app_state.session,
+                app_state.session(),
             ),
             input_value,
         )
@@ -1286,7 +1332,7 @@ fn handle_lab_connection(mut stream: TcpStream, server_state: Arc<ServerState>) 
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner());
         (
-            lab_template::render_lab_workbench("", None, None, None, None, &app_state.session),
+            lab_template::render_lab_workbench("", None, None, None, None, app_state.session()),
             String::new(),
         )
     };
@@ -1423,9 +1469,9 @@ fn lab_command_requires_persistence(command: &str) -> bool {
 }
 
 fn trim_lab_history(state: &mut AppState) {
-    let len = state.session.history.len();
+    let len = state.session().history.len();
     if len > MAX_LAB_HISTORY_ENTRIES {
-        state.session.history.drain(..len - MAX_LAB_HISTORY_ENTRIES);
+        state.session_mut().history.drain(..len - MAX_LAB_HISTORY_ENTRIES);
     }
 }
 
@@ -1530,7 +1576,7 @@ fn handle_connection(
                     last_error.as_deref(),
                     last_physics.as_ref(),
                     last_hunt.as_ref(),
-                    &app_state.session,
+                    app_state.session(),
                     "/hub",
                 )
             };
@@ -1564,7 +1610,7 @@ fn handle_connection(
                     .lock()
                     .unwrap_or_else(|poisoned| poisoned.into_inner());
                 reset_session(&mut app_state);
-                render_centl_work_area("", None, None, None, None, &app_state.session, "/hub")
+                render_centl_work_area("", None, None, None, None, app_state.session(), "/hub")
             })
         };
 
@@ -1779,14 +1825,14 @@ fn find_bytes(haystack: &[u8], needle: &[u8]) -> Option<usize> {
 }
 
 fn trim_history(state: &mut AppState) {
-    let len = state.session.history.len();
+    let len = state.session().history.len();
     if len > MAX_HISTORY_ENTRIES {
-        state.session.history.drain(..len - MAX_HISTORY_ENTRIES);
+        state.session_mut().history.drain(..len - MAX_HISTORY_ENTRIES);
     }
 }
 
 fn reset_session(state: &mut AppState) {
-    state.session = Session::new();
+     *state.session_mut() = Session::new();
 }
 
 fn lab_mutation_is_authorized(
@@ -2215,14 +2261,14 @@ mod tests {
     #[test]
     fn rejected_mode_command_is_visible_and_does_not_mutate_the_session() {
         let mut state = AppState {
-            session: Session::new(),
+            notebooks: vec![("Notebook 01".to_string(), Session::new())], active_notebook: 0,
         };
         let (_, error, physics, hunt) = handle_lab_command_for_mode("Physics", "1 + 1", &mut state);
         let error = error.expect("mode mismatch must be visible");
 
         assert!(physics.is_none());
         assert!(hunt.is_none());
-        assert!(state.session.history.is_empty());
+        assert!(state.session().history.is_empty());
         assert!(error.contains("No work was admitted"));
         let html = lab_template::render_lab_workbench(
             "1 + 1",
@@ -2230,7 +2276,7 @@ mod tests {
             Some(&error),
             None,
             None,
-            &state.session,
+            state.session(),
         );
         assert!(html.contains("Not admitted"));
         assert!(html.contains("Physics mode accepts commands"));
@@ -2329,7 +2375,7 @@ mod tests {
         let (_, state, _) = server.session_for(None);
         {
             let mut state = state.lock().unwrap();
-            crate::engine::evaluate("19 * 23", &mut state.session).unwrap();
+            crate::engine::evaluate("19 * 23", state.session_mut()).unwrap();
             server.persist_lab_project(&state).unwrap();
         }
         let updated = lab_api_response("/api/workspace", &server)
@@ -2381,9 +2427,9 @@ mod tests {
     #[test]
     fn reset_session_clears_saved_calculations() {
         let mut state = AppState {
-            session: Session::new(),
+            notebooks: vec![("Notebook 01".to_string(), Session::new())], active_notebook: 0,
         };
-        state.session.history.push(HistoryEntry {
+        state.session_mut().history.push(HistoryEntry {
             command: "22 + 22".to_string(),
             result: "44".to_string(),
             exact_repr: None,
@@ -2392,7 +2438,7 @@ mod tests {
             success: true,
         });
         reset_session(&mut state);
-        assert!(state.session.history.is_empty());
+        assert!(state.session().history.is_empty());
     }
 
     #[test]
@@ -2403,9 +2449,9 @@ mod tests {
 
         {
             let mut state = state.lock().unwrap();
-            crate::engine::evaluate("2 + 3", &mut state.session).unwrap();
+            crate::engine::evaluate("2 + 3", state.session_mut()).unwrap();
             server.persist_lab_project(&state).unwrap();
-            assert_eq!(state.session.history.len(), 1);
+            assert_eq!(state.session().history.len(), 1);
 
             let (result, error, physics, hunt) =
                 handle_lab_command_for_mode("Build", ":clear", &mut state);
@@ -2413,11 +2459,11 @@ mod tests {
             assert!(error.is_none());
             assert!(physics.is_none());
             assert!(hunt.is_none());
-            assert!(state.session.history.is_empty());
+            assert!(state.session().history.is_empty());
             server.persist_lab_project(&state).unwrap();
 
             let workbench =
-                lab_template::render_lab_workbench("", None, None, None, None, &state.session);
+                lab_template::render_lab_workbench("", None, None, None, None, &state.session());
             assert!(workbench.contains(r#"class="start-surface""#));
             assert!(!workbench.contains(r#"class="result-cell""#));
             assert!(!workbench.contains(r#"class="system-result""#));
@@ -2570,7 +2616,7 @@ mod tests {
         assert!(is_new);
         {
             let mut state = state.lock().unwrap();
-            crate::engine::evaluate("19 * 23", &mut state.session).unwrap();
+            crate::engine::evaluate("19 * 23", state.session_mut()).unwrap();
             server.persist_lab_project(&state).unwrap();
         }
         drop(server);
@@ -2578,9 +2624,9 @@ mod tests {
         let restarted = ServerState::new_lab_at(root.clone()).unwrap();
         let (_, restored, _) = restarted.session_for(None);
         let restored = restored.lock().unwrap();
-        assert_eq!(restored.session.history.len(), 1);
-        assert_eq!(restored.session.history[0].command, "19 * 23");
-        assert_eq!(restored.session.history[0].result, "437");
+        assert_eq!(restored.session().history.len(), 1);
+        assert_eq!(restored.session().history[0].command, "19 * 23");
+        assert_eq!(restored.session().history[0].result, "437");
 
         drop(restored);
         drop(restarted);
@@ -2611,18 +2657,18 @@ mod tests {
         let restarted = ServerState::new_lab_at(root.clone()).unwrap();
         let (_, restored, _) = restarted.session_for(None);
         let restored = restored.lock().unwrap();
-        assert_eq!(restored.session.history.len(), 3);
-        assert!(restored.session.history[0]
+        assert_eq!(restored.session().history.len(), 3);
+        assert!(restored.session().history[0]
             .exact_repr
             .as_deref()
             .unwrap()
             .contains("org.fcf.centl.physics.compute"));
-        assert!(restored.session.history[1]
+        assert!(restored.session().history[1]
             .exact_repr
             .as_deref()
             .unwrap()
             .contains("org.fcf.centl.research.erdos_straus/solve"));
-        assert!(restored.session.history[2]
+        assert!(restored.session().history[2]
             .exact_repr
             .as_deref()
             .unwrap()
@@ -2731,7 +2777,7 @@ mod tests {
         assert!(accepted.starts_with("HTTP/1.1 200 OK"));
 
         let (_, state, _) = server.session_for(None);
-        assert_eq!(state.lock().unwrap().session.history.len(), 1);
+        assert_eq!(state.lock().unwrap().session().history.len(), 1);
         drop(state);
         drop(server);
 

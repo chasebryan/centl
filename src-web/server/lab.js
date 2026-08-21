@@ -398,12 +398,17 @@
     if (fromPalette) closePalette({ restoreFocus: false });
     selectArea("work", { focus: true });
     const editor = activeEditor();
-    if (!editor) return;
-    editor.value = "";
-    removeStorage(draftKey);
-    editor.focus({ preventScroll: true });
-    editor.scrollIntoView({ block: "nearest" });
-    syncComposerActions();
+    if (editor) {
+      editor.value = "";
+      removeStorage(draftKey);
+      editor.scrollIntoView({ block: "nearest" });
+      syncComposerActions();
+    }
+    execute(new URLSearchParams({
+      lab_action: "calculate",
+      cmd: ":new-notebook",
+      interaction_mode: selectedMode
+    }), { restoreEditorFocus: true });
   }
 
   function clearNotebook() {
@@ -695,6 +700,16 @@
       clearNotebook();
     }
 
+    if (target.matches("[data-open-fcf-about], [data-open-fcf-about] *")) {
+      const modal = document.querySelector(".fcf-about-modal");
+      if (modal) modal.hidden = false;
+    }
+
+    if (target.matches("[data-close-fcf-about], [data-close-fcf-about] *") || (target.matches(".fcf-about-modal") && !target.closest(".fcf-about-dialog"))) {
+      const modal = document.querySelector(".fcf-about-modal");
+      if (modal) modal.hidden = true;
+    }
+
     if (target.matches("[data-update]")) {
       const updater = window.webkit?.messageHandlers?.centl26Update;
       if (updater && typeof updater.postMessage === "function") {
@@ -704,10 +719,25 @@
           showHostError("The CentL26 automatic updater could not start.");
         }
       } else {
+        showHostError("Checking origin/main for updates...");
         fetch("/api/update")
           .then((r) => r.json())
           .then((data) => {
-            showHostError(`${data.product} ${data.version}: ${data.message}`);
+            if (data.update_available) {
+              if (window.confirm(`${data.message}\n\nDo you want to pull and rebuild now?`)) {
+                showHostError("Updating repository and rebuilding CentL26 (release)... Please wait.");
+                fetch("/api/update", { method: "POST" })
+                  .then((r) => r.json())
+                  .then((res) => {
+                    showHostError(res.message);
+                  })
+                  .catch((err) => {
+                    showHostError("Update build failed: " + err);
+                  });
+              }
+            } else {
+              showHostError(data.message || `${data.product} ${data.version} is up to date.`);
+            }
           })
           .catch(() => {
             showHostError("Automatic updates are available in the CentL26 macOS app.");
@@ -727,6 +757,11 @@
     if (target.dataset.paletteAction === "download-examples") {
       closePalette({ restoreFocus: false });
       window.location.href = "/download/centl26-examples.csv";
+    }
+
+    if (target.dataset.paletteAction === "download-notebook") {
+      closePalette({ restoreFocus: false });
+      window.location.href = "/download/notebook.md";
     }
 
     if (target.dataset.paletteAction === "run-input") {

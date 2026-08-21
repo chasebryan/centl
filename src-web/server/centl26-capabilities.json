@@ -2,7 +2,7 @@
   "schema": "centl.capability-registry/1",
   "product": {
     "name": "CentL26",
-    "version": "26.2.3",
+    "version": "26.4.0",
     "organization": "Free Computation Foundation",
     "organization_abbreviation": "FCF",
     "runtime": "offline-local"
@@ -47,8 +47,9 @@
     {
       "id": "org.fcf.centl.sci.interpret",
       "contract": 1,
-      "status": "integration-planned",
-      "provider": "centl-sci"
+      "status": "available",
+      "provider": "centl26.sci-engine",
+      "assurance": ["offline", "deterministic", "multi-domain"]
     },
     {
       "id": "org.fcf.centl.chemistry.compute",
@@ -92,8 +93,15 @@
     {
       "id": "org.fcf.centl.mirage.develop",
       "contract": 1,
-      "status": "integration-planned",
+      "status": "deprecated",
       "provider": "mirage"
+    },
+    {
+      "id": "org.fcf.centl.build.extend",
+      "contract": 1,
+      "status": "available",
+      "provider": "centl26.extensions",
+      "assurance": ["exact", "deterministic", "user-defined"]
     },
     {
       "id": "org.fcf.centl.caravan.retrieve",

@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "approval": {
-    "change_note": "CentL26.2 Huge Release: In-app programmability, Dim Mode theme, 2D plotting, quantum/thermo/orbital physics, extended math, and natural language SCi solver",
+    "change_note": "CentL26.4 Release: Version display in branding, working updater, notebook tabs, save/download work, FCF about modal, native SCi and Build capabilities, and redundancy cleanup",
     "release": "CentL26",
     "reviewed_viewports": [
       "1366x768",
@@ -12,9 +12,9 @@
   "files": {
     "desktop/centl26/macos/Assets/CentL26Icon.png": "645249e61681bed304d0337993485905480933207aacb2c2141a1e5ff514dcbd",
     "desktop/centl26/macos/Assets/CentL26Icon.svg": "a599538a075f61f861fe44ad1260fdc98d561dab0931a36ea08c02430e623298",
-    "src-web/server/lab.css": "f75931b00cd40ee14ee2eacd5bd7b79c551919f4b77bbacf96b4f538b4d36b00",
-    "src-web/server/lab.js": "08595015c31f3853cf2d0faedd2961a8a711cf34cd8a38bb537f3dbc12014f32",
-    "src-web/server/lab_template.rs": "c73845a5a2cd77990b867e252762abd3869105d5d2aa668c9efd157013f721b5"
+    "src-web/server/lab.css": "10bb3934a7ca1e7547c73324250ccb186735cf1b686e94b9de874c9e3e16e9b9",
+    "src-web/server/lab.js": "ab5bd53eb0b994e8954d458d22c6d203f02c00d55f1a2f7dadabc121e6ace88e",
+    "src-web/server/lab_template.rs": "5ba54972dc8efd4a9bd4059038b3590479411b686e80ed7f599eb968506c3642"
   },
   "schema": 1,
   "semantic_contract": {

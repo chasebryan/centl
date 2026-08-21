@@ -32,15 +32,20 @@ const CHEMISTRY_PROVIDER_TIMEOUT: Duration = Duration::from_secs(10);
 const PROVIDER_POLL_INTERVAL: Duration = Duration::from_millis(5);
 
 pub struct AppState {
-    pub session: Session,
+    pub notebooks: Vec<(String, Session)>,
+    pub active_notebook: usize,
 }
 
 impl AppState {
     pub fn new() -> Self {
         Self {
-            session: Session::new(),
+            notebooks: vec![("Notebook 01".to_string(), Session::new())],
+            active_notebook: 0,
         }
     }
+    pub fn session(&self) -> &Session { &self.notebooks[self.active_notebook].1 }
+    pub fn session_mut(&mut self) -> &mut Session { &mut self.notebooks[self.active_notebook].1 }
+    pub fn notebook_name(&self) -> &str { &self.notebooks[self.active_notebook].0 }
 }
 
 impl Default for AppState {
@@ -66,8 +71,42 @@ pub fn handle_command(
     // The web Clear control should behave like a clean reload: reset the full
     // calculation session and render the pristine work area, not a synthetic
     // "history cleared" result block.
+    if cmd == ":new-notebook" {
+        let idx = state.notebooks.len() + 1;
+        let name = format!("Notebook {:02}", idx);
+        state.notebooks.push((name, Session::new()));
+        state.active_notebook = state.notebooks.len() - 1;
+        return (None, None, None, None);
+    }
+    if cmd.starts_with(":switch-notebook ") {
+        if let Ok(idx) = cmd[17..].trim().parse::<usize>() {
+            if idx < state.notebooks.len() {
+                state.active_notebook = idx;
+            }
+        }
+        return (None, None, None, None);
+    }
+    if cmd.starts_with(":close-notebook ") {
+        if let Ok(idx) = cmd[16..].trim().parse::<usize>() {
+            if idx < state.notebooks.len() && state.notebooks.len() > 1 {
+                state.notebooks.remove(idx);
+                if state.active_notebook >= state.notebooks.len() {
+                    state.active_notebook = state.notebooks.len() - 1;
+                }
+            }
+        }
+        return (None, None, None, None);
+    }
+    if cmd.starts_with(":rename-notebook ") {
+        let new_name = cmd[17..].trim().to_string();
+        if !new_name.is_empty() {
+            state.notebooks[state.active_notebook].0 = new_name;
+        }
+        return (None, None, None, None);
+    }
+
     if cmd == ":clear" || cmd == ":clear-history" {
-        state.session = Session::new();
+        state.notebooks[state.active_notebook].1 = Session::new();
         return (None, None, None, None);
     }
 
@@ -96,7 +135,7 @@ pub fn handle_command(
 
     if cmd == ":release" || cmd == ":version" || cmd == ":releases" {
         let res = ExecutionResult {
-            text: "=== CentL26.2 Official Release ===\nVersion: 26.2.3 (Release Quality)\nCapabilities:\n• In-App Programmability (build): define, brainstorm, inspect, and test custom STEM functions & constants in plain English.\n• Dim Mode Theme: toggle between standard light and dimmed matte slate palettes.\n• Smart Multi-Domain Auto-Detector: direct stoichiometry, reactions, physics conversions, and constants.\n• CentL-SCi Natural Language STEM Solver: expanded step-by-step offline verified problem solving across chemistry, mechanics, circuits, thermodynamics, geometry, linear algebra, and statistics without external dependencies.\n• Hybrid Gemini Support: online/offline LLM STEM decomposition with exact rational verification.\n• 50+ STEM Examples Sheet: multi-domain reference dataset available via /download/centl26-examples.csv.\n• In-App Updates: seamless update checks via WebKit and /api/update.".to_string(),
+            text: "=== CentL26.4 Official Release ===\nVersion: 26.4.0 (Release Quality)\nCapabilities:\n• In-App Programmability (build): define, brainstorm, inspect, and test custom STEM functions & constants in plain English.\n• Dim Mode Theme: toggle between standard light and dimmed matte slate palettes.\n• Smart Multi-Domain Auto-Detector: direct stoichiometry, reactions, physics conversions, and constants.\n• CentL-SCi Natural Language STEM Solver: expanded step-by-step offline verified problem solving across chemistry, mechanics, circuits, thermodynamics, geometry, linear algebra, and statistics without external dependencies.\n• Hybrid Gemini Support: online/offline LLM STEM decomposition with exact rational verification.\n• 50+ STEM Examples Sheet: multi-domain reference dataset available via /download/centl26-examples.csv.\n• In-App Updates: seamless update checks via WebKit and /api/update.".to_string(),
             exact_rational: None,
             approximate: None,
             symbolic_expr: None,
@@ -144,7 +183,7 @@ pub fn handle_command(
     if is_approximation_command(cmd) {
         return match run_canonical_approx(cmd) {
             Ok(result) => {
-                state.session.history.push(HistoryEntry {
+                state.session_mut().history.push(HistoryEntry {
                     command: cmd.to_string(),
                     result: result.text.clone(),
                     exact_repr: None,
@@ -159,11 +198,11 @@ pub fn handle_command(
     }
 
     // 9. Exact Mathematical Evaluator (with smart SCi plain-English fallback)
-    match evaluate(cmd, &mut state.session) {
+    match evaluate(cmd, state.session_mut()) {
         Ok(result) => (Some(result), None, None, None),
         Err(error) => {
             if cmd.contains(' ') {
-                if let Ok(solution) = crate::engine::sci::solve_stem_offline(cmd, &mut state.session) {
+                if let Ok(solution) = crate::engine::sci::solve_stem_offline(cmd, state.session_mut()) {
                     let mut formatted = format!("SCi Solution [{} · {}]:\n{}\n", solution.domain, solution.confidence, solution.summary);
                     for s in &solution.steps {
                         formatted.push_str(&format!("\n• {}", s));
@@ -181,7 +220,7 @@ pub fn handle_command(
                         symbolic_expr: None,
                         execution_micros: 0,
                     };
-                    state.session.history.push(HistoryEntry {
+                    state.session_mut().history.push(HistoryEntry {
                         command: cmd.to_string(),
                         result: formatted,
                         exact_repr: None,
@@ -856,7 +895,7 @@ fn handle_chemistry_command(
                 symbolic_expr: None,
                 execution_micros: elapsed,
             };
-            state.session.history.push(HistoryEntry {
+            state.session_mut().history.push(HistoryEntry {
                 command: command.to_string(),
                 result: outcome.summary,
                 exact_repr: Some(outcome.evidence),
@@ -1880,7 +1919,7 @@ fn record_physics_history(
             "verified": result.verified,
         }
     });
-    state.session.history.push(HistoryEntry {
+    state.session_mut().history.push(HistoryEntry {
         command: command.to_string(),
         result: result.summary.clone(),
         exact_repr: Some(
@@ -1913,7 +1952,7 @@ fn record_solve_history(
         .witness
         .as_ref()
         .is_some_and(|witness| witness.verified && witness.verify());
-    state.session.history.push(HistoryEntry {
+    state.session_mut().history.push(HistoryEntry {
         command: command.to_string(),
         result: execution.text.clone(),
         exact_repr: Some(
@@ -1958,7 +1997,7 @@ fn record_hunt_history(command: &str, hunt: &HuntSummary, state: &mut AppState) 
         hunt.letter_count,
         hunt.unsolved_count
     );
-    state.session.history.push(HistoryEntry {
+    state.session_mut().history.push(HistoryEntry {
         command: command.to_string(),
         result: summary,
         exact_repr: Some(
@@ -2112,7 +2151,7 @@ fn handle_cps_command(
         symbolic_expr: None,
         execution_micros: elapsed,
     };
-    state.session.history.push(HistoryEntry {
+    state.session_mut().history.push(HistoryEntry {
         command: command.to_string(),
         result: summary,
         exact_repr: Some(evidence),
@@ -2171,7 +2210,7 @@ fn handle_sci_command(
                         symbolic_expr: None,
                         execution_micros: elapsed,
                     };
-                    state.session.history.push(HistoryEntry {
+                    state.session_mut().history.push(HistoryEntry {
                         command: command.to_string(),
                         result: summary,
                         exact_repr: Some(evidence),
@@ -2186,7 +2225,7 @@ fn handle_sci_command(
     }
 
     // 2. Native Offline SCi Solver & Hybrid Gemini STEM Solver
-    match crate::engine::sci::interpret_and_solve_stem(body, &mut state.session, prefer_gemini) {
+    match crate::engine::sci::interpret_and_solve_stem(body, state.session_mut(), prefer_gemini) {
         Ok(solution) => {
             let elapsed = started.elapsed().as_micros();
             let mut formatted_text = format!("SCi Solution [{} · {}]:\n{}\n", solution.domain, solution.confidence, solution.summary);
@@ -2227,7 +2266,7 @@ fn handle_sci_command(
                 symbolic_expr: None,
                 execution_micros: elapsed,
             };
-            state.session.history.push(HistoryEntry {
+            state.session_mut().history.push(HistoryEntry {
                 command: command.to_string(),
                 result: formatted_text,
                 exact_repr: Some(evidence),
@@ -2252,7 +2291,7 @@ fn handle_build_command(
 ) {
     let started = Instant::now();
     // 1. Run native in-app extension builder
-    match crate::engine::extensions::handle_build_command(command, &mut state.session) {
+    match crate::engine::extensions::handle_build_command(command, state.session_mut()) {
         Ok(outcome) => {
             let mut formatted = format!("=== {} ===\n{}\n", outcome.title, outcome.summary);
             for step in &outcome.steps {
@@ -2271,7 +2310,7 @@ fn handle_build_command(
                 execution_micros: elapsed,
             };
             let evidence = serde_json::to_string(&outcome.evidence).unwrap_or_else(|_| "{}".to_string());
-            state.session.history.push(HistoryEntry {
+            state.session_mut().history.push(HistoryEntry {
                 command: command.to_string(),
                 result: formatted_text,
                 exact_repr: Some(evidence),
@@ -2301,7 +2340,7 @@ fn handle_build_command(
                         symbolic_expr: None,
                         execution_micros: elapsed,
                     };
-                    state.session.history.push(HistoryEntry {
+                    state.session_mut().history.push(HistoryEntry {
                         command: command.to_string(),
                         result: stdout,
                         exact_repr: None,
@@ -2370,7 +2409,7 @@ fn handle_caravan_command(
         symbolic_expr: None,
         execution_micros: elapsed,
     };
-    state.session.history.push(HistoryEntry {
+    state.session_mut().history.push(HistoryEntry {
         command: command.to_string(),
         result: text,
         exact_repr: None,
@@ -2504,7 +2543,7 @@ mod tests {
     #[test]
     fn invalid_physics_subcommand_returns_an_error() {
         let mut state = AppState {
-            session: Session::new(),
+            notebooks: vec![("Notebook 01".to_string(), Session::new())], active_notebook: 0,
         };
         let (_, error, physics, _) = handle_command("physics nonsense", &mut state);
         assert!(error.is_some());
@@ -2514,24 +2553,24 @@ mod tests {
     #[test]
     fn physics_and_research_runs_preserve_typed_restart_evidence() {
         let mut state = AppState {
-            session: Session::new(),
+            notebooks: vec![("Notebook 01".to_string(), Session::new())], active_notebook: 0,
         };
         let (_, error, physics, _) = handle_command("physics convert 100 cm m", &mut state);
         assert!(error.is_none());
         assert!(physics.is_some());
-        assert_eq!(state.session.history.len(), 1);
-        assert!(state.session.history[0]
+        assert_eq!(state.session().history.len(), 1);
+        assert!(state.session().history[0]
             .exact_repr
             .as_deref()
             .unwrap()
             .contains("org.fcf.centl.physics.compute"));
-        assert!(state.session.history[0].approximate_repr.is_some());
+        assert!(state.session().history[0].approximate_repr.is_some());
 
         let (solve, error, _, _) = handle_command("es solve 1009", &mut state);
         assert!(error.is_none());
         assert!(solve.is_some());
-        assert_eq!(state.session.history.len(), 2);
-        assert!(state.session.history[1]
+        assert_eq!(state.session().history.len(), 2);
+        assert!(state.session().history[1]
             .exact_repr
             .as_deref()
             .unwrap()
@@ -2540,13 +2579,13 @@ mod tests {
         let (_, error, _, hunt) = handle_command("es", &mut state);
         assert!(error.is_none());
         assert!(hunt.is_some());
-        assert_eq!(state.session.history.len(), 3);
-        assert!(state.session.history[2]
+        assert_eq!(state.session().history.len(), 3);
+        assert!(state.session().history[2]
             .exact_repr
             .as_deref()
             .unwrap()
             .contains("org.fcf.centl.research.erdos_straus/hunt"));
-        assert!(state.session.history[2]
+        assert!(state.session().history[2]
             .approximate_repr
             .as_deref()
             .unwrap()
@@ -2556,9 +2595,9 @@ mod tests {
     #[test]
     fn clear_resets_the_web_session_without_rendering_a_result() {
         let mut state = AppState {
-            session: Session::new(),
+            notebooks: vec![("Notebook 01".to_string(), Session::new())], active_notebook: 0,
         };
-        state.session.history.push(HistoryEntry {
+        state.session_mut().history.push(HistoryEntry {
             command: "2 + 2".to_string(),
             result: "4".to_string(),
             exact_repr: None,
@@ -2567,7 +2606,7 @@ mod tests {
             success: true,
         });
         let (result, error, physics, hunt) = handle_command(":clear", &mut state);
-        assert!(state.session.history.is_empty());
+        assert!(state.session().history.is_empty());
         assert!(result.is_none());
         assert!(error.is_none());
         assert!(physics.is_none());
@@ -3124,20 +3163,193 @@ mod tests {
         assert!(res.is_some());
         assert!(res.unwrap().text.contains("30"));
     }
+
+    #[test]
+    fn test_notebook_tabs_and_export() {
+        let mut state = AppState::new();
+        assert_eq!(state.notebooks.len(), 1);
+        assert_eq!(state.notebook_name(), "Notebook 01");
+
+        // Run calculation in Notebook 01
+        handle_command("1 + 1", &mut state);
+        assert_eq!(state.session().history.len(), 1);
+
+        // Create new notebook
+        handle_command(":new-notebook", &mut state);
+        assert_eq!(state.notebooks.len(), 2);
+        assert_eq!(state.active_notebook, 1);
+        assert_eq!(state.notebook_name(), "Notebook 02");
+        assert_eq!(state.session().history.len(), 0);
+
+        // Rename Notebook 02
+        handle_command(":rename-notebook Orbital Mechanics", &mut state);
+        assert_eq!(state.notebook_name(), "Orbital Mechanics");
+
+        // Run calculation in Orbital Mechanics
+        handle_command("2 + 2", &mut state);
+        assert_eq!(state.session().history.len(), 1);
+
+        // Export markdown and json
+        let md = export_notebook_markdown(&state);
+        assert!(md.contains("# Orbital Mechanics"));
+        assert!(md.contains("2 + 2"));
+
+        let json = export_notebook_json(&state);
+        assert!(json.contains("Orbital Mechanics"));
+        assert!(json.contains("2 + 2"));
+
+        // Switch back to notebook 0
+        handle_command(":switch-notebook 0", &mut state);
+        assert_eq!(state.active_notebook, 0);
+        assert_eq!(state.session().history.len(), 1);
+        assert_eq!(state.session().history[0].command, "1 + 1");
+
+        // Close notebook 1
+        handle_command(":close-notebook 1", &mut state);
+        assert_eq!(state.notebooks.len(), 1);
+        assert_eq!(state.active_notebook, 0);
+    }
 }
 
 pub fn handle_update_check() -> serde_json::Value {
+    let git_status = check_git_update_available();
     serde_json::json!({
         "schema": "centl26.update-check/1",
         "product": "CentL26",
-        "version": "26.2.3",
-        "release_name": "CentL26.2.3",
+        "version": "26.4.0",
+        "release_name": "CentL26.4.0",
         "release_tag": "centl26-build-0003-release",
         "build_commit": super::build_commit(),
-        "status": "up_to_date",
-        "channel": "frozen-2026",
-        "message": "CentL26.2.3 is up to date with the latest release (In-App Programmability, Dim Mode, Auto-Detector, Offline SCi Multi-Domain Solver, and 50+ STEM Examples Catalog)."
+        "status": if git_status.update_available { "update_available" } else { "up_to_date" },
+        "update_available": git_status.update_available,
+        "channel": "main",
+        "message": if git_status.update_available {
+            format!("New updates found on origin/main ({} commit(s) behind). Click Update to pull and rebuild.", git_status.commits_behind)
+        } else {
+            "CentL26 v26.4.0 is up to date with origin/main.".to_string()
+        }
     })
 }
 
+pub struct GitUpdateStatus {
+    pub update_available: bool,
+    pub commits_behind: usize,
+}
 
+pub fn check_git_update_available() -> GitUpdateStatus {
+    let fetch = std::process::Command::new("git")
+        .args(["fetch", "origin", "main", "--quiet"])
+        .output();
+    if fetch.is_err() {
+        return GitUpdateStatus { update_available: false, commits_behind: 0 };
+    }
+    let local_head = std::process::Command::new("git")
+        .args(["rev-parse", "HEAD"])
+        .output()
+        .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
+        .unwrap_or_default();
+    let remote_head = std::process::Command::new("git")
+        .args(["rev-parse", "origin/main"])
+        .output()
+        .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
+        .unwrap_or_default();
+
+    if !local_head.is_empty() && !remote_head.is_empty() && local_head != remote_head {
+        let count_out = std::process::Command::new("git")
+            .args(["rev-list", "--count", "HEAD..origin/main"])
+            .output()
+            .map(|o| String::from_utf8_lossy(&o.stdout).trim().parse::<usize>().unwrap_or(1))
+            .unwrap_or(1);
+        GitUpdateStatus {
+            update_available: count_out > 0,
+            commits_behind: count_out,
+        }
+    } else {
+        GitUpdateStatus { update_available: false, commits_behind: 0 }
+    }
+}
+
+pub fn execute_repo_update() -> serde_json::Value {
+    let pull = std::process::Command::new("git")
+        .args(["pull", "origin", "main", "--ff-only"])
+        .output();
+    match pull {
+        Ok(output) if output.status.success() => {
+            let build = std::process::Command::new("cargo")
+                .args(["build", "--release", "--bin", "centl26"])
+                .output();
+            match build {
+                Ok(b_out) if b_out.status.success() => {
+                    serde_json::json!({
+                        "success": true,
+                        "updated": true,
+                        "message": "Repository updated and binary successfully rebuilt! Restart CentL26 to apply."
+                    })
+                }
+                Ok(b_out) => {
+                    serde_json::json!({
+                        "success": false,
+                        "updated": true,
+                        "message": format!("Git pull succeeded but cargo build failed: {}", String::from_utf8_lossy(&b_out.stderr))
+                    })
+                }
+                Err(err) => {
+                    serde_json::json!({
+                        "success": false,
+                        "updated": true,
+                        "message": format!("Failed to invoke cargo build: {}", err)
+                    })
+                }
+            }
+        }
+        Ok(output) => {
+            serde_json::json!({
+                "success": false,
+                "updated": false,
+                "message": format!("git pull failed: {}", String::from_utf8_lossy(&output.stderr))
+            })
+        }
+        Err(err) => {
+            serde_json::json!({
+                "success": false,
+                "updated": false,
+                "message": format!("Could not run git pull: {}", err)
+            })
+        }
+    }
+}
+
+
+
+pub fn export_notebook_markdown(state: &AppState) -> String {
+    let name = state.notebook_name();
+    let session = state.session();
+    let mut md = format!("# {}\n\nExported from CentL26 v26.4.0\n\n", name);
+    for entry in &session.history {
+        md.push_str(&format!("## `{}`\n\n", entry.command));
+        md.push_str(&format!("**Result:** {}\n\n", entry.result));
+        if let Some(ref exact) = entry.exact_repr {
+            md.push_str(&format!("**Exact:** `{}`\n\n", exact));
+        }
+        md.push_str("---\n\n");
+    }
+    md
+}
+
+pub fn export_notebook_json(state: &AppState) -> String {
+    let name = state.notebook_name();
+    let session = state.session();
+    let entries: Vec<String> = session.history.iter().map(|e| {
+        format!("{{\"command\":{},\"result\":{},\"exact\":{}}}",
+            serde_json_str(&e.command),
+            serde_json_str(&e.result),
+            e.exact_repr.as_ref().map(|s| serde_json_str(s)).unwrap_or("null".to_string())
+        )
+    }).collect();
+    format!("{{\"schema\":\"centl26.notebook/1\",\"name\":{},\"version\":\"26.4.0\",\"entries\":[{}]}}",
+        serde_json_str(name), entries.join(","))
+}
+
+fn serde_json_str(s: &str) -> String {
+    format!("\"{}\"" , s.replace('\\', "\\\\").replace('"', "\\\"").replace('\n', "\\n").replace('\r', "\\r").replace('\t', "\\t"))
+}

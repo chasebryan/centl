@@ -757,6 +757,19 @@ body.hide-console .trace-console { display: none; }
 .palette-icon.neutral { color: var(--ink-soft); background: var(--surface-muted); }
 .workbench-shell.is-loading .workspace-center::after { content: "Running locally…"; position: absolute; top: 91px; right: 16px; z-index: 35; padding: 8px 11px; color: #fff; background: var(--ink); border-radius: 6px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18); font-size: 11px; font-weight: 620; }
 .host-error { position: fixed; right: 16px; bottom: 40px; z-index: 100; max-width: min(420px, calc(100vw - 32px)); padding: 11px 13px; color: #fff; background: var(--danger); border-radius: 7px; box-shadow: 0 14px 38px rgba(127, 29, 29, 0.24); font-size: 12px; font-weight: 600; }
+.product-version { display: block; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+.fcf-about-modal[hidden] { display: none; }
+.fcf-about-modal { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; background: var(--scrim); backdrop-filter: blur(4px); }
+.fcf-about-dialog { width: min(480px, calc(100vw - 32px)); padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow-palette); color: var(--ink); }
+.fcf-about-dialog h2 { margin: 0 0 8px; font-size: 18px; font-weight: 700; color: var(--ink); }
+.fcf-about-dialog p { margin: 0 0 12px; font-size: 13px; line-height: 1.5; color: var(--ink-soft); }
+.fcf-about-links { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+.fcf-about-links a { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 6px; background: var(--surface-subtle); border: 1px solid var(--line); color: var(--brand); font-size: 13px; font-weight: 600; text-decoration: none; }
+.fcf-about-links a:hover { background: var(--brand-soft); }
+.fcf-about-dialog footer { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 11px; color: var(--ink-muted); }
+.fcf-about-dialog footer button { padding: 6px 14px; background: var(--surface-muted); border: 1px solid var(--line); border-radius: 6px; color: var(--ink); font-size: 12px; font-weight: 600; cursor: pointer; }
+.fcf-about-dialog footer button:hover { background: var(--surface-subtle); }
+.fcf-about-button { font-size: 11px; font-weight: 700; color: var(--ink-soft); cursor: pointer; border: none; background: none; }
 
 /* Compact desktops: side panes become transient overlays. */
 @media (max-width: 1099px) {

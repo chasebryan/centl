@@ -5,7 +5,7 @@
 
 # CENTL / CentL26
 
-[![Version](https://img.shields.io/badge/version-26.2.3-blue.svg)](https://github.com/chasebryan/centl)
+[![Version](https://img.shields.io/badge/version-26.4.0-blue.svg)](https://github.com/chasebryan/centl)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-2021%20edition-orange.svg)](https://www.rust-lang.org/)
 [![Offline First](https://img.shields.io/badge/offline-100%25%20local-success.svg)](https://freecomputation.org/)
@@ -23,7 +23,7 @@
 
 ---
 
-## Key Highlights in CentL26.2.3
+## Key Highlights in CentL26.4
 
 ### 1. In-App Programmability & Hackability (`build`)
 Users can extend CentL26 dynamically without learning complex programming languages:

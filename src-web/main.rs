@@ -7,7 +7,6 @@ pub mod physics;
 pub mod server;
 
 use engine::{evaluate, Session};
-use erdos_straus::{run_hunt_window, solve_es};
 use server::{start_lab_server, start_server};
 use std::env;
 use std::path::Path;
@@ -84,7 +83,7 @@ fn main() {
     }
 
     if args.iter().any(|arg| arg == "--version" || arg == "-v") {
-        println!("CentL26 26.2.3 · backend compatibility 0.15 Al-Nur");
+        println!("CentL26 26.4.0 · backend compatibility 0.15 Al-Nur");
         return;
     }
 
