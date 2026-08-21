@@ -444,21 +444,34 @@ fn is_auto_detected_sci(cmd: &str) -> bool {
     }
     let sci_prefixes = [
         "what is", "what are", "what's", "how many", "how much", "how far", "how fast", "how long",
-        "calculate", "compute", "determine", "find the", "find all", "find ", "give me",
-        "differentiate", "derive", "integrate the", "integrate f", "balance the",
+        "calculate", "compute", "determine", "find the", "find all", "find a", "find an", "find ", "give me", "show me", "tell me",
+        "differentiate", "derive", "integrate the", "integrate f", "integrate ", "balance the", "balance ",
         "explain", "solve for", "solve the", "solve ", "show that", "is it prime", "is prime", "convert ",
-        "area of", "volume of", "circumference of", "hypotenuse of", "dot product", "cross product",
+        "area of", "volume of", "circumference of", "perimeter of", "hypotenuse of", "dot product", "cross product",
         "determinant of", "inverse of", "mean of", "median of", "variance of", "standard deviation of",
         "totient of", "prime factors of", "stopping potential", "stopping voltage", "de broglie",
-        "carnot", "blackbody", "stefan", "escape velocity", "orbital speed", "lorentz", "photoelectric"
+        "carnot", "blackbody", "stefan", "escape velocity", "orbital speed", "lorentz", "photoelectric",
+        "the square root", "the cube root", "the derivative", "the integral", "the sum", "the product",
+        "the difference", "the quotient", "the molar mass", "the molecular mass", "the molecular weight",
+        "the atomic mass", "the atomic weight", "the atomic number", "the kinetic energy",
+        "the potential energy", "the speed of", "the velocity", "the force", "the acceleration", "the momentum",
+        "square root of", "cube root of", "sqrt of", "cbrt of", "sum of", "product of", "difference between", "quotient of",
+        "half of", "quarter of", "one half of", "one third of", "two thirds of", "three quarters of",
+        "please calculate", "please compute", "please find", "please evaluate", "please ",
+        "can you calculate", "can you find", "can you compute", "can you tell me", "can you ",
+        "could you calculate", "could you find", "could you ", "i need to calculate", "i need to find"
     ];
     for prefix in sci_prefixes {
         if lower.starts_with(prefix) {
             return true;
         }
     }
-    if lower.split_whitespace().count() >= 3 && (
-        lower.contains("accelerat") || lower.contains("velocity") || lower.contains("kinetic energy")
+    if lower.split_whitespace().count() >= 2 && (
+        lower.contains(" divided by ") || lower.contains(" multiplied by ") || lower.contains(" to the power of ")
+        || lower.contains(" percent of ") || lower.contains(" percent off ") || lower.contains(" percent ")
+        || lower.contains(" times ") || lower.contains(" minus ") || lower.contains(" plus ")
+        || lower.contains(" squared") || lower.contains(" cubed")
+        || lower.contains("accelerat") || lower.contains("velocity") || lower.contains("kinetic energy")
         || lower.contains("potential energy") || lower.contains("free fall") || lower.contains("molar mass")
         || lower.contains("molarity") || lower.contains("dilut") || lower.contains("gibbs") || lower.contains("nernst")
         || lower.contains("ohm") || lower.contains("capacitance") || lower.contains("photon") || lower.contains("rydberg")
