@@ -83,7 +83,7 @@ fn main() {
     }
 
     if args.iter().any(|arg| arg == "--version" || arg == "-v") {
-        println!("CentL26 26.4.0 · backend compatibility 0.15 Al-Nur");
+        println!("CentL26 26.4.1 · backend compatibility 0.15 Al-Nur");
         return;
     }
 

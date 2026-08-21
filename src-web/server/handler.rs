@@ -135,7 +135,7 @@ pub fn handle_command(
 
     if cmd == ":release" || cmd == ":version" || cmd == ":releases" {
         let res = ExecutionResult {
-            text: "=== CentL26.4 Official Release ===\nVersion: 26.4.0 (Release Quality)\nCapabilities:\n• In-App Programmability (build): define, brainstorm, inspect, and test custom STEM functions & constants in plain English.\n• Dim Mode Theme: toggle between standard light and dimmed matte slate palettes.\n• Smart Multi-Domain Auto-Detector: direct stoichiometry, reactions, physics conversions, and constants.\n• CentL-SCi Natural Language STEM Solver: expanded step-by-step offline verified problem solving across chemistry, mechanics, circuits, thermodynamics, geometry, linear algebra, and statistics without external dependencies.\n• Hybrid Gemini Support: online/offline LLM STEM decomposition with exact rational verification.\n• 50+ STEM Examples Sheet: multi-domain reference dataset available via /download/centl26-examples.csv.\n• In-App Updates: seamless update checks via WebKit and /api/update.".to_string(),
+            text: "=== CentL26.4 Official Release ===\nVersion: 26.4.1 (Release Quality)\nCapabilities:\n• In-App Programmability (build): define, brainstorm, inspect, and test custom STEM functions & constants in plain English.\n• 2D Function Plotter: multi-line ASCII/Unicode coordinate grid visualization.\n• Dim Mode Theme: toggle between standard light and dimmed matte slate palettes.\n• Smart Multi-Domain Auto-Detector: direct stoichiometry, reactions, physics conversions, and constants.\n• CentL-SCi Natural Language STEM Solver: expanded step-by-step offline verified problem solving across chemistry, mechanics, circuits, thermodynamics, geometry, linear algebra, and statistics without external dependencies.\n• Hybrid Gemini Support: online/offline LLM STEM decomposition with exact rational verification.\n• 50+ STEM Examples Sheet: multi-domain reference dataset available via /download/centl26-examples.csv.\n• In-App Updates: seamless update checks via WebKit and /api/update.".to_string(),
             exact_rational: None,
             approximate: None,
             symbolic_expr: None,
@@ -3224,9 +3224,9 @@ pub fn handle_update_check() -> serde_json::Value {
     serde_json::json!({
         "schema": "centl26.update-check/1",
         "product": "CentL26",
-        "version": "26.4.0",
-        "release_name": "CentL26.4.0",
-        "release_tag": "centl26-build-0003-release",
+        "version": "26.4.1",
+        "release_name": "CentL26.4.1",
+        "release_tag": "centl26-build-0005-release",
         "build_commit": super::build_commit(),
         "status": if git_status.update_available { "update_available" } else { "up_to_date" },
         "update_available": git_status.update_available,
@@ -3234,7 +3234,7 @@ pub fn handle_update_check() -> serde_json::Value {
         "message": if git_status.update_available {
             format!("New updates found on origin/main ({} commit(s) behind). Click Update to pull and rebuild.", git_status.commits_behind)
         } else {
-            "CentL26 v26.4.0 is up to date with origin/main.".to_string()
+            "CentL26 v26.4.1 is up to date with origin/main.".to_string()
         }
     })
 }

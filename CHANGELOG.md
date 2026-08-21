@@ -1,5 +1,9 @@
 ## Unreleased
 
+### CentL26.4.1 (2026-08-21)
+
+- 2D Function Plotter: Fixed notebook cell history rendering to preserve and display the full multi-line ASCII/Unicode coordinate grid graph and axis metrics in result cells and export receipts.
+
 ### CentL26.4.0 — Product Maturity Release (2026-08-21)
 
 - Version display: Running version now visible in top-left branding lockup and status bar

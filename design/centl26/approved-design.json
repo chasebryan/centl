@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "approval": {
-    "change_note": "CentL26.4 Release: Version display in branding, working updater, notebook tabs, save/download work, FCF about modal, native SCi and Build capabilities, and redundancy cleanup",
+    "change_note": "CentL26.4.1 Release: 2D function plotter full ASCII grid rendering in notebook result cells and export receipts",
     "release": "CentL26",
     "reviewed_viewports": [
       "1366x768",
