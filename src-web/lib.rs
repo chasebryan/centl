@@ -217,6 +217,19 @@ mod tests {
         let mut session = Session::new();
         let result = evaluate("diff(x^3, x)", &mut session).unwrap();
         assert_eq!(result.text, "3 * x^2");
+
+        let higher = evaluate("diff(x^5, x, 2)", &mut session).unwrap();
+        assert_eq!(higher.text, "20 * x^3");
+    }
+
+    #[test]
+    fn test_symbolic_expansion_and_taylor() {
+        let mut session = Session::new();
+        let exp = evaluate("expand(x * (x + 2))", &mut session).unwrap();
+        assert_eq!(exp.text, "x^2 + x * 2");
+
+        let ser = evaluate("taylor(x^3 + 2*x, x, 3)", &mut session).unwrap();
+        assert!(ser.text.contains("x^3") && ser.text.contains("2 * x"));
     }
 
     #[test]

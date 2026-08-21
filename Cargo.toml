@@ -1,6 +1,6 @@
 [package]
 name = "centl-web"
-version = "26.8.6"
+version = "26.8.7"
 edition = "2021"
 authors = ["Free Computation Foundation <contact@freecomputation.org>"]
 description = "CentL26 standalone scientific work environment and CENTL compatibility hosts"

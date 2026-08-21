@@ -420,6 +420,44 @@
     }), { restoreEditorFocus: true });
   }
 
+  function closeActiveNotebookTab() {
+    const activeTab = document.querySelector(".document-tab.is-active");
+    if (activeTab) {
+      const closeBtn = activeTab.querySelector(".tab-close");
+      if (closeBtn && closeBtn.dataset.closeNotebook) {
+        const idx = closeBtn.dataset.closeNotebook;
+        execute(new URLSearchParams({
+          lab_action: "calculate",
+          cmd: `:close-notebook ${idx}`,
+          interaction_mode: selectedMode
+        }), { restoreEditorFocus: true });
+        return;
+      }
+    }
+    const editor = activeEditor();
+    if (editor) {
+      editor.value = "";
+      removeStorage(draftKey);
+      syncComposerActions();
+    }
+  }
+
+  function openSettings() {
+    closePalette({ restoreFocus: false });
+    closeOmnibar();
+    const modal = document.querySelector("[data-settings-modal]");
+    if (!modal) return;
+    const currentMode = readStorage("centl26.startup_mode") || "resume";
+    const radio = modal.querySelector(`input[name="startup_mode"][value="${currentMode}"]`);
+    if (radio) radio.checked = true;
+    modal.hidden = false;
+  }
+
+  function closeSettings() {
+    const modal = document.querySelector("[data-settings-modal]");
+    if (modal) modal.hidden = true;
+  }
+
   function showHostError(message) {
     let notice = document.querySelector(".host-error");
     if (!notice) {
@@ -1941,12 +1979,25 @@
   }
 
   function initializeWorkspace(root = document) {
+    document.body.classList.add("hide-explorer", "hide-inspector", "hide-console");
     initializeInspectorTabs(root);
     initializeReceipts(root);
     rotateWelcomeHeadline(root);
-    selectArea(selectedArea, { openExplorer: selectedArea !== "work", persist: false });
+    selectArea(selectedArea, { openExplorer: false, persist: false });
     applyInteractionMode(selectedMode, { persist: false });
     syncComposerActions();
+
+    const startupMode = readStorage("centl26.startup_mode") || "resume";
+    const startWrap = document.querySelector("[data-start-surface-wrap]");
+    const noteWrap = document.querySelector("[data-notebook-wrap]");
+    if (startupMode === "resume" && hasNotebookContent()) {
+      if (startWrap) startWrap.hidden = true;
+      if (noteWrap) noteWrap.hidden = false;
+    } else if (startupMode === "fresh") {
+      if (startWrap) startWrap.hidden = false;
+      if (noteWrap) noteWrap.hidden = true;
+    }
+
     void hydrateCapabilities(root);
     void hydrateWorkspace(root);
   }
@@ -2322,20 +2373,18 @@
       return;
     }
 
-    // Welcome Screen Actions
-    if (target.matches("[data-resume-session]") || target.closest("[data-resume-session]")) {
-      const startWrap = document.querySelector("[data-start-surface-wrap]");
-      const noteWrap = document.querySelector("[data-notebook-wrap]");
-      if (startWrap && noteWrap) {
-        startWrap.hidden = true;
-        noteWrap.hidden = false;
-        activeEditor()?.focus({ preventScroll: true });
-      } else {
-        activeEditor()?.focus({ preventScroll: true });
-      }
+    // Settings Modal Controls
+    if (target.matches("[data-open-settings]") || target.closest("[data-open-settings]")) {
+      openSettings();
       return;
     }
 
+    if (target.matches("[data-settings-close]") || target.closest("[data-settings-close]") || (target.matches(".centl-settings-modal") && !target.closest(".centl-settings-dialog"))) {
+      closeSettings();
+      return;
+    }
+
+    // Welcome Screen Actions
     if (target.matches("[data-open-welcome]") || target.closest("[data-open-welcome]")) {
       const startWrap = document.querySelector("[data-start-surface-wrap]");
       const noteWrap = document.querySelector("[data-notebook-wrap]");
@@ -2480,6 +2529,9 @@
       const mode = select.value || "Auto";
       applyInteractionMode(mode);
     }
+    if (event.target.matches("[data-setting-startup]")) {
+      writeStorage("centl26.startup_mode", event.target.value);
+    }
     if (event.target.matches("[data-viz-speed]")) {
       StemVisualizer.anim.speed = parseFloat(event.target.value) || 1.0;
     }
@@ -2494,6 +2546,22 @@
     const docModalIsOpen = docModal && !docModal.hidden;
     const vizModal = document.querySelector("[data-visualizer-modal]");
     const vizModalIsOpen = vizModal && !vizModal.hidden;
+    const settingsModal = document.querySelector("[data-settings-modal]");
+    const settingsIsOpen = settingsModal && !settingsModal.hidden;
+
+    // Safe notebook tab closing shortcut: Alt+W / Option+W / Cmd+Shift+W / Ctrl+Shift+W
+    const isCloseTab = (event.altKey && key === "w") || (primary && event.shiftKey && key === "w");
+    if (isCloseTab) {
+      event.preventDefault();
+      closeActiveNotebookTab();
+      return;
+    }
+
+    if (settingsIsOpen && event.key === "Escape") {
+      event.preventDefault();
+      closeSettings();
+      return;
+    }
 
     if (vizModalIsOpen && event.key === "Escape") {
       event.preventDefault();

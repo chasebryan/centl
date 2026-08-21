@@ -553,12 +553,89 @@ pub fn evaluate_single(input: &str, session: &mut Session) -> Result<ExecutionRe
                     Expr::Variable(v) => v.as_str(),
                     _ => "x",
                 };
-                let d = target.diff(var_name);
+                let order = if args.len() >= 3 {
+                    match &args[2] {
+                        Expr::Number(n) => n.numer.to_i64().unwrap_or(1).max(1).min(20) as usize,
+                        _ => 1,
+                    }
+                } else {
+                    1
+                };
+                let mut d = target.clone();
+                for _ in 0..order {
+                    d = d.diff(var_name);
+                }
                 ExecutionResult {
                     text: format!("{}", d),
                     exact_rational: None,
                     approximate: None,
                     symbolic_expr: Some(d),
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+            "expand" if args.len() >= 1 => {
+                let target = &args[0];
+                let expanded = target.expand();
+                ExecutionResult {
+                    text: format!("{}", expanded),
+                    exact_rational: None,
+                    approximate: None,
+                    symbolic_expr: Some(expanded),
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+            "taylor" | "series" if args.len() >= 2 => {
+                let target = &args[0];
+                let var_name = match &args[1] {
+                    Expr::Variable(v) => v.as_str(),
+                    _ => "x",
+                };
+                let degree = if args.len() >= 3 {
+                    match &args[2] {
+                        Expr::Number(n) => n.numer.to_i64().unwrap_or(4).max(1).min(10) as usize,
+                        _ => 4,
+                    }
+                } else {
+                    4
+                };
+                let mut terms = Vec::new();
+                let mut current_deriv = target.clone();
+                for k in 0..=degree {
+                    let coeff_expr = current_deriv.substitute(var_name, &Expr::num(0)).simplify();
+                    let fact = crate::engine::functions::factorial(k as u64).unwrap_or_else(|_| BigInt::one());
+                    let fact_rat = BigRational::from_bigint(fact);
+                    let term = match coeff_expr {
+                        Expr::Number(ref n) if !n.is_zero() => {
+                            let coeff = n / &fact_rat;
+                            if k == 0 {
+                                Some(Expr::Number(coeff))
+                            } else if k == 1 {
+                                Some(Expr::Mul(Box::new(Expr::Number(coeff)), Box::new(Expr::var(var_name))).simplify())
+                            } else {
+                                Some(Expr::Mul(Box::new(Expr::Number(coeff)), Box::new(Expr::Pow(Box::new(Expr::var(var_name)), k as i32))).simplify())
+                            }
+                        }
+                        _ => None,
+                    };
+                    if let Some(t) = term {
+                        terms.push(t);
+                    }
+                    current_deriv = current_deriv.diff(var_name);
+                }
+                let poly = if terms.is_empty() {
+                    Expr::num(0)
+                } else {
+                    let mut acc = terms[0].clone();
+                    for t in terms.iter().skip(1) {
+                        acc = Expr::Add(Box::new(acc), Box::new(t.clone())).simplify();
+                    }
+                    acc
+                };
+                ExecutionResult {
+                    text: format!("{}", poly),
+                    exact_rational: None,
+                    approximate: None,
+                    symbolic_expr: Some(poly),
                     execution_micros: start_time.elapsed().as_micros(),
                 }
             }
