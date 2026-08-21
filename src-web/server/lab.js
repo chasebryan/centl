@@ -876,9 +876,13 @@
       toggleTheme();
     }
 
-    if (target.dataset.paletteAction === "toggle-theme") {
+    if (target.matches("[data-save-project], [data-save-project] *")) {
+      runCommand(":save");
+    }
+
+    if (target.dataset.paletteAction === "save-project") {
       closePalette({ restoreFocus: false });
-      toggleTheme();
+      runCommand(":save");
     }
 
     if (target.dataset.paletteAction === "download-examples") {
@@ -889,6 +893,16 @@
     if (target.dataset.paletteAction === "download-notebook") {
       closePalette({ restoreFocus: false });
       window.location.href = "/download/notebook.md";
+    }
+
+    if (target.dataset.paletteAction === "download-notebook-json") {
+      closePalette({ restoreFocus: false });
+      window.location.href = "/download/notebook.json";
+    }
+
+    if (target.dataset.paletteAction === "download-project") {
+      closePalette({ restoreFocus: false });
+      window.location.href = "/download/project.json";
     }
 
     if (target.dataset.paletteAction === "run-input") {
@@ -1020,6 +1034,12 @@
     if ((primary && event.shiftKey && key === "n") || (event.altKey && key === "n")) {
       event.preventDefault();
       startNewComputation();
+      return;
+    }
+
+    if (primary && !event.altKey && key === "s") {
+      event.preventDefault();
+      runCommand(":save");
       return;
     }
 

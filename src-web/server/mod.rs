@@ -360,7 +360,11 @@ impl ServerState {
     }
 }
 
-fn lab_api_response(path: &str, server_state: &ServerState) -> io::Result<Option<LabApiResponse>> {
+fn lab_api_response(
+    path: &str,
+    server_state: &ServerState,
+    session_state: Option<&Arc<Mutex<AppState>>>,
+) -> io::Result<Option<LabApiResponse>> {
     if path == "/download/centl26-examples.csv" {
         let csv = examples_data::generate_examples_csv();
         return Ok(Some(LabApiResponse {
@@ -378,7 +382,12 @@ fn lab_api_response(path: &str, server_state: &ServerState) -> io::Result<Option
     }
 
     if path == "/download/notebook.md" {
-        let md = if let Some(ref project) = server_state.lab_project {
+        let md = if let Some(state_arc) = session_state {
+            let state = state_arc.lock().map_err(|_| {
+                io::Error::new(io::ErrorKind::Other, "poisoned session state lock")
+            })?;
+            handler::export_notebook_markdown(&state)
+        } else if let Some(ref project) = server_state.lab_project {
             let state = project.state.lock().map_err(|_| {
                 io::Error::new(io::ErrorKind::Other, "poisoned session state lock")
             })?;
@@ -394,7 +403,12 @@ fn lab_api_response(path: &str, server_state: &ServerState) -> io::Result<Option
     }
 
     if path == "/download/notebook.json" || path == "/api/export-notebook" {
-        let json = if let Some(ref project) = server_state.lab_project {
+        let json = if let Some(state_arc) = session_state {
+            let state = state_arc.lock().map_err(|_| {
+                io::Error::new(io::ErrorKind::Other, "poisoned session state lock")
+            })?;
+            handler::export_notebook_json(&state)
+        } else if let Some(ref project) = server_state.lab_project {
             let state = project.state.lock().map_err(|_| {
                 io::Error::new(io::ErrorKind::Other, "poisoned session state lock")
             })?;
@@ -402,6 +416,27 @@ fn lab_api_response(path: &str, server_state: &ServerState) -> io::Result<Option
         } else {
             let state = AppState::new();
             handler::export_notebook_json(&state)
+        };
+        return Ok(Some(LabApiResponse {
+            content_type: "application/json; charset=utf-8",
+            body: json.into_bytes(),
+        }));
+    }
+
+    if path == "/download/project.json" || path == "/api/export-project" {
+        let json = if let Some(state_arc) = session_state {
+            let state = state_arc.lock().map_err(|_| {
+                io::Error::new(io::ErrorKind::Other, "poisoned session state lock")
+            })?;
+            handler::export_project_json(&state)
+        } else if let Some(ref project) = server_state.lab_project {
+            let state = project.state.lock().map_err(|_| {
+                io::Error::new(io::ErrorKind::Other, "poisoned session state lock")
+            })?;
+            handler::export_project_json(&state)
+        } else {
+            let state = AppState::new();
+            handler::export_project_json(&state)
         };
         return Ok(Some(LabApiResponse {
             content_type: "application/json; charset=utf-8",
@@ -1196,8 +1231,17 @@ fn handle_lab_connection(mut stream: TcpStream, server_state: Arc<ServerState>) 
             is_head,
         );
     }
+    let requested_session = request
+        .headers
+        .get("cookie")
+        .and_then(|header| cookie_value(header, LAB_SESSION_COOKIE));
+    let session_arc = requested_session.as_deref().map(|s| {
+        let (_, state, _) = server_state.session_for(Some(s));
+        state
+    });
+
     if method == "GET" || is_head {
-        if let Some(response) = lab_api_response(path, &server_state)? {
+        if let Some(response) = lab_api_response(path, &server_state, session_arc.as_ref())? {
             let mut headers = vec![("Cache-Control", "no-store".to_string())];
             if path.starts_with("/download/") {
                 let filename = path.rsplit('/').next().unwrap_or("centl26-examples.csv");
@@ -1498,7 +1542,7 @@ fn handle_connection(
     let is_head = method == "HEAD";
 
     if (method == "GET" || is_head) && (path.starts_with("/download/") || path == "/api/examples" || path == "/api/update") {
-        if let Some(response) = lab_api_response(path, &server_state)? {
+        if let Some(response) = lab_api_response(path, &server_state, None)? {
             let mut headers = vec![("Cache-Control", "no-store".to_string())];
             if path.starts_with("/download/") {
                 let filename = path.rsplit('/').next().unwrap_or("centl26-examples.csv");
@@ -2361,7 +2405,7 @@ mod tests {
         let root = temporary_project_root("read-apis");
         let server = ServerState::new_lab_at(root.clone()).unwrap();
 
-        let capabilities = lab_api_response("/api/capabilities", &server)
+        let capabilities = lab_api_response("/api/capabilities", &server, None)
             .unwrap()
             .expect("capability API route");
         assert_eq!(capabilities.content_type, "application/json; charset=utf-8");
@@ -2375,7 +2419,7 @@ mod tests {
             assert!(capability["provider"].is_string());
         }
 
-        let workspace = lab_api_response("/api/workspace", &server)
+        let workspace = lab_api_response("/api/workspace", &server, None)
             .unwrap()
             .expect("workspace API route");
         assert_eq!(workspace.content_type, "application/json; charset=utf-8");
@@ -2405,16 +2449,35 @@ mod tests {
             crate::engine::evaluate("19 * 23", state.session_mut()).unwrap();
             server.persist_lab_project(&state).unwrap();
         }
-        let updated = lab_api_response("/api/workspace", &server)
+        let updated = lab_api_response("/api/workspace", &server, None)
             .unwrap()
             .expect("workspace API route");
         let updated: serde_json::Value = serde_json::from_slice(&updated.body).unwrap();
         assert_eq!(updated["revision"], 1);
         assert_eq!(updated["counts"]["receipts"], 1);
         assert_eq!(updated["notebook"]["run_count"], 1);
-        assert!(lab_api_response("/api/not-a-route", &server)
+        assert!(lab_api_response("/api/not-a-route", &server, None)
             .unwrap()
             .is_none());
+
+        // Export and download routes
+        let md = lab_api_response("/download/notebook.md", &server, Some(&state))
+            .unwrap()
+            .expect("markdown download");
+        assert_eq!(md.content_type, "text/markdown; charset=utf-8");
+        assert!(String::from_utf8_lossy(&md.body).contains("19 * 23"));
+
+        let nb_json = lab_api_response("/download/notebook.json", &server, Some(&state))
+            .unwrap()
+            .expect("json download");
+        assert_eq!(nb_json.content_type, "application/json; charset=utf-8");
+        assert!(String::from_utf8_lossy(&nb_json.body).contains("centl26.notebook/1"));
+
+        let proj_json = lab_api_response("/download/project.json", &server, Some(&state))
+            .unwrap()
+            .expect("project export");
+        assert_eq!(proj_json.content_type, "application/json; charset=utf-8");
+        assert!(String::from_utf8_lossy(&proj_json.body).contains("centl26.project/1"));
 
         drop(server);
         fs::remove_dir_all(root).unwrap();
@@ -2496,7 +2559,7 @@ mod tests {
             assert!(!workbench.contains(r#"class="system-result""#));
         }
 
-        let workspace = lab_api_response("/api/workspace", &server)
+        let workspace = lab_api_response("/api/workspace", &server, None)
             .unwrap()
             .expect("workspace API route");
         let workspace: serde_json::Value = serde_json::from_slice(&workspace.body).unwrap();

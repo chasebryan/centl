@@ -208,6 +208,20 @@ pub fn handle_single_command(
         return (None, None, None, None);
     }
 
+    if cmd == ":save" || cmd == ":save-project" {
+        state.sync_session_tabs();
+        let total_entries: usize = state.notebooks.iter().map(|(_, s)| s.history.len()).sum();
+        let name = state.notebook_name().to_string();
+        let res = ExecutionResult {
+            text: format!("Project saved successfully (Active: '{}', {} notebook tab(s), {} total calculation(s)).", name, state.notebooks.len(), total_entries),
+            exact_rational: None,
+            approximate: None,
+            symbolic_expr: None,
+            execution_micros: 0,
+        };
+        return (Some(res), None, None, None);
+    }
+
     if cmd == ":clear" || cmd == ":clear-history" {
         let name = state.notebook_name().to_string();
         state.notebooks[state.active_notebook].1 = Session::new();
@@ -3303,7 +3317,7 @@ mod tests {
         handle_command("2 + 2", &mut state);
         assert_eq!(state.session().history.len(), 1);
 
-        // Export markdown and json
+        // Export markdown, notebook json, and full project json
         let md = export_notebook_markdown(&state);
         assert!(md.contains("# Orbital Mechanics"));
         assert!(md.contains("2 + 2"));
@@ -3311,6 +3325,17 @@ mod tests {
         let json = export_notebook_json(&state);
         assert!(json.contains("Orbital Mechanics"));
         assert!(json.contains("2 + 2"));
+
+        let proj = export_project_json(&state);
+        assert!(proj.contains("centl26.project/1"));
+        assert!(proj.contains("Orbital Mechanics"));
+        assert!(proj.contains("1 + 1"));
+
+        // Save command
+        let (save_res, save_err, _, _) = handle_command(":save", &mut state);
+        assert!(save_err.is_none());
+        assert!(save_res.is_some());
+        assert!(save_res.unwrap().text.contains("Project saved successfully"));
 
         // Switch back to notebook 0
         handle_command(":switch-notebook 0", &mut state);
@@ -3609,6 +3634,29 @@ pub fn export_notebook_json(state: &AppState) -> String {
     }).collect();
     format!("{{\"schema\":\"centl26.notebook/1\",\"name\":{},\"version\":\"26.7.3\",\"entries\":[{}]}}",
         serde_json_str(name), entries.join(","))
+}
+
+pub fn export_project_json(state: &AppState) -> String {
+    let mut notebooks_json = Vec::new();
+    for (name, session) in &state.notebooks {
+        let entries: Vec<String> = session.history.iter().map(|e| {
+            format!("{{\"command\":{},\"result\":{},\"exact\":{}}}",
+                serde_json_str(&e.command),
+                serde_json_str(&e.result),
+                e.exact_repr.as_ref().map(|s| serde_json_str(s)).unwrap_or("null".to_string())
+            )
+        }).collect();
+        notebooks_json.push(format!(
+            "{{\"name\":{},\"entries\":[{}]}}",
+            serde_json_str(name),
+            entries.join(",")
+        ));
+    }
+    format!(
+        "{{\"schema\":\"centl26.project/1\",\"version\":\"26.7.3\",\"active_notebook\":{},\"notebooks\":[{}]}}",
+        state.active_notebook,
+        notebooks_json.join(",")
+    )
 }
 
 fn serde_json_str(s: &str) -> String {
