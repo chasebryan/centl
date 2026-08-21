@@ -392,6 +392,108 @@ impl Expr {
             }
         }
     }
+
+    // Symbolic expansion: expand((x - 1)*(x + 1)) -> x^2 - 1
+    pub fn expand(&self) -> Expr {
+        match self {
+            Expr::Mul(a, b) => {
+                let ea = a.expand();
+                let eb = b.expand();
+                match (&ea, &eb) {
+                    (Expr::Add(a1, a2), _) => {
+                        Expr::Add(
+                            Box::new(Expr::Mul(a1.clone(), Box::new(eb.clone())).expand()),
+                            Box::new(Expr::Mul(a2.clone(), Box::new(eb.clone())).expand()),
+                        ).simplify()
+                    }
+                    (Expr::Sub(a1, a2), _) => {
+                        Expr::Sub(
+                            Box::new(Expr::Mul(a1.clone(), Box::new(eb.clone())).expand()),
+                            Box::new(Expr::Mul(a2.clone(), Box::new(eb.clone())).expand()),
+                        ).simplify()
+                    }
+                    (_, Expr::Add(b1, b2)) => {
+                        Expr::Add(
+                            Box::new(Expr::Mul(Box::new(ea.clone()), b1.clone()).expand()),
+                            Box::new(Expr::Mul(Box::new(ea.clone()), b2.clone()).expand()),
+                        ).simplify()
+                    }
+                    (_, Expr::Sub(b1, b2)) => {
+                        Expr::Sub(
+                            Box::new(Expr::Mul(Box::new(ea.clone()), b1.clone()).expand()),
+                            Box::new(Expr::Mul(Box::new(ea.clone()), b2.clone()).expand()),
+                        ).simplify()
+                    }
+                    _ => Expr::Mul(Box::new(ea), Box::new(eb)).simplify(),
+                }
+            }
+            Expr::Pow(base, exp) if *exp > 1 && *exp <= 8 => {
+                let mut res = base.expand();
+                for _ in 1..*exp {
+                    res = Expr::Mul(Box::new(res), Box::new(base.expand())).expand();
+                }
+                res.simplify()
+            }
+            Expr::Add(a, b) => Expr::Add(Box::new(a.expand()), Box::new(b.expand())).simplify(),
+            Expr::Sub(a, b) => Expr::Sub(Box::new(a.expand()), Box::new(b.expand())).simplify(),
+            Expr::Neg(a) => Expr::Neg(Box::new(a.expand())).simplify(),
+            Expr::Div(a, b) => Expr::Div(Box::new(a.expand()), Box::new(b.expand())).simplify(),
+            _ => self.clone(),
+        }
+    }
+
+    // Symbolic factorization for quadratic / polynomial forms
+    pub fn factor(&self, var: &str) -> Result<Expr, String> {
+        let diff = self.expand().simplify();
+        let (c2, c1, c0) = extract_quadratic_coeffs(&diff, var)?;
+        if c2.is_zero() {
+            return Ok(diff);
+        }
+        let four = BigRational::from_i64(4);
+        let two = BigRational::from_i64(2);
+        let four_c2_c0 = &(&four * &c2) * &c0;
+        let delta = &(&c1 * &c1) - &four_c2_c0;
+
+        if delta.is_negative() {
+            return Ok(self.clone());
+        }
+
+        let delta_num = delta.numer.to_f64();
+        let delta_den = delta.denom.to_f64();
+        let sq_num = delta_num.sqrt().round();
+        let sq_den = delta_den.sqrt().round();
+
+        if (sq_num * sq_num - delta_num).abs() < 1e-6 && (sq_den * sq_den - delta_den).abs() < 1e-6 {
+            let sqrt_delta = BigRational::from_fraction(sq_num as i64, sq_den as i64);
+            let r1 = (&(-&c1) + &sqrt_delta) / (&two * &c2);
+            let r2 = (&(-&c1) - &sqrt_delta) / (&two * &c2);
+
+            let term1 = if r1.is_zero() {
+                Expr::var(var)
+            } else if r1.is_negative() {
+                Expr::Add(Box::new(Expr::var(var)), Box::new(Expr::Number(-r1)))
+            } else {
+                Expr::Sub(Box::new(Expr::var(var)), Box::new(Expr::Number(r1)))
+            };
+
+            let term2 = if r2.is_zero() {
+                Expr::var(var)
+            } else if r2.is_negative() {
+                Expr::Add(Box::new(Expr::var(var)), Box::new(Expr::Number(-r2)))
+            } else {
+                Expr::Sub(Box::new(Expr::var(var)), Box::new(Expr::Number(r2)))
+            };
+
+            if c2.numer.is_one() && c2.denom.is_one() {
+                Ok(Expr::Mul(Box::new(term1), Box::new(term2)))
+            } else {
+                let leading = Expr::Number(c2);
+                Ok(Expr::Mul(Box::new(leading), Box::new(Expr::Mul(Box::new(term1), Box::new(term2)))))
+            }
+        } else {
+            Ok(self.clone())
+        }
+    }
 }
 
 fn extract_quadratic_coeffs(expr: &Expr, var: &str) -> Result<(BigRational, BigRational, BigRational), String> {

@@ -114,16 +114,254 @@ pub fn evaluate(input: &str, session: &mut Session) -> Result<ExecutionResult, S
                     execution_micros: elapsed,
                 });
             }
+            ":vars" | ":variables" => {
+                let mut entries: Vec<String> = session
+                    .variables
+                    .iter()
+                    .map(|(k, v)| format!("  {} = {}", k, v))
+                    .collect();
+                entries.sort();
+                return Ok(ExecutionResult {
+                    text: if entries.is_empty() {
+                        "No variables defined in session.".to_string()
+                    } else {
+                        format!("Session Variables:\n{}", entries.join("\n"))
+                    },
+                    exact_rational: None,
+                    approximate: None,
+                    symbolic_expr: None,
+                    execution_micros: elapsed,
+                });
+            }
             _ => return Err(format!("unknown command: {}", trimmed)),
         }
     }
 
+    // Check for explicit "define" prefix
+    let expr_str = if let Some(stripped) = trimmed.strip_prefix("define ") {
+        stripped.trim()
+    } else {
+        trimmed
+    };
+
     // Parse expression
-    let expr = Parser::parse(trimmed)?;
+    let expr = Parser::parse(expr_str)?;
+
+    // Handle variable assignments: var = expr
+    if let Expr::Equation(lhs, rhs) = &expr {
+        if let Expr::Variable(var_name) = lhs.as_ref() {
+            let eval_rhs = eval_expr(rhs, session)?;
+            let text = format!("{} = {}", var_name, eval_rhs);
+            let exact = match &eval_rhs {
+                Expr::Number(n) => Some(n.clone()),
+                _ => None,
+            };
+            session.variables.insert(var_name.clone(), eval_rhs.clone());
+            let exec_res = ExecutionResult {
+                text,
+                exact_rational: exact,
+                approximate: None,
+                symbolic_expr: Some(Expr::Equation(lhs.clone(), Box::new(eval_rhs))),
+                execution_micros: start_time.elapsed().as_micros(),
+            };
+            session.history.push(HistoryEntry {
+                command: trimmed.to_string(),
+                result: exec_res.text.clone(),
+                exact_repr: exec_res.exact_rational.as_ref().map(|r| format!("{}", r)),
+                approximate_repr: None,
+                execution_micros: exec_res.execution_micros,
+                success: true,
+            });
+            return Ok(exec_res);
+        }
+    }
 
     // Handle high-level commands embedded in expressions
     let result = match &expr {
         Expr::Function(name, args) => match name.as_str() {
+            "assert" | "verify" if args.len() >= 1 => {
+                let target = &args[0];
+                let (lhs, rhs) = match target {
+                    Expr::Equation(l, r) => (eval_expr(l, session)?, eval_expr(r, session)?),
+                    other => (eval_expr(other, session)?, Expr::num(0)),
+                };
+                let diff = Expr::Sub(Box::new(lhs.expand()), Box::new(rhs.expand())).simplify();
+                let verified = diff.is_zero();
+                let text = if verified {
+                    format!("assert({}): verified", target)
+                } else {
+                    format!("assert({}): refuted", target)
+                };
+                ExecutionResult {
+                    text,
+                    exact_rational: None,
+                    approximate: None,
+                    symbolic_expr: Some(diff),
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+            "expand" if args.len() == 1 => {
+                let eval = eval_expr(&args[0], session)?;
+                let exp = eval.expand().simplify();
+                let text = format!("{}", exp);
+                ExecutionResult {
+                    text,
+                    exact_rational: None,
+                    approximate: None,
+                    symbolic_expr: Some(exp),
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+            "factor" if args.len() >= 1 => {
+                let eval = eval_expr(&args[0], session)?;
+                let var_name = if args.len() >= 2 {
+                    match &args[1] {
+                        Expr::Variable(v) => v.as_str(),
+                        _ => "x",
+                    }
+                } else {
+                    "x"
+                };
+                let factored = eval.factor(var_name)?;
+                let text = format!("{}", factored);
+                ExecutionResult {
+                    text,
+                    exact_rational: None,
+                    approximate: None,
+                    symbolic_expr: Some(factored),
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+            "simplify" if args.len() == 1 => {
+                let eval = eval_expr(&args[0], session)?;
+                let simplified = eval.simplify();
+                let text = format!("{}", simplified);
+                ExecutionResult {
+                    text,
+                    exact_rational: None,
+                    approximate: None,
+                    symbolic_expr: Some(simplified),
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+            "choose" | "nCr" if args.len() == 2 => {
+                let a = eval_expr(&args[0], session)?;
+                let b = eval_expr(&args[1], session)?;
+                if let (Expr::Number(na), Expr::Number(nb)) = (a, b) {
+                    if na.is_integer() && !na.is_negative() && nb.is_integer() && !nb.is_negative() {
+                        let n = na.numer.to_i64().unwrap_or(0) as u64;
+                        let k = nb.numer.to_i64().unwrap_or(0) as u64;
+                        let c = choose(n, k)?;
+                        let rat = BigRational::from_bigint(c);
+                        let text = format!("{}", rat);
+                        ExecutionResult {
+                            text,
+                            exact_rational: Some(rat),
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("choose requires non-negative integers".to_string());
+                    }
+                } else {
+                    return Err("choose requires integers".to_string());
+                }
+            }
+            "permutations" | "nPr" if args.len() == 2 => {
+                let a = eval_expr(&args[0], session)?;
+                let b = eval_expr(&args[1], session)?;
+                if let (Expr::Number(na), Expr::Number(nb)) = (a, b) {
+                    if na.is_integer() && !na.is_negative() && nb.is_integer() && !nb.is_negative() {
+                        let n = na.numer.to_i64().unwrap_or(0) as u64;
+                        let k = nb.numer.to_i64().unwrap_or(0) as u64;
+                        let p = permutations(n, k)?;
+                        let rat = BigRational::from_bigint(p);
+                        let text = format!("{}", rat);
+                        ExecutionResult {
+                            text,
+                            exact_rational: Some(rat),
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("permutations requires non-negative integers".to_string());
+                    }
+                } else {
+                    return Err("permutations requires integers".to_string());
+                }
+            }
+            "is_prime" if args.len() == 1 => {
+                let a = eval_expr(&args[0], session)?;
+                if let Expr::Number(na) = a {
+                    if na.is_integer() && !na.is_negative() {
+                        let n = na.numer.to_i64().unwrap_or(0) as u64;
+                        let p = is_prime(n);
+                        let text = if p { "true".to_string() } else { "false".to_string() };
+                        ExecutionResult {
+                            text,
+                            exact_rational: None,
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("is_prime requires non-negative integer".to_string());
+                    }
+                } else {
+                    return Err("is_prime requires integer".to_string());
+                }
+            }
+            "factors" if args.len() == 1 => {
+                let a = eval_expr(&args[0], session)?;
+                if let Expr::Number(na) = a {
+                    if na.is_integer() && !na.is_negative() {
+                        let n = na.numer.to_i64().unwrap_or(0) as u64;
+                        let f_list = factors(n);
+                        let text = f_list.iter().map(|f| f.to_string()).collect::<Vec<_>>().join(", ");
+                        ExecutionResult {
+                            text,
+                            exact_rational: None,
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("factors requires non-negative integer".to_string());
+                    }
+                } else {
+                    return Err("factors requires integer".to_string());
+                }
+            }
+            "prime_factors" if args.len() == 1 => {
+                let a = eval_expr(&args[0], session)?;
+                if let Expr::Number(na) = a {
+                    if na.is_integer() && !na.is_negative() {
+                        let n = na.numer.to_i64().unwrap_or(0) as u64;
+                        let pf = prime_factors(n);
+                        let parts: Vec<String> = pf.iter().map(|(p, count)| {
+                            if *count == 1 {
+                                p.to_string()
+                            } else {
+                                format!("{}^{}", p, count)
+                            }
+                        }).collect();
+                        let text = if parts.is_empty() { "1".to_string() } else { parts.join(" * ") };
+                        ExecutionResult {
+                            text,
+                            exact_rational: None,
+                            approximate: None,
+                            symbolic_expr: None,
+                            execution_micros: start_time.elapsed().as_micros(),
+                        }
+                    } else {
+                        return Err("prime_factors requires non-negative integer".to_string());
+                    }
+                } else {
+                    return Err("prime_factors requires integer".to_string());
+                }
+            }
             "diff" if args.len() >= 2 => {
                 let target = &args[0];
                 let var_name = match &args[1] {

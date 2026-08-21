@@ -318,6 +318,9 @@ impl ServerState {
         let research_status =
             capabilities::capability_status(registry, "org.fcf.centl.research.erdos_straus")
                 .unwrap_or("unavailable");
+        let model_status =
+            capabilities::capability_status(registry, "org.fcf.centl.sci.interpret")
+                .unwrap_or("not-implemented");
         let build_status =
             capabilities::capability_status(registry, "org.fcf.centl.mirage.develop")
                 .unwrap_or("integration-planned");
@@ -333,7 +336,7 @@ impl ServerState {
             "counts": {
                 "notebooks": 1,
                 "datasets": 0,
-                "models": 0,
+                "models": if model_status == "available" { 1 } else { 0 },
                 "receipts": run_count,
                 "extensions": 0,
             },
@@ -348,9 +351,9 @@ impl ServerState {
                 {"id": "projects", "label": "Projects", "status": "single-project", "available": true, "count": 1},
                 {"id": "tools", "label": "Tools", "status": "available", "available": true, "count": available_tools},
                 {"id": "data", "label": "Data", "status": "not-implemented", "available": false, "count": 0},
-                {"id": "models", "label": "Models", "status": "not-implemented", "available": false, "count": 0},
+                {"id": "models", "label": "Models", "status": model_status, "available": model_status == "available", "count": if model_status == "available" { 1 } else { 0 }},
                 {"id": "research", "label": "Research", "status": research_status, "available": research_status == "available", "count": if research_status == "available" { 1 } else { 0 }},
-                {"id": "build", "label": "Build", "status": build_status, "available": build_status == "available", "count": 0},
+                {"id": "build", "label": "Build", "status": build_status, "available": build_status == "available", "count": if build_status == "available" { 1 } else { 0 }},
             ],
         }))
     }
@@ -590,6 +593,18 @@ impl ProjectProcessLock {
                 ));
             }
             Ok(Self { _file: file })
+        }
+    }
+}
+
+#[cfg(unix)]
+const LOCK_UN: i32 = 8;
+
+#[cfg(unix)]
+impl Drop for ProjectProcessLock {
+    fn drop(&mut self) {
+        unsafe {
+            let _ = flock(self._file.as_raw_fd(), LOCK_UN);
         }
     }
 }
@@ -1313,7 +1328,7 @@ fn validate_lab_interaction_mode(interaction_mode: &str, command: &str) -> Resul
     match normalized_mode.as_str() {
         "auto" => Ok(()),
         "math"
-            if !["physics", "es", "erdos", "chem", "chemistry"]
+            if !["physics", "es", "erdos", "chem", "chemistry", "cps", "sci", "mirage", "caravan"]
                 .iter()
                 .any(|family| belongs_to(family)) =>
         {
@@ -1333,8 +1348,9 @@ fn validate_lab_interaction_mode(interaction_mode: &str, command: &str) -> Resul
             "Research mode accepts `es` or `erdos` commands only. No work was admitted."
                 .to_string(),
         ),
+        "build" if belongs_to("mirage") || belongs_to("build") => Ok(()),
         "build" => Err(
-            "Build mode has no registered executor in this CentL26 runtime. No work was admitted."
+            "Build mode requires the CENTL-MIRAGE development engine. No work was admitted."
                 .to_string(),
         ),
         _ => unreachable!("interaction mode was validated above"),
@@ -2164,10 +2180,10 @@ mod tests {
             .find(|capability| capability["id"].as_str() == Some("org.fcf.centl.chemistry.compute"))
             .unwrap();
         assert_eq!(chemistry["status"], "available");
-        assert_eq!(
-            chemistry["operations"],
-            serde_json::json!(["atoms", "balance"])
-        );
+        let ops = chemistry["operations"].as_array().unwrap();
+        assert!(ops.iter().any(|v| v == "atoms"));
+        assert!(ops.iter().any(|v| v == "balance"));
+        assert!(ops.iter().any(|v| v == "molar-mass"));
 
         let project = capabilities
             .iter()

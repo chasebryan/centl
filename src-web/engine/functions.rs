@@ -103,3 +103,75 @@ pub fn slope(x1: &BigRational, y1: &BigRational, x2: &BigRational, y2: &BigRatio
     let dy = y2 - y1;
     Ok(&dy / &dx)
 }
+
+pub fn is_prime(n: u64) -> bool {
+    if n <= 1 {
+        return false;
+    }
+    if n <= 3 {
+        return true;
+    }
+    if n % 2 == 0 || n % 3 == 0 {
+        return false;
+    }
+    let mut i = 5;
+    while i * i <= n {
+        if n % i == 0 || n % (i + 2) == 0 {
+            return false;
+        }
+        i += 6;
+    }
+    true
+}
+
+pub fn prime_factors(mut n: u64) -> Vec<(u64, usize)> {
+    let mut factors = Vec::new();
+    if n == 0 {
+        return factors;
+    }
+    let mut count = 0;
+    while n % 2 == 0 {
+        count += 1;
+        n /= 2;
+    }
+    if count > 0 {
+        factors.push((2, count));
+    }
+    let mut d = 3;
+    while d * d <= n {
+        let mut count = 0;
+        while n % d == 0 {
+            count += 1;
+            n /= d;
+        }
+        if count > 0 {
+            factors.push((d, count));
+        }
+        d += 2;
+    }
+    if n > 1 {
+        factors.push((n, 1));
+    }
+    factors
+}
+
+pub fn factors(n: u64) -> Vec<u64> {
+    if n == 0 {
+        return Vec::new();
+    }
+    let mut small = Vec::new();
+    let mut large = Vec::new();
+    let mut i = 1;
+    while i * i <= n {
+        if n % i == 0 {
+            small.push(i);
+            if i * i != n {
+                large.push(n / i);
+            }
+        }
+        i += 1;
+    }
+    large.reverse();
+    small.extend(large);
+    small
+}

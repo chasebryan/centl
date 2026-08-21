@@ -192,3 +192,166 @@ pub fn calculate_kinematics(v0: f64, a: f64, t: f64) -> PhysicsResult {
         verified: true,
     }
 }
+
+pub struct PhysicalConstant {
+    pub symbol: &'static str,
+    pub name: &'static str,
+    pub value_str: &'static str,
+    pub value_f64: f64,
+    pub unit: &'static str,
+    pub exact: bool,
+    pub provenance: &'static str,
+}
+
+pub const PHYSICAL_CONSTANTS: &[PhysicalConstant] = &[
+    PhysicalConstant { symbol: "c", name: "Speed of light in vacuum", value_str: "299792458", value_f64: 299792458.0, unit: "m/s", exact: true, provenance: "SI definition (exact)" },
+    PhysicalConstant { symbol: "h", name: "Planck constant", value_str: "6.62607015e-34", value_f64: 6.62607015e-34, unit: "J·s", exact: true, provenance: "SI definition (exact)" },
+    PhysicalConstant { symbol: "hbar", name: "Reduced Planck constant (h / 2pi)", value_str: "1.054571817e-34", value_f64: 1.0545718176461565e-34, unit: "J·s", exact: false, provenance: "Derived from SI h" },
+    PhysicalConstant { symbol: "G", name: "Newtonian constant of gravitation", value_str: "6.67430e-11", value_f64: 6.67430e-11, unit: "m³/(kg·s²)", exact: false, provenance: "CODATA 2018" },
+    PhysicalConstant { symbol: "k_B", name: "Boltzmann constant", value_str: "1.380649e-23", value_f64: 1.380649e-23, unit: "J/K", exact: true, provenance: "SI definition (exact)" },
+    PhysicalConstant { symbol: "k", name: "Boltzmann constant (alias)", value_str: "1.380649e-23", value_f64: 1.380649e-23, unit: "J/K", exact: true, provenance: "SI definition (exact)" },
+    PhysicalConstant { symbol: "e", name: "Elementary charge", value_str: "1.602176634e-19", value_f64: 1.602176634e-19, unit: "C", exact: true, provenance: "SI definition (exact)" },
+    PhysicalConstant { symbol: "m_e", name: "Electron rest mass", value_str: "9.1093837015e-31", value_f64: 9.1093837015e-31, unit: "kg", exact: false, provenance: "CODATA 2018" },
+    PhysicalConstant { symbol: "m_p", name: "Proton rest mass", value_str: "1.67262192369e-27", value_f64: 1.67262192369e-27, unit: "kg", exact: false, provenance: "CODATA 2018" },
+    PhysicalConstant { symbol: "m_n", name: "Neutron rest mass", value_str: "1.67492749804e-27", value_f64: 1.67492749804e-27, unit: "kg", exact: false, provenance: "CODATA 2018" },
+    PhysicalConstant { symbol: "N_A", name: "Avogadro constant", value_str: "6.02214076e23", value_f64: 6.02214076e23, unit: "mol⁻¹", exact: true, provenance: "SI definition (exact)" },
+    PhysicalConstant { symbol: "epsilon_0", name: "Vacuum electric permittivity", value_str: "8.8541878128e-12", value_f64: 8.8541878128e-12, unit: "F/m", exact: false, provenance: "CODATA 2018" },
+    PhysicalConstant { symbol: "mu_0", name: "Vacuum magnetic permeability", value_str: "1.25663706212e-6", value_f64: 1.25663706212e-6, unit: "N/A²", exact: false, provenance: "CODATA 2018" },
+    PhysicalConstant { symbol: "R", name: "Molar gas constant (N_A * k_B)", value_str: "8.31446261815324", value_f64: 8.31446261815324, unit: "J/(mol·K)", exact: true, provenance: "Exact product N_A * k_B" },
+    PhysicalConstant { symbol: "g_0", name: "Standard acceleration of gravity", value_str: "9.80665", value_f64: 9.80665, unit: "m/s²", exact: true, provenance: "Standard definition (exact)" },
+    PhysicalConstant { symbol: "sigma_sb", name: "Stefan-Boltzmann constant", value_str: "5.670374419e-8", value_f64: 5.670374419e-8, unit: "W/(m²·K⁴)", exact: true, provenance: "Exact derivation (pi² k_B⁴ / (60 hbar³ c²))" },
+    PhysicalConstant { symbol: "alpha", name: "Fine-structure constant", value_str: "0.0072973525693", value_f64: 7.2973525693e-3, unit: "dimensionless (1/137.035999084)", exact: false, provenance: "CODATA 2018" },
+];
+
+pub fn lookup_constant(symbol: &str) -> Option<&'static PhysicalConstant> {
+    let sym_clean = symbol.trim();
+    PHYSICAL_CONSTANTS.iter().find(|c| c.symbol.eq_ignore_ascii_case(sym_clean))
+}
+
+pub fn list_units_catalog() -> PhysicsResult {
+    let catalog = vec![
+        ("Length", "m (meter, SI), cm, mm, km, in (inch), ft (foot), yd (yard), mi (mile)"),
+        ("Mass", "kg (kilogram, SI), g, mg, lb (pound), oz (ounce)"),
+        ("Time", "s (second, SI), ms, min (minute), hr (hour), day"),
+        ("Energy", "J (joule, SI), kJ, cal (calorie), kcal, eV (electronvolt), kWh"),
+        ("Pressure", "Pa (pascal, SI), kPa, bar, atm (atmosphere), psi, mmHg"),
+        ("Constants", "c, h, hbar, G, k_B, e, m_e, m_p, m_n, N_A, epsilon_0, mu_0, R, g_0, sigma_sb, alpha"),
+    ];
+    let details = catalog
+        .into_iter()
+        .map(|(cat, units)| (cat.to_string(), units.to_string()))
+        .collect();
+    PhysicsResult {
+        title: "Physical Units & Dimensions Catalog".to_string(),
+        details,
+        summary: "SI base dimensions and derived unit conversions available".to_string(),
+        verified: true,
+    }
+}
+
+pub fn calculate_cherenkov(refractive_index: f64, speed: f64) -> Result<PhysicsResult, String> {
+    if refractive_index < 1.0 {
+        return Err("refractive index must be >= 1.0".to_string());
+    }
+    if speed <= 0.0 {
+        return Err("particle speed must be > 0.0 m/s".to_string());
+    }
+    let c = 299792458.0;
+    if speed >= c {
+        return Err("particle speed must be strictly subluminal (< c)".to_string());
+    }
+
+    let beta = speed / c;
+    let threshold_beta = 1.0 / refractive_index;
+    let threshold_speed = c / refractive_index;
+    let beta_n = beta * refractive_index;
+    let emission = beta_n > 1.0;
+
+    let (cone_angle_rad, cone_angle_deg) = if emission {
+        let cos_theta = 1.0 / beta_n;
+        let theta_rad = cos_theta.acos();
+        (Some(theta_rad), Some(theta_rad.to_degrees()))
+    } else {
+        (None, None)
+    };
+
+    let mut details = vec![
+        ("Refractive Index (n)".to_string(), format!("{:.6}", refractive_index)),
+        ("Particle Speed (v)".to_string(), format!("{:.6e} m/s", speed)),
+        ("Particle Beta (v/c)".to_string(), format!("{:.6}", beta)),
+        ("Threshold Beta (1/n)".to_string(), format!("{:.6}", threshold_beta)),
+        ("Threshold Speed (c/n)".to_string(), format!("{:.6e} m/s", threshold_speed)),
+        ("Beta * n Product".to_string(), format!("{:.6}", beta_n)),
+        ("Cherenkov Emission".to_string(), if emission { "ACTIVE (v > c/n)".to_string() } else { "SUB-THRESHOLD (no emission)".to_string() }),
+    ];
+
+    if let (Some(rad), Some(deg)) = (cone_angle_rad, cone_angle_deg) {
+        details.push(("Cherenkov Cone Angle (rad)".to_string(), format!("{:.6} rad", rad)));
+        details.push(("Cherenkov Cone Angle (deg)".to_string(), format!("{:.4}°", deg)));
+    }
+
+    let summary = if emission {
+        format!("Emission active: beta*n = {:.4} > 1, cone angle = {:.2}°", beta_n, cone_angle_deg.unwrap_or(0.0))
+    } else {
+        format!("Sub-threshold: beta*n = {:.4} <= 1, no radiation emitted", beta_n)
+    };
+
+    Ok(PhysicsResult {
+        title: "Relativistic Cherenkov Radiation Analysis".to_string(),
+        details,
+        summary,
+        verified: true,
+    })
+}
+
+pub fn simulate_gravity_trajectory(
+    mass: f64,
+    pos: (f64, f64, f64),
+    vel: (f64, f64, f64),
+    grav: (f64, f64, f64),
+    dt: f64,
+    steps: u64,
+) -> Result<PhysicsResult, String> {
+    if mass <= 0.0 {
+        return Err("mass must be > 0".to_string());
+    }
+    if dt <= 0.0 {
+        return Err("time step dt must be > 0".to_string());
+    }
+    if steps == 0 || steps > 1000000 {
+        return Err("steps must be between 1 and 1,000,000".to_string());
+    }
+
+    let mut p = pos;
+    let mut v = vel;
+    for _ in 0..steps {
+        // Symplectic Euler: update velocity first, then position
+        v.0 += grav.0 * dt;
+        v.1 += grav.1 * dt;
+        v.2 += grav.2 * dt;
+        p.0 += v.0 * dt;
+        p.1 += v.1 * dt;
+        p.2 += v.2 * dt;
+    }
+
+    let t_total = (steps as f64) * dt;
+    let v_mag = (v.0 * v.0 + v.1 * v.1 + v.2 * v.2).sqrt();
+    let p_mag = (p.0 * p.0 + p.1 * p.1 + p.2 * p.2).sqrt();
+
+    Ok(PhysicsResult {
+        title: "Symplectic Gravitational Trajectory Simulation".to_string(),
+        details: vec![
+            ("Mass".to_string(), format!("{} kg", mass)),
+            ("Initial Position".to_string(), format!("({:.4}, {:.4}, {:.4}) m", pos.0, pos.1, pos.2)),
+            ("Initial Velocity".to_string(), format!("({:.4}, {:.4}, {:.4}) m/s", vel.0, vel.1, vel.2)),
+            ("Gravity Acceleration".to_string(), format!("({:.4}, {:.4}, {:.4}) m/s²", grav.0, grav.1, grav.2)),
+            ("Time Step (dt)".to_string(), format!("{:.4} s", dt)),
+            ("Total Steps".to_string(), format!("{}", steps)),
+            ("Total Duration".to_string(), format!("{:.4} s", t_total)),
+            ("Final Position".to_string(), format!("({:.4}, {:.4}, {:.4}) m (dist: {:.4} m)", p.0, p.1, p.2, p_mag)),
+            ("Final Velocity".to_string(), format!("({:.4}, {:.4}, {:.4}) m/s (speed: {:.4} m/s)", v.0, v.1, v.2, v_mag)),
+        ],
+        summary: format!("t = {:.2}s: p = ({:.2}, {:.2}, {:.2}) m, v = ({:.2}, {:.2}, {:.2}) m/s", t_total, p.0, p.1, p.2, v.0, v.1, v.2),
+        verified: true,
+    })
+}

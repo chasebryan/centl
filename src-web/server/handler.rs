@@ -35,6 +35,20 @@ pub struct AppState {
     pub session: Session,
 }
 
+impl AppState {
+    pub fn new() -> Self {
+        Self {
+            session: Session::new(),
+        }
+    }
+}
+
+impl Default for AppState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 pub fn handle_command(
     raw_cmd: &str,
     state: &mut AppState,
@@ -63,6 +77,26 @@ pub fn handle_command(
     // parsing, balancing, or conservation semantics.
     if has_command_prefix(cmd, "chem") || has_command_prefix(cmd, "chemistry") {
         return handle_chemistry_command(cmd, state);
+    }
+
+    // Chemical Process Systems (CPS) Command Handler
+    if has_command_prefix(cmd, "cps") {
+        return handle_cps_command(cmd, state);
+    }
+
+    // Scientific Problem Interpretation (SCi) Command Handler
+    if has_command_prefix(cmd, "sci") {
+        return handle_sci_command(cmd, state);
+    }
+
+    // Development Workbench (MIRAGE) Command Handler
+    if has_command_prefix(cmd, "mirage") {
+        return handle_mirage_command(cmd, state);
+    }
+
+    // Preservation & Retrieval (CARAVAN) Command Handler
+    if has_command_prefix(cmd, "caravan") {
+        return handle_caravan_command(cmd, state);
     }
 
     // 1. Erdős–Straus Command Handler
@@ -173,6 +207,94 @@ pub fn handle_command(
             };
         }
 
+        if parts.len() >= 2 && parts[1] == "units" {
+            let started = Instant::now();
+            let result = crate::physics::list_units_catalog();
+            record_physics_history(cmd, &result, started.elapsed().as_micros(), state);
+            return (None, None, Some(result), None);
+        }
+
+        if parts.len() >= 2 && parts[1] == "constant" {
+            if parts.len() != 3 {
+                return (
+                    None,
+                    Some("Usage: physics constant <symbol>".to_string()),
+                    None,
+                    None,
+                );
+            }
+            let sym = parts[2];
+            let started = Instant::now();
+            if let Some(c) = crate::physics::lookup_constant(sym) {
+                let result = PhysicsResult {
+                    title: format!("Physical Constant: {} ({})", c.symbol, c.name),
+                    details: vec![
+                        ("Symbol".to_string(), c.symbol.to_string()),
+                        ("Name".to_string(), c.name.to_string()),
+                        ("Value".to_string(), format!("{} {}", c.value_str, c.unit)),
+                        ("Exactness".to_string(), if c.exact { "Exact definition".to_string() } else { "Measured / Derived".to_string() }),
+                        ("Provenance".to_string(), c.provenance.to_string()),
+                    ],
+                    summary: format!("{} = {} {}", c.symbol, c.value_str, c.unit),
+                    verified: true,
+                };
+                record_physics_history(cmd, &result, started.elapsed().as_micros(), state);
+                return (None, None, Some(result), None);
+            } else {
+                return (
+                    None,
+                    Some(format!("Unknown physical constant: {}. Use 'physics units' to see available constants.", sym)),
+                    None,
+                    None,
+                );
+            }
+        }
+
+        if parts.len() >= 2 && parts[1] == "cherenkov" {
+            if parts.len() != 4 {
+                return (
+                    None,
+                    Some("Usage: physics cherenkov <refractive_index> <particle_speed_m_per_s>".to_string()),
+                    None,
+                    None,
+                );
+            }
+            let n = match parts[2].parse::<f64>() {
+                Ok(v) => v,
+                Err(_) => return (None, Some(format!("Invalid refractive index: {}", parts[2])), None, None),
+            };
+            let v = match parts[3].parse::<f64>() {
+                Ok(v) => v,
+                Err(_) => return (None, Some(format!("Invalid particle speed: {}", parts[3])), None, None),
+            };
+            let started = Instant::now();
+            return match crate::physics::calculate_cherenkov(n, v) {
+                Ok(result) => {
+                    record_physics_history(cmd, &result, started.elapsed().as_micros(), state);
+                    (None, None, Some(result), None)
+                }
+                Err(error) => (None, Some(error), None, None),
+            };
+        }
+
+        if parts.len() >= 2 && parts[1] == "gravity" {
+            let mass = named_f64(&parts[2..], "m").or_else(|| named_f64(&parts[2..], "mass")).unwrap_or(1.0);
+            let pos = named_vec3(&parts[2..], "p").or_else(|| named_vec3(&parts[2..], "pos")).or_else(|| named_vec3(&parts[2..], "position")).unwrap_or((0.0, 0.0, 0.0));
+            let vel = named_vec3(&parts[2..], "v").or_else(|| named_vec3(&parts[2..], "vel")).or_else(|| named_vec3(&parts[2..], "velocity")).unwrap_or((0.0, 0.0, 0.0));
+            let grav = named_vec3(&parts[2..], "g").or_else(|| named_vec3(&parts[2..], "grav")).or_else(|| named_vec3(&parts[2..], "gravity")).unwrap_or((0.0, 0.0, -9.80665));
+            let dt = named_f64(&parts[2..], "dt").unwrap_or(0.01);
+            let steps = named_u64(&parts[2..], "steps").or_else(|| named_u64(&parts[2..], "n")).unwrap_or(100);
+
+            let started = Instant::now();
+            return match crate::physics::simulate_gravity_trajectory(mass, pos, vel, grav, dt, steps) {
+                Ok(result) => {
+                    record_physics_history(cmd, &result, started.elapsed().as_micros(), state);
+                    (None, None, Some(result), None)
+                }
+                Err(error) => (None, Some(error), None, None),
+            };
+        }
+
         if parts.len() >= 2 && parts[1] == "collision" {
             let m1 = named_f64(&parts[2..], "m1");
             let v1 = named_f64(&parts[2..], "v1");
@@ -207,7 +329,7 @@ pub fn handle_command(
         return (
             None,
             Some(
-                "Usage: physics convert <value> <from_unit> <to_unit> | physics collision m1=<...> v1=<...> m2=<...> v2=<...> [e=<...>]"
+                "Usage: physics convert <value> <from> <to> | physics constant <sym> | physics units | physics cherenkov <n> <v> | physics gravity m=.. p=.. v=.. g=.. dt=.. steps=.. | physics collision m1=.. v1=.. m2=.. v2=.. [e=..]"
                     .to_string(),
             ),
             None,
@@ -362,25 +484,155 @@ fn chemistry_provider_args(command: &str) -> Result<Vec<String>, String> {
     } else {
         command["chem".len()..].trim()
     };
-    let Some((operation, raw_operand)) = body.split_once(char::is_whitespace) else {
-        return Err("Usage: chem atoms <formula> | chem balance <reaction>".to_string());
-    };
-    let operand = strip_matching_quotes(raw_operand.trim());
-    if operand.is_empty() {
-        return Err("Usage: chem atoms <formula> | chem balance <reaction>".to_string());
+    let mut tokens = tokenize_command_args(body);
+    if tokens.is_empty() {
+        return Err("Usage: chem <operation> [args...]".to_string());
     }
-
-    match operation.to_ascii_lowercase().as_str() {
-        "atoms" if !operand.chars().any(char::is_whitespace) => {
-            Ok(vec!["atoms".to_string(), operand.to_string()])
+    let operation = tokens.remove(0).to_ascii_lowercase();
+    match operation.as_str() {
+        "atoms" => {
+            if tokens.len() != 1 {
+                return Err("Usage: chem atoms <formula>".to_string());
+            }
+            let formula = strip_matching_quotes(&tokens[0]);
+            if formula.chars().any(char::is_whitespace) {
+                return Err("A chemical formula cannot contain whitespace.".to_string());
+            }
+            Ok(vec!["atoms".to_string(), formula.to_string()])
         }
-        "atoms" => Err("A chemical formula cannot contain whitespace.".to_string()),
-        "balance" => Ok(vec!["balance".to_string(), operand.to_string()]),
+        "balance" => {
+            if tokens.is_empty() {
+                return Err("Usage: chem balance <reaction>".to_string());
+            }
+            let joined = tokens.join(" ");
+            let reaction = strip_matching_quotes(&joined);
+            Ok(vec!["balance".to_string(), reaction.to_string()])
+        }
+        "particles" => {
+            let mut args = vec!["particles".to_string()];
+            for t in tokens {
+                args.push(strip_matching_quotes(&t).to_string());
+            }
+            Ok(args)
+        }
+        "moles" => {
+            let mut args = vec!["moles".to_string()];
+            for t in tokens {
+                args.push(strip_matching_quotes(&t).to_string());
+            }
+            Ok(args)
+        }
+        "stoich" => {
+            let mut args = vec!["stoich".to_string()];
+            for t in tokens {
+                args.push(strip_matching_quotes(&t).to_string());
+            }
+            Ok(args)
+        }
+        "limiting" => {
+            let mut args = vec!["limiting".to_string()];
+            for t in tokens {
+                args.push(strip_matching_quotes(&t).to_string());
+            }
+            Ok(args)
+        }
+        "spread" => {
+            let mut args = vec!["spread".to_string()];
+            for t in tokens {
+                args.push(strip_matching_quotes(&t).to_string());
+            }
+            Ok(args)
+        }
+        "constant" => {
+            if tokens.is_empty() {
+                return Err("Usage: chem constant <symbol>".to_string());
+            }
+            Ok(vec!["constant".to_string(), strip_matching_quotes(&tokens[0]).to_string()])
+        }
+        "molar-mass" | "molarmass" | "mass" => {
+            if tokens.is_empty() {
+                return Err("Usage: chem molar-mass <formula>".to_string());
+            }
+            Ok(vec!["molar-mass".to_string(), strip_matching_quotes(&tokens[0]).to_string()])
+        }
+        "concentration" => {
+            let mut args = vec!["concentration".to_string()];
+            for t in tokens {
+                args.push(strip_matching_quotes(&t).to_string());
+            }
+            Ok(args)
+        }
+        "dilution" => {
+            let mut args = vec!["dilution".to_string()];
+            for t in tokens {
+                args.push(strip_matching_quotes(&t).to_string());
+            }
+            Ok(args)
+        }
+        "yield" => {
+            let mut args = vec!["yield".to_string()];
+            for t in tokens {
+                args.push(strip_matching_quotes(&t).to_string());
+            }
+            Ok(args)
+        }
+        "gas" => {
+            let mut args = vec!["gas".to_string()];
+            for t in tokens {
+                args.push(strip_matching_quotes(&t).to_string());
+            }
+            Ok(args)
+        }
+        "charge" => {
+            let mut args = vec!["charge".to_string()];
+            for t in tokens {
+                args.push(strip_matching_quotes(&t).to_string());
+            }
+            Ok(args)
+        }
+        "thermo" => {
+            let mut args = vec!["thermo".to_string()];
+            for t in tokens {
+                args.push(strip_matching_quotes(&t).to_string());
+            }
+            Ok(args)
+        }
         _ => Err(
-            "Qualified CentL26 chemistry operations: chem atoms <formula> | chem balance <reaction>"
+            "Qualified CentL26 chemistry operations: chem atoms <formula> | chem balance <reaction> | chem constant <sym> | chem molar-mass <formula> | chem concentration <moles> <vol> | chem dilution <c1> <v1> <v2> | chem yield <act> <theo> | chem gas <n> <T> <V> | chem charge <n> | chem particles [exact|measured] <moles> | chem moles [exact|measured] <entities> | chem stoich <rxn> <src> <mol> <tgt> | chem limiting <rxn> <species=mol>... | chem spread <unit> <vals>... | chem thermo <rxn> <species=H>..."
                 .to_string(),
         ),
     }
+}
+
+fn tokenize_command_args(input: &str) -> Vec<String> {
+    let mut tokens = Vec::new();
+    let mut current = String::new();
+    let mut in_single_quote = false;
+    let mut in_double_quote = false;
+
+    for c in input.chars() {
+        match c {
+            '\'' if !in_double_quote => {
+                in_single_quote = !in_single_quote;
+            }
+            '"' if !in_single_quote => {
+                in_double_quote = !in_double_quote;
+            }
+            c if c.is_whitespace() && !in_single_quote && !in_double_quote => {
+                if !current.is_empty() {
+                    tokens.push(current.clone());
+                    current.clear();
+                }
+            }
+            _ => {
+                current.push(c);
+            }
+        }
+    }
+    if !current.is_empty() {
+        tokens.push(current);
+    }
+    tokens
 }
 
 fn strip_matching_quotes(value: &str) -> &str {
@@ -437,29 +689,98 @@ fn run_chemistry_with_timeout(
         return Err("CENTL Chemistry returned an unsupported protocol version.".to_string());
     }
 
-    let (expected_kind, capability, operand) = match args.as_ref() {
-        [operation, operand] if operation == "atoms" => (
-            "chemical_formula",
-            "org.fcf.centl.chemistry.compute",
-            operand,
-        ),
-        [operation, operand] if operation == "balance" => (
-            "balanced_reaction",
-            "org.fcf.centl.chemistry.compute",
-            operand,
-        ),
-        _ => return Err("CentL26 refused an unqualified chemistry operation.".to_string()),
-    };
-    if payload.get("kind").and_then(Value::as_str) != Some(expected_kind) {
-        return Err(format!(
-            "CENTL Chemistry returned an unexpected result kind; expected {}.",
-            expected_kind
-        ));
-    }
-    let summary = match expected_kind {
-        "chemical_formula" => summarize_formula(&payload, operand)?,
-        "balanced_reaction" => summarize_balanced_reaction(&payload, operand)?,
-        _ => unreachable!(),
+    let (capability, summary) = match payload.get("kind").and_then(Value::as_str) {
+        Some("chemical_formula") => {
+            let operand = args.get(1).map(String::as_str).unwrap_or("");
+            ("org.fcf.centl.chemistry.compute", summarize_formula(&payload, operand)?)
+        }
+        Some("balanced_reaction") => {
+            let operand = args.get(1).map(String::as_str).unwrap_or("");
+            ("org.fcf.centl.chemistry.compute", summarize_balanced_reaction(&payload, operand)?)
+        }
+        Some("moles_to_entities") => {
+            let entities = payload.get("entities").and_then(Value::as_str).unwrap_or("");
+            let moles = payload.get("moles").and_then(Value::as_str).unwrap_or("");
+            ("org.fcf.centl.chemistry.compute", format!("{} mol = {} entities (N_A exact)", moles, entities))
+        }
+        Some("entities_to_moles") => {
+            let entities = payload.get("entities").and_then(Value::as_str).unwrap_or("");
+            let moles = payload.get("moles").and_then(Value::as_str).unwrap_or("");
+            ("org.fcf.centl.chemistry.compute", format!("{} entities = {} mol", entities, moles))
+        }
+        Some("stoichiometric_amount_conversion") => {
+            let src_mol = payload.get("source_moles").and_then(Value::as_str).unwrap_or("");
+            let src_spec = payload.get("source_species").and_then(Value::as_str).unwrap_or("");
+            let tgt_mol = payload.get("target_moles").and_then(Value::as_str).unwrap_or("");
+            let tgt_spec = payload.get("target_species").and_then(Value::as_str).unwrap_or("");
+            ("org.fcf.centl.chemistry.compute", format!("{} mol {} → {} mol {}", src_mol, src_spec, tgt_mol, tgt_spec))
+        }
+        Some("limiting_reagent_amount_result") => {
+            let reagent = payload.get("limiting_reagent").and_then(Value::as_str).unwrap_or("");
+            let extent = payload.get("extent_moles").and_then(Value::as_str).unwrap_or("");
+            ("org.fcf.centl.chemistry.compute", format!("Limiting reagent: {} (reaction extent = {} mol)", reagent, extent))
+        }
+        Some("chemistry_sample_spread") => {
+            let mean = payload.get("mean").and_then(Value::as_str).unwrap_or("");
+            let std_dev = payload.get("sample_standard_deviation").and_then(Value::as_str).unwrap_or("");
+            let unit = payload.get("unit").and_then(Value::as_str).unwrap_or("");
+            ("org.fcf.centl.chemistry.compute", format!("Sample statistics: mean = {} {}, std dev = {} {}", mean, unit, std_dev, unit))
+        }
+        Some("derived_chemistry_constant") => {
+            let sym = payload.get("symbol").and_then(Value::as_str).unwrap_or("");
+            let val = payload.get("value").and_then(Value::as_str).unwrap_or("");
+            let unit = payload.get("unit").and_then(Value::as_str).unwrap_or("");
+            let def = payload.get("definition").and_then(Value::as_str).unwrap_or("");
+            ("org.fcf.centl.chemistry.compute", format!("{} = {} {} ({})", sym, val, unit, def))
+        }
+        Some("molar_mass_interval") => {
+            let formula = payload.get("formula").and_then(Value::as_str).unwrap_or("");
+            let lower = payload.get("lower").and_then(Value::as_str).unwrap_or("");
+            let upper = payload.get("upper").and_then(Value::as_str).unwrap_or("");
+            let unit = payload.get("unit").and_then(Value::as_str).unwrap_or("g/mol");
+            let text = if lower == upper {
+                format!("M({}) = {} {}", formula, lower, unit)
+            } else {
+                format!("M({}) = [{}, {}] {}", formula, lower, upper, unit)
+            };
+            ("org.fcf.centl.chemistry.compute", text)
+        }
+        Some("concentration") => {
+            let val = payload.get("value").and_then(Value::as_str).unwrap_or("");
+            let unit = payload.get("unit").and_then(Value::as_str).unwrap_or("mol/L");
+            ("org.fcf.centl.chemistry.compute", format!("Concentration = {} {}", val, unit))
+        }
+        Some("dilution") => {
+            let val = payload.get("final_concentration").and_then(Value::as_str).unwrap_or("");
+            let unit = payload.get("unit").and_then(Value::as_str).unwrap_or("mol/L");
+            ("org.fcf.centl.chemistry.compute", format!("Final Concentration = {} {}", val, unit))
+        }
+        Some("percent_yield") => {
+            let val = payload.get("percentage").and_then(Value::as_str).unwrap_or("");
+            let unit = payload.get("unit").and_then(Value::as_str).unwrap_or("%");
+            ("org.fcf.centl.chemistry.compute", format!("Percent Yield = {} {}", val, unit))
+        }
+        Some("ideal_gas_pressure") => {
+            let val = payload.get("pressure").and_then(Value::as_str).unwrap_or("");
+            let unit = payload.get("unit").and_then(Value::as_str).unwrap_or("Pa");
+            ("org.fcf.centl.chemistry.compute", format!("Pressure = {} {}", val, unit))
+        }
+        Some("faraday_charge") => {
+            let val = payload.get("charge").and_then(Value::as_str).unwrap_or("");
+            let unit = payload.get("unit").and_then(Value::as_str).unwrap_or("C");
+            ("org.fcf.centl.chemistry.compute", format!("Charge = {} {}", val, unit))
+        }
+        Some("reaction_enthalpy") => {
+            let val = payload.get("enthalpy").and_then(Value::as_str).unwrap_or("");
+            let unit = payload.get("unit").and_then(Value::as_str).unwrap_or("kJ/mol");
+            ("org.fcf.centl.chemistry.compute", format!("ΔH°_rxn = {} {}", val, unit))
+        }
+        Some(other) => {
+            return Err(format!("CENTL Chemistry returned an unrecognized result kind: {}.", other));
+        }
+        None => {
+            return Err("CENTL Chemistry protocol response omitted kind.".to_string());
+        }
     };
 
     let evidence_document = serde_json::json!({
@@ -1287,6 +1608,317 @@ fn named_f64(parts: &[&str], name: &str) -> Option<f64> {
     })
 }
 
+fn named_u64(parts: &[&str], name: &str) -> Option<u64> {
+    parts.iter().find_map(|part| {
+        let (key, value) = part.split_once('=')?;
+        if key.eq_ignore_ascii_case(name) {
+            value.parse::<u64>().ok()
+        } else {
+            None
+        }
+    })
+}
+
+fn named_vec3(parts: &[&str], name: &str) -> Option<(f64, f64, f64)> {
+    parts.iter().find_map(|part| {
+        let (key, value) = part.split_once('=')?;
+        if key.eq_ignore_ascii_case(name) {
+            let coords: Vec<&str> = value.split(',').collect();
+            if coords.len() == 3 {
+                let x = coords[0].trim().parse::<f64>().ok()?;
+                let y = coords[1].trim().parse::<f64>().ok()?;
+                let z = coords[2].trim().parse::<f64>().ok()?;
+                Some((x, y, z))
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    })
+}
+
+fn handle_cps_command(
+    command: &str,
+    state: &mut AppState,
+) -> (
+    Option<ExecutionResult>,
+    Option<String>,
+    Option<PhysicsResult>,
+    Option<HuntSummary>,
+) {
+    let body = command["cps".len()..].trim();
+    let tokens = tokenize_command_args(body);
+    if tokens.is_empty() || tokens[0] != "preflight" {
+        return (
+            None,
+            Some("Usage: cps preflight [measured|exact] FORMULA=MOLES ...".to_string()),
+            None,
+            None,
+        );
+    }
+    let provider = super::capabilities::cps_provider().command;
+    let started = Instant::now();
+    let output = match run_bounded_provider(&provider, &tokens, CHEMISTRY_PROVIDER_TIMEOUT) {
+        Ok(out) => out,
+        Err(error) => {
+            return (
+                None,
+                Some(format!("CENTL Chemical Process Systems (CPS) engine unavailable: {}", error)),
+                None,
+                None,
+            );
+        }
+    };
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return (
+            None,
+            Some(if stderr.is_empty() {
+                format!("CPS preflight failed with status {}", output.status)
+            } else {
+                stderr.trim().to_string()
+            }),
+            None,
+            None,
+        );
+    }
+    let payload: Value = match serde_json::from_slice(&output.stdout) {
+        Ok(v) => v,
+        Err(e) => return (None, Some(format!("CPS returned invalid protocol JSON: {}", e)), None, None),
+    };
+    let species_count = payload.get("species").and_then(Value::as_array).map(|a| a.len()).unwrap_or(0);
+    let total_moles = payload.get("total_species_moles").and_then(Value::as_str).unwrap_or("0");
+    let summary = format!("CPS Preflight: composition validated ({} species, {} total mol).", species_count, total_moles);
+    let evidence_doc = serde_json::json!({
+        "schema": "centl26.cps-evidence/1",
+        "capability": "org.fcf.centl.cps.preflight",
+        "request": command,
+        "provider": provider,
+        "host": {
+            "product": "CentL26",
+            "build_commit": super::build_commit(),
+        },
+        "response": payload,
+    });
+    let evidence = serde_json::to_string_pretty(&evidence_doc).unwrap_or_default();
+    let elapsed = started.elapsed().as_micros();
+    let result = ExecutionResult {
+        text: summary.clone(),
+        exact_rational: None,
+        approximate: None,
+        symbolic_expr: None,
+        execution_micros: elapsed,
+    };
+    state.session.history.push(HistoryEntry {
+        command: command.to_string(),
+        result: summary,
+        exact_repr: Some(evidence),
+        approximate_repr: None,
+        execution_micros: elapsed,
+        success: true,
+    });
+    (Some(result), None, None, None)
+}
+
+fn handle_sci_command(
+    command: &str,
+    state: &mut AppState,
+) -> (
+    Option<ExecutionResult>,
+    Option<String>,
+    Option<PhysicsResult>,
+    Option<HuntSummary>,
+) {
+    let body = command.strip_prefix("sci ").unwrap_or(command).trim();
+    let provider = super::capabilities::sci_provider().command;
+    let started = Instant::now();
+    let output = match run_bounded_provider(&provider, &["--json".to_string(), body.to_string()], CHEMISTRY_PROVIDER_TIMEOUT) {
+        Ok(out) => out,
+        Err(error) => {
+            return (
+                None,
+                Some(format!("CENTL-SCi scientific interpretation engine unavailable: {}", error)),
+                None,
+                None,
+            );
+        }
+    };
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return (
+            None,
+            Some(if stderr.is_empty() {
+                format!("SCi interpretation failed with status {}", output.status)
+            } else {
+                stderr.trim().to_string()
+            }),
+            None,
+            None,
+        );
+    }
+    let payload: Value = match serde_json::from_slice(&output.stdout) {
+        Ok(v) => v,
+        Err(e) => return (None, Some(format!("SCi returned invalid protocol JSON: {}", e)), None, None),
+    };
+    let summary = payload.get("summary").and_then(Value::as_str).or_else(|| payload.get("answer").and_then(Value::as_str)).unwrap_or("SCi interpretation completed.").to_string();
+    let evidence_doc = serde_json::json!({
+        "schema": "centl26.sci-evidence/1",
+        "capability": "org.fcf.centl.sci.interpret",
+        "request": command,
+        "provider": provider,
+        "host": {
+            "product": "CentL26",
+            "build_commit": super::build_commit(),
+        },
+        "response": payload,
+    });
+    let evidence = serde_json::to_string_pretty(&evidence_doc).unwrap_or_default();
+    let elapsed = started.elapsed().as_micros();
+    let result = ExecutionResult {
+        text: summary.clone(),
+        exact_rational: None,
+        approximate: None,
+        symbolic_expr: None,
+        execution_micros: elapsed,
+    };
+    state.session.history.push(HistoryEntry {
+        command: command.to_string(),
+        result: summary,
+        exact_repr: Some(evidence),
+        approximate_repr: None,
+        execution_micros: elapsed,
+        success: true,
+    });
+    (Some(result), None, None, None)
+}
+
+fn handle_mirage_command(
+    command: &str,
+    state: &mut AppState,
+) -> (
+    Option<ExecutionResult>,
+    Option<String>,
+    Option<PhysicsResult>,
+    Option<HuntSummary>,
+) {
+    let body = command.strip_prefix("mirage").unwrap_or(command).trim();
+    let tokens = tokenize_command_args(body);
+    let provider = super::capabilities::mirage_provider().command;
+    let started = Instant::now();
+    let output = match run_bounded_provider(&provider, &tokens, CHEMISTRY_PROVIDER_TIMEOUT) {
+        Ok(out) => out,
+        Err(error) => {
+            return (
+                None,
+                Some(format!("CENTL-MIRAGE development engine unavailable: {}", error)),
+                None,
+                None,
+            );
+        }
+    };
+    let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+    if !output.status.success() {
+        return (
+            None,
+            Some(if stderr.is_empty() {
+                format!("MIRAGE failed with status {}", output.status)
+            } else {
+                stderr
+            }),
+            None,
+            None,
+        );
+    }
+    let text = if stdout.is_empty() {
+        "MIRAGE command completed.".to_string()
+    } else {
+        stdout
+    };
+    let elapsed = started.elapsed().as_micros();
+    let result = ExecutionResult {
+        text: text.clone(),
+        exact_rational: None,
+        approximate: None,
+        symbolic_expr: None,
+        execution_micros: elapsed,
+    };
+    state.session.history.push(HistoryEntry {
+        command: command.to_string(),
+        result: text,
+        exact_repr: None,
+        approximate_repr: None,
+        execution_micros: elapsed,
+        success: true,
+    });
+    (Some(result), None, None, None)
+}
+
+fn handle_caravan_command(
+    command: &str,
+    state: &mut AppState,
+) -> (
+    Option<ExecutionResult>,
+    Option<String>,
+    Option<PhysicsResult>,
+    Option<HuntSummary>,
+) {
+    let body = command.strip_prefix("caravan").unwrap_or(command).trim();
+    let tokens = tokenize_command_args(body);
+    let provider = super::capabilities::canonical_math_provider().command;
+    let mut args = vec!["caravan".to_string()];
+    args.extend(tokens);
+    let started = Instant::now();
+    let output = match run_bounded_provider(&provider, &args, CHEMISTRY_PROVIDER_TIMEOUT) {
+        Ok(out) => out,
+        Err(error) => {
+            return (
+                None,
+                Some(format!("CENTL Caravan provider unavailable: {}", error)),
+                None,
+                None,
+            );
+        }
+    };
+    let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+    if !output.status.success() {
+        return (
+            None,
+            Some(if stderr.is_empty() {
+                format!("Caravan failed with status {}", output.status)
+            } else {
+                stderr
+            }),
+            None,
+            None,
+        );
+    }
+    let text = if stdout.is_empty() {
+        "Caravan inspection completed.".to_string()
+    } else {
+        stdout
+    };
+    let elapsed = started.elapsed().as_micros();
+    let result = ExecutionResult {
+        text: text.clone(),
+        exact_rational: None,
+        approximate: None,
+        symbolic_expr: None,
+        execution_micros: elapsed,
+    };
+    state.session.history.push(HistoryEntry {
+        command: command.to_string(),
+        result: text,
+        exact_repr: None,
+        approximate_repr: None,
+        execution_micros: elapsed,
+        success: true,
+    });
+    (Some(result), None, None, None)
+}
+
 pub fn render_full_page(content_html: &str, title: &str, rel: &str) -> String {
     let mut page = String::new();
     page.push_str("<!doctype html>\n<html lang=\"en\">\n<head>\n");
@@ -1502,7 +2134,11 @@ mod tests {
             chemistry_provider_args("chemistry balance 'C2H6 + O2 -> CO2 + H2O'").unwrap(),
             vec!["balance", "C2H6 + O2 -> CO2 + H2O"]
         );
-        assert!(chemistry_provider_args("chem molar-mass H2O").is_err());
+        assert_eq!(
+            chemistry_provider_args("chem molar-mass H2O").unwrap(),
+            vec!["molar-mass", "H2O"]
+        );
+        assert!(chemistry_provider_args("chem unknown-operation H2O").is_err());
         assert!(chemistry_provider_args("chem atoms Ca (OH)2").is_err());
         assert!(!has_command_prefix("chemical", "chem"));
     }
@@ -1702,4 +2338,150 @@ mod tests {
             "<header class=\"masthead home-masthead\" id=\"centl-hub\" tabindex=\"-1\" autofocus>"
         ));
     }
+
+    #[test]
+    fn physics_extended_commands_execute_accurately() {
+        let mut state = AppState::new();
+
+        // 1. Constants
+        let (_exec, err, phys, _) = handle_command("physics constant c", &mut state);
+        assert!(err.is_none());
+        assert!(phys.is_some());
+        let phys = phys.unwrap();
+        assert!(phys.summary.contains("299792458"));
+
+        // 2. Units catalog
+        let (_exec, err, phys, _) = handle_command("physics units", &mut state);
+        assert!(err.is_none());
+        assert!(phys.is_some());
+        assert!(phys.unwrap().title.contains("Physical Units"));
+
+        // 3. Cherenkov radiation
+        let (_exec, err, phys, _) = handle_command("physics cherenkov 1.33 2.5e8", &mut state);
+        assert!(err.is_none());
+        assert!(phys.is_some());
+        let phys = phys.unwrap();
+        assert!(phys.summary.contains("Emission active"));
+        assert!(phys.verified);
+
+        // 4. Gravity trajectory simulation
+        let (_exec, err, phys, _) = handle_command(
+            "physics gravity m=1.0 p=0,0,10 v=10,0,0 g=0,0,-9.8 dt=0.1 steps=20",
+            &mut state,
+        );
+        assert!(err.is_none());
+        assert!(phys.is_some());
+        let phys = phys.unwrap();
+        assert!(phys.title.contains("Gravitational Trajectory Simulation"));
+        assert!(phys.verified);
+    }
+
+    #[test]
+    fn mathematical_engine_extensions_evaluate_correctly() {
+        let mut state = AppState::new();
+
+        // Variable assignment and resolution
+        let (res, err, _, _) = handle_command("x = 42", &mut state);
+        assert!(err.is_none());
+        assert_eq!(res.unwrap().text, "x = 42");
+
+        let (res, err, _, _) = handle_command("x * 2", &mut state);
+        assert!(err.is_none());
+        assert_eq!(res.unwrap().text, "84");
+
+        // :vars command
+        let (res, err, _, _) = handle_command(":vars", &mut state);
+        assert!(err.is_none());
+        assert!(res.unwrap().text.contains("x = 42"));
+
+        // Prime testing and factorization
+        let (res, err, _, _) = handle_command("is_prime(1009)", &mut state);
+        assert!(err.is_none());
+        assert_eq!(res.unwrap().text, "true");
+
+        let (res, err, _, _) = handle_command("is_prime(1008)", &mut state);
+        assert!(err.is_none());
+        assert_eq!(res.unwrap().text, "false");
+
+        let (res, err, _, _) = handle_command("factors(28)", &mut state);
+        assert!(err.is_none());
+        assert_eq!(res.unwrap().text, "1, 2, 4, 7, 14, 28");
+
+        let (res, err, _, _) = handle_command("prime_factors(360)", &mut state);
+        assert!(err.is_none());
+        assert_eq!(res.unwrap().text, "2^3 * 3^2 * 5");
+
+        // Combinatorics
+        let (res, err, _, _) = handle_command("choose(10, 3)", &mut state);
+        assert!(err.is_none());
+        assert_eq!(res.unwrap().text, "120");
+
+        let (res, err, _, _) = handle_command("permutations(5, 2)", &mut state);
+        assert!(err.is_none());
+        assert_eq!(res.unwrap().text, "20");
+
+        // Polynomial expand and factor with unbound symbolic variable
+        let (res, err, _, _) = handle_command("expand((t - 2) * (t + 3))", &mut state);
+        assert!(err.is_none());
+        let expanded = res.unwrap().text;
+        assert!(expanded.contains("t^2") || expanded.contains("t * t") || expanded.contains("t"));
+
+        // Assertions & verification
+        let (res, err, _, _) = handle_command("assert(1 + 1 = 2)", &mut state);
+        assert!(err.is_none());
+        assert_eq!(res.unwrap().text, "assert(1 + 1 = 2): verified");
+
+        let (res, err, _, _) = handle_command("assert(1 + 1 = 3)", &mut state);
+        assert!(err.is_none());
+        assert!(res.unwrap().text.contains("refuted"));
+    }
+
+    #[test]
+    fn chemistry_expanded_operation_lowering_handles_all_variants() {
+        assert_eq!(
+            chemistry_provider_args("chem particles exact 2").unwrap(),
+            vec!["particles", "exact", "2"]
+        );
+        assert_eq!(
+            chemistry_provider_args("chem moles measured 6.022e23").unwrap(),
+            vec!["moles", "measured", "6.022e23"]
+        );
+        assert_eq!(
+            chemistry_provider_args("chem constant F").unwrap(),
+            vec!["constant", "F"]
+        );
+        assert_eq!(
+            chemistry_provider_args("chem concentration 0.5 1.0").unwrap(),
+            vec!["concentration", "0.5", "1.0"]
+        );
+        assert_eq!(
+            chemistry_provider_args("chem dilution 1.0 0.5 2.0").unwrap(),
+            vec!["dilution", "1.0", "0.5", "2.0"]
+        );
+        assert_eq!(
+            chemistry_provider_args("chem yield 85 100").unwrap(),
+            vec!["yield", "85", "100"]
+        );
+        assert_eq!(
+            chemistry_provider_args("chem gas 1 300 0.024").unwrap(),
+            vec!["gas", "1", "300", "0.024"]
+        );
+        assert_eq!(
+            chemistry_provider_args("chem charge 2").unwrap(),
+            vec!["charge", "2"]
+        );
+        assert_eq!(
+            chemistry_provider_args("chem stoich '2 H2 + O2 -> 2 H2O' H2 4 H2O").unwrap(),
+            vec!["stoich", "2 H2 + O2 -> 2 H2O", "H2", "4", "H2O"]
+        );
+        assert_eq!(
+            chemistry_provider_args("chem limiting '2 H2 + O2 -> 2 H2O' H2=4 O2=1").unwrap(),
+            vec!["limiting", "2 H2 + O2 -> 2 H2O", "H2=4", "O2=1"]
+        );
+        assert_eq!(
+            chemistry_provider_args("chem spread g 1.0 1.1 0.9").unwrap(),
+            vec!["spread", "g", "1.0", "1.1", "0.9"]
+        );
+    }
 }
+

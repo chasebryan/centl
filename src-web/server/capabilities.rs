@@ -8,6 +8,10 @@ use std::os::unix::fs::PermissionsExt;
 pub(crate) const CANONICAL_MATH_ENV: &str = "CENTL26_CENTL_BIN";
 pub(crate) const LEGACY_CANONICAL_MATH_ENV: &str = "CENTL_ENGINE_BIN";
 pub(crate) const CHEMISTRY_ENV: &str = "CENTL26_CHEM_BIN";
+pub(crate) const SCI_ENV: &str = "CENTL26_SCI_BIN";
+pub(crate) const CPS_ENV: &str = "CENTL26_CPS_BIN";
+pub(crate) const MIRAGE_ENV: &str = "CENTL26_MIRAGE_BIN";
+pub(crate) const PHYSICS_ENV: &str = "CENTL26_PHYSICS_BIN";
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct ProviderResolution {
@@ -20,6 +24,10 @@ pub(crate) struct ProviderResolution {
 pub(crate) struct RuntimeProviders {
     pub canonical_math: ProviderResolution,
     pub chemistry: ProviderResolution,
+    pub sci: ProviderResolution,
+    pub cps: ProviderResolution,
+    pub mirage: ProviderResolution,
+    pub physics: ProviderResolution,
 }
 
 impl RuntimeProviders {
@@ -31,6 +39,10 @@ impl RuntimeProviders {
                 "centl",
             ),
             chemistry: resolve_provider(CHEMISTRY_ENV, None, "centl-chem"),
+            sci: resolve_provider(SCI_ENV, None, "centl-sci"),
+            cps: resolve_provider(CPS_ENV, None, "centl-cps"),
+            mirage: resolve_provider(MIRAGE_ENV, None, "centl-mirage"),
+            physics: resolve_provider(PHYSICS_ENV, None, "centl-physics"),
         }
     }
 }
@@ -41,6 +53,23 @@ pub(crate) fn canonical_math_provider() -> ProviderResolution {
 
 pub(crate) fn chemistry_provider() -> ProviderResolution {
     resolve_provider(CHEMISTRY_ENV, None, "centl-chem")
+}
+
+pub(crate) fn sci_provider() -> ProviderResolution {
+    resolve_provider(SCI_ENV, None, "centl-sci")
+}
+
+pub(crate) fn cps_provider() -> ProviderResolution {
+    resolve_provider(CPS_ENV, None, "centl-cps")
+}
+
+pub(crate) fn mirage_provider() -> ProviderResolution {
+    resolve_provider(MIRAGE_ENV, None, "centl-mirage")
+}
+
+#[allow(dead_code)]
+pub(crate) fn physics_provider() -> ProviderResolution {
+    resolve_provider(PHYSICS_ENV, None, "centl-physics")
 }
 
 fn resolve_provider(
@@ -156,6 +185,18 @@ fn runtime_registry_with_providers(
     );
     set_capability_status(
         &mut registry,
+        "org.fcf.centl.sci.interpret",
+        providers.sci.available,
+        "The CENTL-SCi provider is not available in this runtime.",
+    );
+    set_capability_status(
+        &mut registry,
+        "org.fcf.centl.mirage.develop",
+        providers.mirage.available,
+        "The CENTL-MIRAGE development engine is not available in this runtime.",
+    );
+    set_capability_status(
+        &mut registry,
         "org.fcf.centl.project.persist",
         project_store_available,
         "No writable CentL26 project store is attached.",
@@ -170,6 +211,10 @@ fn runtime_registry_with_providers(
                 "providers": {
                     "centl": provider_status(&providers.canonical_math),
                     "centl-chem": provider_status(&providers.chemistry),
+                    "centl-sci": provider_status(&providers.sci),
+                    "centl-cps": provider_status(&providers.cps),
+                    "centl-mirage": provider_status(&providers.mirage),
+                    "centl-physics": provider_status(&providers.physics),
                 }
             }),
         );
@@ -296,6 +341,10 @@ mod tests {
         let providers = RuntimeProviders {
             canonical_math: provider(false),
             chemistry: provider(false),
+            sci: provider(false),
+            cps: provider(false),
+            mirage: provider(false),
+            physics: provider(false),
         };
         let registry = runtime_registry_with_providers(
             super::super::lab_template::CAPABILITY_REGISTRY,
@@ -312,6 +361,14 @@ mod tests {
             Some("unavailable")
         );
         assert_eq!(
+            capability_status(&registry, "org.fcf.centl.sci.interpret"),
+            Some("unavailable")
+        );
+        assert_eq!(
+            capability_status(&registry, "org.fcf.centl.mirage.develop"),
+            Some("unavailable")
+        );
+        assert_eq!(
             capability_status(&registry, "org.fcf.centl.project.persist"),
             Some("available")
         );
@@ -322,6 +379,10 @@ mod tests {
         let providers = RuntimeProviders {
             canonical_math: provider(true),
             chemistry: provider(true),
+            sci: provider(true),
+            cps: provider(true),
+            mirage: provider(true),
+            physics: provider(true),
         };
         let registry = runtime_registry_with_providers(
             super::super::lab_template::CAPABILITY_REGISTRY,
@@ -335,6 +396,14 @@ mod tests {
         );
         assert_eq!(
             capability_status(&registry, "org.fcf.centl.chemistry.compute"),
+            Some("available")
+        );
+        assert_eq!(
+            capability_status(&registry, "org.fcf.centl.sci.interpret"),
+            Some("available")
+        );
+        assert_eq!(
+            capability_status(&registry, "org.fcf.centl.mirage.develop"),
             Some("available")
         );
         assert_eq!(

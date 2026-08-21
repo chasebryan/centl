@@ -55,7 +55,23 @@
       "contract": 1,
       "status": "available",
       "provider": "centl26.chemistry-adapter",
-      "operations": ["atoms", "balance"],
+      "operations": [
+        "atoms",
+        "balance",
+        "particles",
+        "moles",
+        "stoich",
+        "limiting",
+        "spread",
+        "constant",
+        "molar-mass",
+        "concentration",
+        "dilution",
+        "yield",
+        "gas",
+        "charge",
+        "thermo"
+      ],
       "assurance": ["exact", "conservation-verified", "machine-protocol"]
     },
     {
