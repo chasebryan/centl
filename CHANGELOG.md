@@ -1,5 +1,11 @@
 ## Unreleased
 
+### CentL26.7.2 — Multi-Statement Cell Engine & Multi-Platform Updates (2026-08-21)
+
+- **Large Multi-Statement Computations in Single Cells**: Write and run compound mathematical scripts, multi-step derivations, and mixed-domain calculations directly inside a single cell (split by newlines or semicolons `;`), featuring full step-by-step block transparency, inter-step variable persistence, comment support (`#` and `//`), and exact rational result enclosures.
+- **Top Navigation Bar Polish**: Removed redundant top Run button; re-allocated and expanded the Command Center search bar (`⌘ K`) up to `480px` for optimal breathing room and quick access to commands.
+- **Synchronized Multi-Platform Release Packages**: Packaged native portable distributions across **macOS Arm64** (`CentL26-macOS-arm64.zip`), **Linux x86_64** (`CentL26-Linux-x86_64.tar.gz`), and **Windows 11 x64** (`CentL26-Windows-x64.zip`).
+
 ### CentL26.7.1 — Natural Language Arithmetic & In-App Update Dialog (2026-08-21)
 
 - **Universal Natural Language Arithmetic**: CentL-SCi parses and solves conversational math questions in plain English (e.g. `"what is 55 divided by 22?"` $\rightarrow$ `5/2` / `2.5`, percentages `"15% of 300"`, square roots `"square root of 144"`, fractions `"half of 150"`, number theory `"is 97 a prime number?"`, and gcd/lcm) with exact rational receipts.

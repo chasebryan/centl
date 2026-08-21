@@ -112,7 +112,7 @@ pub fn render_lab_page(workbench: &str) -> String {
         </div>
         <div>
           <h2>CentL26 Software Update</h2>
-          <small class="update-current-version">Installed: CentL26 v26.7.1</small>
+          <small class="update-current-version">Installed: CentL26 v26.7.2</small>
         </div>
       </div>
       <div class="update-body">
