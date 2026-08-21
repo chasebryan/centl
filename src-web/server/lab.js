@@ -380,6 +380,11 @@
 
   function runCommand(command, { interactionMode = selectedMode } = {}) {
     closePalette({ restoreFocus: false });
+    if (/^\s*(:visualize|:visualizer|:viz|visualize|visualizer|theorems?)\b/i.test(command)) {
+      const rest = command.replace(/^\s*(:visualize|:visualizer|:viz|visualize|visualizer|theorems?)\s*/i, "").trim();
+      StemVisualizer.open(rest || null);
+      return;
+    }
     execute(new URLSearchParams({
       lab_action: "calculate",
       cmd: command,
@@ -583,6 +588,14 @@
     if (!q) {
       return [
         {
+          id: "solver-visualizer",
+          category: "tools",
+          source: "Visualizer",
+          title: "STEM Visualizer & Animated Theorem Lab",
+          subtitle: "Interactive 2D animated graphing grid, proofs, and simulations",
+          isVisualizer: true
+        },
+        {
           id: "solver-calc",
           category: "tools",
           source: "Exact Math",
@@ -633,16 +646,85 @@
       ];
     }
 
-    return [
-      {
-        id: "solver-eval",
+    const qLower = q.toLowerCase();
+    const suggestions = [];
+
+    if (qLower.includes("viz") || qLower.includes("visual") || qLower.includes("graph") || qLower.includes("anim") || qLower.includes("plot") || qLower.includes("theorem")) {
+      suggestions.push({
+        id: "solver-visualizer-match",
         category: "tools",
-        source: "CentL Engine",
-        title: `Run in Notebook: "${q}"`,
-        subtitle: "Execute in active CentL26 workspace session",
-        command: q
-      }
-    ];
+        source: "Visualizer",
+        title: "Open STEM Visualizer & Theorem Studio",
+        subtitle: `Graph and animate mathematical functions & proofs for "${q}"`,
+        isVisualizer: true
+      });
+    }
+
+    if (qLower.includes("riemann") || qLower.includes("integral") || qLower.includes("area")) {
+      suggestions.push({
+        id: "solver-theorem-riemann",
+        category: "tools",
+        source: "Theorem Lab",
+        title: "Riemann Integral Sum Approximation",
+        subtitle: "Interactive step rectangle convergence demonstration",
+        theoremId: "riemann"
+      });
+    }
+
+    if (qLower.includes("taylor") || qLower.includes("series") || qLower.includes("maclaurin")) {
+      suggestions.push({
+        id: "solver-theorem-taylor",
+        category: "tools",
+        source: "Theorem Lab",
+        title: "Taylor / Maclaurin Series Expansion",
+        subtitle: "Polynomial series approximation convergence",
+        theoremId: "taylor"
+      });
+    }
+
+    if (qLower.includes("fourier") || qLower.includes("harmonic")) {
+      suggestions.push({
+        id: "solver-theorem-fourier",
+        category: "tools",
+        source: "Theorem Lab",
+        title: "Fourier Series Wave Synthesis",
+        subtitle: "Superposition of harmonic sines approximating square wave",
+        theoremId: "fourier"
+      });
+    }
+
+    if (qLower.includes("wave") || qLower.includes("superposition") || qLower.includes("interf")) {
+      suggestions.push({
+        id: "solver-theorem-wave",
+        category: "tools",
+        source: "Theorem Lab",
+        title: "Wave Interference & Standing Beats",
+        subtitle: "Linear superposition forming stationary nodes and antinodes",
+        theoremId: "wave_interf"
+      });
+    }
+
+    if (qLower.includes("kinetics") || qLower.includes("reaction") || qLower.includes("equilibrium")) {
+      suggestions.push({
+        id: "solver-theorem-chem",
+        category: "tools",
+        source: "Theorem Lab",
+        title: "Reversible Reaction Kinetics [A] ⇌ [B]",
+        subtitle: "Equilibrium concentration curves with forward/reverse rates",
+        theoremId: "chem_kinetics"
+      });
+    }
+
+    suggestions.push({
+      id: "solver-eval",
+      category: "tools",
+      source: "CentL Engine",
+      title: `Run in Notebook: "${q}"`,
+      subtitle: "Execute in active CentL26 workspace session",
+      command: q
+    });
+
+    return suggestions;
   }
 
   function renderOmnibarResults(query = "", category = omnibarActiveCategory) {
@@ -720,16 +802,19 @@
     if (category === "all" || category === "tools") {
       const solvers = getCentlSolverSuggestions(rawQuery);
       solvers.forEach(s => {
+        const isViz = s.isVisualizer || s.theoremId;
         items.push({
           type: "solver",
-          iconClass: "solver",
-          iconText: "⚙",
+          iconClass: isViz ? "exact" : "solver",
+          iconText: isViz ? "📊" : "⚙",
           source: s.source,
           title: s.title,
           subtitle: s.subtitle,
-          actionLabel: "Run in Notebook ↵",
-          actionClass: "",
-          command: s.command
+          actionLabel: isViz ? "Open Studio ↗" : "Run in Notebook ↵",
+          actionClass: isViz ? "chrome-action" : "",
+          command: s.command,
+          isVisualizer: s.isVisualizer,
+          theoremId: s.theoremId
         });
       });
     }
@@ -766,6 +851,10 @@
         ? `data-omnibar-url="${escapeHtml(item.url)}"`
         : item.docId
         ? `data-omnibar-doc="${escapeHtml(item.docId)}"`
+        : item.theoremId
+        ? `data-omnibar-theorem="${escapeHtml(item.theoremId)}"`
+        : item.isVisualizer
+        ? `data-open-visualizer`
         : item.command
         ? `data-omnibar-cmd="${escapeHtml(item.command)}"`
         : "";
@@ -1886,6 +1975,12 @@
       syncComposerActions();
       return;
     }
+    const cmdVal = activeEditor()?.value.trim();
+    if (cmdVal && /^\s*(:visualize|:visualizer|:viz|visualize|visualizer|theorems?)\b/i.test(cmdVal)) {
+      const rest = cmdVal.replace(/^\s*(:visualize|:visualizer|:viz|visualize|visualizer|theorems?)\s*/i, "").trim();
+      StemVisualizer.open(rest || null);
+      return;
+    }
     execute(encodeForm(form, event.submitter));
   });
 
@@ -2187,6 +2282,14 @@
     }
 
     // Omnibar Item Selection
+    const omniThItem = target.closest("[data-omnibar-theorem]");
+    if (omniThItem) {
+      closeOmnibar();
+      StemVisualizer.open();
+      StemVisualizer.setTheorem(omniThItem.dataset.omnibarTheorem);
+      return;
+    }
+
     const omniUrlItem = target.closest("[data-omnibar-url]");
     if (omniUrlItem) {
       openInChrome(omniUrlItem.dataset.omnibarUrl);
@@ -2247,6 +2350,8 @@
 
     // STEM Dynamic Visualizer Modal Controls
     if (target.matches("[data-open-visualizer]") || target.closest("[data-open-visualizer]")) {
+      closeOmnibar();
+      closePalette({ restoreFocus: false });
       StemVisualizer.open();
       return;
     }
