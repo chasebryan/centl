@@ -421,7 +421,7 @@ enum CentL26UpdateContract {
             throw CentL26UpdateError("The updater accepted assets outside the exact CentL26 release channel.")
         }
         let olderTag = self.releaseTag(buildSequence: buildSequence - 1, buildCommit: buildCommit)
-        let completeSet = [
+        let completeSet: [String: [Int64]] = [
             manifestAssetName: [512],
             archive: [4096],
             checksumAssetName: [96],
