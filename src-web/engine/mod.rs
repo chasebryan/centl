@@ -72,7 +72,7 @@ pub fn evaluate(input: &str, session: &mut Session) -> Result<ExecutionResult, S
         let plot_text = plot::handle_plot_command(trimmed)?;
         let elapsed = start_time.elapsed().as_micros();
         let res = ExecutionResult {
-            text: plot_text,
+            text: plot_text.clone(),
             exact_rational: None,
             approximate: None,
             symbolic_expr: None,
@@ -80,8 +80,8 @@ pub fn evaluate(input: &str, session: &mut Session) -> Result<ExecutionResult, S
         };
         session.history.push(HistoryEntry {
             command: trimmed.to_string(),
-            result: "2D Function Plot".to_string(),
-            exact_repr: None,
+            result: plot_text.clone(),
+            exact_repr: Some(plot_text),
             approximate_repr: None,
             execution_micros: elapsed,
             success: true,

@@ -2984,6 +2984,14 @@ mod tests {
         let (res, err, _, _) = handle_command("plot sin(x) from -3.14 to 3.14", &mut state);
         assert!(err.is_none(), "err was: {:?}", err);
         assert!(res.unwrap().text.contains("Function Plot: f(x) = sin(x)"));
+        assert!(state.session().history.last().unwrap().result.contains("┌"));
+        assert!(state.session().history.last().unwrap().result.contains("●"));
+
+        let (res, err, _, _) = handle_command("plot x^3 - 3*x from -2.5 to 2.5", &mut state);
+        assert!(err.is_none(), "err was: {:?}", err);
+        assert!(res.unwrap().text.contains("Function Plot: f(x) = x^3 - 3*x"));
+        assert!(state.session().history.last().unwrap().result.contains("┌"));
+        assert!(state.session().history.last().unwrap().result.contains("●"));
 
         // Assertions & verification
         let (res, err, _, _) = handle_command("assert(1 + 1 = 2)", &mut state);
