@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Release: CentL26.10.2 Date: 2026-08-22 Codename: CentL26 Scientific Notebook &amp; LaTeX Typography Standard Distribution Matrix: macOS (Apple Silicon / Intel), Windows 11 (x8664), Linux (Debian / Fedora / Arch)">
+  <title>CentL26.10.2 — Official Release Notes — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/release-26.10.2.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/release-26.10.2.html">
+  <meta property="og:title" content="CentL26.10.2 — Official Release Notes — Free Computation Foundation">
+  <meta property="og:description" content="Release: CentL26.10.2 Date: 2026-08-22 Codename: CentL26 Scientific Notebook &amp; LaTeX Typography Standard Distribution Matrix: macOS (Apple Silicon / Intel), Windows 11 (x8664), Linux (Debian / Fedora / Arch)">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>CentL26.10.2 — Official Release Notes</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../free-computation.html#top">What is Free Computation?</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">Release: CentL26.10.2 Date: 2026-08-22 Codename: CentL26 Scientific Notebook &amp; LaTeX Typography Standard Distribution Matrix: macOS (Apple Silicon / Intel), Windows 11 (x8664), Linux (Debian / Fedora / Arch)</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/oasis/docs/releases/26.10.2.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Release</strong>: <code>CentL26.10.2</code></p>
+<p><strong>Date</strong>: <code>2026-08-22</code></p>
+<p><strong>Codename</strong>: <code>CentL26 Scientific Notebook &amp; LaTeX Typography Standard</code></p>
+<p><strong>Distribution Matrix</strong>: macOS (Apple Silicon / Intel), Windows 11 (x86_64), Linux (Debian / Fedora / Arch)</p>
+<hr>
+<h2>Executive Summary</h2>
+<p><strong>CentL26.10.2</strong> introduces Jupyter-grade interactive notebook workflows, a native offline LaTeX mathematical typography engine, the definitive 13-domain FCF Operator Manual, and macOS WKWebView lockout prevention with safe client-side Blob downloads.</p>
+<hr>
+<h2>Key Highlights in CentL26.10.2</h2>
+<h3>1. Jupyter-Grade Interactive Notebook Workflows &amp; UI</h3>
+<ul><li><strong>Cell Gutter Architecture</strong>: Structured <code>In [n]:</code> and <code>Out [n]:</code> prompt gutters with execution microsecond timing ($\mu\text{s}$) and exact interval enclosure badges.</li><li><strong>Per-Cell Action Controls</strong>: Each cell features instant actions: <code>▶ Run</code> (re-execute), <code>+ Above</code> (insert code cell above), <code>+ Below</code> (insert code cell below), <code>▲</code> / <code>▼</code> (reorder cells), <code>✏ Edit</code> (edit in composer), <code>📋 Copy</code> (copy expression), and <code>✕ Delete</code> (remove cell).</li><li><strong>Workspace Toolbar Actions</strong>: Added clean developer controls: <code>Code</code> (<code>&lt;/&gt;</code>), <code>Markdown</code> (<code>M↓</code>), <code>▶ Run All</code> (evaluate whole notebook), <code>↺ Restart</code> (<code>rotate-ccw</code>), <code>Visualizer</code>, <code>Tools</code> (<code>⌘P</code>), <code>Save</code> (<code>⌘S</code>), <code>Settings</code>, <code>Help</code>, and <code>Theme</code>.</li><li><strong>Keyboard Shortcuts &amp; Command Mode</strong>:</li></ul>
+<p>- <code>Shift + Enter</code>: Execute active command and advance focus. - <code>Ctrl + Enter</code> / <code>⌘ Enter</code>: Execute active command in place. - <code>Alt + Enter</code>: Execute active command and insert a blank cell below. - Command Mode (<code>Esc</code>): <code>A</code> (add above), <code>B</code> (add below), <code>M</code> (markdown note), <code>Y</code> (code cell), <code>K</code> / <code>Up</code> (navigate up), <code>J</code> / <code>Down</code> (navigate down), <code>Enter</code> (edit focused cell).</p>
+<h3>2. Self-Contained LaTeX &amp; Mathematical Typography Engine</h3>
+<ul><li><strong>Native Math Parser (<code>renderLatexMath</code>)</strong>: Zero-dependency client-side LaTeX parser that accurately formats:</li></ul>
+<p>- <strong>Fractions &amp; Roots</strong>: Nested <code>\frac{a}{b}</code>, <code>\sqrt{x}</code>, <code>\sqrt[n]{x}</code>, and binomial coefficients <code>\binom{n}{k}</code>. - <strong>Greek Alphabet &amp; Constants</strong>: <code>\alpha</code> through <code>\omega</code>, <code>\Delta</code>, <code>\Gamma</code>, <code>\Theta</code>, <code>\Sigma</code>, <code>\Phi</code>, <code>\Psi</code>, <code>\Omega</code>, <code>\pi</code>, <code>\hbar</code>, <code>\ell</code>. - <strong>Blackboard Bold Sets</strong>: <code>\mathbb{Q}</code>, <code>\mathbb{Z}</code>, <code>\mathbb{R}</code>, <code>\mathbb{N}</code>, <code>\mathbb{C}</code>. - <strong>Arrows &amp; Operators</strong>: <code>\rightarrow</code>, <code>\leftarrow</code>, <code>\Rightarrow</code>, <code>\implies</code>, <code>\to</code>, <code>\mapsto</code>, <code>\approx</code>, <code>\le</code>, <code>\ge</code>, <code>\neq</code>, <code>\pm</code>, <code>\times</code>, <code>\cdot</code>, <code>\in</code>, <code>\notin</code>, <code>\subset</code>, <code>\cup</code>, <code>\cap</code>, <code>\equiv</code>. - <strong>Calculus &amp; Big Operators</strong>: <code>\sum</code>, <code>\prod</code>, <code>\int</code>, <code>\iint</code>, <code>\oint</code>, <code>\partial</code>, <code>\nabla</code>, <code>\pmod{m}</code>, <code>\lim</code>. - <strong>Display Math Blocks</strong>: Centers and styles display formulas <code>$$...$$</code> with stacked fraction numerators and denominators.</p>
+<ul><li><strong>Pre-Extraction Syntax Protection</strong>: Math formulas are extracted prior to markdown italic/bold parsing, preventing arithmetic asterisks from accidentally corrupting mathematical symbols.</li><li><strong>Automatic Hydration</strong>: Automatically renders math and LaTeX across both the in-app documentation viewer and notebook markdown cells (<code>.markdown-rendered-body</code>).</li></ul>
+<h3>3. Definitive CentL26 Operator Manual</h3>
+<ul><li><strong>13 Comprehensive Domains</strong>: Authored the canonical Operator Manual in <code>src-web/server/fcf_docs.rs</code> covering:</li></ul>
+<p>1. Philosophical Grounding &amp; Exact-First Architecture 2. Interactive Notebook Workspace &amp; Multi-Tabs 3. Workspace Toolbar &amp; Controls 4. Keyboard Shortcuts &amp; Command Mode 5. Exact Mathematical Engine &amp; CAS Syntax 6. Physics &amp; SI Mechanics Engine 7. Chemistry &amp; Stoichiometry Engine 8. Research Kernels &amp; Number Theory 9. Interactive STEM Animated Visualizer &amp; Theorem Studio 10. In-App Programmability &amp; Extensions (<code>build</code>) 11. AI Co-Pilot (Gemini Command Integration) 12. Project Storage, Exports &amp; Interoperability 13. Master System Commands Reference Table</p>
+<ul><li><strong>Structured Offline Reader</strong>: Enhanced the in-app document reader with responsive Markdown table support (<code>.fcf-doc-table</code>), horizontal dividers, and ordered lists.</li></ul>
+<h3>4. macOS WKWebView Lockout Prevention</h3>
+<ul><li>Replaced direct <code>&lt;a href=&quot;/download/...&quot;&gt;</code> toolbar links with safe client-side Blob downloads (<code>URL.createObjectURL(blob)</code>), ensuring notebook exports (<code>.ipynb</code>, <code>.md</code>, <code>.json</code>) trigger standard macOS save dialogues without navigating WKWebView away from the app.</li></ul>
+<h3>5. Clean Vector Search Symbols &amp; Aesthetics</h3>
+<ul><li>Removed legacy Chrome emblems and emojis from the search omnibar and dropdown results, replacing them with crisp line-art SVG vector symbols.</li><li>Refined the Restart icon with a geometrically accurate counter-clockwise circular reload arrow.</li></ul>
+<h3>6. Preferences &amp; Settings Protection</h3>
+<ul><li>Disabled the &quot;Start Fresh Computation&quot; option in Preferences &amp; Settings and marked it with an explicit <strong>Unavailable</strong> badge.</li><li>Enforced <strong>Resume Previous Session</strong> as the permanent default behavior to protect active user calculations.</li></ul>
+<hr>
+<h2>Verification &amp; Test Suite</h2>
+<ul><li><strong>Template &amp; Handler Suite</strong>: 44 automated tests pass cleanly (<code>cargo test --lib -- lab_template fcf_docs handler</code>).</li><li><strong>Build Cleanliness</strong>: Validated across <code>cargo check</code> and <code>cargo build</code>.</li></ul>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

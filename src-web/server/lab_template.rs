@@ -29,28 +29,22 @@ pub fn render_lab_page(workbench: &str) -> String {
       <a class="product-lockup" href="/" aria-label="CentL26 home">
         <div class="product-brand">
           <strong>CentL26</strong>
-          <small>Free Computation Foundation · v26.10.1</small>
+          <small>Free Computation Foundation · v26.10.2</small>
         </div>
       </a>
       <div class="workspace-path"><button type="button" data-toggle-explorer title="Toggle workspace explorer">Workspace</button><span>/</span><input type="text" class="notebook-rename-input" data-rename-notebook value="Notebook 01" aria-label="Rename active notebook" spellcheck="false" title="Click to rename active notebook"></div>
       <div class="command-center" hidden></div>
       <div class="header-omnibar" role="search">
         <div class="omnibar-input-wrap">
-          <span class="omnibar-fcf-chrome-icon" title="FCF STEM Chrome Academic Router">
-            <svg viewBox="0 0 24 24" class="fcf-chrome-emblem" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.2"/>
-              <path d="M12 2a10 10 0 0 1 8.66 5H12z" fill="#EA4335"/>
-              <path d="M20.66 7A10 10 0 0 1 15 21.32L10.67 13.82z" fill="#FBBC05"/>
-              <path d="M15 21.32A10 10 0 0 1 3.34 12.5L7.67 5z" fill="#34A853"/>
-              <path d="M3.34 12.5A10 10 0 0 1 12 2l4.33 7.5H7.67z" fill="#4285F4"/>
-              <circle cx="12" cy="12" r="4.5" fill="#ffffff" stroke="#cbd5e1" stroke-width="0.8"/>
-              <circle cx="12" cy="12" r="2.8" fill="#1A73E8"/>
+          <span class="omnibar-search-icon" title="Search STEM papers, FCF manuals, or academic sources">
+            <svg viewBox="0 0 20 20" class="omnibar-vector-icon" aria-hidden="true">
+              <circle cx="8.5" cy="8.5" r="5.5"></circle>
+              <path d="m13 13 4 4"></path>
             </svg>
           </span>
-          <input type="text" class="header-omnibar-input" data-omnibar-input placeholder="Search STEM papers, FCF manuals, or Chrome..." spellcheck="false" autocomplete="off" aria-label="Search STEM academic papers, FCF documentation, and Google Chrome" aria-expanded="false" aria-controls="omnibar-dropdown">
+          <input type="text" class="header-omnibar-input" data-omnibar-input placeholder="Search STEM papers, FCF manuals, or academic sources..." spellcheck="false" autocomplete="off" aria-label="Search STEM academic papers and FCF documentation" aria-expanded="false" aria-controls="omnibar-dropdown">
           <div class="omnibar-actions">
             <button type="button" class="omnibar-clear" data-omnibar-clear title="Clear query" hidden>×</button>
-            <span class="chrome-status-pill" title="Automatic Google Chrome Academic Router">Chrome</span>
             <kbd>⌘ K</kbd>
           </div>
         </div>
@@ -60,7 +54,7 @@ pub fn render_lab_page(workbench: &str) -> String {
             <button type="button" class="category-chip is-active" data-chip="all">All STEM</button>
             <button type="button" class="category-chip" data-chip="docs">FCF Manuals &amp; Docs</button>
             <button type="button" class="category-chip" data-chip="research">FCF Research Papers</button>
-            <button type="button" class="category-chip" data-chip="chrome">Academic Papers (Chrome)</button>
+            <button type="button" class="category-chip" data-chip="chrome">Academic Web</button>
             <button type="button" class="category-chip" data-chip="tools">CentL Solvers</button>
           </div>
           
@@ -70,7 +64,7 @@ pub fn render_lab_page(workbench: &str) -> String {
           
           <div class="omnibar-footer">
             <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
-            <span><kbd>↵</kbd> select / open in Chrome</span>
+            <span><kbd>↵</kbd> select / view</span>
             <span><kbd>esc</kbd> close</span>
             <span class="omnibar-footer-note">Free Computation Foundation · STEM Academic Router</span>
           </div>
@@ -88,7 +82,6 @@ pub fn render_lab_page(workbench: &str) -> String {
           <button class="rail-button" type="button" data-select-area="models" data-label="Models" aria-label="Models" aria-controls="explorer-area-models" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="2"></circle><ellipse cx="10" cy="10" rx="8" ry="3.5"></ellipse><ellipse cx="10" cy="10" rx="3.5" ry="8" transform="rotate(45 10 10)"></ellipse></svg></button>
           <button class="rail-button" type="button" data-select-area="research" data-label="Research" aria-label="Research" aria-controls="explorer-area-research" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3h6M8 3v5l-4 7c-.5 1 .1 2 1.3 2h9.4c1.2 0 1.8-1 1.3-2l-4-7V3"></path><path d="M6.5 13h7"></path></svg></button>
           <button class="rail-button" type="button" data-select-area="build" data-label="Build" aria-label="Build" aria-controls="explorer-area-build" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 5-4 5 4 5M13 5l4 5-4 5M11.5 3 8.5 17"></path></svg></button>
-          <button class="rail-button gemini-rail-button" type="button" data-select-area="gemini" data-label="Gemini AI" aria-label="Gemini AI Co-Pilot" aria-controls="explorer-area-gemini" aria-pressed="false"><svg viewBox="0 0 24 24" class="gemini-sparkle-icon" aria-hidden="true"><defs><linearGradient id="gemini-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color='#4E82EE'/><stop offset="35%" stop-color='#7B61FF'/><stop offset="70%" stop-color='#C259D4'/><stop offset="100%" stop-color='#FA6076'/></linearGradient></defs><path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="url(#gemini-grad)"/></svg></button>
         </div>
         <div>
           <button class="rail-button" type="button" data-toggle-console data-label="Trace" aria-label="Trace"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m4 6 4 4-4 4M10 15h6"></path></svg></button>
@@ -150,7 +143,7 @@ pub fn render_lab_page(workbench: &str) -> String {
         <a href="https://freecomputation.org/" target="_blank" rel="noopener">🔗 freecomputation.org</a>
         <a href="https://github.com/sponsors/chasebryan" target="_blank" rel="noopener">💝 Sponsor on GitHub</a>
       </div>
-      <footer><span>v26.10.1 · Apache-2.0</span><button type="button" data-close-fcf-about>Close</button></footer>
+      <footer><span>v26.10.2 · Apache-2.0</span><button type="button" data-close-fcf-about>Close</button></footer>
     </div>
   </div>
 
@@ -162,17 +155,11 @@ pub fn render_lab_page(workbench: &str) -> String {
           <h2 id="fcf-doc-title">Document Title</h2>
         </div>
         <div class="fcf-doc-controls">
-          <button type="button" class="doc-btn doc-chrome-btn" data-doc-open-chrome title="Open this paper in Google Chrome">
-            <svg viewBox="0 0 24 24" class="fcf-chrome-emblem" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.2"/>
-              <path d="M12 2a10 10 0 0 1 8.66 5H12z" fill="#EA4335"/>
-              <path d="M20.66 7A10 10 0 0 1 15 21.32L10.67 13.82z" fill="#FBBC05"/>
-              <path d="M15 21.32A10 10 0 0 1 3.34 12.5L7.67 5z" fill="#34A853"/>
-              <path d="M3.34 12.5A10 10 0 0 1 12 2l4.33 7.5H7.67z" fill="#4285F4"/>
-              <circle cx="12" cy="12" r="4.5" fill="#ffffff" stroke="#cbd5e1" stroke-width="0.8"/>
-              <circle cx="12" cy="12" r="2.8" fill="#1A73E8"/>
+          <button type="button" class="doc-btn doc-chrome-btn" data-doc-open-chrome title="Open this paper in external browser">
+            <svg viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M9 3H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4M13 3h4v4M8 12 17 3"></path>
             </svg>
-            Open in Chrome
+            Open in Browser
           </button>
           <button type="button" class="doc-btn doc-close-btn" data-doc-close aria-label="Close document">✕</button>
         </div>
@@ -191,7 +178,7 @@ pub fn render_lab_page(workbench: &str) -> String {
         </div>
         <div>
           <h2>CentL26 Software Update</h2>
-          <small class="update-current-version">Installed: CentL26 v26.10.1</small>
+          <small class="update-current-version">Installed: CentL26 v26.10.2</small>
         </div>
       </div>
       <div class="update-body">
@@ -479,10 +466,10 @@ pub fn render_lab_page(workbench: &str) -> String {
                 <small>Automatically loads active calculations, variables, and previous notebook receipts.</small>
               </div>
             </label>
-            <label class="settings-radio-label">
-              <input type="radio" name="startup_mode" value="fresh" data-setting-startup>
+            <label class="settings-radio-label is-disabled">
+              <input type="radio" name="startup_mode" value="fresh" data-setting-startup disabled>
               <div class="settings-radio-content">
-                <strong>Start Fresh Computation</strong>
+                <strong>Start Fresh Computation <span class="settings-unavailable-badge">Unavailable</span></strong>
                 <small>Always opens to a clean slate with fresh memory and blank computation tab.</small>
               </div>
             </label>
@@ -614,7 +601,7 @@ pub(crate) fn render_lab_workbench_with_transient_result(
     }
     html.push_str(r#"</div><button class="strip-action add-tab" type="button" data-new-notebook data-new-computation title="Start a blank computation without clearing notebook history" aria-label="Create new notebook tab"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"></path></svg></button><span class="strip-spacer"></span><button class="strip-action" type="button" data-toggle-explorer title="Toggle workspace" aria-label="Toggle workspace"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"></rect><path d="M8 3v14"></path></svg></button><button class="strip-action" type="button" data-toggle-inspector title="Toggle inspector" aria-label="Toggle inspector"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"></rect><path d="M12 3v14"></path></svg></button></div>"#);
 
-    html.push_str(r#"<div class="workspace-toolbar"><div><button class="toolbar-button" type="button" data-open-welcome title="Open Welcome Screen"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 9.5 10 4l7 5.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z"></path><path d="M9 18v-6h2v6"></path></svg>Welcome</button><button class="toolbar-button" type="button" data-open-visualizer title="Open Interactive STEM Animated Visualizer &amp; Theorem Studio"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17V3m0 14h14M3 12c3-4 6 2 9-5 2-4 3-1 5 1"></path></svg>Visualizer</button><button class="toolbar-button" type="button" data-open-palette><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M4 10h12M4 15h8"></path></svg>Tools</button><button class="toolbar-button" type="button" data-save-project title="Save workspace (Ctrl / ⌘ S)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h9l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm2 0v4h6V4M6 13h8v4H6v-4Z"></path></svg>Save</button><a class="toolbar-button" href="/download/notebook.ipynb" download="notebook.ipynb" title="Download Jupyter Notebook (.ipynb)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M6 9l4 4 4-4M4 17h12"></path></svg>Jupyter (.ipynb)</a><a class="toolbar-button" href="/download/notebook.md" download="notebook.md" title="Download notebook as Markdown"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M6 9l4 4 4-4M4 17h12"></path></svg>Markdown</a><button class="toolbar-button" type="button" data-open-settings title="Open Preferences and Settings"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"></circle><circle cx="10" cy="10" r="2.8"></circle></svg>Settings</button><button class="toolbar-button" type="button" data-open-help title="Open help and guide"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"></circle><path d="M7.5 8a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3.5M10 15h.01"></path></svg>Help</button></div><div><button class="toolbar-icon theme-toggle" type="button" data-toggle-theme title="Toggle dimmed theme" aria-label="Toggle dimmed theme"><svg class="theme-icon-sun" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3"></circle><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M15.7 4.3l-1.4 1.4M5.7 14.3l-1.4 1.4"></path></svg><svg class="theme-icon-moon" viewBox="0 0 20 20" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg></button></div></div>"#);
+    html.push_str(r#"<div class="workspace-toolbar"><div><button class="toolbar-button" type="button" data-open-welcome title="Open Welcome Screen"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 9.5 10 4l7 5.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z"></path><path d="M9 18v-6h2v6"></path></svg>Welcome</button><button class="toolbar-button" type="button" data-add-code-cell title="Add Code Cell (B)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6.5 6-4 4 4 4m7-8 4 4-4 4m-2-9.5-3 11"></path></svg>Code</button><button class="toolbar-button" type="button" data-add-md-cell title="Add Markdown Note Cell (M)"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="4" width="15" height="12" rx="2"></rect><path d="M5.5 13.5V6.5l2.5 3 2.5-3v7m4-4.5 2 2.5 2-2.5m-2 2V6.5"></path></svg>Markdown</button><button class="toolbar-button" type="button" data-run-all-cells title="Run All Cells in Notebook"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 4 6 6-6 6M11 4l6 6-6 6"></path></svg>Run All</button><button class="toolbar-button" type="button" data-restart-kernel title="Restart Kernel &amp; Reset Workspace State"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10a7 7 0 1 0 7-7 7.6 7.6 0 0 0-5.2 2.1L3 6.5"></path><path d="M3 2.5v4h4"></path></svg>Restart</button><button class="toolbar-button" type="button" data-open-visualizer title="Open Interactive STEM Animated Visualizer &amp; Theorem Studio"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17V3m0 14h14M3 12c3-4 6 2 9-5 2-4 3-1 5 1"></path></svg>Visualizer</button><button class="toolbar-button" type="button" data-open-palette title="Search Tools &amp; Commands (⌘P)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M4 10h12M4 15h8"></path></svg>Tools</button><button class="toolbar-button" type="button" data-save-project title="Save workspace (Ctrl / ⌘ S)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h9l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm2 0v4h6V4M6 13h8v4H6v-4Z"></path></svg>Save</button><button class="toolbar-button" type="button" data-open-settings title="Open Preferences and Settings"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"></circle><circle cx="10" cy="10" r="2.8"></circle></svg>Settings</button><button class="toolbar-button" type="button" data-open-help title="Open help and guide"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"></circle><path d="M7.5 8a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3.5M10 15h.01"></path></svg>Help</button></div><div><button class="toolbar-icon theme-toggle" type="button" data-toggle-theme title="Toggle dimmed theme" aria-label="Toggle dimmed theme"><svg class="theme-icon-sun" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3"></circle><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M15.7 4.3l-1.4 1.4M5.7 14.3l-1.4 1.4"></path></svg><svg class="theme-icon-moon" viewBox="0 0 20 20" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg></button></div></div>"#);
 
     let show_welcome_surface = current_input.is_empty()
         && last_result.is_none()
@@ -681,7 +668,7 @@ fn render_explorer(html: &mut String, session: &Session) {
     html.push_str(&authored_symbols.to_string());
     html.push_str(&format!(r#"</strong>symbols</span></div><section class="tree-group"><h2>Current work</h2><button class="tree-row is-selected" type="button" data-focus-cell><span class="tree-icon notebook">N</span><span>{}</span><em>"#, escape_html(active_name)));
     html.push_str(&run_count.to_string());
-    html.push_str(r#"</em></button><button class="tree-row" type="button" data-open-visualizer><span class="tree-icon exact">📊</span><span>STEM Visualizer</span><em class="visualizer-tree-badge">Theorems</em></button><button class="tree-row" type="button" data-select-area="data"><span class="tree-icon dataset">D</span><span>Datasets</span><em data-workspace-field="counts.datasets">4</em></button><button class="tree-row" type="button" data-select-area="models"><span class="tree-icon model">M</span><span>Models</span><em data-workspace-field="counts.models">1</em></button><button class="tree-row" type="button" data-select-area="build"><span class="tree-icon build">B</span><span>Extensions</span><em data-workspace-field="counts.extensions">0</em></button><button class="tree-row" type="button" data-select-area="gemini"><span class="tree-icon gemini">✦</span><span>Gemini AI</span><em class="gemini-tree-badge">Co-Pilot</em></button><button class="tree-row" type="button" data-open-evidence><span class="tree-icon receipt">R</span><span>Receipts</span><em data-workspace-field="counts.receipts">"#);
+    html.push_str(r#"</em></button><button class="tree-row" type="button" data-open-visualizer><span class="tree-icon exact">📊</span><span>STEM Visualizer</span><em class="visualizer-tree-badge">Theorems</em></button><button class="tree-row" type="button" data-select-area="data"><span class="tree-icon dataset">D</span><span>Datasets</span><em data-workspace-field="counts.datasets">4</em></button><button class="tree-row" type="button" data-select-area="models"><span class="tree-icon model">M</span><span>Models</span><em data-workspace-field="counts.models">1</em></button><button class="tree-row" type="button" data-select-area="build"><span class="tree-icon build">B</span><span>Extensions</span><em data-workspace-field="counts.extensions">0</em></button><button class="tree-row" type="button" data-open-evidence><span class="tree-icon receipt">R</span><span>Receipts</span><em data-workspace-field="counts.receipts">"#);
     html.push_str(&run_count.to_string());
     html.push_str(r#"</em></button></section></section>"#);
 
@@ -725,40 +712,7 @@ fn render_explorer(html: &mut String, session: &Session) {
     render_capability_row(html, "org.fcf.centl.build.extend", "In-app programmability");
     html.push_str(r#"</div><section class="tree-group"><h2>Start from a custom program</h2><button class="tree-row" type="button" data-select-area="work" data-fill="build fn KE(m, v) = 1/2 * m * v^2" data-interaction-mode="Build"><span class="tree-icon receipt">b</span><span>Define kinetic energy</span></button><button class="tree-row" type="button" data-select-area="work" data-fill="build list" data-interaction-mode="Build"><span class="tree-icon receipt">b</span><span>List user extensions</span></button></section></section>"#);
 
-    // Dedicated Gemini AI Area
-    let (gemini_configured, _gemini_key_mask, _gemini_source, gemini_model) = crate::engine::sci::get_gemini_status_info();
-    let status_class = if gemini_configured { "gemini-badge-connected" } else { "gemini-badge-unconfigured" };
-    let status_text = if gemini_configured { "Connected" } else { "Setup Required" };
-
-    html.push_str(r#"<section class="explorer-area" id="explorer-area-gemini" data-area-panel="gemini" data-area-title="Gemini AI" data-area-subtitle="Strategic STEM co-pilot" hidden><div class="gemini-hero-card"><div class="gemini-hero-header"><div class="gemini-sparkle-lockup"><svg viewBox="0 0 24 24" class="gemini-sparkle-emblem" aria-hidden="true"><defs><linearGradient id="gemini-grad-hero" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color='#4E82EE'/><stop offset="35%" stop-color='#7B61FF'/><stop offset="70%" stop-color='#C259D4'/><stop offset="100%" stop-color='#FA6076'/></linearGradient></defs><path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="url(#gemini-grad-hero)"/></svg><div><strong>Gemini AI</strong></div></div><span class="gemini-status-badge "#);
-    html.push_str(status_class);
-    html.push_str(r#"">"#);
-    html.push_str(status_text);
-    html.push_str(r#"</span></div></div>"#);
-
-    // Compact credentials section
-    html.push_str(r#"<section class="tree-group"><h2>API Key</h2><div class="gemini-config-box">"#);
-    if !gemini_configured {
-        html.push_str(r#"<p class="gemini-help-note">Enter your key or set <code>GEMINI_API_KEY</code> in your environment.</p>"#);
-    }
-    html.push_str(r#"<form class="gemini-key-form" data-gemini-key-form><input type="password" class="gemini-key-input" placeholder="Gemini API key…" aria-label="Gemini API Key" spellcheck="false"><button type="submit" class="gemini-key-save-btn">Save</button></form><div class="gemini-sub-links"><a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Get key at Google AI Studio ↗</a></div></div></section>"#);
-
-    // Model selector
-    html.push_str(r#"<section class="tree-group"><h2>Model</h2><div class="gemini-model-selector" data-gemini-model-selector><button type="button" class="gemini-model-chip"#);
-    if gemini_model == "gemini-2.5-flash" {
-        html.push_str(" is-active");
-    }
-    html.push_str(r#" data-gemini-model data-model="gemini-2.5-flash" data-command=":gemini-model gemini-2.5-flash"><strong>2.5 Flash</strong><small>Fast</small></button><button type="button" class="gemini-model-chip"#);
-    if gemini_model == "gemini-2.5-pro" {
-        html.push_str(" is-active");
-    }
-    html.push_str(r#" data-gemini-model data-model="gemini-2.5-pro" data-command=":gemini-model gemini-2.5-pro"><strong>2.5 Pro</strong><small>Deep reasoning</small></button></div></section>"#);
-
-    // Quick actions
-    html.push_str(r#"<section class="tree-group"><h2>Quick Actions</h2><button class="tree-row" type="button" data-select-area="work" data-fill=":gemini Explain the last calculation in depth" data-interaction-mode="Math"><span class="tree-icon gemini">✦</span><span>Explain Last Result</span></button><button class="tree-row" type="button" data-select-area="work" data-fill=":gemini Derive the theoretical proof of " data-interaction-mode="Math"><span class="tree-icon gemini">✦</span><span>Derive Proof</span></button><button class="tree-row" type="button" data-select-area="work" data-fill=":gemini Generate Python SymPy script for " data-interaction-mode="Build"><span class="tree-icon gemini">✦</span><span>Generate Script</span></button><button class="tree-row" type="button" data-select-area="work" data-fill=":gemini Synthesize research summary on " data-interaction-mode="Research"><span class="tree-icon gemini">✦</span><span>Research Summary</span></button></section>"#);
-
-    render_capability_row(html, "org.fcf.centl.gemini.copilot", "Gemini Co-Pilot");
-    html.push_str(r#"</section></div><footer class="explorer-footer"><span><i></i><span><strong>CentL26 Core</strong><small>Ready · Local</small></span></span></footer></aside>"#);
+    html.push_str(r#"</div><footer class="explorer-footer"><span><i></i><span><strong>CentL26 Core</strong><small>Ready · Local</small></span></span></footer></aside>"#);
 }
 
 fn command_is_family(command: &str, families: &[&str]) -> bool {
@@ -948,28 +902,42 @@ fn render_notebook_results(
     for (index, entry) in session.history.iter().take(visible_history_len).enumerate() {
         let (kind, kind_class) = history_kind(entry);
         let is_markdown = entry.command.starts_with("# ") || entry.command.starts_with(":md ");
+        let cell_num = index + 1;
         if is_markdown {
             let note_text = entry.command.strip_prefix(":md ").unwrap_or(&entry.command);
             html.push_str(&format!(
-                r#"<article class="result-cell markdown-cell" data-cell-index="{}"><div class="cell-index"><span>[{}]</span><span class="cell-badge-md">MD</span></div><div class="cell-content"><div class="markdown-rendered-body"><p>{}</p></div><div class="cell-actions"><button type="button" class="cell-action-btn" data-edit-cell="{}" title="Edit note in composer">✏ Edit</button><button type="button" class="cell-action-btn cell-action-delete" data-delete-cell="{}" title="Delete note">✕ Delete</button></div></div></article>"#,
+                r#"<article class="result-cell markdown-cell jupyter-cell" data-cell-index="{}"><div class="cell-index"><span class="gutter-prompt">In [{}]</span><span class="cell-badge-md">MD</span></div><div class="cell-content"><div class="cell-header-bar"><span class="cell-type-badge kind-md">Markdown</span><div class="cell-actions"><button type="button" class="cell-action-btn" data-add-above="{}" title="Insert cell above">+ Above</button><button type="button" class="cell-action-btn" data-add-below="{}" title="Insert cell below">+ Below</button><button type="button" class="cell-action-btn" data-move-up="{}" title="Move cell up">▲</button><button type="button" class="cell-action-btn" data-move-down="{}" title="Move cell down">▼</button><button type="button" class="cell-action-btn" data-edit-cell="{}" title="Edit note in composer">✏ Edit</button><button type="button" class="cell-action-btn cell-action-delete" data-delete-cell="{}" title="Delete note">✕ Delete</button></div></div><div class="markdown-rendered-body" data-raw-markdown="{}"><p>{}</p></div></div></article>"#,
                 index,
-                index + 1,
-                escape_html(note_text),
+                cell_num,
+                index,
+                index,
+                index,
+                index,
                 escape_html(&entry.command),
-                index
+                index,
+                escape_html(note_text),
+                escape_html(note_text)
             ));
         } else {
             html.push_str(&format!(
-                r#"<article class="result-cell" data-cell-index="{}"><div class="cell-index"><span>[{}]</span><button type="button" data-command="{}" data-command-mode="Auto" title="Run again" aria-label="Run cell {} again"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 5 8 5-8 5Z"></path></svg></button></div><div class="cell-content"><div class="source-line"><code>{}</code><div class="cell-actions"><button type="button" class="cell-action-btn" data-run-cell="{}" title="Run cell again">▶ Run</button><button type="button" class="cell-action-btn" data-edit-cell="{}" title="Edit in composer">✏ Edit</button><button type="button" class="cell-action-btn" data-copy-cell="{}" title="Copy expression">📋 Copy</button><button type="button" class="cell-action-btn cell-action-delete" data-delete-cell="{}" title="Delete cell">✕ Delete</button></div></div><div class="result-output"><header><span>Result</span><div><small class="kind-{}">{}</small><small>{} µs</small></div></header><pre>{}</pre>"#,
+                r#"<article class="result-cell code-cell jupyter-cell" data-cell-index="{}"><div class="cell-index"><span class="gutter-prompt">In [{}]</span><button type="button" data-command="{}" data-command-mode="Auto" data-run-cell="{}" title="Run cell again (Shift+Enter)" aria-label="Run cell {} again"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 5 8 5-8 5Z"></path></svg></button></div><div class="cell-content"><div class="cell-header-bar"><span class="cell-type-badge kind-{}">{}</span><div class="cell-actions"><button type="button" class="cell-action-btn" data-run-cell="{}" title="Run cell again (Shift+Enter)">▶ Run</button><button type="button" class="cell-action-btn" data-add-above="{}" title="Insert cell above">+ Above</button><button type="button" class="cell-action-btn" data-add-below="{}" title="Insert cell below">+ Below</button><button type="button" class="cell-action-btn" data-move-up="{}" title="Move cell up">▲</button><button type="button" class="cell-action-btn" data-move-down="{}" title="Move cell down">▼</button><button type="button" class="cell-action-btn" data-edit-cell="{}" title="Edit in composer">✏ Edit</button><button type="button" class="cell-action-btn" data-copy-cell="{}" title="Copy expression">📋 Copy</button><button type="button" class="cell-action-btn cell-action-delete" data-delete-cell="{}" title="Delete cell">✕ Delete</button></div></div><div class="source-line"><code>{}</code></div><div class="result-output"><div class="output-gutter"><span class="gutter-prompt">Out [{}]</span></div><div class="output-content"><header><span>Result</span><div><small class="kind-{}">{}</small><small>{} µs</small></div></header><pre>{}</pre>"#,
                 index,
-                index + 1,
-                escape_html(&entry.command),
-                index + 1,
+                cell_num,
                 escape_html(&entry.command),
                 escape_html(&entry.command),
+                cell_num,
+                kind_class,
+                kind,
+                escape_html(&entry.command),
+                index,
+                index,
+                index,
+                index,
                 escape_html(&entry.command),
                 escape_html(&entry.command),
                 index,
+                escape_html(&entry.command),
+                cell_num,
                 kind_class,
                 kind,
                 entry.execution_micros,
@@ -983,7 +951,7 @@ fn render_notebook_results(
                     ));
                 }
             }
-            html.push_str(r#"</div></div></article>"#);
+            html.push_str(r#"</div></div></div></article>"#);
         }
     }
 
@@ -1124,7 +1092,7 @@ mod tests {
         let html = render_lab_page(&workbench);
 
         for area in [
-            "work", "projects", "tools", "data", "models", "research", "build", "gemini",
+            "work", "projects", "tools", "data", "models", "research", "build",
         ] {
             assert!(html.contains(&format!(r#"data-select-area="{}""#, area)));
             assert!(html.contains(&format!(r#"data-area-panel="{}""#, area)));
@@ -1140,13 +1108,9 @@ mod tests {
         assert!(html.contains(
             r#"data-select-area="build"><span class="tree-icon build">B</span><span>Extensions"#
         ));
-        assert!(html.contains(
-            r#"data-select-area="gemini"><span class="tree-icon gemini">✦</span><span>Gemini AI"#
-        ));
         assert!(!html.contains(">Scratch<"));
         assert!(html.contains("CentL26 bundles pre-loaded STEM datasets") || html.contains("No dataset object service is registered"));
         assert!(html.contains("Native offline SCi problem solver is active"));
-        assert!(html.contains("Gemini AI"));
     }
 
     #[test]
@@ -1324,6 +1288,14 @@ mod tests {
             "data-fn-",
             "data-open-settings",
             "data-settings-",
+            "data-add-code-cell",
+            "data-add-md-cell",
+            "data-run-all-cells",
+            "data-restart-kernel",
+            "data-add-above",
+            "data-add-below",
+            "data-move-up",
+            "data-move-down",
             "data-run-cell",
             "data-edit-cell",
             "data-copy-cell",
@@ -1433,7 +1405,7 @@ mod tests {
         assert!(
             empty_html.contains(r#"data-command="es solve 1009" data-modes="research""#)
         );
-        assert!(html.contains(r#"data-command-mode="Auto" title="Run again""#));
+        assert!(html.contains(r#"data-command-mode="Auto" data-run-cell="physics convert 100 cm m" title="Run cell again (Shift+Enter)""#));
         assert!(LAB_JS.contains("interactionModes.has(target.dataset.interactionMode)"));
         assert!(LAB_JS.contains("interactionModes.has(target.dataset.commandMode)"));
     }

@@ -1,5 +1,28 @@
 ## Unreleased
 
+### CentL26.10.2 — Interactive Notebooks, LaTeX Typography Engine & Definitive Operator Reference (2026-08-22)
+
+- **Continuous Jupyter-Grade Interactive Notebook Workflows**:
+  - Implemented structured `In [n]:` / `Out [n]:` cell gutters, execution timing badges, and prompt identifiers.
+  - Added full cell controls: `▶ Run` (re-execute), `+ Above` (insert above), `+ Below` (insert below), `▲` / `▼` (reorder cells), `✏ Edit` (edit in composer), `📋 Copy` (copy expression), and `✕ Delete` (delete cell).
+  - Added clean workspace toolbar controls: `Code` (`</>`), `Markdown` (`M↓`), `▶ Run All`, and `↺ Restart` (`rotate-ccw`).
+  - Added full Jupyter keyboard shortcuts: `Shift+Enter` (run & advance), `Ctrl+Enter` / `Cmd+Enter` (run in place), `Alt+Enter` (run & insert below), and `Esc` command mode navigation (`A`, `B`, `M`, `Y`, `K`/`J`, `Enter`).
+- **Self-Contained LaTeX & Mathematical Typography Engine**:
+  - Built client-side offline LaTeX mathematical engine `renderLatexMath(latex, isDisplay)` in `lab.js` supporting fractions (`\frac`), square roots (`\sqrt`), Greek letters (`\alpha`–`\omega`, `\Delta`), arrows (`\rightarrow`, `\implies`, `\to`), blackboard bold sets (`\mathbb{Q}`, `\mathbb{Z}`, `\mathbb{R}`), and calculus operators (`\sum`, `\prod`, `\int`, `\partial`, `\nabla`).
+  - Implemented pre-extraction syntax protection in `renderMarkdownToHtml` to prevent mathematical syntax from colliding with markdown italicization.
+  - Added dynamic mathematical hydration (`hydrateMarkdownCells`) for notebook note cells.
+- **Definitive CentL26 Operator Manual**:
+  - Fully authored a comprehensive 13-domain in-app Operator Manual in `src-web/server/fcf_docs.rs` with markdown table parsing (`.fcf-doc-table`), horizontal dividers, and ordered lists.
+- **macOS WKWebView Lockout Prevention**:
+  - Replaced direct download URL redirects with safe client-side Blob downloads (`triggerSafeDownload`), ensuring export actions never lock the user out of the WKWebView desktop app.
+- **Aesthetic Refinement & Settings Stability**:
+  - Replaced legacy emblems and emojis in the search omnibar with clean line-art SVG vector symbols.
+  - Locked startup behavior to "Resume Previous Session" and marked "Start Fresh Computation" as Unavailable to protect user workspace state.
+  - Removed tacky Gemini side tabs and enabled clean in-notebook command integration (`:gemini`, `:gemini-key`, `:gemini-model`, `:gemini-status`).
+- **Universal Release Standardization**:
+  - Synchronized `v26.10.2` across `Cargo.toml`, `Cargo.lock`, `README.md`, `desktop/centl26/macos/Info.plist`, `CentL26Updater.swift`, and capabilities metadata.
+  - Published official `docs/releases/26.10.2.md` release notes.
+
 ### CentL26.10.1 — Orchid Release (2026-08-22)
 
 - **Official Botanical Orchid Application Icon**:

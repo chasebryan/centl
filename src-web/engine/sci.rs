@@ -2952,7 +2952,7 @@ fn http_post_json(url_str: &str, payload: &Value) -> Result<String, String> {
             "-sS",
             "--max-time", "25",
             "--connect-timeout", "8",
-            "-A", "CentL26/26.10.1",
+            "-A", "CentL26/26.10.2",
             "-X", "POST",
             url_str,
             "-H", "Content-Type: application/json",

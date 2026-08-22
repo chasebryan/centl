@@ -27,7 +27,7 @@ Copy-Item "desktop\centl26\windows\CentL26.bat" (Join-Path $DistDir "CentL26.bat
 $ReadmeContent = @"
 =====================================================
 CentL26 Scientific Computing Workbench
-Version: 26.10.1 (Windows 11 x86_64)
+Version: 26.10.2 (Windows 11 x86_64)
 Free Computation Foundation · Apache-2.0
 =====================================================
 
@@ -49,7 +49,7 @@ if (Test-Path "LICENSE") {
 # 4. Generate Build Manifest
 $Manifest = @{
     "name" = "CentL26"
-    "version" = "26.10.1"
+    "version" = "26.10.2"
     "platform" = "windows-x86_64"
     "target" = "x86_64-pc-windows-msvc"
     "timestamp" = (Get-Date -Format "o")

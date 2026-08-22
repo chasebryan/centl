@@ -19,50 +19,270 @@ pub static FCF_DOCUMENTS: &[FcfDoc] = &[
         summary: "Comprehensive guide to exact arithmetic, symbolic algebra, multi-statement notebooks, and keyboard shortcuts in CentL26.",
         tags: &["manual", "operator", "guide", "arithmetic", "hotkeys", "notebooks", "algebra"],
         content: r#"# CentL26 Scientific Work Environment · Operator Manual
-**Free Computation Foundation · Official Standard**
+**Free Computation Foundation · Canonical Reference & User Guide**
 
-## 1. Philosophical Grounding
-CentL26 operates on a foundational axiom: **Good maths should be free. Never manufacture mathematical certainty.**
-Every result computed within CentL26 is exact-first. Where closed-form exact rational solutions exist, they are preserved with arbitrary precision. When approximations are requested, they are presented with rigorous interval enclosures rather than lossy floating-point truncations.
+## 1. Philosophical Grounding & Architecture
+CentL26 is built on a foundational axiom: **Good maths should be free. Never manufacture mathematical certainty.**
 
----
-
-## 2. Mathematical Kernels & Exact Arithmetic
-CentL26 features built-in arbitrary precision rational arithmetic:
-- **Fractions**: `1/3 + 5/7` evaluates exactly to `22/21`.
-- **Large Integers**: Powers like `2^64` evaluate exactly to `18446744073709551616`.
-- **Symbolic Differentiation**: `diff(x^3 * sin(x), x)` yields `3 * x^2 * sin(x) + x^3 * cos(x)`.
-- **Symbolic Integration**: `integrate(3*x^2 + 2*x, x, 0, 5)` yields `150`.
-- **Equation Solving**: `solve(x^2 - 5*x + 6 = 0, x)` yields `x = 2, x = 3`.
-- **Rigorous Enclosure**: `approx(pi, 50)` produces 50 verified decimal digits with guaranteed interval bounds.
+Unlike conventional computer algebra systems or floating-point calculators that silently truncate digits and accumulate round-off errors:
+- **Exact-First Arithmetic**: Every rational computation in CentL26 is performed over the exact field $\mathbb{Q}$ using arbitrary-precision rational arithmetic.
+- **Closed-Form Symbolics**: Algebraic identities, derivatives, integrals, and polynomials are manipulated symbolically in closed form.
+- **Certified Interval Enclosures**: When transcendental constants ($\pi, e$) or irrational roots ($\sqrt{2}$) are evaluated, CentL26 computes rigorous upper and lower bounds $[x_{\min}, x_{\max}]$ guaranteed to enclose the true real value $x^*$.
+- **Local & Offline Privacy**: All calculations, notebooks, and extensions run 100% locally on your machine with zero cloud dependencies.
 
 ---
 
-## 3. Multi-Statement Notebook Cells
-Execute multiple computational steps sequentially within a single cell using semicolons:
+## 2. Interactive Notebook Workspace
+CentL26 organizes your scientific work into an interactive multi-cell notebook canvas.
+
+### 2.1 Anatomy of a Cell
+Each notebook cell consists of:
+- **Input Gutter (`In [n]:`)**: Displays the sequential execution count of the calculation.
+- **Header Bar & Domain Badge**: Indicates the active computational domain (`Exact ℚ`, `Symbolic ∂`, `Physics Δ`, `Chemistry Σ`, `Erdős p`, `Build b`, `SCi NL`, `Markdown`).
+- **Cell Actions**:
+  - `▶ Run`: Re-evaluates the cell immediately.
+  - `+ Above`: Inserts a new computation cell above the active cell.
+  - `+ Below`: Inserts a new computation cell below the active cell.
+  - `▲` / `▼`: Reorders cells up or down.
+  - `✏ Edit`: Loads the cell's expression into the bottom composer for modification.
+  - `📋 Copy`: Copies the expression to your clipboard.
+  - `✕ Delete`: Removes the cell from the notebook history.
+- **Source Expression**: The exact mathematical syntax or command executed.
+- **Output Section (`Out [n]:`)**: Displays the exact result, execution timing in microseconds ($\mu\text{s}$), and certified enclosure bounds where applicable.
+
+### 2.2 Cell Types
+1. **Code Cells (`▶`)**: Execute calculations, solvers, unit conversions, and multi-statement programs.
+2. **Markdown Cells (`MD`)**: Documentation and mathematical notes. Prefix any command with `#` or `:md` to create a note.
+
+### 2.3 Multi-Notebook Tabs
+Work with multiple independent calculations simultaneously:
+- Click the `+` tab button in the document strip or run `:new-notebook` to open a new tab.
+- Double-click the notebook title or use `:rename-notebook <name>` to name your active document.
+- Switch tabs with `⌘ 1`, `⌘ 2`, or by clicking the tab.
+- Close a tab using `Alt+W` or `:close-notebook <idx>`.
+
+---
+
+## 3. Workspace Toolbar & Controls
+The top toolbar provides one-click access to core environment tools:
+- **Welcome**: Switch to the launchpad and problem surface.
+- **Code**: Insert and focus a new computation cell.
+- **Markdown**: Insert a formatted markdown note cell.
+- **Run All**: Sequentially re-evaluate every cell in the notebook in order.
+- **Restart**: Clear execution history and reset variable scope while preserving notebook tabs.
+- **Visualizer**: Launch the interactive 60 FPS STEM Animated Visualizer & Theorem Studio.
+- **Tools**: Open the quick Command Palette and tool search (`⌘ P`).
+- **Save**: Persist current project state to disk (`⌘ S`).
+- **Settings**: Toggle startup mode between *Resume previous session* and *Start fresh*.
+- **Help**: Open the in-app quick reference guide.
+- **Theme**: Switch between clean light and dimmed dark themes.
+
+---
+
+## 4. Keyboard Shortcuts & Navigation
+
+### 4.1 Execution Shortcuts
+- `Shift + Enter`: Execute the active cell/command and advance focus.
+- `Ctrl + Enter` or `⌘ Enter`: Execute the active cell in place.
+- `Alt + Enter`: Execute the active cell and immediately insert a blank cell below.
+
+### 4.2 System Navigation
+- `⌘ K` or `/` (outside inputs): Focus the STEM Academic Search & Chrome Omnibar.
+- `⌘ P` or `Ctrl + P`: Open Command Palette (Commands & Quick Open).
+- `⌘ B` or `Ctrl + B`: Toggle the left Explorer side pane.
+- `⌘ J` or `Ctrl + J`: Toggle the bottom Trace Console.
+- `⌘ S` or `Ctrl + S`: Save active project locally.
+- `Alt + W` or `⌘ Shift W`: Close active notebook tab.
+- `Escape`: Close active modal, dialog, or omnibar menu.
+
+### 4.3 Command Mode (when outside text inputs)
+Press `Escape` to enter command mode:
+- `A`: Insert new code cell above.
+- `B`: Insert new code cell below.
+- `M`: Switch cell / insert markdown note.
+- `Y`: Switch cell / insert code cell.
+- `K` or `ArrowUp`: Navigate focus to previous cell.
+- `J` or `ArrowDown`: Navigate focus to next cell.
+- `Enter`: Enter edit mode in focused cell.
+
+---
+
+## 5. Exact Mathematical Engine & CAS Syntax
+
+### 5.1 Rational Arithmetic & Big Integers
+- Arbitrary precision fractions: `1/3 + 5/7` → `22/21`
+- Exponentiation & large powers: `2^64` → `18446744073709551616`
+- Factorials & Combinatorics: `50!` or `factorial(50)`
+- Divisibility & Number Theory: `gcd(84, 360)` → `12`, `lcm(14, 15)` → `210`
+
+### 5.2 Variables & Multi-Statement Cells
+Assign variables and chain calculations sequentially using semicolons:
 ```centl
-a = 15;
-b = 27;
-hypot_sq = a^2 + b^2;
-hypot_sq
+x = 14;
+y = 28;
+radius = sqrt(x^2 + y^2);
+area = pi * radius^2;
+area
 ```
 
+### 5.3 Symbolic Calculus
+- **Differentiation**: `diff(expression, variable)`
+  - `diff(x^3 * sin(x), x)` → `3*x^2*sin(x) + x^3*cos(x)`
+  - `diff(exp(-x^2), x)` → `-2*x*exp(-x^2)`
+- **Symbolic Integration**: `integrate(expression, variable, [lower, upper])`
+  - Indefinite: `integrate(3*x^2 + 2*x, x)` → `x^3 + x^2`
+  - Definite: `integrate(3*x^2 + 2*x, x, 0, 5)` → `150`
+- **Taylor Series**: `series(expression, variable, center, order)`
+  - `series(sin(x), x, 0, 6)` → `x - x^3/6 + x^5/120 + O(x^7)`
+- **Limits**: `limit(expression, variable, point)`
+  - `limit(sin(x)/x, x, 0)` → `1`
+
+### 5.4 Algebraic Equation Solving & Polynomials
+- **Equation Solving**: `solve(equation, variable)`
+  - `solve(x^2 - 5*x + 6 = 0, x)` → `x = 2, x = 3`
+  - `solve(2*x + 5 = 17, x)` → `x = 6`
+- **Polynomial Factorization**: `factor(x^4 - 1)` → `(x - 1)*(x + 1)*(x^2 + 1)`
+- **Polynomial Expansion**: `expand((x + 2)^4)`
+- **Simplification**: `simplify((x^2 - 1)/(x - 1))` → `x + 1`
+
+### 5.5 Certified Transcendental Enclosures
+Evaluate irrational and transcendental numbers to arbitrary precision with verified bounds:
+- `approx(pi, 50)` → 50 verified decimal digits of $\pi$ with guaranteed error interval.
+- `approx(e, 50)` → 50 verified digits of Euler's constant $e$.
+- `approx(sqrt(2), 50)` → 50 verified digits of $\sqrt{2}$.
+
 ---
 
-## 4. In-App Programmability & Extensions (`build`)
-Define custom STEM formulas and user constants dynamically:
+## 6. Physics & SI Mechanics Engine
+CentL26 includes a typed physical computation engine with SI unit validation:
+
+### 6.1 Unit Conversions
+Convert between imperial, metric, atomic, and astronomical units:
+- `physics convert 100 km/h m/s` → `27.77777778 m/s`
+- `physics convert 1 atm Pa` → `101325 Pa`
+- `physics convert 100 eV J` → `1.602176634e-17 J`
+- `physics convert 1 AU km` → `149597870.7 km`
+
+### 6.2 Classical Mechanics & Kinematics
+- **Kinematic Equations**: `physics kinematics v0=25 a=-9.8 t=2.5` (computes displacement and final velocity).
+- **Elastic Collisions**: `physics collision elastic 2.0 5.0 1.0 -3.0` (computes post-collision velocities preserving kinetic energy $\frac{1}{2}mv^2$ and momentum $mv$).
+- **Gravitational Force**: $F = G \frac{m_1 m_2}{r^2}$.
+
+### 6.3 Relativistic Dynamics
+- **Lorentz Factor**: $\gamma = \frac{1}{\sqrt{1 - v^2/c^2}}$
+- **Relativistic Invariant Energy-Momentum**:
+  $$E^2 = (pc)^2 + (m_0 c^2)^2$$
+
+---
+
+## 7. Chemistry & Stoichiometry Engine
+
+### 7.1 Elemental Atom Counting
+Decomposes complex, nested chemical formulas:
+- `chem atoms Ca(OH)2` → `Ca: 1, O: 2, H: 2` (Total: 5 atoms)
+- `chem atoms (NH4)2SO4` → `N: 2, H: 8, S: 1, O: 4` (Total: 15 atoms)
+- `chem atoms Fe3[Fe(CN)6]2` → `Fe: 5, C: 12, N: 12`
+
+### 7.2 Molar Mass Computation
+Calculates exact molecular weight:
+- `chem mass H2SO4` → `98.078 g/mol`
+- `chem mass C6H12O6` → `180.156 g/mol`
+
+### 7.3 Chemical Reaction Balancing
+Balances reactions using exact matrix nullspace linear algebra:
+- `chem balance H2 + O2 = H2O` → `2 H2 + O2 = 2 H2O`
+- `chem balance C3H8 + O2 = CO2 + H2O` → `C3H8 + 5 O2 = 3 CO2 + 4 H2O`
+- `chem balance KMnO4 + HCl = KCl + MnCl2 + H2O + Cl2` → `2 KMnO4 + 16 HCl = 2 KCl + 2 MnCl2 + 8 H2O + 5 Cl2`
+
+### 7.4 Buffers & Thermochemistry
+- **Henderson-Hasselbalch Equation**: $\text{pH} = \text{p}K_a + \log_{10}\left(\frac{[\text{A}^-]}{[\text{HA}]}\right)$
+- **Gibbs Free Energy**: $\Delta G = \Delta H - T \Delta S$
+
+---
+
+## 8. Research Kernels & Number Theory
+CentL26 includes specialized high-performance research solvers for open mathematical problems:
+
+### 8.1 Erdős–Straus Conjecture Solver
+Decomposes rational $\frac{4}{p}$ into Egyptian unit fractions:
+- `es solve 1009` → Finds witness triple $(x, y, z)$ such that $\frac{4}{1009} = \frac{1}{x} + \frac{1}{y} + \frac{1}{z}$.
+- `es hunt 1000000` → High-throughput scanner evaluating prime residue classes at $>10^7$ primes/sec.
+
+### 8.2 Collatz Trajectory Dynamics
+- `collatz 27` → Computes stopping time, maximum trajectory peak, and 2-adic valuation vector.
+
+---
+
+## 9. Interactive STEM Animated Visualizer & Theorem Studio
+Launch the Visualizer via the toolbar **Visualizer** button or by running `:visualize`, `:viz`, or `:theorems`.
+
+### Built-in Interactive Models:
+1. **Erdős–Straus Modular Resonance Orbit**: Dynamic polar projection of unit fraction decomposition paths.
+2. **Collatz Stopping Time Tree & 2-Adic Decay**: Branching tree visualization of Syracuse stopping times.
+3. **Prime Harmonic Distribution & Zeta Spirals**: Spatial distribution of primes along logarithmic spirals.
+4. **Relativistic Spacetime & Light Cone**: Minkowski coordinate transformations and time dilation envelopes.
+5. **Double Pendulum Chaotic Phase Space**: Non-linear dynamical phase portrait and sensitivity to initial conditions.
+6. **Molecular Reaction Graph**: Stoichiometric mass-conservation flow networks.
+7. **Quantum Wave Packet Dispersion**: Tunneling probability across rectangular potential barriers.
+8. **Fourier Harmonic Synthesis**: Real-time reconstruction of square and sawtooth waves from trigonometric series.
+
+### Canvas Controls:
+- **Play/Pause**: Toggle 60 FPS animation with `Space` or the play button.
+- **Step**: Advance animation by single frames with `→`.
+- **Reset**: Return simulation to $t = 0$ with `R`.
+- **Speed**: Adjust simulation rate from $0.25\times$ to $4.0\times$.
+- **Pan & Zoom**: Click and drag canvas to pan; scroll wheel to zoom.
+
+---
+
+## 10. In-App Programmability & Extensions (`build`)
+Define reusable functions and constants that persist across your workspace:
 ```centl
-build fn KE(m, v) = 1/2 * m * v^2
-build const c_light = 299792458
+build fn lorentz(v) = 1 / sqrt(1 - (v / 299792458)^2)
+build const planck_h = 6.62607015e-34
+build fn photon_energy(freq) = planck_h * freq
 ```
+View and manage all authored extensions in the **Extensions (`B`)** Explorer pane.
 
 ---
 
-## 5. Keyboard Navigation & Omnibar Shortcuts
-- `⌘ K` or `Ctrl+K`: Focus the STEM Academic Search & Chrome Omnibar.
-- `⌘ Enter` or `Ctrl+Enter`: Execute the active cell in the notebook.
-- `⌘ S` or `Ctrl+S`: Save active workspace state locally.
-- `Escape`: Close active modal or omnibar dropdown.
+## 11. AI Co-Pilot (Gemini Command Integration)
+CentL26 integrates Google Gemini as an optional natural-language assistant directly within the notebook workspace:
+- **Ask Gemini**: `:gemini <query>` (e.g., `:gemini explain the derivation of Stirling's approximation`)
+- **Configure API Key**: `:gemini-key <YOUR_API_KEY>`
+- **Switch Model**: `:gemini-model <model>` (e.g. `gemini-2.5-pro`, `gemini-2.5-flash`, `gemini-2.5-flash-lite`)
+- **Check Status**: `:gemini-status`
+
+*Note*: CentL26 adheres to exact-first validation. Gemini serves strictly as a conceptual co-pilot; all mathematical computations remain verified by CentL26's native deterministic kernels.
+
+---
+
+## 12. Project Storage, Export & Interoperability
+- **Auto-Save & Project Files**: Work is automatically preserved locally in your session database. Use `⌘ S` or `:save` to create named snapshots.
+- **Jupyter Notebook Export (`.ipynb`)**: Download complete notebooks in official Jupyter format for use in JupyterLab, Google Colab, and VS Code.
+- **Markdown Export (`.md`)**: Export clean Markdown documents with formatted LaTeX equations.
+- **Full JSON Archive (`.json`)**: Export complete session state, receipts, variables, and history.
+
+---
+
+## 13. Master System Commands Reference Table
+
+| Command | Action | Shortcut |
+|:---|:---|:---|
+| `:clear` | Clears current notebook history & receipts | `Clear` Button |
+| `:new-notebook` | Opens a new independent computation notebook tab | `+` Tab |
+| `:switch-notebook <n>` | Switches active tab to notebook index `n` | `⌘ 1..9` |
+| `:rename-notebook <name>` | Renames the active notebook tab | Double-Click Title |
+| `:close-notebook <n>` | Closes notebook tab at index `n` | `Alt + W` |
+| `:delete-cell <n>` | Deletes cell `n` from the active notebook | `✕ Delete` |
+| `:move-cell <n> <dir>` | Reorders cell `n` up (`-1`) or down (`1`) | `▲` / `▼` |
+| `:save` | Persists project state and notebook sessions to disk | `⌘ S` |
+| `:visualize` / `:viz` | Opens the STEM Animated Visualizer & Theorem Studio | Toolbar Button |
+| `:gemini <prompt>` | Prompts Gemini AI Co-Pilot for conceptual assistance | In-Workspace |
+| `:gemini-key <key>` | Configures Gemini API credentials for current session | In-Workspace |
+| `:gemini-model <mod>` | Sets active Gemini model (`gemini-2.5-pro`, etc.) | In-Workspace |
+| `:gemini-status` | Displays AI co-pilot connectivity and credential status | In-Workspace |
+| `:help` | Displays keyboard shortcuts and system reference | Toolbar Button |
 "#,
     },
     FcfDoc {
@@ -76,17 +296,17 @@ build const c_light = 299792458
 
 ## 1. Atom Counting & Chemical Formula Decomposition
 CentL26 parses nested chemical formulas and calculates constituent elemental stoichiometry:
-- `chem atoms Ca(OH)2` $\rightarrow$ `Ca: 1, O: 2, H: 2` (Total atoms: 5).
-- `chem atoms (NH4)2SO4` $\rightarrow$ `N: 2, H: 8, S: 1, O: 4` (Total atoms: 15).
-- `chem atoms Fe3[Fe(CN)6]2` $\rightarrow$ `Fe: 5, C: 12, N: 12`.
+- `chem atoms Ca(OH)2` → `Ca: 1, O: 2, H: 2` (Total atoms: 5).
+- `chem atoms (NH4)2SO4` → `N: 2, H: 8, S: 1, O: 4` (Total atoms: 15).
+- `chem atoms Fe3[Fe(CN)6]2` → `Fe: 5, C: 12, N: 12`.
 
 ---
 
 ## 2. Chemical Equation Balancing
 CentL26 uses exact matrix nullspace linear algebra to balance stoichiometric reactions:
-- `chem balance H2 + O2 = H2O` $\rightarrow$ `2 H2 + O2 = 2 H2O`
-- `chem balance C3H8 + O2 = CO2 + H2O` $\rightarrow$ `C3H8 + 5 O2 = 3 CO2 + 4 H2O`
-- `chem balance KMnO4 + HCl = KCl + MnCl2 + H2O + Cl2` $\rightarrow$ `2 KMnO4 + 16 HCl = 2 KCl + 2 MnCl2 + 8 H2O + 5 Cl2`
+- `chem balance H2 + O2 = H2O` → `2 H2 + O2 = 2 H2O`
+- `chem balance C3H8 + O2 = CO2 + H2O` → `C3H8 + 5 O2 = 3 CO2 + 4 H2O`
+- `chem balance KMnO4 + HCl = KCl + MnCl2 + H2O + Cl2` → `2 KMnO4 + 16 HCl = 2 KCl + 2 MnCl2 + 8 H2O + 5 Cl2`
 
 ---
 
@@ -107,9 +327,9 @@ CentL26 uses exact matrix nullspace linear algebra to balance stoichiometric rea
 
 ## 1. Verified SI Unit Conversions
 CentL26 performs unit conversions with exact dimensional consistency:
-- `physics convert 100 km/h m/s` $\rightarrow$ `100 km/h = 27.77777778 m/s`
-- `physics convert 1 atm Pa` $\rightarrow$ `1 atm = 101325 Pa`
-- `physics convert 100 eV J` $\rightarrow$ `100 eV = 1.602176634e-17 J`
+- `physics convert 100 km/h m/s` → `100 km/h = 27.77777778 m/s`
+- `physics convert 1 atm Pa` → `1 atm = 101325 Pa`
+- `physics convert 100 eV J` → `100 eV = 1.602176634e-17 J`
 
 ---
 
@@ -240,6 +460,43 @@ The Bryan Recursive Entanglement Calculus (BREC) is a discrete, constructive cal
 1. **Total Termination**: Every finite BREC sequence resolves in $O(N \log N)$ steps without divergence.
 2. **Reversibility**: Historical traces preserve bijective reconstruction up to the initial seed state.
 3. **Exact Arithmetic Encoding**: State vectors are represented as exact rational coordinates in $\mathbb{Q}^d$.
+"#,
+    },
+    FcfDoc {
+        id: "centl26-10-2-release-notes",
+        title: "CentL26.10.2 Official Release Notes",
+        category: "manual",
+        summary: "Jupyter-grade interactive notebooks, native LaTeX typography engine, 13-domain operator manual, and safe downloads.",
+        tags: &["release", "notebook", "latex", "math", "typography", "jupyter", "shortcuts", "update"],
+        content: r#"# CentL26.10.2 — Official Release Notes
+**Free Computation Foundation · CentL26 Flagship Release**
+
+## Executive Summary
+**CentL26.10.2** introduces continuous Jupyter-grade interactive notebook workflows, a native offline LaTeX mathematical typography engine, the definitive 13-domain FCF Operator Manual, and macOS WKWebView lockout prevention.
+
+---
+
+## 1. Jupyter-Grade Interactive Notebook Workflows
+- **Cell Gutter Architecture**: Structured `In [n]:` and `Out [n]:` prompt gutters with execution microsecond timing ($\mu\text{s}$).
+- **Per-Cell Action Controls**: Instant actions on every cell: `▶ Run`, `+ Above`, `+ Below`, `▲` / `▼`, `✏ Edit`, `📋 Copy`, and `✕ Delete`.
+- **Workspace Toolbar Actions**: Added clean developer controls: `Code` (`</>`), `Markdown` (`M↓`), `▶ Run All`, and `↺ Restart` (`rotate-ccw`).
+- **Jupyter Keyboard Shortcuts & Command Mode**:
+  - `Shift + Enter`: Execute active command and advance focus.
+  - `Ctrl + Enter` / `⌘ Enter`: Execute active command in place.
+  - `Alt + Enter`: Execute active command and insert a blank cell below.
+  - Command Mode (`Esc`): `A` (add above), `B` (add below), `M` (markdown note), `Y` (code cell), `K`/`J` (navigate), `Enter` (edit).
+
+---
+
+## 2. Self-Contained LaTeX & Mathematical Typography Engine
+- **Native Math Parser**: Client-side parsing for fractions (`\frac`), roots (`\sqrt`), Greek letters, sets ($\mathbb{Q}, \mathbb{Z}, \mathbb{R}$), arrows ($→, ⇒$), and big operators ($\sum, \prod, \int$).
+- **Pre-Extraction Syntax Protection**: Math formulas are extracted prior to markdown parsing, preventing arithmetic asterisks from corrupting formulas.
+- **Dynamic Hydration**: Automatically renders math in notebook markdown cells.
+
+---
+
+## 3. Definitive CentL26 Operator Manual
+- Comprehensive 13-domain in-app documentation covering mathematics, CAS, physics, chemistry, research solvers, STEM visualizer, and programmability.
 "#,
     },
 ];

@@ -240,6 +240,21 @@ pub fn handle_single_command(
         return (None, None, None, None);
     }
 
+    if let Some(rest) = cmd.strip_prefix(":move-cell ") {
+        let parts: Vec<&str> = rest.split_whitespace().collect();
+        if parts.len() >= 2 {
+            if let (Ok(idx), Ok(dir)) = (parts[0].parse::<usize>(), parts[1].parse::<i32>()) {
+                let history = &mut state.session_mut().history;
+                if dir < 0 && idx > 0 && idx < history.len() {
+                    history.swap(idx, idx - 1);
+                } else if dir > 0 && idx + 1 < history.len() {
+                    history.swap(idx, idx + 1);
+                }
+            }
+        }
+        return (None, None, None, None);
+    }
+
     if let Some(key) = cmd.strip_prefix(":gemini-key ").or_else(|| cmd.strip_prefix(":set-gemini-key ")) {
         crate::engine::sci::set_runtime_gemini_key(key.trim());
         let res = ExecutionResult {
@@ -294,7 +309,7 @@ pub fn handle_single_command(
 
     if cmd == ":release" || cmd == ":version" || cmd == ":releases" {
         let res = ExecutionResult {
-            text: "=== CentL26.10.1 Orchid Release (Universal Multi-Platform) ===\nVersion: 26.10.1 (Orchid Release)\nCapabilities:\n• Official Orchid Botanical Artwork Application Icon across macOS, Windows 11, and Linux.\n• Multi-Platform Standard: full native support for Windows 11, macOS Apple Silicon / Intel, and Debian/Fedora/Arch Linux.\n• Continuous Jupyter-Grade Notebooks: seamless multi-step calculations, inline cell editing, cell deletion, re-running, and direct Jupyter Notebook (.ipynb) export.\n• Canonical Polynomial Algebra Engine: arbitrary-precision Rational Root Theorem solver, synthetic division, and exact root isolation for high-degree polynomials.\n• Algebraic Equation Auto-Solve & Verification: free variable analysis, implicit multiplication, and constant truth-value verification.\n• Advanced Calculus & Discrete Math: higher-order differentiation, indefinite/definite integration, limits with L'Hôpital's rule, multivariant Taylor series, discrete sums and products.\n• Interactive STEM Animated Visualizer: theorem studio, dynamic ODE wave animations, chaotic attractors, particle physics simulations, and crystal lattice geometry.\n• STEM Academic Search Engine: omnibar Chrome routing to Google Scholar, arXiv, PubMed, Wolfram MathWorld, OEIS, NIST, and NASA ADS.\n• FCF Knowledge Center & Smooth In-App Reader: built-in responsive documentation browser for all FCF manuals, specs, and theoretical research theorem preprints.\n• Gemini AI Co-Pilot Resiliency: multi-model auto-fallback (2.5-flash -> 2.0-flash -> 1.5-flash -> 1.5-pro), cross-platform key persistence, and fault-tolerant JSON decomposition.\n• Multi-Strategy In-App Updater: dual-channel git & GitHub manifest synchronization, isolated build retry, and automated precompiled binary fallback.\n• Multi-Notebook Tabs & Workspaces: seamlessly organize independent computations in named tabs with safe keyboard shortcuts (⌥W).\n• In-App Programmability: define, inspect, and test custom STEM functions & constants in plain English.\n• CentL-SCi STEM Solver: comprehensive step-by-step offline verified problem solving across chemistry, mechanics, quantum physics, thermodynamics, and statistics.\n• 100-Test Automated Non-Regression Suite: verified offline test coverage across all mathematical and scientific domains.".to_string(),
+            text: "=== CentL26.10.2 Release (Scientific Notebooks & LaTeX Typography) ===\nVersion: 26.10.2\nCapabilities:\n• Jupyter-Grade Interactive Notebook Workflows: prompt gutters (In [n] / Out [n]), cell actions (+ Above, + Below, Move Up/Down, Edit, Copy, Delete), and Jupyter keyboard navigation (Shift+Enter, Ctrl+Enter, Alt+Enter, Esc command mode).\n• Native Offline LaTeX Mathematical Typography Engine: fractional structures (\\frac), radical roots (\\sqrt), Greek alphabets, arrows (→, ⇒), blackboard bold sets (ℚ, ℤ, ℝ), and big operators (∑, ∏, ∫).\n• Definitive 13-Domain FCF Operator Manual: comprehensive in-app documentation covering mathematics, CAS, physics, chemistry, research solvers, STEM visualizer, and programmability.\n• Safe Client-Side Webview Downloads: Blob URL export generation for .ipynb, .md, and .json eliminating WKWebView navigation lockout.\n• Clean Vector SVG Design: line-art vector icons replacing emojis and emblems across search omnibar, toolbar, and cell controls.\n• Locked Session Stability: automatic resume mode preventing workspace blanking.\n• Official Orchid Botanical Artwork Application Icon across macOS, Windows 11, and Linux.\n• Multi-Platform Standard: full native support for Windows 11, macOS Apple Silicon / Intel, and Debian/Fedora/Arch Linux.\n• Canonical Polynomial Algebra & Exact CAS Engine.\n• CentL-SCi STEM Solver & 100-Test Automated Non-Regression Suite.".to_string(),
             exact_rational: None,
             approximate: None,
             symbolic_expr: None,

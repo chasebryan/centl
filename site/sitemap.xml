@@ -1776,6 +1776,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/manuals/release-26.10.2.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/manuals/release-26.10.1.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>

@@ -20,7 +20,7 @@
   let selectedInspectorTab = "result";
   let capabilitiesRequest = null;
 
-  const areaNames = new Set(["work", "projects", "tools", "data", "models", "research", "build", "gemini"]);
+  const areaNames = new Set(["work", "projects", "tools", "data", "models", "research", "build"]);
   const interactionModes = new Set(["Auto", "Math", "Physics", "Research", "Build"]);
   const inspectorTabs = new Set(["result", "variables", "evidence"]);
 
@@ -410,6 +410,96 @@
     }), { restoreEditorFocus: true });
   }
 
+  function addCodeCell(defaultText = "") {
+    selectArea("work", { focus: true });
+    const editor = activeEditor();
+    if (editor) {
+      editor.value = defaultText;
+      editor.focus();
+      editor.scrollIntoView({ behavior: "smooth", block: "center" });
+      syncComposerActions();
+    }
+  }
+
+  function addMarkdownCell() {
+    selectArea("work", { focus: true });
+    const editor = activeEditor();
+    if (editor) {
+      editor.value = "# ";
+      editor.focus();
+      editor.scrollIntoView({ behavior: "smooth", block: "center" });
+      syncComposerActions();
+    }
+  }
+
+  function restartKernel() {
+    clearNotebook();
+  }
+
+  async function runAllCells() {
+    const cells = Array.from(document.querySelectorAll(".result-cell:not(.markdown-cell) [data-run-cell]"));
+    if (cells.length === 0) {
+      const editor = activeEditor();
+      if (editor && editor.value.trim()) {
+        activeForm()?.requestSubmit();
+      }
+      return;
+    }
+    const runBtn = document.querySelector("[data-run-all-cells]");
+    if (runBtn) {
+      runBtn.disabled = true;
+      runBtn.classList.add("is-running");
+    }
+    for (const cell of cells) {
+      const cmd = cell.dataset.runCell;
+      if (cmd) {
+        await new Promise((resolve) => {
+          execute(new URLSearchParams({
+            lab_action: "calculate",
+            cmd: cmd,
+            interaction_mode: selectedMode
+          }), { restoreEditorFocus: false });
+          setTimeout(resolve, 150);
+        });
+      }
+    }
+    if (runBtn) {
+      runBtn.disabled = false;
+      runBtn.classList.remove("is-running");
+    }
+    const editor = activeEditor();
+    if (editor) editor.focus();
+  }
+
+  function moveCell(index, direction) {
+    execute(new URLSearchParams({
+      lab_action: "calculate",
+      cmd: `:move-cell ${index} ${direction}`,
+      interaction_mode: selectedMode
+    }), { restoreEditorFocus: true });
+  }
+
+  function triggerSafeDownload(url, filename) {
+    fetch(url)
+      .then((res) => res.blob())
+      .then((blob) => {
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.style.display = "none";
+        a.href = blobUrl;
+        a.download = filename || url.split("/").pop();
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(blobUrl);
+        }, 400);
+      })
+      .catch((err) => {
+        console.error("Safe download failed:", err);
+      });
+  }
+
   function clearNotebook() {
     const editor = activeEditor();
     const hasWork = Boolean(editor?.value.trim()) || hasNotebookContent();
@@ -448,9 +538,14 @@
     closeOmnibar();
     const modal = document.querySelector("[data-settings-modal]");
     if (!modal) return;
-    const currentMode = readStorage("centl26.startup_mode") || "resume";
-    const radio = modal.querySelector(`input[name="startup_mode"][value="${currentMode}"]`);
-    if (radio) radio.checked = true;
+    writeStorage("centl26.startup_mode", "resume");
+    const resumeRadio = modal.querySelector('input[name="startup_mode"][value="resume"]');
+    if (resumeRadio) resumeRadio.checked = true;
+    const freshRadio = modal.querySelector('input[name="startup_mode"][value="fresh"]');
+    if (freshRadio) {
+      freshRadio.disabled = true;
+      freshRadio.checked = false;
+    }
     modal.hidden = false;
   }
 
@@ -531,24 +626,334 @@
       .replace(/'/g, "&#039;");
   }
 
+  function renderLatexMath(rawLatex, isDisplay = false) {
+    if (!rawLatex) return "";
+    let s = rawLatex.trim();
+
+    // 1. Text blocks: \text{...}, \mathrm{...}, \mathbf{...}
+    const textBlocks = [];
+    s = s.replace(/\\text\{([^}]+)\}/g, (_, t) => {
+      const id = `__MTXT_${textBlocks.length}__`;
+      textBlocks.push(`<span class="math-text">${escapeHtml(t)}</span>`);
+      return id;
+    }).replace(/\\mathrm\{([^}]+)\}/g, (_, t) => {
+      const id = `__MTXT_${textBlocks.length}__`;
+      textBlocks.push(`<span class="math-rm">${escapeHtml(t)}</span>`);
+      return id;
+    }).replace(/\\mathbf\{([^}]+)\}/g, (_, t) => {
+      const id = `__MTXT_${textBlocks.length}__`;
+      textBlocks.push(`<strong class="math-bf">${escapeHtml(t)}</strong>`);
+      return id;
+    });
+
+    // 2. Fractions: \frac{num}{den} with recursive support
+    let prev = "";
+    while (prev !== s && s.includes("\\frac")) {
+      prev = s;
+      s = s.replace(/\\frac\{((?:[^{}]|\{[^{}]*\})*)\}\{((?:[^{}]|\{[^{}]*\})*)\}/g, (_, num, den) => {
+        return `<span class="math-frac"><span class="math-num">${renderLatexMath(num)}</span><span class="math-den">${renderLatexMath(den)}</span></span>`;
+      });
+    }
+
+    // 3. Roots: \sqrt[n]{...} and \sqrt{...}
+    s = s.replace(/\\sqrt\[([^\]]+)\]\{([^}]+)\}/g, (_, n, body) => {
+      return `<span class="math-root"><sup class="math-root-index">${renderLatexMath(n)}</sup><span class="math-sqrt-sign">√</span><span class="math-sqrt-line">${renderLatexMath(body)}</span></span>`;
+    }).replace(/\\sqrt\{([^}]+)\}/g, (_, body) => {
+      return `<span class="math-root"><span class="math-sqrt-sign">√</span><span class="math-sqrt-line">${renderLatexMath(body)}</span></span>`;
+    });
+
+    // 4. Binomial coefficients: \binom{n}{k}
+    s = s.replace(/\\binom\{([^}]+)\}\{([^}]+)\}/g, (_, n, k) => {
+      return `<span class="math-fence">(</span><span class="math-frac math-binom"><span class="math-num">${renderLatexMath(n)}</span><span class="math-den">${renderLatexMath(k)}</span></span><span class="math-fence">)</span>`;
+    });
+
+    // 5. Greek letters, arrows, relations, operators
+    const latexMap = [
+      [/\\rightarrow\b|\\to\b/g, "→"],
+      [/\\leftarrow\b|\\gets\b/g, "←"],
+      [/\\Rightarrow\b|\\implies\b/g, "⇒"],
+      [/\\Leftarrow\b/g, "⇐"],
+      [/\\Leftrightarrow\b|\\iff\b/g, "⇔"],
+      [/\\mapsto\b/g, "↦"],
+      [/\\uparrow\b/g, "↑"],
+      [/\\downarrow\b/g, "↓"],
+      [/\\approx\b/g, "≈"],
+      [/\\sim\b/g, "∼"],
+      [/\\simeq\b/g, "≃"],
+      [/\\cong\b/g, "≅"],
+      [/\\equiv\b/g, "≡"],
+      [/\\le\b|\\leq\b/g, "≤"],
+      [/\\ge\b|\\geq\b/g, "≥"],
+      [/\\neq\b|\\ne\b/g, "≠"],
+      [/\\pm\b/g, "±"],
+      [/\\mp\b/g, "∓"],
+      [/\\times\b/g, "×"],
+      [/\\cdot\b/g, "·"],
+      [/\\div\b/g, "÷"],
+      [/\\circ\b/g, "∘"],
+      [/\\bullet\b/g, "•"],
+      [/\\in\b/g, "∈"],
+      [/\\notin\b/g, "∉"],
+      [/\\subset\b/g, "⊂"],
+      [/\\subseteq\b/g, "⊆"],
+      [/\\supset\b/g, "⊃"],
+      [/\\supseteq\b/g, "⊇"],
+      [/\\cap\b/g, "∩"],
+      [/\\cup\b/g, "∪"],
+      [/\\setminus\b/g, "∖"],
+      [/\\forall\b/g, "∀"],
+      [/\\exists\b/g, "∃"],
+      [/\\nexists\b/g, "∄"],
+      [/\\infty\b/g, "∞"],
+      [/\\partial\b/g, "∂"],
+      [/\\nabla\b/g, "∇"],
+      [/\\hbar\b/g, "ℏ"],
+      [/\\ell\b/g, "ℓ"],
+      [/\\Re\b/g, "ℜ"],
+      [/\\Im\b/g, "ℑ"],
+      [/\\sum\b/g, '<span class="math-op math-sum">∑</span>'],
+      [/\\prod\b/g, '<span class="math-op math-prod">∏</span>'],
+      [/\\int\b/g, '<span class="math-op math-int">∫</span>'],
+      [/\\iint\b/g, '<span class="math-op math-int">∬</span>'],
+      [/\\iiint\b/g, '<span class="math-op math-int">∭</span>'],
+      [/\\oint\b/g, '<span class="math-op math-int">∮</span>'],
+      [/\\alpha\b/g, "α"],
+      [/\\beta\b/g, "β"],
+      [/\\gamma\b/g, "γ"],
+      [/\\Gamma\b/g, "Γ"],
+      [/\\delta\b/g, "δ"],
+      [/\\Delta\b/g, "Δ"],
+      [/\\epsilon\b|\\varepsilon\b/g, "ε"],
+      [/\\zeta\b/g, "ζ"],
+      [/\\eta\b/g, "η"],
+      [/\\theta\b/g, "θ"],
+      [/\\Theta\b/g, "Θ"],
+      [/\\iota\b/g, "ι"],
+      [/\\kappa\b/g, "κ"],
+      [/\\lambda\b/g, "λ"],
+      [/\\Lambda\b/g, "Λ"],
+      [/\\mu\b/g, "μ"],
+      [/\\nu\b/g, "ν"],
+      [/\\xi\b/g, "ξ"],
+      [/\\Xi\b/g, "Ξ"],
+      [/\\pi\b/g, "π"],
+      [/\\Pi\b/g, "Π"],
+      [/\\rho\b/g, "ρ"],
+      [/\\sigma\b/g, "σ"],
+      [/\\Sigma\b/g, "Σ"],
+      [/\\tau\b/g, "τ"],
+      [/\\upsilon\b/g, "υ"],
+      [/\\Upsilon\b/g, "Υ"],
+      [/\\phi\b/g, "ϕ"],
+      [/\\Phi\b/g, "Φ"],
+      [/\\varphi\b/g, "φ"],
+      [/\\chi\b/g, "χ"],
+      [/\\psi\b/g, "ψ"],
+      [/\\Psi\b/g, "Ψ"],
+      [/\\omega\b/g, "ω"],
+      [/\\Omega\b/g, "Ω"],
+      [/\\mathbb\{Q\}|\\mathbb\s+Q/g, "ℚ"],
+      [/\\mathbb\{Z\}|\\mathbb\s+Z/g, "ℤ"],
+      [/\\mathbb\{R\}|\\mathbb\s+R/g, "ℝ"],
+      [/\\mathbb\{N\}|\\mathbb\s+N/g, "ℕ"],
+      [/\\mathbb\{C\}|\\mathbb\s+C/g, "ℂ"],
+      [/\\mathbb\{P\}|\\mathbb\s+P/g, "ℙ"],
+      [/\\mathbb\{H\}|\\mathbb\s+H/g, "ℍ"],
+      [/\\mathcal\{C\}|\\mathcal\s+C/g, "𝒞"],
+      [/\\mathcal\{K\}|\\mathcal\s+K/g, "𝒦"],
+      [/\\mathcal\{I\}|\\mathcal\s+I/g, "ℐ"],
+      [/\\mathcal\{O\}|\\mathcal\s+O/g, "𝒪"],
+      [/\\mathcal\{S\}|\\mathcal\s+S/g, "𝒮"],
+      [/\\otimes\b/g, "⊗"],
+      [/\\oplus\b/g, "⊕"],
+      [/\\odot\b/g, "⊙"],
+      [/\\prec\b/g, "≺"],
+      [/\\succ\b/g, "≻"],
+      [/\\preceq\b/g, "⪯"],
+      [/\\succeq\b/g, "⪰"],
+      [/\\bot\b/g, "⊥"],
+      [/\\top\b/g, "⊤"],
+      [/\\dots\b|\\ldots\b/g, "…"],
+      [/\\cdots\b/g, "⋯"],
+      [/\\vdots\b/g, "⋮"],
+      [/\\ddots\b/g, "⋱"],
+      [/\\quad\b/g, '<span class="math-quad"> </span>'],
+      [/\\qquad\b/g, '<span class="math-qquad">  </span>'],
+      [/\\,/g, '<span class="math-thinspace"> </span>'],
+      [/\\;/g, '<span class="math-medspace"> </span>'],
+      [/\\!/g, ""]
+    ];
+
+    for (const [re, rep] of latexMap) {
+      s = s.replace(re, rep);
+    }
+
+    // 6. Modulo & Functions
+    s = s.replace(/\\pmod\{([^}]+)\}/g, (_, m) => `<span class="math-mod">(mod ${renderLatexMath(m)})</span>`);
+    s = s.replace(/\\bmod\b/g, "mod");
+    s = s.replace(/\\(sin|cos|tan|cot|sec|csc|sinh|cosh|tanh|log|ln|exp|lim|max|min|sup|inf|det|gcd|deg|dim|ker|hom)\b/g, '<span class="math-fn">$1</span>');
+
+    // 7. Fences
+    s = s.replace(/\\left\(/g, '<span class="math-fence">(</span>')
+         .replace(/\\right\)/g, '<span class="math-fence">)</span>')
+         .replace(/\\left\[/g, '<span class="math-fence">[</span>')
+         .replace(/\\right\]/g, '<span class="math-fence">]</span>')
+         .replace(/\\left\\\{/g, '<span class="math-fence">{</span>')
+         .replace(/\\right\\\}/g, '<span class="math-fence">}</span>')
+         .replace(/\\left\|/g, '<span class="math-fence">|</span>')
+         .replace(/\\right\|/g, '<span class="math-fence">|</span>')
+         .replace(/\\\{/g, '{')
+         .replace(/\\\}/g, '}');
+
+    // 8. Subscripts & Superscripts
+    s = s.replace(/_\{([^}]+)\}/g, (_, sub) => `<sub>${renderLatexMath(sub)}</sub>`);
+    s = s.replace(/_([a-zA-Z0-9+\-*=])/g, (_, sub) => `<sub>${sub}</sub>`);
+    s = s.replace(/\^\{([^}]+)\}/g, (_, sup) => `<sup>${renderLatexMath(sup)}</sup>`);
+    s = s.replace(/\^([a-zA-Z0-9+\-*=])/g, (_, sup) => `<sup>${sup}</sup>`);
+
+    // Restore text blocks
+    textBlocks.forEach((html, i) => {
+      s = s.replace(`__MTXT_${i}__`, html);
+    });
+
+    const wrapperClass = isDisplay ? "math-display" : "math-inline";
+    return `<span class="${wrapperClass}">${s}</span>`;
+  }
+
   function renderMarkdownToHtml(md) {
     if (!md) return "";
-    let html = escapeHtml(md)
-      .replace(/```([a-z0-9_-]*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-      .replace(/^\&gt; (.*$)/gim, '<blockquote style="margin: 8px 0; padding: 6px 12px; border-left: 3px solid #1A73E8; background: var(--surface-subtle); color: var(--muted);">$1</blockquote>')
-      .replace(/^\s*[-*]\s+(.*$)/gim, '<li style="margin-left: 18px;">$1</li>')
-      .replace(/\n\n/g, '</p><p>');
 
-    return `<p>${html}</p>`
-      .replace(/<p><\/p>/g, '')
-      .replace(/<p>(<h[1-3]>.*?<\/h[1-3]>)<\/p>/g, '$1')
-      .replace(/<p>(<pre>.*?<\/pre>)<\/p>/gs, '$1');
+    const displayMath = [];
+    const inlineMath = [];
+
+    // 1. Extract Display Math: $$ ... $$ or \[ ... \]
+    let text = md.replace(/\$\$([\s\S]+?)\$\$/g, (_, math) => {
+      const id = `__DISPMATH_${displayMath.length}__`;
+      displayMath.push(math);
+      return `\n\n${id}\n\n`;
+    }).replace(/\\\[([\s\S]+?)\\\]/g, (_, math) => {
+      const id = `__DISPMATH_${displayMath.length}__`;
+      displayMath.push(math);
+      return `\n\n${id}\n\n`;
+    });
+
+    // 2. Extract Inline Math: $ ... $ or \( ... \)
+    text = text.replace(/\$([^\$\n]+?)\$/g, (_, math) => {
+      const id = `__INLMATH_${inlineMath.length}__`;
+      inlineMath.push(math);
+      return id;
+    }).replace(/\\\(([\s\S]+?)\\\)/g, (_, math) => {
+      const id = `__INLMATH_${inlineMath.length}__`;
+      inlineMath.push(math);
+      return id;
+    });
+
+    // 3. Process Code Blocks & Spans
+    const lines = text.split("\n");
+    let inCode = false;
+    let codeLines = [];
+    let processed = [];
+    let inTable = false;
+    let tableRows = [];
+
+    function flushTable() {
+      if (tableRows.length === 0) return;
+      let tblHtml = '<table class="fcf-doc-table"><thead><tr>';
+      const headers = tableRows[0];
+      headers.forEach(h => { tblHtml += `<th>${h}</th>`; });
+      tblHtml += '</tr></thead><tbody>';
+      for (let i = 1; i < tableRows.length; i++) {
+        tblHtml += '<tr>';
+        tableRows[i].forEach(cell => { tblHtml += `<td>${cell}</td>`; });
+        tblHtml += '</tr>';
+      }
+      tblHtml += '</tbody></table>';
+      processed.push(tblHtml);
+      tableRows = [];
+      inTable = false;
+    }
+
+    for (let line of lines) {
+      if (line.trim().startsWith("```")) {
+        if (inTable) flushTable();
+        if (inCode) {
+          inCode = false;
+          processed.push(`<pre><code>${escapeHtml(codeLines.join("\n"))}</code></pre>`);
+          codeLines = [];
+        } else {
+          inCode = true;
+          codeLines = [];
+        }
+        continue;
+      }
+      if (inCode) {
+        codeLines.push(line);
+        continue;
+      }
+
+      if (/^\s*\|.*\|\s*$/.test(line)) {
+        if (/^\s*\|(?:\s*:?-+:?\s*\|)+\s*$/.test(line)) {
+          continue;
+        }
+        inTable = true;
+        const cells = line.split("|").slice(1, -1).map(c => {
+          let cellText = escapeHtml(c.trim());
+          cellText = cellText.replace(/`([^`]+)`/g, '<code>$1</code>')
+            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*([^*]+)\*/g, '<em>$1</em>');
+          return cellText;
+        });
+        tableRows.push(cells);
+        continue;
+      } else if (inTable) {
+        flushTable();
+      }
+
+      if (/^\s*---+\s*$/.test(line)) {
+        processed.push('<hr style="border: 0; border-top: 1px solid var(--line); margin: 20px 0;">');
+        continue;
+      }
+
+      let l = escapeHtml(line)
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+        .replace(/^\&gt; (.*$)/gim, '<blockquote style="margin: 8px 0; padding: 6px 12px; border-left: 3px solid #1A73E8; background: var(--surface-subtle); color: var(--muted);">$1</blockquote>')
+        .replace(/^\s*[-*•]\s+(.*$)/gim, '<li style="margin-left: 18px;">$1</li>')
+        .replace(/^\s*(\d+)\.\s+(.*$)/gim, '<li style="margin-left: 18px; list-style-type: decimal;">$2</li>');
+
+      processed.push(l);
+    }
+    if (inTable) flushTable();
+    if (inCode) {
+      processed.push(`<pre><code>${escapeHtml(codeLines.join("\n"))}</code></pre>`);
+    }
+
+    let resultHtml = processed.map(item => {
+      const trimmed = item.trim();
+      if (!trimmed) return '';
+      if (/^<(h[1-3]|pre|table|hr|blockquote|li)/.test(trimmed)) return item;
+      return `<p>${item}</p>`;
+    }).filter(Boolean).join("\n");
+
+    // 4. Restore Display Math
+    displayMath.forEach((math, i) => {
+      const placeholder = `__DISPMATH_${i}__`;
+      const rendered = `<div class="math-display-wrap">${renderLatexMath(math, true)}</div>`;
+      resultHtml = resultHtml.split(placeholder).join(rendered);
+    });
+
+    // 5. Restore Inline Math
+    inlineMath.forEach((math, i) => {
+      const placeholder = `__INLMATH_${i}__`;
+      const rendered = renderLatexMath(math, false);
+      resultHtml = resultHtml.split(placeholder).join(rendered);
+    });
+
+    return resultHtml;
   }
 
   function getChromeProviders(query) {
@@ -782,11 +1187,11 @@
         items.push({
           type: "chrome",
           iconClass: "chrome",
-          iconSvg: `<svg viewBox="0 0 24 24" class="fcf-chrome-emblem" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.2"/><path d="M12 2a10 10 0 0 1 8.66 5H12z" fill="#EA4335"/><path d="M20.66 7A10 10 0 0 1 15 21.32L10.67 13.82z" fill="#FBBC05"/><path d="M15 21.32A10 10 0 0 1 3.34 12.5L7.67 5z" fill="#34A853"/><path d="M3.34 12.5A10 10 0 0 1 12 2l4.33 7.5H7.67z" fill="#4285F4"/><circle cx="12" cy="12" r="4.5" fill="#ffffff" stroke="#cbd5e1" stroke-width="0.8"/><circle cx="12" cy="12" r="2.8" fill="#1A73E8"/></svg>`,
+          iconSvg: `<svg viewBox="0 0 20 20" class="omnibar-symbol-icon" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.4"></circle><path d="M2.5 10h15M10 2.5a12 12 0 0 1 0 15M10 2.5a12 12 0 0 0 0 15" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>`,
           source: p.source,
           title: p.title,
           subtitle: p.subtitle,
-          actionLabel: "Search in Chrome ↗",
+          actionLabel: "Search Web ↗",
           actionClass: "chrome-action",
           url: p.url
         });
@@ -804,7 +1209,7 @@
         items.push({
           type: "doc",
           iconClass: "doc",
-          iconText: "📖",
+          iconSvg: `<svg viewBox="0 0 20 20" class="omnibar-symbol-icon" aria-hidden="true"><path d="M4 4h12v12H4z" fill="none" stroke="currentColor" stroke-width="1.4"></path><path d="M7 7h6M7 10h6M7 13h4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>`,
           source: d.category === "manual" ? "FCF Manual" : "FCF Spec",
           title: d.title,
           subtitle: d.summary,
@@ -826,7 +1231,7 @@
         items.push({
           type: "research",
           iconClass: "research",
-          iconText: "📑",
+          iconSvg: `<svg viewBox="0 0 20 20" class="omnibar-symbol-icon" aria-hidden="true"><path d="M5 3h7l4 4v10H5z" fill="none" stroke="currentColor" stroke-width="1.4"></path><path d="M12 3v4h4" fill="none" stroke="currentColor" stroke-width="1.4"></path><path d="M8 11h4M8 14h4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>`,
           source: "FCF Preprint",
           title: p.title,
           subtitle: p.summary,
@@ -845,7 +1250,9 @@
         items.push({
           type: "solver",
           iconClass: isViz ? "exact" : "solver",
-          iconText: isViz ? "📊" : "⚙",
+          iconSvg: isViz
+            ? `<svg viewBox="0 0 20 20" class="omnibar-symbol-icon" aria-hidden="true"><path d="M3 17V3m0 14h14M3 12c3-4 6 2 9-5 2-4 3-1 5 1" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>`
+            : `<svg viewBox="0 0 20 20" class="omnibar-symbol-icon" aria-hidden="true"><circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" stroke-width="1.4"></circle><path d="M10 6v8M6 10h8" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>`,
           source: s.source,
           title: s.title,
           subtitle: s.subtitle,
@@ -1979,6 +2386,18 @@
     }
   }
 
+  function hydrateMarkdownCells(root = document) {
+    const bodies = root.querySelectorAll ? root.querySelectorAll(".markdown-rendered-body") : document.querySelectorAll(".markdown-rendered-body");
+    bodies.forEach(el => {
+      if (el.dataset.hydrated === "true") return;
+      const rawText = el.getAttribute("data-raw-markdown") || el.textContent || "";
+      if (rawText.trim()) {
+        el.innerHTML = renderMarkdownToHtml(rawText);
+        el.dataset.hydrated = "true";
+      }
+    });
+  }
+
   function initializeWorkspace(root = document) {
     document.body.classList.add("hide-explorer", "hide-inspector", "hide-console");
     initializeInspectorTabs(root);
@@ -1987,16 +2406,14 @@
     selectArea(selectedArea, { openExplorer: false, persist: false });
     applyInteractionMode(selectedMode, { persist: false });
     syncComposerActions();
+    hydrateMarkdownCells(root);
 
-    const startupMode = readStorage("centl26.startup_mode") || "resume";
+    writeStorage("centl26.startup_mode", "resume");
     const startWrap = document.querySelector("[data-start-surface-wrap]");
     const noteWrap = document.querySelector("[data-notebook-wrap]");
-    if (startupMode === "resume" && hasNotebookContent()) {
+    if (hasNotebookContent()) {
       if (startWrap) startWrap.hidden = true;
       if (noteWrap) noteWrap.hidden = false;
-    } else if (startupMode === "fresh") {
-      if (startWrap) startWrap.hidden = false;
-      if (noteWrap) noteWrap.hidden = true;
     }
 
     void hydrateCapabilities(root);
@@ -2004,22 +2421,6 @@
   }
 
   document.addEventListener("submit", (event) => {
-    const geminiForm = event.target.closest("[data-gemini-key-form]");
-    if (geminiForm) {
-      event.preventDefault();
-      const input = geminiForm.querySelector(".gemini-key-input");
-      const keyVal = input?.value.trim();
-      if (keyVal) {
-        execute(new URLSearchParams({
-          lab_action: "calculate",
-          cmd: `:gemini-key ${keyVal}`,
-          interaction_mode: selectedMode
-        }), { restoreEditorFocus: false });
-        input.value = "";
-      }
-      return;
-    }
-
     const form = event.target.closest("[data-centl-form]");
     if (!form) return;
     event.preventDefault();
@@ -2040,6 +2441,52 @@
   document.addEventListener("click", (event) => {
     if (event.target.matches(".command-palette")) {
       closePalette();
+      return;
+    }
+
+    if (event.target.closest("[data-add-code-cell]")) {
+      addCodeCell();
+      return;
+    }
+
+    if (event.target.closest("[data-add-md-cell]")) {
+      addMarkdownCell();
+      return;
+    }
+
+    if (event.target.closest("[data-run-all-cells]")) {
+      void runAllCells();
+      return;
+    }
+
+    if (event.target.closest("[data-restart-kernel]")) {
+      restartKernel();
+      return;
+    }
+
+    const addAboveBtn = event.target.closest("[data-add-above]");
+    if (addAboveBtn) {
+      addCodeCell();
+      return;
+    }
+
+    const addBelowBtn = event.target.closest("[data-add-below]");
+    if (addBelowBtn) {
+      addCodeCell();
+      return;
+    }
+
+    const moveUpBtn = event.target.closest("[data-move-up]");
+    if (moveUpBtn && moveUpBtn.dataset.moveUp !== undefined) {
+      const idx = parseInt(moveUpBtn.dataset.moveUp, 10);
+      if (!isNaN(idx)) moveCell(idx, -1);
+      return;
+    }
+
+    const moveDownBtn = event.target.closest("[data-move-down]");
+    if (moveDownBtn && moveDownBtn.dataset.moveDown !== undefined) {
+      const idx = parseInt(moveDownBtn.dataset.moveDown, 10);
+      if (!isNaN(idx)) moveCell(idx, 1);
       return;
     }
 
@@ -2099,26 +2546,6 @@
     if (target.dataset.receiptTarget) {
       openEvidence();
       activateReceipt(target);
-    }
-
-    const modelChip = target.closest(".gemini-model-chip");
-    if (modelChip && modelChip.dataset.model) {
-      const modelName = modelChip.dataset.model;
-      document.querySelectorAll(".gemini-model-chip").forEach((c) => c.classList.remove("is-active"));
-      modelChip.classList.add("is-active");
-      execute(new URLSearchParams({
-        lab_action: "calculate",
-        cmd: `:gemini-model ${modelName}`,
-        interaction_mode: selectedMode
-      }), { restoreEditorFocus: false });
-    }
-
-    if (target.matches("[data-gemini-test]")) {
-      execute(new URLSearchParams({
-        lab_action: "calculate",
-        cmd: ":gemini-status",
-        interaction_mode: selectedMode
-      }), { restoreEditorFocus: false });
     }
 
     if (target.matches("[data-new-notebook], [data-new-notebook] *")) {
@@ -2286,27 +2713,37 @@
 
     if (target.dataset.paletteAction === "download-examples") {
       closePalette({ restoreFocus: false });
-      window.location.href = "/download/centl26-examples.csv";
+      triggerSafeDownload("/download/centl26-examples.csv", "centl26-examples.csv");
     }
 
     if (target.dataset.paletteAction === "download-notebook") {
       closePalette({ restoreFocus: false });
-      window.location.href = "/download/notebook.md";
+      triggerSafeDownload("/download/notebook.md", "notebook.md");
     }
 
     if (target.dataset.paletteAction === "download-notebook-ipynb") {
       closePalette({ restoreFocus: false });
-      window.location.href = "/download/notebook.ipynb";
+      triggerSafeDownload("/download/notebook.ipynb", "notebook.ipynb");
     }
 
     if (target.dataset.paletteAction === "download-notebook-json") {
       closePalette({ restoreFocus: false });
-      window.location.href = "/download/notebook.json";
+      triggerSafeDownload("/download/notebook.json", "notebook.json");
     }
 
     if (target.dataset.paletteAction === "download-project") {
       closePalette({ restoreFocus: false });
-      window.location.href = "/download/project.json";
+      triggerSafeDownload("/download/project.json", "project.json");
+    }
+
+    if (target.dataset.paletteAction === "run-all-cells") {
+      closePalette({ restoreFocus: false });
+      void runAllCells();
+    }
+
+    if (target.dataset.paletteAction === "restart-kernel") {
+      closePalette({ restoreFocus: false });
+      restartKernel();
     }
 
     if (target.dataset.paletteAction === "run-input") {
@@ -2576,7 +3013,12 @@
       applyInteractionMode(mode);
     }
     if (event.target.matches("[data-setting-startup]")) {
-      writeStorage("centl26.startup_mode", event.target.value);
+      if (event.target.value === "fresh") {
+        event.target.checked = false;
+        const resumeRadio = document.querySelector('input[name="startup_mode"][value="resume"]');
+        if (resumeRadio) resumeRadio.checked = true;
+      }
+      writeStorage("centl26.startup_mode", "resume");
     }
     if (event.target.matches("[data-viz-speed]")) {
       StemVisualizer.anim.speed = parseFloat(event.target.value) || 1.0;
@@ -2717,14 +3159,80 @@
       return;
     }
 
+    const inInput = ["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName);
+
     if (event.key === "Enter") {
-      if (primary || event.shiftKey || event.target.matches("textarea[name='cmd'], #active-command")) {
+      if (event.shiftKey) {
+        // Shift+Enter: Run and advance / prepare composer
         const form = activeForm();
         if (form) {
           event.preventDefault();
           form.requestSubmit();
           return;
         }
+      } else if (primary) {
+        // Ctrl/Cmd+Enter: Run in place
+        const form = activeForm();
+        if (form) {
+          event.preventDefault();
+          form.requestSubmit();
+          return;
+        }
+      } else if (event.altKey) {
+        // Alt+Enter: Run and insert new blank cell below
+        const form = activeForm();
+        if (form) {
+          event.preventDefault();
+          form.requestSubmit();
+          setTimeout(() => addCodeCell(), 200);
+          return;
+        }
+      } else if (event.target.matches("textarea[name='cmd'], #active-command")) {
+        const form = activeForm();
+        if (form) {
+          event.preventDefault();
+          form.requestSubmit();
+          return;
+        }
+      }
+    }
+
+    // Jupyter Command Mode navigation (when outside text inputs)
+    if (!inInput && !primary && !event.altKey) {
+      if (key === "a") {
+        event.preventDefault();
+        addCodeCell();
+        return;
+      }
+      if (key === "b") {
+        event.preventDefault();
+        addCodeCell();
+        return;
+      }
+      if (key === "m") {
+        event.preventDefault();
+        addMarkdownCell();
+        return;
+      }
+      if (key === "y") {
+        event.preventDefault();
+        addCodeCell();
+        return;
+      }
+      if (key === "enter") {
+        event.preventDefault();
+        activeEditor()?.focus();
+        return;
+      }
+      if (key === "arrowup" || key === "k") {
+        event.preventDefault();
+        activeEditor()?.focus();
+        return;
+      }
+      if (key === "arrowdown" || key === "j") {
+        event.preventDefault();
+        activeEditor()?.focus();
+        return;
       }
     }
 

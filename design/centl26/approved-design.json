@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "approval": {
-    "change_note": "CentL26.10.1.1: Zoomed and perfectly framed orchid botanical app icon",
+    "change_note": "CentL26: Jupyter-grade notebook mechanics, clean vector symbols, and command-driven Gemini integration",
     "release": "CentL26",
     "reviewed_viewports": [
       "1366x768",
@@ -12,9 +12,9 @@
   "files": {
     "desktop/centl26/macos/Assets/CentL26Icon.png": "395921be0d09a1336f20be41b651a83ae7bcc56434e6ada49b2b202287029d66",
     "desktop/centl26/macos/Assets/CentL26Icon.svg": "8256916929b9e3b6f69879b5502ad2d16dd5a46cac50bed81b7b857658b79e02",
-    "src-web/server/lab.css": "d650dfcb3369b3c4754d60a66a15c42bb483a8e495990df14cba3cca5cb64518",
-    "src-web/server/lab.js": "61b45c9ecc8e4eb2683642b2fd32f8790040508ec65c28370fe6e60bf5210d23",
-    "src-web/server/lab_template.rs": "b1135899716a4dd9f3cae41403b6d33866d1bdc2bde5cf7bca0a68ecb65542c6"
+    "src-web/server/lab.css": "4e72a4b0903784702baf707237f21a0ba47c0440586e92b46ce8daf3616d210c",
+    "src-web/server/lab.js": "4607673f8fa18623f8cc3baf128762efd6b7a74d9b6b6c959f7358b64bb45b8c",
+    "src-web/server/lab_template.rs": "16a9194b0a2a82f0a3804e49c56332c543b26578f616add398c48ea74a59f362"
   },
   "schema": 1,
   "semantic_contract": {
