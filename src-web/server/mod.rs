@@ -403,6 +403,27 @@ fn lab_api_response(
         }));
     }
 
+    if path == "/download/notebook.ipynb" || path == "/api/export-ipynb" {
+        let ipynb = if let Some(state_arc) = session_state {
+            let state = state_arc.lock().map_err(|_| {
+                io::Error::new(io::ErrorKind::Other, "poisoned session state lock")
+            })?;
+            handler::export_notebook_ipynb(&state)
+        } else if let Some(ref project) = server_state.lab_project {
+            let state = project.state.lock().map_err(|_| {
+                io::Error::new(io::ErrorKind::Other, "poisoned session state lock")
+            })?;
+            handler::export_notebook_ipynb(&state)
+        } else {
+            let state = AppState::new();
+            handler::export_notebook_ipynb(&state)
+        };
+        return Ok(Some(LabApiResponse {
+            content_type: "application/x-ipynb+json; charset=utf-8",
+            body: ipynb.into_bytes(),
+        }));
+    }
+
     if path == "/download/notebook.json" || path == "/api/export-notebook" {
         let json = if let Some(state_arc) = session_state {
             let state = state_arc.lock().map_err(|_| {

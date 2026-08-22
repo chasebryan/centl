@@ -1,5 +1,30 @@
 ## Unreleased
 
+### CentL26.10.0 — Continuous Jupyter-Grade Notebooks, In-App Paper Scrolling, Complete Windows 11 Build & Website Modernization (2026-08-21)
+
+- **Continuous Calculations & Jupyter Notebook Parity**:
+  - Resolved DOM input selector latching bug where duplicate hidden `#active-command` inputs trapped focus after the initial calculation.
+  - Docked composer is permanently available, focused, and responsive for continuous multi-step evaluations without requiring the user to clear work.
+  - Added per-cell inline action toolbar with **Re-run**, **Edit in Composer**, **Copy Expression**, and **Delete Cell** buttons.
+  - Added Markdown notes support with `# ` or `:md ` syntax and specialized clean note cards.
+  - Added direct export to Jupyter Notebook (`.ipynb`) format via `/download/notebook.ipynb` and command palette, alongside Markdown (`.md`) and JSON (`.json`).
+  - Added keyboard execution shortcuts (`Enter` for instant run, `Shift+Enter` for notebook step-and-advance, `Ctrl+Enter` / `Cmd+Enter` for run-in-place).
+- **Smooth In-App FCF Research Reader**:
+  - Fixed modal dialog flexbox overflow constraints on `.fcf-doc-dialog` and `.fcf-doc-body` (`min-height: 0; flex: 1 1 auto; height: 88vh; overflow-y: auto; overscroll-behavior: contain`).
+  - Added custom styled scrollbars with smooth scrolling for comprehensive reading of theoretical papers in-app.
+  - Expanded in-app document registry with Bryan Recursive Entanglement Calculus (BREC v1.0 canonical specification), Erdős–Straus Modular Decomposition, Collatz Modular Trajectory Dynamics, Ramanujan Tau asymptotics, and Chemistry/Physics manuals.
+- **Complete Windows 11 Build & Packaging**:
+  - Completed `desktop/centl26/windows/build.ps1` to produce standalone `CentL26-Windows-x86_64.zip` distribution archives containing release binary, icon, batch launcher, README, and license.
+  - Added automated SHA-256 manifest and checksum generation (`CentL26-Windows-x86_64.zip.sha256`, `BUILD_MANIFEST.json`).
+  - Updated `desktop/centl26/windows/CentL26.bat` with proper argument forwarding (`%*`) and return code preservation.
+- **Website Modernization & Beautification (`site/`)**:
+  - Modernized `site/style.css` and `site/library-layout.css` into a sleek, modern scientific computing portal while retaining the iconic Free Computation Foundation identity (Oasis blue, Rust, Palm, and zero-JavaScript calculation compatibility).
+  - Modern typography font stacks with high-contrast readability, elevated card shadows, and smooth rounded containers.
+  - Redesigned interactive zero-JS calculation terminal with macOS-style window controls, interactive preset chips, and dark-theme syntax highlighted console outputs.
+  - Responsive mobile navigation bar and streamlined grid cards.
+- **Universal Release Standardization**:
+  - Synchronized `v26.10.0` across `Cargo.toml`, `Cargo.lock`, `README.md`, `desktop/centl26/macos/Info.plist`, `CentL26Updater.swift`, and capabilities metadata.
+
 ### CentL26.9.1 — Visual Refinements, Native Cogwheel Settings & Version Standardization (2026-08-21)
 
 - **Visual & UI Refinement**:

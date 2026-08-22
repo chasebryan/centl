@@ -29,7 +29,7 @@ pub fn render_lab_page(workbench: &str) -> String {
       <a class="product-lockup" href="/" aria-label="CentL26 home">
         <div class="product-brand">
           <strong>CentL26</strong>
-          <small>Free Computation Foundation · v26.9.1</small>
+          <small>Free Computation Foundation · v26.10.0</small>
         </div>
       </a>
       <div class="workspace-path"><button type="button" data-toggle-explorer title="Toggle workspace explorer">Workspace</button><span>/</span><input type="text" class="notebook-rename-input" data-rename-notebook value="Notebook 01" aria-label="Rename active notebook" spellcheck="false" title="Click to rename active notebook"></div>
@@ -126,6 +126,7 @@ pub fn render_lab_page(workbench: &str) -> String {
         <button type="button" role="option" tabindex="-1" data-palette-action="save-project" data-modes="all"><span class="palette-icon exact">💾</span><span><strong>Save project</strong><small>Persist active workspace state locally</small></span><kbd>⌘S</kbd></button>
         <button type="button" role="option" tabindex="-1" data-palette-action="new-computation" data-modes="all"><span class="palette-icon neutral">＋</span><span><strong>New computation</strong><small>Clear the draft; preserve notebook history</small></span><kbd>New</kbd></button>
         <button type="button" role="option" tabindex="-1" data-palette-action="download-notebook" data-modes="all"><span class="palette-icon neutral">↓</span><span><strong>Download notebook (Markdown)</strong><small>Export active notebook calculations as .md</small></span><kbd>MD</kbd></button>
+        <button type="button" role="option" tabindex="-1" data-palette-action="download-notebook-ipynb" data-modes="all"><span class="palette-icon neutral">↓</span><span><strong>Download Jupyter Notebook (.ipynb)</strong><small>Export Jupyter-compatible notebook</small></span><kbd>IPYNB</kbd></button>
         <button type="button" role="option" tabindex="-1" data-palette-action="download-notebook-json" data-modes="all"><span class="palette-icon neutral">↓</span><span><strong>Download notebook (JSON)</strong><small>Export structured notebook document</small></span><kbd>JSON</kbd></button>
         <button type="button" role="option" tabindex="-1" data-palette-action="download-project" data-modes="all"><span class="palette-icon neutral">↓</span><span><strong>Download project package</strong><small>Export all tabs and workspace history</small></span><kbd>Project</kbd></button>
         <button type="button" role="option" tabindex="-1" data-palette-action="download-examples" data-modes="all"><span class="palette-icon neutral">↓</span><span><strong>Download STEM Examples</strong><small>Complete CSV spreadsheet for chemistry, physics, math</small></span><kbd>CSV</kbd></button>
@@ -148,7 +149,7 @@ pub fn render_lab_page(workbench: &str) -> String {
         <a href="https://freecomputation.org/" target="_blank" rel="noopener">🔗 freecomputation.org</a>
         <a href="https://github.com/sponsors/chasebryan" target="_blank" rel="noopener">💝 Sponsor on GitHub</a>
       </div>
-      <footer><span>v26.9.1 · Apache-2.0</span><button type="button" data-close-fcf-about>Close</button></footer>
+      <footer><span>v26.10.0 · Apache-2.0</span><button type="button" data-close-fcf-about>Close</button></footer>
     </div>
   </div>
 
@@ -189,7 +190,7 @@ pub fn render_lab_page(workbench: &str) -> String {
         </div>
         <div>
           <h2>CentL26 Software Update</h2>
-          <small class="update-current-version">Installed: CentL26 v26.9.1</small>
+          <small class="update-current-version">Installed: CentL26 v26.10.0</small>
         </div>
       </div>
       <div class="update-body">
@@ -612,7 +613,7 @@ pub(crate) fn render_lab_workbench_with_transient_result(
     }
     html.push_str(r#"</div><button class="strip-action add-tab" type="button" data-new-notebook data-new-computation title="Start a blank computation without clearing notebook history" aria-label="Create new notebook tab"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"></path></svg></button><span class="strip-spacer"></span><button class="strip-action" type="button" data-toggle-explorer title="Toggle workspace" aria-label="Toggle workspace"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"></rect><path d="M8 3v14"></path></svg></button><button class="strip-action" type="button" data-toggle-inspector title="Toggle inspector" aria-label="Toggle inspector"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"></rect><path d="M12 3v14"></path></svg></button></div>"#);
 
-    html.push_str(r#"<div class="workspace-toolbar"><div><button class="toolbar-button" type="button" data-open-welcome title="Open Welcome Screen"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 9.5 10 4l7 5.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z"></path><path d="M9 18v-6h2v6"></path></svg>Welcome</button><button class="toolbar-button" type="button" data-open-visualizer title="Open Interactive STEM Animated Visualizer &amp; Theorem Studio"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17V3m0 14h14M3 12c3-4 6 2 9-5 2-4 3-1 5 1"></path></svg>Visualizer</button><button class="toolbar-button" type="button" data-open-palette><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M4 10h12M4 15h8"></path></svg>Tools</button><button class="toolbar-button" type="button" data-save-project title="Save workspace (Ctrl / ⌘ S)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h9l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm2 0v4h6V4M6 13h8v4H6v-4Z"></path></svg>Save</button><a class="toolbar-button" href="/download/notebook.md" download="notebook.md" title="Download notebook as Markdown"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M6 9l4 4 4-4M4 17h12"></path></svg>Download</a><button class="toolbar-button" type="button" data-open-settings title="Open Preferences and Settings"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"></circle><circle cx="10" cy="10" r="2.8"></circle></svg>Settings</button><button class="toolbar-button" type="button" data-open-help title="Open help and guide"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"></circle><path d="M7.5 8a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3.5M10 15h.01"></path></svg>Help</button></div><div><button class="toolbar-icon theme-toggle" type="button" data-toggle-theme title="Toggle dimmed theme" aria-label="Toggle dimmed theme"><svg class="theme-icon-sun" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3"></circle><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M15.7 4.3l-1.4 1.4M5.7 14.3l-1.4 1.4"></path></svg><svg class="theme-icon-moon" viewBox="0 0 20 20" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg></button></div></div>"#);
+    html.push_str(r#"<div class="workspace-toolbar"><div><button class="toolbar-button" type="button" data-open-welcome title="Open Welcome Screen"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 9.5 10 4l7 5.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z"></path><path d="M9 18v-6h2v6"></path></svg>Welcome</button><button class="toolbar-button" type="button" data-open-visualizer title="Open Interactive STEM Animated Visualizer &amp; Theorem Studio"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17V3m0 14h14M3 12c3-4 6 2 9-5 2-4 3-1 5 1"></path></svg>Visualizer</button><button class="toolbar-button" type="button" data-open-palette><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M4 10h12M4 15h8"></path></svg>Tools</button><button class="toolbar-button" type="button" data-save-project title="Save workspace (Ctrl / ⌘ S)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h9l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm2 0v4h6V4M6 13h8v4H6v-4Z"></path></svg>Save</button><a class="toolbar-button" href="/download/notebook.ipynb" download="notebook.ipynb" title="Download Jupyter Notebook (.ipynb)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M6 9l4 4 4-4M4 17h12"></path></svg>Jupyter (.ipynb)</a><a class="toolbar-button" href="/download/notebook.md" download="notebook.md" title="Download notebook as Markdown"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M6 9l4 4 4-4M4 17h12"></path></svg>Markdown</a><button class="toolbar-button" type="button" data-open-settings title="Open Preferences and Settings"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"></circle><circle cx="10" cy="10" r="2.8"></circle></svg>Settings</button><button class="toolbar-button" type="button" data-open-help title="Open help and guide"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"></circle><path d="M7.5 8a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3.5M10 15h.01"></path></svg>Help</button></div><div><button class="toolbar-icon theme-toggle" type="button" data-toggle-theme title="Toggle dimmed theme" aria-label="Toggle dimmed theme"><svg class="theme-icon-sun" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3"></circle><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M15.7 4.3l-1.4 1.4M5.7 14.3l-1.4 1.4"></path></svg><svg class="theme-icon-moon" viewBox="0 0 20 20" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg></button></div></div>"#);
 
     let show_welcome_surface = current_input.is_empty()
         && last_result.is_none()
@@ -626,29 +627,7 @@ pub(crate) fn render_lab_workbench_with_transient_result(
         html.push_str(r#"<div class="start-surface-wrap" data-start-surface-wrap>"#);
         render_start_surface(&mut html, current_input, session);
         html.push_str(r#"</div>"#);
-        if has_work {
-            html.push_str(r#"<div class="notebook-wrap" data-notebook-wrap hidden>"#);
-            html.push_str(&format!(
-                r#"<div class="notebook-feed"><header class="notebook-header"><div><span>Notebook</span><h1 contenteditable="true" data-rename-notebook spellcheck="false" title="Click to rename notebook">{}</h1></div><div><small>Session</small><strong>Exact · Offline</strong></div></header>"#,
-                escape_html(active_name)
-            ));
-            render_notebook_results(
-                &mut html,
-                last_result,
-                last_error,
-                last_physics,
-                last_hunt,
-                show_transient_result,
-                session,
-            );
-            html.push_str(r#"</div>"#);
-            render_composer(&mut html, current_input, false);
-            html.push_str(r#"</div>"#);
-        }
-    } else if has_work {
-        html.push_str(r#"<div class="start-surface-wrap" data-start-surface-wrap hidden>"#);
-        render_start_surface(&mut html, current_input, session);
-        html.push_str(r#"</div>"#);
+    } else {
         html.push_str(r#"<div class="notebook-wrap" data-notebook-wrap>"#);
         html.push_str(&format!(
             r#"<div class="notebook-feed"><header class="notebook-header"><div><span>Notebook</span><h1 contenteditable="true" data-rename-notebook spellcheck="false" title="Click to rename notebook">{}</h1></div><div><small>Session</small><strong>Exact · Offline</strong></div></header>"#,
@@ -665,10 +644,6 @@ pub(crate) fn render_lab_workbench_with_transient_result(
         );
         html.push_str(r#"</div>"#);
         render_composer(&mut html, current_input, false);
-        html.push_str(r#"</div>"#);
-    } else {
-        html.push_str(r#"<div class="start-surface-wrap" data-start-surface-wrap>"#);
-        render_start_surface(&mut html, current_input, session);
         html.push_str(r#"</div>"#);
     }
     html.push_str(r#"</div>"#);
@@ -711,7 +686,7 @@ fn render_explorer(html: &mut String, session: &Session) {
 
     html.push_str(r#"<section class="explorer-area" id="explorer-area-projects" data-area-panel="projects" data-area-title="Projects" data-area-subtitle="Local storage" hidden><div class="area-metrics"><span><strong data-workspace-field="counts.notebooks">1</strong>notebook</span><span><strong data-workspace-field="counts.receipts">"#);
     html.push_str(&run_count.to_string());
-    html.push_str(r#"</strong>receipts</span></div><p class="area-summary">Manage independent notebook tabs, persist project state locally, and export clean Markdown or full JSON packages.</p><section class="tree-group"><h2>Project actions</h2><button class="tree-row" type="button" data-new-notebook><span class="tree-icon notebook">+</span><span>Create New Notebook</span></button><button class="tree-row" type="button" data-save-project><span class="tree-icon exact">💾</span><span>Save Project (⌘S)</span></button></section><section class="tree-group"><h2>Export &amp; Download</h2><a class="tree-row" href="/download/notebook.md" download="notebook.md"><span class="tree-icon dataset">MD</span><span>Download Notebook (.md)</span></a><a class="tree-row" href="/download/notebook.json" download="notebook.json"><span class="tree-icon dataset">JSON</span><span>Download Notebook (.json)</span></a><a class="tree-row" href="/download/project.json" download="project.json"><span class="tree-icon model">ZIP</span><span>Download Full Project (.json)</span></a></section>"#);
+    html.push_str(r#"</strong>receipts</span></div><p class="area-summary">Manage independent notebook tabs, persist project state locally, and export Jupyter Notebooks (.ipynb), clean Markdown, or full JSON packages.</p><section class="tree-group"><h2>Project actions</h2><button class="tree-row" type="button" data-new-notebook><span class="tree-icon notebook">+</span><span>Create New Notebook</span></button><button class="tree-row" type="button" data-save-project><span class="tree-icon exact">💾</span><span>Save Project (⌘S)</span></button></section><section class="tree-group"><h2>Export &amp; Download</h2><a class="tree-row" href="/download/notebook.ipynb" download="notebook.ipynb"><span class="tree-icon dataset">IPYNB</span><span>Download Jupyter Notebook (.ipynb)</span></a><a class="tree-row" href="/download/notebook.md" download="notebook.md"><span class="tree-icon dataset">MD</span><span>Download Notebook (.md)</span></a><a class="tree-row" href="/download/notebook.json" download="notebook.json"><span class="tree-icon dataset">JSON</span><span>Download Notebook (.json)</span></a><a class="tree-row" href="/download/project.json" download="project.json"><span class="tree-icon model">ZIP</span><span>Download Full Project (.json)</span></a></section>"#);
     render_capability_row(html, "org.fcf.centl.project.persist", "Project persistence");
     html.push_str(r#"</section>"#);
 
@@ -971,16 +946,44 @@ fn render_notebook_results(
         .saturating_sub(usize::from(suppress_latest_history_cell));
     for (index, entry) in session.history.iter().take(visible_history_len).enumerate() {
         let (kind, kind_class) = history_kind(entry);
-        html.push_str(&format!(r#"<article class="result-cell"><div class="cell-index"><span>[{}]</span><button type="button" data-command="{}" data-command-mode="Auto" title="Run again" aria-label="Run cell {} again"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 5 8 5-8 5Z"></path></svg></button></div><div class="cell-content"><div class="source-line"><code>{}</code></div><div class="result-output"><header><span>Result</span><div><small class="kind-{}">{}</small><small>{} µs</small></div></header><pre>{}</pre>"#, index + 1, escape_html(&entry.command), index + 1, escape_html(&entry.command), kind_class, kind, entry.execution_micros, escape_html(&entry.result)));
-        if let Some(enclosure) = &entry.approximate_repr {
-            if !result_already_displays_enclosure(&entry.result, enclosure) {
-                html.push_str(&format!(
-                    r#"<p class="enclosure-line"><span>≈</span>{}</p>"#,
-                    escape_html(enclosure)
-                ));
+        let is_markdown = entry.command.starts_with("# ") || entry.command.starts_with(":md ");
+        if is_markdown {
+            let note_text = entry.command.strip_prefix(":md ").unwrap_or(&entry.command);
+            html.push_str(&format!(
+                r#"<article class="result-cell markdown-cell" data-cell-index="{}"><div class="cell-index"><span>[{}]</span><span class="cell-badge-md">MD</span></div><div class="cell-content"><div class="markdown-rendered-body"><p>{}</p></div><div class="cell-actions"><button type="button" class="cell-action-btn" data-edit-cell="{}" title="Edit note in composer">✏ Edit</button><button type="button" class="cell-action-btn cell-action-delete" data-delete-cell="{}" title="Delete note">✕ Delete</button></div></div></article>"#,
+                index,
+                index + 1,
+                escape_html(note_text),
+                escape_html(&entry.command),
+                index
+            ));
+        } else {
+            html.push_str(&format!(
+                r#"<article class="result-cell" data-cell-index="{}"><div class="cell-index"><span>[{}]</span><button type="button" data-command="{}" data-command-mode="Auto" title="Run again" aria-label="Run cell {} again"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 5 8 5-8 5Z"></path></svg></button></div><div class="cell-content"><div class="source-line"><code>{}</code><div class="cell-actions"><button type="button" class="cell-action-btn" data-run-cell="{}" title="Run cell again">▶ Run</button><button type="button" class="cell-action-btn" data-edit-cell="{}" title="Edit in composer">✏ Edit</button><button type="button" class="cell-action-btn" data-copy-cell="{}" title="Copy expression">📋 Copy</button><button type="button" class="cell-action-btn cell-action-delete" data-delete-cell="{}" title="Delete cell">✕ Delete</button></div></div><div class="result-output"><header><span>Result</span><div><small class="kind-{}">{}</small><small>{} µs</small></div></header><pre>{}</pre>"#,
+                index,
+                index + 1,
+                escape_html(&entry.command),
+                index + 1,
+                escape_html(&entry.command),
+                escape_html(&entry.command),
+                escape_html(&entry.command),
+                escape_html(&entry.command),
+                index,
+                kind_class,
+                kind,
+                entry.execution_micros,
+                escape_html(&entry.result)
+            ));
+            if let Some(enclosure) = &entry.approximate_repr {
+                if !result_already_displays_enclosure(&entry.result, enclosure) {
+                    html.push_str(&format!(
+                        r#"<p class="enclosure-line"><span>≈</span>{}</p>"#,
+                        escape_html(enclosure)
+                    ));
+                }
             }
+            html.push_str(r#"</div></div></article>"#);
         }
-        html.push_str(r#"</div></div></article>"#);
     }
 
     if let Some(error) = last_error {

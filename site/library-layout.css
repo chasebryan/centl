@@ -1,41 +1,60 @@
-/* Focused layout additions for the FCF manuals and research catalog. */
+/* Focused layout additions for the FCF manuals and research catalog.
+   Modernized for CentL26.10
+*/
 
 .manual-groups,
 .topic-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  margin: 12px 0 24px;
+  gap: 16px;
+  margin: 16px 0 28px;
 }
 
 .manual-group,
 .topic-card,
 .compact-card {
   border: 1px solid var(--rule);
-  background: #fff;
-  padding: 14px 16px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+  transition: all 150ms ease;
+}
+
+.manual-group:hover,
+.topic-card:hover,
+.compact-card:hover {
+  border-color: #93c5fd;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .manual-group h3,
 .topic-card h3,
 .compact-card h3 {
-  margin: 0 0 7px;
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
 }
 
 .manual-group ul,
 .topic-card ul {
-  margin: 6px 0 0;
-  padding-left: 19px;
+  margin: 8px 0 0;
+  padding-left: 20px;
 }
 
 .manual-group li,
 .topic-card li {
-  margin: 4px 0;
+  margin: 6px 0;
+  font-size: 14px;
 }
 
 .topic-card p,
 .compact-card p {
-  margin: 6px 0 10px;
+  margin: 6px 0 12px;
+  font-size: 14px;
+  color: var(--ink-secondary);
 }
 
 .topic-card .card-links,
@@ -45,18 +64,20 @@
 
 .research-intro {
   max-width: 72ch;
+  font-size: 15.5px;
+  line-height: 1.68;
 }
 
 .research-nav-label {
-  margin: 12px 0 5px;
+  margin: 16px 0 6px;
   color: var(--muted);
-  font: 700 11px/1.3 var(--ui);
-  letter-spacing: .06em;
+  font: 750 11px/1.3 var(--ui);
+  letter-spacing: .08em;
   text-transform: uppercase;
 }
 
 nav .research-subnav {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 nav .research-subnav li {
@@ -64,14 +85,14 @@ nav .research-subnav li {
 }
 
 nav .research-subnav.secondary {
-  padding-left: 10px;
+  padding-left: 12px;
   border-left: 2px solid var(--rule);
 }
 
 .compact-research-list {
   display: grid;
-  gap: 10px;
-  margin: 12px 0 20px;
+  gap: 12px;
+  margin: 16px 0 24px;
 }
 
 .compact-research-list .compact-card {
@@ -81,16 +102,18 @@ nav .research-subnav.secondary {
 .research-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 9px;
-  margin: 12px 0 18px;
+  gap: 10px;
+  margin: 16px 0 22px;
 }
 
 .research-figure-compact {
-  width: min(100%, 430px);
-  margin: 18px auto 24px;
-  padding: 8px;
+  width: min(100%, 460px);
+  margin: 22px auto 28px;
+  padding: 10px;
   border: 1px solid var(--rule);
-  background: var(--panel);
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  box-shadow: var(--shadow-sm);
 }
 
 .research-figure-compact img {
@@ -98,31 +121,37 @@ nav .research-subnav.secondary {
   width: 100%;
   height: auto;
   margin: 0;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--rule);
 }
 
 .research-figure-compact figcaption {
-  margin: 8px 5px 2px;
+  margin: 10px 6px 4px;
   color: var(--muted);
-  font: 13px/1.45 var(--ui);
+  font: 13px/1.5 var(--ui);
+  text-align: center;
 }
 
 .paper-summary {
   max-width: 72ch;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
+  font-size: 15px;
+  line-height: 1.68;
 }
 
 .record-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  margin: 12px 0 20px;
+  gap: 10px;
+  margin: 16px 0 24px;
 }
 
 .record-strip div {
   border: 1px solid var(--rule);
-  background: #fff;
-  padding: 9px 10px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  padding: 11px 13px;
+  box-shadow: var(--shadow-sm);
 }
 
 .record-strip strong,
@@ -132,19 +161,21 @@ nav .research-subnav.secondary {
 
 .record-strip strong {
   color: var(--oasis-deep);
-  font: 700 11px/1.3 var(--ui);
-  letter-spacing: .04em;
+  font: 750 11px/1.3 var(--ui);
+  letter-spacing: .06em;
   text-transform: uppercase;
 }
 
 .record-strip span {
-  margin-top: 3px;
+  margin-top: 4px;
+  font-size: 13.5px;
+  font-weight: 500;
 }
 
 .library-section-note {
   color: var(--muted);
   font-family: var(--ui);
-  font-size: 14px;
+  font-size: 13.5px;
 }
 
 @media (max-width: 760px) {

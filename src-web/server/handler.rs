@@ -230,6 +230,16 @@ pub fn handle_single_command(
         return (None, None, None, None);
     }
 
+    if let Some(idx_str) = cmd.strip_prefix(":delete-cell ") {
+        if let Ok(idx) = idx_str.trim().parse::<usize>() {
+            let history = &mut state.session_mut().history;
+            if idx < history.len() {
+                history.remove(idx);
+            }
+        }
+        return (None, None, None, None);
+    }
+
     if let Some(key) = cmd.strip_prefix(":gemini-key ").or_else(|| cmd.strip_prefix(":set-gemini-key ")) {
         crate::engine::sci::set_runtime_gemini_key(key.trim());
         let res = ExecutionResult {
@@ -284,7 +294,7 @@ pub fn handle_single_command(
 
     if cmd == ":release" || cmd == ":version" || cmd == ":releases" {
         let res = ExecutionResult {
-            text: "=== CentL26.9.1 Official Universal Release (All Platforms) ===\nVersion: 26.9.1 (Universal Release)\nCapabilities:\n• Multi-Platform Standard: native support for Windows 11, macOS Apple Silicon / Intel, and Debian/Fedora/Arch Linux.\n• Canonical Polynomial Algebra Engine: arbitrary-precision Rational Root Theorem solver, synthetic division, and exact root isolation for high-degree polynomials.\n• Algebraic Equation Auto-Solve & Verification: free variable analysis, implicit multiplication, and constant truth-value verification.\n• Advanced Calculus & Discrete Math: higher-order differentiation, indefinite/definite integration, limits with L'Hôpital's rule, multivariant Taylor series, discrete sums and products.\n• Interactive STEM Animated Visualizer: theorem studio, dynamic ODE wave animations, chaotic attractors, particle physics simulations, and crystal lattice geometry.\n• STEM Academic Search Engine: omnibar Chrome routing to Google Scholar, arXiv, PubMed, Wolfram MathWorld, OEIS, NIST, and NASA ADS.\n• FCF Knowledge Center & In-App Reader: built-in documentation browser for all FCF manuals, specs, and research theorem preprints.\n• Gemini AI Co-Pilot Resiliency: multi-model auto-fallback (2.5-flash -> 2.0-flash -> 1.5-flash -> 1.5-pro), cross-platform key persistence, and fault-tolerant JSON decomposition.\n• Multi-Strategy In-App Updater: dual-channel git & GitHub manifest synchronization, isolated build retry, and automated precompiled binary fallback.\n• Multi-Notebook Tabs & Workspaces: seamlessly organize independent computations in named tabs with safe keyboard shortcuts (⌥W).\n• In-App Programmability: define, inspect, and test custom STEM functions & constants in plain English.\n• CentL-SCi STEM Solver: comprehensive step-by-step offline verified problem solving across chemistry, mechanics, quantum physics, thermodynamics, and statistics.\n• 100-Test Automated Non-Regression Suite: verified offline test coverage across all mathematical and scientific domains.".to_string(),
+            text: "=== CentL26.10 Official Universal Release (All Platforms) ===\nVersion: 26.10.0 (Universal Release)\nCapabilities:\n• Multi-Platform Standard: full native support for Windows 11, macOS Apple Silicon / Intel, and Debian/Fedora/Arch Linux.\n• Continuous Jupyter-Grade Notebooks: seamless multi-step calculations, inline cell editing, cell deletion, re-running, and direct Jupyter Notebook (.ipynb) export.\n• Canonical Polynomial Algebra Engine: arbitrary-precision Rational Root Theorem solver, synthetic division, and exact root isolation for high-degree polynomials.\n• Algebraic Equation Auto-Solve & Verification: free variable analysis, implicit multiplication, and constant truth-value verification.\n• Advanced Calculus & Discrete Math: higher-order differentiation, indefinite/definite integration, limits with L'Hôpital's rule, multivariant Taylor series, discrete sums and products.\n• Interactive STEM Animated Visualizer: theorem studio, dynamic ODE wave animations, chaotic attractors, particle physics simulations, and crystal lattice geometry.\n• STEM Academic Search Engine: omnibar Chrome routing to Google Scholar, arXiv, PubMed, Wolfram MathWorld, OEIS, NIST, and NASA ADS.\n• FCF Knowledge Center & Smooth In-App Reader: built-in responsive documentation browser for all FCF manuals, specs, and theoretical research theorem preprints.\n• Gemini AI Co-Pilot Resiliency: multi-model auto-fallback (2.5-flash -> 2.0-flash -> 1.5-flash -> 1.5-pro), cross-platform key persistence, and fault-tolerant JSON decomposition.\n• Multi-Strategy In-App Updater: dual-channel git & GitHub manifest synchronization, isolated build retry, and automated precompiled binary fallback.\n• Multi-Notebook Tabs & Workspaces: seamlessly organize independent computations in named tabs with safe keyboard shortcuts (⌥W).\n• In-App Programmability: define, inspect, and test custom STEM functions & constants in plain English.\n• CentL-SCi STEM Solver: comprehensive step-by-step offline verified problem solving across chemistry, mechanics, quantum physics, thermodynamics, and statistics.\n• 100-Test Automated Non-Regression Suite: verified offline test coverage across all mathematical and scientific domains.".to_string(),
             exact_rational: None,
             approximate: None,
             symbolic_expr: None,
@@ -3908,6 +3918,61 @@ pub fn export_project_json(state: &AppState) -> String {
         state.active_notebook,
         notebooks_json.join(",")
     )
+}
+
+pub fn export_notebook_ipynb(state: &AppState) -> String {
+    let session = state.session();
+    let mut cells = Vec::new();
+    for (i, entry) in session.history.iter().enumerate() {
+        let is_markdown = entry.command.starts_with("# ") || entry.command.starts_with(":md ");
+        if is_markdown {
+            let src = entry.command.strip_prefix(":md ").unwrap_or(&entry.command);
+            cells.push(serde_json::json!({
+                "cell_type": "markdown",
+                "metadata": {},
+                "source": [src]
+            }));
+        } else {
+            let output_text = if let Some(ref exact) = entry.exact_repr {
+                format!("{}\nExact: {}", entry.result, exact)
+            } else {
+                entry.result.clone()
+            };
+            cells.push(serde_json::json!({
+                "cell_type": "code",
+                "execution_count": (i + 1),
+                "metadata": {},
+                "source": [entry.command.clone()],
+                "outputs": [
+                    {
+                        "output_type": "execute_result",
+                        "execution_count": (i + 1),
+                        "data": {
+                            "text/plain": [output_text]
+                        },
+                        "metadata": {}
+                    }
+                ]
+            }));
+        }
+    }
+    let doc = serde_json::json!({
+        "cells": cells,
+        "metadata": {
+            "language_info": {
+                "name": "centl",
+                "version": CURRENT_VERSION
+            },
+            "kernelspec": {
+                "display_name": "CentL26 Exact Core",
+                "language": "centl",
+                "name": "centl26"
+            }
+        },
+        "nbformat": 4,
+        "nbformat_minor": 5
+    });
+    serde_json::to_string_pretty(&doc).unwrap_or_else(|_| "{}".to_string())
 }
 
 fn serde_json_str(s: &str) -> String {

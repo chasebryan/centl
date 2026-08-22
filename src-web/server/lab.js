@@ -29,11 +29,11 @@
   }
 
   function activeForm() {
-    return document.querySelector(".active-cell[data-centl-form]");
+    return document.querySelector(".notebook-wrap:not([hidden]) .active-cell[data-centl-form], .start-surface-wrap:not([hidden]) .active-cell[data-centl-form], .active-cell[data-centl-form]");
   }
 
   function activeEditor() {
-    return document.querySelector("#active-command");
+    return document.querySelector(".notebook-wrap:not([hidden]) #active-command, .start-surface-wrap:not([hidden]) #active-command, #active-command, textarea[name='cmd']");
   }
 
   function hasNotebookContent() {
@@ -41,7 +41,8 @@
   }
 
   function syncComposerActions() {
-    const hasInput = Boolean(activeEditor()?.value.trim());
+    const editor = activeEditor();
+    const hasInput = Boolean(editor?.value.trim());
     document.querySelectorAll("[data-run-active], .composer-run").forEach((button) => {
       button.disabled = !hasInput;
       button.setAttribute("aria-disabled", String(!hasInput));
@@ -2022,22 +2023,62 @@
     const form = event.target.closest("[data-centl-form]");
     if (!form) return;
     event.preventDefault();
-    if (!activeEditor()?.value.trim()) {
+    const editor = form.querySelector("textarea[name='cmd']") || activeEditor();
+    const cmdVal = editor?.value.trim();
+    if (!cmdVal) {
       syncComposerActions();
       return;
     }
-    const cmdVal = activeEditor()?.value.trim();
     if (cmdVal && /^\s*(:visualize|:visualizer|:viz|visualize|visualizer|theorems?)\b/i.test(cmdVal)) {
       const rest = cmdVal.replace(/^\s*(:visualize|:visualizer|:viz|visualize|visualizer|theorems?)\s*/i, "").trim();
       StemVisualizer.open(rest || null);
       return;
     }
-    execute(encodeForm(form, event.submitter));
+    execute(encodeForm(form, event.submitter), { restoreEditorFocus: true });
   });
 
   document.addEventListener("click", (event) => {
     if (event.target.matches(".command-palette")) {
       closePalette();
+      return;
+    }
+
+    const runCellBtn = event.target.closest("[data-run-cell]");
+    if (runCellBtn && runCellBtn.dataset.runCell) {
+      runCommand(runCellBtn.dataset.runCell);
+      return;
+    }
+
+    const editCellBtn = event.target.closest("[data-edit-cell]");
+    if (editCellBtn && editCellBtn.dataset.editCell) {
+      const editor = activeEditor();
+      if (editor) {
+        editor.value = editCellBtn.dataset.editCell;
+        editor.focus();
+        syncComposerActions();
+      }
+      return;
+    }
+
+    const copyCellBtn = event.target.closest("[data-copy-cell]");
+    if (copyCellBtn && copyCellBtn.dataset.copyCell) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(copyCellBtn.dataset.copyCell);
+      }
+      const originalText = copyCellBtn.textContent;
+      copyCellBtn.textContent = "✓ Copied";
+      setTimeout(() => { copyCellBtn.textContent = originalText; }, 1500);
+      return;
+    }
+
+    const deleteCellBtn = event.target.closest("[data-delete-cell]");
+    if (deleteCellBtn && deleteCellBtn.dataset.deleteCell !== undefined) {
+      const idx = deleteCellBtn.dataset.deleteCell;
+      execute(new URLSearchParams({
+        lab_action: "calculate",
+        cmd: `:delete-cell ${idx}`,
+        interaction_mode: selectedMode
+      }), { restoreEditorFocus: true });
       return;
     }
 
@@ -2251,6 +2292,11 @@
     if (target.dataset.paletteAction === "download-notebook") {
       closePalette({ restoreFocus: false });
       window.location.href = "/download/notebook.md";
+    }
+
+    if (target.dataset.paletteAction === "download-notebook-ipynb") {
+      closePalette({ restoreFocus: false });
+      window.location.href = "/download/notebook.ipynb";
     }
 
     if (target.dataset.paletteAction === "download-notebook-json") {
@@ -2671,13 +2717,15 @@
       return;
     }
 
-    if (primary && event.key === "Enter") {
-      const form = activeForm();
-      if (form) {
-        event.preventDefault();
-        form.requestSubmit();
+    if (event.key === "Enter") {
+      if (primary || event.shiftKey || event.target.matches("textarea[name='cmd'], #active-command")) {
+        const form = activeForm();
+        if (form) {
+          event.preventDefault();
+          form.requestSubmit();
+          return;
+        }
       }
-      return;
     }
 
     const inspectorTab = event.target.closest?.("[data-inspector-tab]");

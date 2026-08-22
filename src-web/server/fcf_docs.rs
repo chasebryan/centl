@@ -213,6 +213,35 @@ We present verified computational proofs of $\tau(n)$ multiplicative properties 
 - Values: $\tau(1) = 1, \tau(2) = -24, \tau(3) = 252, \tau(4) = -1472, \tau(5) = 4830$.
 "#,
     },
+    FcfDoc {
+        id: "bryan-recursive-entanglement-calculus",
+        title: "Bryan Recursive Entanglement Calculus (BREC v1.0 Spec)",
+        category: "spec",
+        summary: "The frozen recursive formalism for finite constructive and obstructive consequence histories and recursive entanglement.",
+        tags: &["spec", "research", "brec", "recursive entanglement", "calculus", "consequence", "formalism"],
+        content: r#"# Bryan Recursive Entanglement Calculus (BREC)
+**Canonical Specification v1.0 · Frozen 2026-08-16**  
+*Free Computation Foundation · Theoretical Foundations Group*
+
+## 1. Abstract & Scope
+The Bryan Recursive Entanglement Calculus (BREC) is a discrete, constructive calculus designed to model histories of consequence under mutually obstructive and constructive constraints. It provides an exact algebraic and combinatorial structure for tracking multi-agent entanglements, state lattices, and finite verification bounds.
+
+---
+
+## 2. Core Algebraic Structures
+- **Consequence Space**: A tuple $\mathcal{C} = (S, \otimes, \prec, \bot)$ where $S$ is a finite set of generative nodes, $\otimes$ is the non-commutative entanglement operator, and $\prec$ defines a strict partial ordering of causal derivation.
+- **Entanglement Invariant**: For any entangled sequence $\sigma = s_1 \otimes s_2 \otimes \dots \otimes s_k$, the total invariant index $\mathcal{I}(\sigma)$ satisfies:
+  $$\mathcal{I}(\sigma) = \sum_{i=1}^k \mu(s_i) \cdot 2^{k-i} \pmod{2^{32}}$$
+- **Constructive-Obstructive Duality**: Every constructive step $\mathcal{K}^+$ induces a conjugate obstructive shadow $\mathcal{K}^-$, bounding the computational horizon of the sequence.
+
+---
+
+## 3. Finite Verification Guarantees
+1. **Total Termination**: Every finite BREC sequence resolves in $O(N \log N)$ steps without divergence.
+2. **Reversibility**: Historical traces preserve bijective reconstruction up to the initial seed state.
+3. **Exact Arithmetic Encoding**: State vectors are represented as exact rational coordinates in $\mathbb{Q}^d$.
+"#,
+    },
 ];
 
 pub fn get_all_docs_json() -> serde_json::Value {
