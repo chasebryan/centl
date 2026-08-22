@@ -1,5 +1,12 @@
 ## Unreleased
 
+### CentL26.9.1 — Visual Refinements, Native Cogwheel Settings & Version Standardization (2026-08-21)
+
+- **Visual & UI Refinement**:
+  - Replaced Settings toolbar icon with a crisp native vector cogwheel/gear symbol.
+  - Synchronized application-wide visual version numbering (`v26.9.1`) across header lockups, about dialogs, and update receipts.
+  - Updated repository `README.md` with complete CentL26.9 feature capabilities, exact polynomial algebra documentation, and theorem studio visualizer.
+
 ### CentL26.9.0 — Full STEM Backend Upgrade, Robust Algebra Engine & Non-Regression Suite (2026-08-21)
 
 - **Canonical Polynomial Engine & Exact Root Finding**:
