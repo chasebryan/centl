@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "approval": {
-    "change_note": "CentL26.10.1 Orchid Release: official botanical watercolor orchid icon and version synchronization",
+    "change_note": "CentL26.10.1.1: Zoomed and perfectly framed orchid botanical app icon",
     "release": "CentL26",
     "reviewed_viewports": [
       "1366x768",
@@ -10,8 +10,8 @@
     "status": "user-approved"
   },
   "files": {
-    "desktop/centl26/macos/Assets/CentL26Icon.png": "552c6d4575acb0529ca17594f09399e3fd24a8ac1d818c746f3e79a495ef4204",
-    "desktop/centl26/macos/Assets/CentL26Icon.svg": "a7b61ea9f9b0292f940c6792546234e4f4c32dd210db529b9248203d5fe9fbcf",
+    "desktop/centl26/macos/Assets/CentL26Icon.png": "395921be0d09a1336f20be41b651a83ae7bcc56434e6ada49b2b202287029d66",
+    "desktop/centl26/macos/Assets/CentL26Icon.svg": "8256916929b9e3b6f69879b5502ad2d16dd5a46cac50bed81b7b857658b79e02",
     "src-web/server/lab.css": "d650dfcb3369b3c4754d60a66a15c42bb483a8e495990df14cba3cca5cb64518",
     "src-web/server/lab.js": "61b45c9ecc8e4eb2683642b2fd32f8790040508ec65c28370fe6e60bf5210d23",
     "src-web/server/lab_template.rs": "b1135899716a4dd9f3cae41403b6d33866d1bdc2bde5cf7bca0a68ecb65542c6"
