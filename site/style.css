@@ -2,77 +2,71 @@
    FREE COMPUTATION FOUNDATION (FCF)
    INSTITUTE FOR ADVANCED COMPUTATIONAL SCIENCE & RESEARCH
    Flagship Platform: CentL26 Native Desktop Suite
-   Design DNA: SpaceX Aerospace Industrial · Google DeepMind AI · xAI Cosmic Aura
+   Aesthetics: SpaceX Aerospace Industrial · Google DeepMind AI · xAI Clean Void
    ========================================================================== */
 
 :root {
   color-scheme: dark;
   
-  /* Deep Space Cosmic Base */
-  --bg-deep: #02040a;
-  --bg-surface: rgba(6, 11, 26, 0.55);
-  --bg-panel: rgba(10, 18, 42, 0.58);
-  --bg-panel-elevated: rgba(18, 30, 68, 0.72);
-  --bg-panel-hover: rgba(26, 46, 96, 0.85);
-  --bg-glass: rgba(8, 16, 36, 0.45);
+  /* Pure Deep Space Void */
+  --bg-deep: #000000;
+  --bg-space: #030712;
+  --bg-card: rgba(10, 15, 30, 0.5);
+  --bg-card-hover: rgba(15, 23, 48, 0.7);
+  --bg-glass: rgba(6, 10, 22, 0.65);
   
-  /* Luminous Aerospace & Quantum Energy Accents */
+  /* Luminous Cyber & Scientific Accents */
   --cyan-beam: #00f0ff;
   --cyan-bright: #38bdf8;
-  --cyan-glow: rgba(0, 240, 255, 0.5);
-  --cyan-border: rgba(56, 189, 248, 0.5);
+  --cyan-glow: rgba(0, 240, 255, 0.35);
+  --cyan-border: rgba(56, 189, 248, 0.3);
   
   --blue-primary: #0284c7;
   --blue-vibrant: #2563eb;
   --blue-gradient: linear-gradient(135deg, #0ea5e9 0%, #2563eb 50%, #4f46e5 100%);
-  --iridescent-gradient: linear-gradient(135deg, #ffffff 0%, #e0f2fe 30%, #38bdf8 65%, #a855f7 100%);
+  --iridescent-gradient: linear-gradient(135deg, #ffffff 0%, #dbeafe 30%, #38bdf8 65%, #a855f7 100%);
+  --hero-text-gradient: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
   
   --emerald-pure: #10b981;
   --emerald-bright: #34d399;
-  --emerald-glow: rgba(16, 185, 129, 0.4);
+  --emerald-glow: rgba(16, 185, 129, 0.35);
   
   --solar-orange: #f97316;
-  --solar-glow: rgba(249, 115, 22, 0.4);
-  
   --violet-quantum: #8b5cf6;
-  --violet-bright: #a78bfa;
-  --violet-glow: rgba(139, 92, 246, 0.4);
-  
   --pink-sponsor: #ec4899;
   --pink-gradient: linear-gradient(135deg, #ec4899 0%, #db2777 50%, #be185d 100%);
   
-  /* Aerospace High-Contrast Typography */
+  /* Typography Colors */
   --text-white: #ffffff;
   --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --text-faint: #64748b;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-faint: #475569;
   
-  /* Laser Borders & Dividers */
-  --border-subtle: rgba(255, 255, 255, 0.12);
-  --border-medium: rgba(255, 255, 255, 0.22);
-  --border-highlight: rgba(56, 189, 248, 0.55);
+  /* Clean 1px Aerospace Borders */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.14);
+  --border-highlight: rgba(56, 189, 248, 0.35);
   
-  /* Typography */
+  /* Font Stacks */
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", "Cascadia Code", "Fira Code", Menlo, Monaco, Consolas, monospace;
   
-  /* Geometry */
+  /* Radii */
   --radius-xs: 4px;
   --radius-sm: 8px;
   --radius-md: 14px;
-  --radius-lg: 24px;
+  --radius-lg: 20px;
   --radius-full: 9999px;
   
-  --shadow-panel: 0 24px 60px -12px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.12);
-  --shadow-glow-cyan: 0 0 36px rgba(0, 240, 255, 0.5);
-  --shadow-glow-blue: 0 8px 36px rgba(14, 165, 233, 0.5);
+  --shadow-card: 0 12px 36px -6px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 0 30px rgba(14, 165, 233, 0.25);
 }
 
 * { box-sizing: border-box; }
 
 html {
-  background: var(--bg-deep);
+  background: #000000;
   color: var(--text-primary);
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
@@ -83,14 +77,8 @@ body {
   margin: 0;
   padding: 0;
   color: var(--text-primary);
-  background: #02040a;
-  background-image: 
-    radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.22) 0%, transparent 55%),
-    radial-gradient(circle at 15% 40%, rgba(168, 85, 247, 0.16) 0%, transparent 45%),
-    radial-gradient(circle at 85% 65%, rgba(0, 240, 255, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.12) 0%, transparent 55%);
-  background-attachment: fixed;
-  font: 15px/1.68 var(--font-sans);
+  background: transparent !important;
+  font: 15px/1.65 var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -99,7 +87,7 @@ body {
 }
 
 /* ==========================================================================
-   Fixed 3D Space Drift Background Canvas (High-Visibility Layer)
+   Full-Bleed 3D Space Drift Background Canvas
    ========================================================================== */
 #space-drift-canvas {
   position: fixed !important;
@@ -107,25 +95,26 @@ body {
   left: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  z-index: 0 !important;
+  z-index: -1 !important;
   pointer-events: none !important;
+  background: radial-gradient(circle at 50% 15%, #050a1c 0%, #000000 70%);
 }
 
 a {
   color: var(--cyan-bright);
   text-decoration: none;
-  transition: all 140ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 140ms ease;
 }
 a:hover {
   color: var(--cyan-beam);
-  text-shadow: 0 0 14px var(--cyan-glow);
+  text-shadow: 0 0 10px var(--cyan-glow);
 }
 
 .skip {
   position: absolute;
   left: -9999px;
   top: 16px;
-  padding: 10px 22px;
+  padding: 10px 20px;
   background: var(--blue-primary);
   color: #fff;
   border-radius: var(--radius-sm);
@@ -134,116 +123,416 @@ a:hover {
   font-size: 13px;
   z-index: 10000;
   text-decoration: none;
-  box-shadow: var(--shadow-glow-cyan);
 }
 .skip:focus { left: 16px; }
 
 /* ==========================================================================
-   9-Second Cosmic Aura Banner in Hero ("Free Computation Foundation")
+   Universal Sticky Top Navigation Bar (SpaceX / DeepMind Aesthetic)
    ========================================================================== */
-.fcf-cosmic-aura-banner {
+.site-header {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.nav-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.site-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: #fff;
+}
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: var(--blue-gradient);
+  border: 1px solid var(--cyan-border);
+  border-radius: var(--radius-sm);
+  font: 800 15px/1 var(--font-mono);
+  color: #fff;
+  letter-spacing: 0.06em;
+  box-shadow: 0 0 14px var(--cyan-glow);
+}
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+.brand-name {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+.brand-meta {
+  font-size: 11px;
+  font-weight: 650;
+  font-family: var(--font-mono);
+  color: var(--cyan-beam);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-link {
+  padding: 6px 12px;
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  font-weight: 550;
+  border-radius: var(--radius-xs);
+  transition: all 140ms ease;
+}
+.nav-link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+.nav-link.highlight {
+  background: rgba(0, 240, 255, 0.12);
+  border: 1px solid var(--cyan-border);
+  color: var(--cyan-beam);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.nav-link.highlight:hover {
+  background: var(--cyan-beam);
+  color: #000;
+  box-shadow: 0 0 18px var(--cyan-beam);
+}
+.nav-link.sponsor {
+  background: var(--pink-gradient);
+  border: 1px solid rgba(236, 72, 153, 0.4);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 700;
+  box-shadow: 0 0 16px rgba(236, 72, 153, 0.35);
+}
+.nav-link.sponsor:hover {
+  box-shadow: 0 0 24px rgba(236, 72, 153, 0.6);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   Full-Bleed Center-Aligned Hero (DeepMind / SpaceX Style)
+   ========================================================================== */
+.hero-section {
   position: relative;
-  margin: 0 0 28px;
-  padding: 32px 36px;
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, rgba(14, 165, 233, 0.18) 0%, rgba(168, 85, 247, 0.14) 50%, rgba(6, 11, 26, 0.75) 100%);
-  border: 1px solid var(--border-highlight);
-  box-shadow: 0 0 40px rgba(14, 165, 233, 0.25), inset 0 0 30px rgba(0, 240, 255, 0.12);
-  overflow: hidden;
-  animation: cosmicAuraIntro 9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 90px 24px 70px;
+  text-align: center;
 }
 
-@keyframes cosmicAuraIntro {
-  0% {
-    box-shadow: 0 0 80px rgba(0, 240, 255, 0.6), inset 0 0 50px rgba(168, 85, 247, 0.4);
-    border-color: var(--cyan-beam);
-    transform: scale(0.99);
-  }
-  30% {
-    box-shadow: 0 0 100px rgba(168, 85, 247, 0.55), 0 0 50px rgba(0, 240, 255, 0.4), inset 0 0 40px rgba(14, 165, 233, 0.3);
-    border-color: rgba(168, 85, 247, 0.8);
-    transform: scale(1);
-  }
-  70% {
-    box-shadow: 0 0 70px rgba(0, 240, 255, 0.45), inset 0 0 30px rgba(0, 240, 255, 0.2);
-    border-color: var(--cyan-border);
-  }
-  100% {
-    box-shadow: 0 0 36px rgba(14, 165, 233, 0.2), inset 0 0 20px rgba(0, 240, 255, 0.08);
-    border-color: var(--border-highlight);
-  }
-}
-
-.aura-halo-glow {
+/* Ethereal Pulsing Cosmic Aura Halo */
+.hero-aura-glow {
   position: absolute;
-  top: -100px;
+  top: 40px;
   left: 50%;
   transform: translateX(-50%);
-  width: 500px;
-  height: 250px;
+  width: 600px;
+  height: 350px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(0, 240, 255, 0.35) 0%, rgba(139, 92, 246, 0.25) 50%, transparent 80%);
-  filter: blur(50px);
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.28) 0%, rgba(139, 92, 246, 0.2) 45%, rgba(14, 165, 233, 0.08) 70%, transparent 100%);
+  filter: blur(70px);
   pointer-events: none;
-  animation: haloBreathe 6s ease-in-out infinite alternate;
+  animation: heroAuraPulse 6s ease-in-out infinite alternate;
+  z-index: 0;
 }
 
-@keyframes haloBreathe {
-  0% { opacity: 0.6; transform: translateX(-50%) scale(0.9); }
-  100% { opacity: 1; transform: translateX(-50%) scale(1.15); }
+@keyframes heroAuraPulse {
+  0% { opacity: 0.65; transform: translateX(-50%) scale(0.9); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.15); filter: blur(85px); }
+  100% { opacity: 0.75; transform: translateX(-50%) scale(0.98); }
 }
 
-.aura-brand-lockup {
+.hero-content {
   position: relative;
   z-index: 2;
 }
 
-.aura-kicker {
+.hero-pill-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-full);
   font-family: var(--font-mono);
   font-size: 11.5px;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  color: var(--cyan-beam);
-  text-shadow: 0 0 14px var(--cyan-glow);
+  font-weight: 700;
+  color: var(--text-secondary);
   text-transform: uppercase;
-  margin-bottom: 12px;
+  letter-spacing: 0.08em;
+  margin-bottom: 24px;
+  backdrop-filter: blur(10px);
+}
+.hero-pill-badge .status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--emerald-pure);
+  box-shadow: 0 0 8px var(--emerald-pure);
 }
 
-.aura-glowing-title {
-  margin: 0 0 10px;
-  font: 900 clamp(32px, 4.4vw, 54px)/1.1 var(--font-sans);
+.hero-headline {
+  margin: 0 auto 22px;
+  font: 850 clamp(42px, 5.8vw, 76px)/1.08 var(--font-sans);
   letter-spacing: -0.04em;
+  color: #fff;
+  max-width: 950px;
+}
+.hero-gradient-text {
   background: var(--iridescent-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 24px rgba(0, 240, 255, 0.45));
+  filter: drop-shadow(0 0 30px rgba(0, 240, 255, 0.35));
 }
 
-.aura-glowing-tagline {
-  margin: 0 0 18px;
-  font-family: var(--font-mono);
-  font-size: clamp(12px, 1.4vw, 14px);
-  font-weight: 700;
-  letter-spacing: 0.12em;
+.hero-subtext {
+  margin: 0 auto 36px;
+  font-size: clamp(16px, 1.8vw, 19px);
+  line-height: 1.65;
   color: var(--text-secondary);
-  text-transform: uppercase;
+  max-width: 720px;
+  font-weight: 400;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 0 0 20px;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 28px;
+  background: #ffffff;
+  color: #000000;
+  font-size: 14.5px;
+  font-weight: 750;
+  font-family: var(--font-sans);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 24px rgba(255, 255, 255, 0.4);
+  transition: all 140ms ease;
+}
+.btn-primary:hover {
+  background: var(--cyan-beam);
+  color: #000000;
+  box-shadow: 0 0 32px var(--cyan-beam);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 24px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-medium);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  backdrop-filter: blur(12px);
+  transition: all 140ms ease;
+}
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--cyan-border);
+  color: var(--cyan-beam);
+  transform: translateY(-2px);
 }
 
 /* ==========================================================================
-   Main Laboratory Shell (Translucent Crystal Glass)
+   Flagship Desktop App Matrix (Clean Studio Frame)
+   ========================================================================== */
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+  position: relative;
+  z-index: 2;
+}
+
+.section-header {
+  text-align: center;
+  margin: 70px 0 36px;
+}
+.section-kicker {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+  color: var(--cyan-beam);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.section-title {
+  margin: 0;
+  font: 800 clamp(28px, 3.5vw, 42px)/1.2 var(--font-sans);
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+.section-desc {
+  margin: 12px auto 0;
+  max-width: 640px;
+  font-size: 15.5px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.app-suite-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin: 32px 0 60px;
+}
+
+.app-platform-card {
+  padding: 28px 24px;
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.app-platform-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--cyan-border);
+  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.8), 0 0 24px var(--cyan-glow);
+  transform: translateY(-3px);
+}
+.app-platform-card h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+}
+.app-platform-card p {
+  margin: 0 0 18px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.app-platform-card pre {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  background: #02040a;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--cyan-bright);
+}
+
+/* ==========================================================================
+   Bento Grid for Scientific Capabilities
+   ========================================================================== */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin: 32px 0 60px;
+}
+
+.bento-card {
+  padding: 30px;
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  transition: all 160ms ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.bento-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--cyan-border);
+  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.8), 0 0 24px var(--cyan-glow);
+  transform: translateY(-3px);
+}
+.bento-card h3 {
+  margin: 0 0 12px;
+  font-size: 19px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+.bento-card p {
+  margin: 0 0 20px;
+  font-size: 14.5px;
+  line-height: 1.68;
+  color: var(--text-secondary);
+}
+.bento-card .card-links {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.bento-card .card-links a {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+.bento-card .card-links a:hover {
+  background: var(--blue-primary);
+  color: #fff;
+  border-color: var(--cyan-beam);
+}
+
+/* ==========================================================================
+   Documentation & Subpage Shell (Two-Column Subpage Layout)
    ========================================================================== */
 .shell {
-  width: min(1320px, 94vw);
+  max-width: 1240px;
   margin: 24px auto 70px;
   background: var(--bg-surface);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-panel), 0 0 40px rgba(0, 240, 255, 0.08);
+  box-shadow: var(--shadow-panel);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -251,157 +540,115 @@ a:hover {
   z-index: 10;
 }
 
-/* Precision Corner Crosshairs */
-.shell::before, .shell::after {
-  content: "+";
-  position: absolute;
-  font-family: var(--font-mono);
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--cyan-beam);
-  opacity: 0.95;
-  pointer-events: none;
-  z-index: 20;
+.layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  min-height: calc(100vh - 180px);
 }
-.shell::before { top: 12px; left: 16px; }
-.shell::after { top: 12px; right: 16px; }
 
 /* ==========================================================================
-   Universal High-Tech Top Navigation Bar
+   Documentation & Subpage Compatibility Classes
    ========================================================================== */
 .masthead {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 32px;
-  background: rgba(4, 8, 20, 0.75);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  padding: 14px 28px;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-subtle);
   position: sticky;
   top: 0;
   z-index: 100;
 }
-
-.brand {
+.masthead .brand {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
-.brand a {
+.masthead .brand a {
   display: flex;
   align-items: center;
   gap: 12px;
   text-decoration: none;
   color: #fff;
 }
-.brand strong {
+.masthead .brand strong {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   background: var(--blue-gradient);
   border: 1px solid var(--cyan-border);
   border-radius: var(--radius-sm);
-  font: 850 17px/1 var(--font-mono);
+  font: 800 15px/1 var(--font-mono);
   color: #fff;
-  letter-spacing: 0.08em;
-  box-shadow: 0 0 16px var(--cyan-glow);
+  letter-spacing: 0.06em;
+  box-shadow: 0 0 14px var(--cyan-glow);
 }
-.brand .brand-meta {
+.masthead .brand-meta {
   display: flex;
   flex-direction: column;
 }
-.brand span {
-  font-size: 15.5px;
+.masthead .brand span {
+  font-size: 15px;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--text-white);
+  color: #fff;
 }
-.brand small {
-  font-size: 11.5px;
-  font-weight: 700;
+.masthead .brand small {
+  font-size: 11px;
+  font-weight: 650;
   font-family: var(--font-mono);
   color: var(--cyan-beam);
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-
-.masthead .title {
-  display: flex;
-  flex-direction: column;
-  margin-left: 20px;
-}
-.masthead .title h1 {
-  margin: 0;
-  font: 800 18px/1.2 var(--font-sans);
-  color: var(--text-white);
-  letter-spacing: -0.01em;
-}
-.masthead .title p {
-  margin: 3px 0 0;
-  font-size: 12.5px;
-  color: var(--text-muted);
-}
-
 .masthead-nav {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 .masthead-nav a {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
+  padding: 6px 12px;
   color: var(--text-secondary);
   font-size: 13.5px;
-  font-weight: 600;
-  font-family: var(--font-sans);
-  border-radius: var(--radius-sm);
+  font-weight: 550;
+  border-radius: var(--radius-xs);
   transition: all 140ms ease;
 }
 .masthead-nav a:hover {
-  color: var(--text-white);
-  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
 }
 .masthead-nav a.nav-btn-highlight {
-  background: rgba(0, 240, 255, 0.16);
+  background: rgba(0, 240, 255, 0.12);
   border: 1px solid var(--cyan-border);
   color: var(--cyan-beam);
   font-family: var(--font-mono);
   font-size: 12.5px;
-  font-weight: 750;
+  font-weight: 700;
 }
 .masthead-nav a.nav-btn-highlight:hover {
   background: var(--cyan-beam);
-  color: #02040a;
-  box-shadow: var(--shadow-glow-cyan);
+  color: #000;
+  box-shadow: 0 0 18px var(--cyan-beam);
 }
 .masthead-nav a.nav-btn-sponsor {
   background: var(--pink-gradient);
   border: 1px solid rgba(236, 72, 153, 0.4);
   color: #fff;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
-  box-shadow: 0 0 18px rgba(236, 72, 153, 0.35);
+  box-shadow: 0 0 16px rgba(236, 72, 153, 0.35);
 }
 .masthead-nav a.nav-btn-sponsor:hover {
-  box-shadow: 0 0 28px rgba(236, 72, 153, 0.6);
+  box-shadow: 0 0 24px rgba(236, 72, 153, 0.6);
   transform: translateY(-1px);
 }
 
-/* ==========================================================================
-   Two-Column Grid Layout
-   ========================================================================== */
-.layout {
-  display: grid;
-  grid-template-columns: 275px minmax(0, 1fr);
-  min-height: calc(100vh - 180px);
-}
-
-/* High-Tech Aerospace Sidebar */
 nav {
   padding: 28px 18px 48px;
   background: rgba(4, 8, 18, 0.7);
@@ -446,319 +693,45 @@ nav a.is-active, nav li.active a {
   font-weight: 750;
 }
 
-/* ==========================================================================
-   Main Laboratory Content Area
-   ========================================================================== */
 main {
   padding: 40px clamp(24px, 4.5vw, 54px) 60px;
   min-width: 0;
   background: transparent;
   position: relative;
 }
-
 main h1 {
   margin: 0 0 18px;
-  font: 850 clamp(30px, 3.6vw, 46px)/1.15 var(--font-sans);
-  color: var(--text-white);
+  font: 850 clamp(30px, 3.6vw, 44px)/1.15 var(--font-sans);
+  color: #fff;
   letter-spacing: -0.03em;
 }
 main h2 {
-  margin: 48px 0 20px;
-  font: 800 23px/1.3 var(--font-sans);
-  color: var(--text-white);
+  margin: 44px 0 18px;
+  font: 800 22px/1.3 var(--font-sans);
+  color: #fff;
   letter-spacing: -0.02em;
-  padding-bottom: 10px;
+  padding-bottom: 8px;
   border-bottom: 1px solid var(--border-subtle);
-  display: flex;
-  align-items: center;
-  gap: 12px;
 }
 main h3 {
-  margin: 28px 0 12px;
-  font: 750 18px/1.35 var(--font-sans);
-  color: var(--text-white);
+  margin: 26px 0 12px;
+  font: 750 17px/1.35 var(--font-sans);
+  color: #fff;
 }
 main p {
   margin: 0 0 18px;
   color: var(--text-secondary);
-  font-size: 15.5px;
-  line-height: 1.72;
-}
-
-/* Hero Section with Interactive Quantum Particle Canvas */
-.hero-wrapper {
-  position: relative;
-  margin: -10px 0 36px;
-  padding: 38px 42px;
-  background: linear-gradient(135deg, rgba(13, 22, 44, 0.72) 0%, rgba(6, 10, 24, 0.85) 100%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-highlight);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), inset 0 0 30px rgba(14, 165, 233, 0.1);
-}
-#quantum-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: auto;
-  z-index: 1;
-  opacity: 0.7;
-}
-.hero-content {
-  position: relative;
-  z-index: 2;
-  pointer-events: none;
-}
-.hero-content a, .hero-content button {
-  pointer-events: auto;
-}
-
-/* Telemetry Badge Strip */
-.hero-badges {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 18px;
-}
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xs);
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  font-weight: 750;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-.hero-badge.highlight {
-  background: rgba(0, 240, 255, 0.14);
-  border-color: var(--cyan-border);
-  color: var(--cyan-beam);
-}
-
-.hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 14px;
-  margin: 26px 0 12px;
-}
-.btn-cta-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 13px 26px;
-  background: var(--blue-gradient);
-  border: 1px solid var(--cyan-border);
-  color: #fff;
-  font-size: 14.5px;
-  font-weight: 750;
-  font-family: var(--font-sans);
-  text-decoration: none;
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-glow-blue);
-  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-.btn-cta-primary:hover {
-  background: var(--cyan-beam);
-  color: #02040a;
-  box-shadow: var(--shadow-glow-cyan);
-  transform: translateY(-2px);
-}
-.btn-cta-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 13px 22px;
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border-medium);
-  color: var(--text-white);
-  font-size: 14px;
-  font-weight: 650;
-  text-decoration: none;
-  border-radius: var(--radius-sm);
-  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-.btn-cta-secondary:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--cyan-beam);
-  border-color: var(--cyan-border);
-  transform: translateY(-2px);
+  font-size: 15px;
+  line-height: 1.7;
 }
 
 /* ==========================================================================
-   CentL26 Flagship Native Desktop Suite Showcase
-   ========================================================================== */
-.centl-app-showcase {
-  margin: 36px 0 44px;
-  background: rgba(6, 12, 28, 0.88);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-highlight);
-  border-radius: var(--radius-md);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), inset 0 0 24px rgba(14, 165, 233, 0.08);
-  overflow: hidden;
-  padding: 32px;
-}
-
-.app-showcase-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--border-subtle);
-  margin-bottom: 24px;
-}
-.app-header-left {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.mac-dots {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.mac-dot {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-}
-.dot-red { background: #ef4444; }
-.dot-yellow { background: #eab308; }
-.dot-green { background: #22c55e; }
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--emerald-pure);
-  box-shadow: 0 0 12px var(--emerald-pure);
-}
-
-.app-download-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-  margin: 24px 0 16px;
-}
-.app-download-card {
-  padding: 24px 20px;
-  background: rgba(14, 24, 52, 0.72);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: all 160ms ease;
-}
-.app-download-card:hover {
-  border-color: var(--cyan-border);
-  box-shadow: 0 0 24px var(--cyan-glow);
-  transform: translateY(-2px);
-}
-.app-download-card h4 {
-  margin: 0 0 8px;
-  font-size: 16.5px;
-  font-weight: 800;
-  color: #fff;
-}
-.app-download-card p {
-  margin: 0 0 16px;
-  font-size: 13.5px;
-  color: var(--text-secondary);
-  line-height: 1.55;
-}
-.app-download-card pre {
-  margin: 0 0 14px;
-  padding: 10px 12px;
-  font-size: 12px;
-  background: rgba(3, 6, 16, 0.92);
-}
-
-/* ==========================================================================
-   Bento-Grid High-Tech Feature & Module Cards
-   ========================================================================== */
-.hub-pathways {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 22px;
-  margin: 30px 0 44px;
-}
-.hub-card {
-  padding: 28px 30px;
-  background: var(--bg-panel);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-panel);
-  transition: all 160ms cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  position: relative;
-}
-.hub-card:hover {
-  border-color: var(--cyan-border);
-  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.8), 0 0 24px var(--cyan-glow);
-  transform: translateY(-3px);
-}
-.hub-card h3 {
-  margin: 0 0 12px;
-  font-size: 19px;
-  font-weight: 800;
-  color: var(--text-white);
-  letter-spacing: -0.01em;
-}
-.hub-card p {
-  margin: 0 0 20px;
-  font-size: 14.5px;
-  line-height: 1.68;
-  color: var(--text-secondary);
-}
-.hub-card .card-links {
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.hub-card .card-links a {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 14px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xs);
-  color: var(--text-secondary);
-  font-size: 12.5px;
-  font-family: var(--font-mono);
-  font-weight: 650;
-}
-.hub-card .card-links a:hover {
-  background: var(--blue-primary);
-  color: #fff;
-  border-color: var(--cyan-beam);
-}
-
-/* ==========================================================================
-   Code Blocks, Terminal Snippets & Tables
+   Code Blocks & Tables
    ========================================================================== */
 pre {
   margin: 20px 0 26px;
   padding: 20px 24px;
-  background: rgba(3, 6, 16, 0.9);
+  background: #02040a;
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
@@ -792,7 +765,7 @@ table {
   border-radius: var(--radius-sm);
   overflow: hidden;
   font-size: 14.5px;
-  background: var(--bg-panel);
+  background: var(--bg-card);
 }
 th {
   padding: 14px 20px;
@@ -815,111 +788,149 @@ tr:last-child td { border-bottom: 0; }
 tr:hover td { background: rgba(255, 255, 255, 0.04); }
 
 /* ==========================================================================
-   High-Tech Sponsorship & Funding Radar
+   Sponsorship Dashboard Card
    ========================================================================== */
-.sponsor-actions {
-  margin: 24px 0;
-}
-.sponsor-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 28px;
-  background: var(--pink-gradient);
-  border: 1px solid rgba(244, 114, 182, 0.5);
-  color: #fff;
-  font-weight: 800;
-  font-family: var(--font-sans);
-  font-size: 15px;
-  text-decoration: none;
-  border-radius: var(--radius-sm);
-  box-shadow: 0 0 24px rgba(219, 39, 119, 0.4);
-  transition: all 140ms ease;
-}
-.sponsor-button:hover {
-  box-shadow: 0 0 36px rgba(236, 72, 153, 0.65);
-  transform: translateY(-2px);
-}
-.funding-total {
-  display: grid;
-  gap: 8px;
-  padding: 20px 28px;
-  background: rgba(219, 39, 119, 0.09);
-  border: 1px solid rgba(219, 39, 119, 0.3);
-  border-radius: var(--radius-sm);
-  margin-top: 20px;
-  width: max-content;
-  min-width: 320px;
-}
-.funding-total span { font-size: 12px; color: #f472b6; font-family: var(--font-mono); text-transform: uppercase; font-weight: 750; }
-.funding-total strong { font-size: 26px; color: #fff; font-weight: 850; font-family: var(--font-mono); }
-.funding-total small { font-size: 12.5px; color: var(--text-muted); }
-
-/* ==========================================================================
-   Laboratory Telemetry Footer
-   ========================================================================== */
-footer {
+.sponsor-banner {
   padding: 36px 40px;
-  background: rgba(4, 8, 20, 0.88);
-  border-top: 1px solid var(--border-subtle);
-  color: var(--text-muted);
-  font-size: 13px;
-  font-family: var(--font-mono);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-footer .footer-line {
+  background: linear-gradient(135deg, rgba(219, 39, 119, 0.12) 0%, rgba(10, 15, 30, 0.6) 100%);
+  border: 1px solid rgba(236, 72, 153, 0.35);
+  border-radius: var(--radius-md);
+  margin: 40px 0 60px;
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
   align-items: center;
-  gap: 16px;
+  justify-content: space-between;
+  gap: 24px;
+}
+.sponsor-info h3 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+}
+.sponsor-info p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.6;
+}
+.sponsor-ledger {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 22px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(236, 72, 153, 0.3);
+  border-radius: var(--radius-sm);
+}
+.sponsor-ledger span {
+  font-size: 11.5px;
+  font-family: var(--font-mono);
+  color: #f472b6;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.sponsor-ledger strong {
+  font-size: 24px;
+  font-family: var(--font-mono);
+  color: #fff;
+  font-weight: 850;
+}
+.sponsor-ledger small {
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
 /* ==========================================================================
-   Responsive Viewport Adaptations
+   Clean Multi-Column Aerospace Footer
    ========================================================================== */
-@media (max-width: 960px) {
-  .shell {
-    width: 100vw;
-    margin: 0;
-    border-radius: 0;
-    border: 0;
+.site-footer {
+  border-top: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.85);
+  padding: 60px 24px 40px;
+  position: relative;
+  z-index: 2;
+}
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr repeat(3, 1fr);
+  gap: 36px;
+}
+.footer-brand h4 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+}
+.footer-brand p {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  max-width: 320px;
+}
+.footer-col h5 {
+  margin: 0 0 14px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  font-weight: 750;
+  color: var(--cyan-beam);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.footer-col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.footer-col li {
+  margin-bottom: 8px;
+}
+.footer-col a {
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  transition: all 120ms ease;
+}
+.footer-col a:hover {
+  color: #fff;
+}
+.footer-bottom {
+  max-width: 1200px;
+  margin: 40px auto 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 12.5px;
+  font-family: var(--font-mono);
+}
+
+/* ==========================================================================
+   Responsive Adaptations
+   ========================================================================== */
+@media (max-width: 900px) {
+  .app-suite-grid,
+  .bento-grid,
+  .footer-container {
+    grid-template-columns: 1fr;
   }
-  .masthead {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 18px 22px;
-  }
-  .masthead-nav {
-    flex-wrap: wrap;
-    gap: 6px;
+  .nav-links {
+    display: none;
   }
   .layout {
     grid-template-columns: 1fr;
   }
-  nav {
+  nav.subpage-nav {
     border-right: 0;
     border-bottom: 1px solid var(--border-subtle);
-    min-height: auto;
-    padding: 18px 22px;
   }
-  nav ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  nav h2 {
-    width: 100%;
-    margin-top: 14px;
-  }
-  .app-download-grid {
-    grid-template-columns: 1fr;
-  }
-  .hub-pathways {
-    grid-template-columns: 1fr;
+  .hero-headline {
+    font-size: 38px;
   }
 }

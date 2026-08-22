@@ -9,7 +9,7 @@
   <meta name="robots" content="index,follow,max-image-preview:large">
   <meta name="author" content="Free Computation Foundation">
   <meta name="keywords" content="Free Computation Foundation, FCF, CENTL, CentL26, exact mathematics, arbitrary precision rational, interval arithmetic, scientific computation, Erdős-Straus, Bryan Recursive Entanglement Calculus, BREC, computer algebra, quantum computing, continuum physics">
-  <meta name="theme-color" content="#02040a">
+  <meta name="theme-color" content="#000000">
   <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
   <link rel="me" href="https://github.com/chasebryan/centl">
   <meta property="og:type" content="website">
@@ -31,234 +31,211 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="style.css?v=7">
-  <link rel="stylesheet" href="library-layout.css?v=6">
+  <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 <canvas id="space-drift-canvas"></canvas>
 
-<div class="shell" id="top">
-  <a class="skip" href="#content">Skip to content</a>
-  
-  <header class="masthead home-masthead" id="centl-hub" tabindex="-1">
-    <div class="brand">
-      <a href="index.html#top">
-        <strong>FCF</strong>
-        <div class="brand-meta">
-          <span>Free Computation Foundation</span>
-          <small>Advanced Computational Science · CentL26.10</small>
-        </div>
-      </a>
+<!-- Universal Sticky Navigation Bar -->
+<header class="site-header">
+  <div class="nav-container">
+    <a href="index.html" class="site-brand">
+      <span class="brand-badge">FCF</span>
+      <div class="brand-text">
+        <span class="brand-name">Free Computation Foundation</span>
+        <span class="brand-meta">Advanced Computational Science</span>
+      </div>
+    </a>
+    <nav class="nav-links" aria-label="Main Navigation">
+      <a href="software.html" class="nav-link highlight">[DL] CENTL26 APP</a>
+      <a href="centl.html" class="nav-link">Architecture</a>
+      <a href="software.html" class="nav-link">Desktop Apps</a>
+      <a href="docs.html" class="nav-link">Documentation</a>
+      <a href="research.html" class="nav-link">Research</a>
+      <a href="mirrors.html" class="nav-link">The Bazaar</a>
+      <a href="https://github.com/chasebryan/centl" target="_blank" rel="noopener" class="nav-link">GitHub</a>
+      <a href="https://github.com/sponsors/chasebryan" target="_blank" rel="noopener" class="nav-link sponsor">Sponsor FCF</a>
+    </nav>
+  </div>
+</header>
+
+<!-- Grand SpaceX / Google DeepMind Full-Bleed Hero -->
+<section class="hero-section">
+  <div class="hero-aura-glow"></div>
+  <div class="hero-content">
+    <div class="hero-pill-badge">
+      <span class="status-dot"></span>
+      <span>CentL26.10 Universal Release · 100% Deterministic &amp; Offline</span>
     </div>
-    <nav class="masthead-nav" aria-label="Laboratory Navigation">
-      <a href="software.html" class="nav-btn-highlight">[DL] DOWNLOAD CENTL26</a>
-      <a href="centl.html">Architecture</a>
-      <a href="software.html">Desktop Apps</a>
-      <a href="docs.html">Documentation</a>
-      <a href="research.html">Research Preprints</a>
-      <a href="mirrors.html">The Bazaar</a>
-      <a href="https://github.com/chasebryan/centl" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://github.com/sponsors/chasebryan" class="nav-btn-sponsor" target="_blank" rel="noopener">Sponsor FCF</a>
-    </nav>
-  </header>
 
-  <div class="layout">
-    <nav aria-label="Primary Navigation">
-      <h2>Flagship &amp; Desktop</h2>
-      <ul>
-        <li><a href="index.html#top" class="is-active">Laboratory Overview</a></li>
-        <li><a href="software.html#top">Native Desktop Suite</a></li>
-        <li><a href="centl.html#top">CentL26 Architecture</a></li>
-        <li><a href="free-computation.html#top">Computational Manifesto</a></li>
-        <li><a href="research-erdos-straus.html#top">Erdős–Straus Program</a></li>
-      </ul>
-      <h2>Technical Manuals</h2>
-      <ul>
-        <li><a href="docs.html#top">Documentation Portal</a></li>
-        <li><a href="manuals/install.html#top">Universal Installation</a></li>
-        <li><a href="manuals/numerics.html#top">Exact Numerical Contract</a></li>
-        <li><a href="manuals/syntax.html#top">CAS &amp; Equation Syntax</a></li>
-        <li><a href="manuals/sci.html#top">Physics &amp; Stoichiometry</a></li>
-      </ul>
-      <h2>Research Institute</h2>
-      <ul>
-        <li><a href="research.html#top">Preprints &amp; Technical Reports</a></li>
-        <li><a href="bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus Spec</a></li>
-        <li><a href="research-erdos-straus.html#top">Distributed Prime Hunt</a></li>
-      </ul>
-      <h2>Society &amp; Governance</h2>
-      <ul>
-        <li><a href="about.html#top">About the Foundation</a></li>
-        <li><a href="funding.html#top">Institutional Grants &amp; Sponsors</a></li>
-        <li><a href="mirrors.html#top">The CARAVAN Global Mesh</a></li>
-        <li><a href="https://github.com/chasebryan/centl" target="_blank" rel="noopener">GitHub Source Repository</a></li>
-      </ul>
-    </nav>
+    <h1 class="hero-headline">
+      The Exact-First Foundation<br>
+      <span class="hero-gradient-text">For Science &amp; Discovery.</span>
+    </h1>
 
-    <main id="content">
-      <!-- High-Tech Hero with 9-Second Cosmic Aura Banner -->
-      <section class="hero-wrapper">
-        <canvas id="quantum-canvas"></canvas>
-        <div class="hero-content">
-          <div class="fcf-cosmic-aura-banner" id="fcf-aura-banner">
-            <div class="aura-halo-glow"></div>
-            <div class="aura-brand-lockup">
-              <span class="aura-kicker">// QUANTUM RESEARCH MATRIX ACTIVE //</span>
-              <h1 class="aura-glowing-title">Free Computation Foundation</h1>
-              <p class="aura-glowing-tagline">INSTITUTE FOR ADVANCED COMPUTATIONAL SCIENCE · CENTL26.10</p>
-            </div>
-          </div>
+    <p class="hero-subtext">
+      The Free Computation Foundation develops deterministic, sovereign computational platforms for theoretical physics, symbolic computer algebra, stoichiometry, and discrete consequence calculus. Zero telemetry. Zero floating-point drift. Complete local autonomy.
+    </p>
 
-          <div class="hero-badges">
-            <span class="hero-badge highlight">[FLAGSHIP] CENTL26.10 UNIVERSAL RELEASE</span>
-            <span class="hero-badge">[CORE] EXACT RATIONAL CAS</span>
-            <span class="hero-badge">[RUNTIME] 100% DETERMINISTIC &amp; OFFLINE</span>
-            <span class="hero-badge">[PLATFORMS] MACOS · LINUX · WINDOWS 11</span>
-          </div>
+    <div class="hero-actions">
+      <a href="software.html" class="btn-primary">Download CentL26 Suite ↓</a>
+      <a href="centl.html" class="btn-secondary">Platform Architecture →</a>
+      <a href="research.html" class="btn-secondary">Research Preprints →</a>
+    </div>
+  </div>
+</section>
 
-          <p>The Free Computation Foundation develops exact-first computational platforms for theoretical physics, symbolic mathematics, chemical stoichiometry, and discrete consequence calculus. Deterministic execution with mathematical honesty: exact quantities remain exact, approximations carry certified interval enclosures, and cloud dependencies are completely eliminated.</p>
-
-          <div class="hero-actions">
-            <a href="software.html" class="btn-cta-primary">[DL] Download CentL26 Desktop Suite</a>
-            <a href="centl.html" class="btn-cta-secondary">[DOC] Platform Architecture</a>
-            <a href="research.html" class="btn-cta-secondary">[RES] Scientific Research Preprints</a>
-          </div>
-        </div>
-      </section>
-
-      <h2>CentL26 Flagship Native Desktop Suite</h2>
-      <p>CentL26 is engineered as a high-performance sovereign desktop application running natively on macOS, Linux, and Windows 11. All algorithms execute 100% locally on your hardware with zero telemetry and complete air-gapped autonomy.</p>
-
-      <div class="centl-app-showcase">
-        <div class="app-showcase-header">
-          <div class="app-header-left">
-            <div class="mac-dots">
-              <span class="mac-dot dot-red"></span>
-              <span class="mac-dot dot-yellow"></span>
-              <span class="mac-dot dot-green"></span>
-            </div>
-            <span class="status-dot"></span>
-            <strong style="font-family: var(--font-mono); font-size: 13px; color: #fff;">CentL26 Universal Desktop Workbench · v26.10.0 [Al-Nur Engine]</strong>
-          </div>
-          <div>
-            <span class="badge-oasis" style="background: rgba(2, 132, 199, 0.25); border: 1px solid var(--cyan-border); color: var(--cyan-beam); padding: 4px 10px; border-radius: var(--radius-xs); font-size: 11px; font-family: var(--font-mono); font-weight: 750;">100% OFFLINE AUTONOMY</span>
-          </div>
-        </div>
-
-        <div class="app-download-grid">
-          <div class="app-download-card">
-            <div>
-              <h4>macOS Universal</h4>
-              <p>Apple Silicon (M1/M2/M3/M4) and Intel x86_64. Native AppKit &amp; WebKit GUI with interactive STEM visualizer.</p>
-              <pre><code>./install.sh
-open CentL26.app</code></pre>
-            </div>
-            <a href="software.html#macos" class="btn-cta-primary" style="text-align: center; justify-content: center;">Get macOS App</a>
-          </div>
-
-          <div class="app-download-card">
-            <div>
-              <h4>GNU/Linux Standalone</h4>
-              <p>Debian, Ubuntu, Fedora, Arch Linux. Includes interactive terminal CLI and high-throughput background daemon.</p>
-              <pre><code>curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install.sh
-sh install.sh</code></pre>
-            </div>
-            <a href="software.html#linux" class="btn-cta-primary" style="text-align: center; justify-content: center;">Get Linux Suite</a>
-          </div>
-
-          <div class="app-download-card">
-            <div>
-              <h4>Windows 11 x86_64</h4>
-              <p>Standalone zip bundle with native launcher, desktop shortcut script, and verified SHA-256 checksums.</p>
-              <pre><code>powershell -File install.ps1
-CentL26.bat</code></pre>
-            </div>
-            <a href="software.html#windows" class="btn-cta-primary" style="text-align: center; justify-content: center;">Get Windows 11 App</a>
-          </div>
-        </div>
-      </div>
-
-      <h2>Core Research &amp; Computational Modules</h2>
-      <div class="hub-pathways">
-        <section class="hub-card">
-          <h3>1. Exact Computer Algebra &amp; Polynomial Factoring</h3>
-          <p>Arbitrary-precision rational arithmetic engine (BigRational). Canonical polynomial division, Rational Root Theorem factorization, and symbolic calculus without floating-point truncation.</p>
-          <div class="card-links">
-            <a href="centl.html">Architecture</a>
-            <a href="manuals/numerics.html">Numerical Guarantees</a>
-            <a href="manuals/syntax.html">CAS Grammar</a>
-          </div>
-        </section>
-
-        <section class="hub-card">
-          <h3>2. Erdős–Straus Program &amp; Distributed Hunt</h3>
-          <p>Formal investigation of 4/n unit-fraction representations across arithmetic progressions. Type-II geometry, congruence obstruction shadows, and distributed cluster verification.</p>
-          <div class="card-links">
-            <a href="research-erdos-straus.html">Research Program</a>
-            <a href="research-erdos-straus.html#es-hunt">Prime Hunt Telemetry</a>
-          </div>
-        </section>
-
-        <section class="hub-card">
-          <h3>3. Bryan Recursive Entanglement Calculus (BREC)</h3>
-          <p>Canonical specification v1.0 of the discrete consequence calculus. Deterministic multi-agent state tracking, finite consequence bounds, and algebraic entanglement invariants.</p>
-          <div class="card-links">
-            <a href="bryan-recursive-entanglement-calculus.html">BREC v1.0 Formal Spec</a>
-            <a href="research.html">Technical Preprints</a>
-          </div>
-        </section>
-
-        <section class="hub-card">
-          <h3>4. Native Cross-Platform Laboratory Desktop Suite</h3>
-          <p>High-performance offline standalone workbenches for macOS (Apple Silicon / Intel Universal), Linux (Debian, Fedora, Arch), and Windows 11 with interactive STEM visualizer.</p>
-          <div class="card-links">
-            <a href="software.html">Download CentL26</a>
-            <a href="manuals/install.html">Toolchain Guide</a>
-          </div>
-        </section>
-      </div>
-
-      <h2>Universal 1-Command Bootstrap</h2>
-      <pre><code># Universal Unix Bootstrap (Linux x86_64, macOS Apple Silicon & Intel):
-curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install.sh
-sh install.sh
-
-# Launch the offline scientific computing environment:
-centl26</code></pre>
-      <p>CentL26 runs 100% locally with zero cloud telemetry. Full details in the <a href="manuals/install.html">Universal Installation Guide</a>.</p>
-
-      <h2>Support Scientific Independence &amp; Research Preservation</h2>
-      <p>The Free Computation Foundation operates as an independent scientific research society dedicated to preserving honest computational software. Institutional grants and individual sponsorships directly support our research fellows and cluster infrastructure.</p>
-      
-      <div class="sponsor-actions" aria-label="FCF sponsorship methods">
-        <a class="sponsor-button" href="https://github.com/sponsors/chasebryan" target="_blank" rel="noopener">Sponsor FCF via GitHub Sponsors</a>
-      </div>
-      
-      <div class="funding-total">
-        <span>Institutional Sponsorship Ledger</span>
-        <strong>$265.00 USD</strong>
-        <small>Active Grant Commitments: 1 · Verified GitHub Sponsors: $265.00</small>
-      </div>
-    </main>
+<!-- Flagship Native Desktop Workbench Showcase -->
+<div class="page-container">
+  <div class="section-header">
+    <div class="section-kicker">// SOVEREIGN DESKTOP COMPUTING //</div>
+    <h2 class="section-title">CentL26 Native Desktop Suite</h2>
+    <p class="section-desc">Engineered in high-performance Rust for air-gapped workstations and high-throughput research clusters. Runs natively with full hardware acceleration.</p>
   </div>
 
-  <footer>
-    <div class="footer-line">
-      <span>Free Computation Foundation · Institute for Advanced Computational Science</span>
-      <span>·</span>
-      <span>Apache-2.0 Open Science License</span>
-      <span>·</span>
-      <span>RFC/ISO Deterministic Verification Standards</span>
+  <div class="app-suite-grid">
+    <div class="app-platform-card">
+      <div>
+        <h3>macOS Universal</h3>
+        <p>Native AppKit &amp; WebKit GUI with interactive STEM theorem visualizer. Optimized for Apple Silicon (M1/M2/M3/M4) and Intel.</p>
+        <pre><code>./install.sh
+open CentL26.app</code></pre>
+      </div>
+      <a href="software.html#macos" class="btn-primary" style="justify-content: center; width: 100%;">Get macOS App</a>
     </div>
-    <div class="footer-line">
-      <span>CentL26.10 Flagship Universal Release</span>
-      <span>·</span>
-      <span>Cryptographic Origin: CARAVAN Coordinator Mesh</span>
-      <span>·</span>
-      <a href="https://github.com/chasebryan/centl">GitHub Repository</a>
+
+    <div class="app-platform-card">
+      <div>
+        <h3>GNU/Linux Standalone</h3>
+        <p>Standalone binary and distribution packages for Debian, Ubuntu, Fedora, RHEL, and Arch Linux with interactive terminal CLI.</p>
+        <pre><code>curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install.sh
+sh install.sh</code></pre>
+      </div>
+      <a href="software.html#linux" class="btn-primary" style="justify-content: center; width: 100%;">Get Linux Suite</a>
     </div>
-  </footer>
+
+    <div class="app-platform-card">
+      <div>
+        <h3>Windows 11 x86_64</h3>
+        <p>Standalone distribution archive with automated PowerShell setup script, launcher batch file, and SHA-256 integrity seal.</p>
+        <pre><code>powershell -File install.ps1
+CentL26.bat</code></pre>
+      </div>
+      <a href="software.html#windows" class="btn-primary" style="justify-content: center; width: 100%;">Get Windows 11 App</a>
+    </div>
+  </div>
+
+  <!-- Core Research & Computational Capabilities (Bento Grid) -->
+  <div class="section-header">
+    <div class="section-kicker">// SCIENTIFIC CAPABILITIES //</div>
+    <h2 class="section-title">Exact Mathematical Matrix</h2>
+    <p class="section-desc">Arbitrary-precision rational arithmetic, coordinate-free relativistic mechanics, and discrete consequence calculus.</p>
+  </div>
+
+  <div class="bento-grid">
+    <div class="bento-card">
+      <div>
+        <h3>1. Arbitrary-Precision Rational CAS</h3>
+        <p>Exact BigRational core eliminates floating-point rounding errors. Features canonical polynomial division, Rational Root Theorem factorization, and symbolic calculus with mathematical certification.</p>
+      </div>
+      <div class="card-links">
+        <a href="centl.html">Architecture</a>
+        <a href="manuals/numerics.html">Numerical Guarantees</a>
+        <a href="manuals/syntax.html">CAS Grammar</a>
+      </div>
+    </div>
+
+    <div class="bento-card">
+      <div>
+        <h3>2. Stoichiometric Chemical Balancer</h3>
+        <p>Nullspace linear algebra engine for reaction stoichiometry, molecular formula parsing, oxidation-reduction balancing, and reaction thermodynamics with exact rational molar ratios.</p>
+      </div>
+      <div class="card-links">
+        <a href="manuals/sci.html">Stoichiometry Manual</a>
+        <a href="centl.html">Chemistry Engine</a>
+      </div>
+    </div>
+
+    <div class="bento-card">
+      <div>
+        <h3>3. Bryan Recursive Entanglement Calculus (BREC)</h3>
+        <p>Canonical v1.0 specification of the discrete consequence calculus. Deterministic multi-agent state tracking, finite consequence bounds, and algebraic entanglement invariants.</p>
+      </div>
+      <div class="card-links">
+        <a href="bryan-recursive-entanglement-calculus.html">BREC v1.0 Specification</a>
+        <a href="research.html">Technical Preprints</a>
+      </div>
+    </div>
+
+    <div class="bento-card">
+      <div>
+        <h3>4. Erdős–Straus Program &amp; Distributed Hunt</h3>
+        <p>Investigation of 4/n unit-fraction representations across arithmetic progressions. Type-II geometry, congruence obstruction shadows, and distributed cluster verification.</p>
+      </div>
+      <div class="card-links">
+        <a href="research-erdos-straus.html">Research Program</a>
+        <a href="research-erdos-straus.html#es-hunt">Distributed Telemetry</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transparent Institutional Sponsorship Banner -->
+  <div class="sponsor-banner">
+    <div class="sponsor-info">
+      <h3>Support Scientific Independence</h3>
+      <p>The Free Computation Foundation is an independent research institution. Philanthropic grants and individual sponsorships directly support our research fellows and open-source computing infrastructure.</p>
+    </div>
+    <div class="sponsor-ledger">
+      <span>Verified Ledger</span>
+      <strong>$265.00 USD</strong>
+      <small>Active Grants: 1 · Verified Sponsors: $265.00</small>
+    </div>
+    <div>
+      <a href="https://github.com/sponsors/chasebryan" target="_blank" rel="noopener" class="btn-primary" style="background: var(--pink-gradient); color: #fff; box-shadow: 0 0 24px rgba(236, 72, 153, 0.45);">Sponsor via GitHub Sponsors →</a>
+    </div>
+  </div>
 </div>
+
+<!-- Aerospace Clean Multi-Column Footer -->
+<footer class="site-footer">
+  <div class="footer-container">
+    <div class="footer-brand">
+      <h4>Free Computation Foundation</h4>
+      <p>Institute for Advanced Computational Science. Dedicated to deterministic, exact-first software systems for science and human progress.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Platform</h5>
+      <ul>
+        <li><a href="software.html">CentL26 Desktop</a></li>
+        <li><a href="centl.html">Architecture</a></li>
+        <li><a href="manuals/install.html">Installation</a></li>
+        <li><a href="manuals/numerics.html">Numerics</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Research</h5>
+      <ul>
+        <li><a href="research.html">Preprints</a></li>
+        <li><a href="bryan-recursive-entanglement-calculus.html">BREC v1.0 Spec</a></li>
+        <li><a href="research-erdos-straus.html">Erdős–Straus Hunt</a></li>
+        <li><a href="free-computation.html">Manifesto</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Foundation</h5>
+      <ul>
+        <li><a href="about.html">About FCF</a></li>
+        <li><a href="funding.html">Grants &amp; Sponsors</a></li>
+        <li><a href="mirrors.html">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>Free Computation Foundation · Apache-2.0 Open Science License</div>
+    <div>CentL26.10 Universal Release · CARAVAN Global Mesh</div>
+  </div>
+</footer>
 
 <script src="site-lab.js"></script>
 </body>
