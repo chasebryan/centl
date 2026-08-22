@@ -5,7 +5,7 @@
 
 # CENTL / CentL26
 
-[![Version](https://img.shields.io/badge/version-26.10.0-blue.svg)](https://github.com/chasebryan/centl)
+[![Version](https://img.shields.io/badge/version-26.10.1-blue.svg)](https://github.com/chasebryan/centl)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-2021%20edition-orange.svg)](https://www.rust-lang.org/)
 [![Offline First](https://img.shields.io/badge/offline-100%25%20local-success.svg)](https://freecomputation.org/)
@@ -167,7 +167,7 @@ The CENTL research program includes active exploration of **Erdős–Straus Diop
 ## Documentation & Manuals
 
 - [CentL26 Architecture Guide](docs/CENTL26-ARCHITECTURE.md)
-- [CentL26.10 Universal Release Notes](docs/releases/26.10.0.md)
+- [CentL26.10.1 Orchid Release Notes](docs/releases/26.10.1.md)
 - [Universal Multi-Platform Installation](docs/INSTALL.md)
 - [Exact Numerical & Algebraic Contract](docs/NUMERICS.md)
 - [Exact Polynomial & Matrix Algebra Guide](docs/ALGEBRA.md)

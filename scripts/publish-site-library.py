@@ -70,6 +70,7 @@ MANUALS: list[tuple[str, str, str]] = [
     ("CONTRIBUTING.md", "contributing", "Contributing"),
     ("SECURITY.md", "security", "Security"),
     ("LICENSING.md", "licensing", "Licensing"),
+    ("docs/releases/26.10.1.md", "release-26.10.1", "CentL26.10.1 Orchid Release"),
     ("docs/releases/26.10.0.md", "release-26.10.0", "CentL26.10 Universal Release"),
     ("docs/ALGEBRA.md", "algebra", "Exact Polynomial Algebra"),
     ("docs/CALCULUS.md", "calculus", "Symbolic Calculus & Series"),

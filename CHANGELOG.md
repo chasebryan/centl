@@ -1,5 +1,16 @@
 ## Unreleased
 
+### CentL26.10.1 — Orchid Release (2026-08-22)
+
+- **Official Botanical Orchid Application Icon**:
+  - Adopted the official botanical watercolor orchid painting across all operating systems.
+  - Generated full-fidelity, lossless multi-platform icon assets across macOS (`CentL26.app` / `CentL26Icon.png`), GNU/Linux (`16x16` through `1024x1024` hicolor theme and SVG), and Windows 11 (`CentL26.ico`).
+  - Updated and approved the design contract baseline in `approved-design.json`.
+- **Universal Release Standardization**:
+  - Synchronized `v26.10.1` across `Cargo.toml`, `Cargo.lock`, `README.md`, `desktop/centl26/macos/Info.plist`, `CentL26Updater.swift`, and capabilities metadata.
+  - Published official `docs/releases/26.10.1.md` release notes.
+  - Updated multi-platform distribution archives and verified SHA-256 signatures in `build/centl26/`.
+
 ### CentL26.10.0 — Continuous Jupyter-Grade Notebooks, In-App Paper Scrolling, Complete Windows 11 Build & Website Modernization (2026-08-21)
 
 - **Continuous Calculations & Jupyter Notebook Parity**:

@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "approval": {
-    "change_note": "Approved new orchid app icon for CentL26",
+    "change_note": "CentL26.10.1 Orchid Release: official botanical watercolor orchid icon and version synchronization",
     "release": "CentL26",
     "reviewed_viewports": [
       "1366x768",
@@ -14,7 +14,7 @@
     "desktop/centl26/macos/Assets/CentL26Icon.svg": "a7b61ea9f9b0292f940c6792546234e4f4c32dd210db529b9248203d5fe9fbcf",
     "src-web/server/lab.css": "d650dfcb3369b3c4754d60a66a15c42bb483a8e495990df14cba3cca5cb64518",
     "src-web/server/lab.js": "61b45c9ecc8e4eb2683642b2fd32f8790040508ec65c28370fe6e60bf5210d23",
-    "src-web/server/lab_template.rs": "e09abd71c044b49e210295f02be3bc497bf5e935dbc89db08a3c4df726407ae0"
+    "src-web/server/lab_template.rs": "b1135899716a4dd9f3cae41403b6d33866d1bdc2bde5cf7bca0a68ecb65542c6"
   },
   "schema": 1,
   "semantic_contract": {

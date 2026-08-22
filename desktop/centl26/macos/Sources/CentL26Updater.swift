@@ -23,7 +23,7 @@ enum CentL26UpdateContract {
 
     static let messageHandlerName = "centl26Update"
     static let productName = "CentL26"
-    static let productVersion = "26.10.0"
+    static let productVersion = "26.10.1"
     static let bundleIdentifier = "org.freecomputation.centl"
     static let releaseSchema = "org.freecomputation.centl.macos-release/2"
     static let buildSchema = "org.freecomputation.centl.build/1"

@@ -20,7 +20,7 @@ approved visual system, continuous Jupyter-grade notebooks, in-app paper reading
 exact polynomial algebra, higher-order calculus, interactive STEM dynamic visualizer,
 academic search omnibar, and universal native support across macOS, Linux, and Windows 11.
 
-Public release documentation: [CentL26.10 Universal Release Notes](releases/26.10.0.md) · [CentL26 release architecture](CENTL26-ARCHITECTURE.md) ·
+Public release documentation: [CentL26.10.1 Orchid Release Notes](releases/26.10.1.md) · [CentL26.10 Universal Release Notes](releases/26.10.0.md) · [CentL26 release architecture](CENTL26-ARCHITECTURE.md) ·
 [design contract](CENTL26-DESIGN-CONTRACT.md) · [native packaging guide](../desktop/centl26/macos/README.md).
 
 | Document | When to open it |
@@ -37,6 +37,7 @@ Public release documentation: [CentL26.10 Universal Release Notes](releases/26.1
 | [SCIENCE-DOMAINS-PLAN.md](SCIENCE-DOMAINS-PLAN.md) | full multi-domain science scheme |
 | [CENTL26-ARCHITECTURE.md](CENTL26-ARCHITECTURE.md) | standalone CentL26 product and backend architecture |
 | [CENTL26-DESIGN-CONTRACT.md](CENTL26-DESIGN-CONTRACT.md) | approved interface freeze and review gate |
+| [releases/26.10.1.md](releases/26.10.1.md) | CentL26.10.1 Orchid Release notes |
 | [releases/26.10.0.md](releases/26.10.0.md) | CentL26.10 flagship universal release notes |
 | [releases/26.0.0.md](releases/26.0.0.md) | CentL26 initial release notes |
 
