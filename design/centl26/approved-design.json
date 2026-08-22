@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "approval": {
-    "change_note": "Approved CentL26.10 continuous notebooks, in-app doc reader, and academic search.",
+    "change_note": "Approved new orchid app icon for CentL26",
     "release": "CentL26",
     "reviewed_viewports": [
       "1366x768",
@@ -10,8 +10,8 @@
     "status": "user-approved"
   },
   "files": {
-    "desktop/centl26/macos/Assets/CentL26Icon.png": "f8654785b5f6441a1b54a0859490dd09a4447b00547209f6ada2fb26b663baef",
-    "desktop/centl26/macos/Assets/CentL26Icon.svg": "a62da90372e32287849ea8d33bb6ed2fa5ec1f314528924f1fd4ff01bfc7acc7",
+    "desktop/centl26/macos/Assets/CentL26Icon.png": "552c6d4575acb0529ca17594f09399e3fd24a8ac1d818c746f3e79a495ef4204",
+    "desktop/centl26/macos/Assets/CentL26Icon.svg": "a7b61ea9f9b0292f940c6792546234e4f4c32dd210db529b9248203d5fe9fbcf",
     "src-web/server/lab.css": "d650dfcb3369b3c4754d60a66a15c42bb483a8e495990df14cba3cca5cb64518",
     "src-web/server/lab.js": "61b45c9ecc8e4eb2683642b2fd32f8790040508ec65c28370fe6e60bf5210d23",
     "src-web/server/lab_template.rs": "e09abd71c044b49e210295f02be3bc497bf5e935dbc89db08a3c4df726407ae0"
