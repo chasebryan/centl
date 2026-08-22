@@ -2620,8 +2620,8 @@ pub fn render_full_page(content_html: &str, title: &str, rel: &str) -> String {
     page.push_str("</head>\n<body>\n<div class=\"shell\" id=\"top\">\n");
     page.push_str("  <a class=\"skip\" href=\"#content\">Skip to content</a>\n");
     page.push_str(&format!(
-        "  <header class=\"masthead home-masthead\" id=\"centl-hub\" tabindex=\"-1\" autofocus>\n    <div class=\"brand\"><a href=\"{}index.html#top\"><strong>FCF</strong><div class=\"brand-meta\"><span>Free Computation Foundation</span><small>Advanced Computational Science · CentL26.10</small></div></a></div>\n    <nav class=\"masthead-nav\" aria-label=\"Quick Links\"><a href=\"/hub#centl-console\" class=\"nav-btn-highlight\">[EXEC] LIVE TERMINAL</a><a href=\"{}software.html\">Desktop Apps</a><a href=\"{}docs.html\">Docs</a><a href=\"{}research.html\">Research</a><a href=\"{}mirrors.html\">The Bazaar</a><a href=\"https://github.com/chasebryan/centl\" target=\"_blank\" rel=\"noopener\">GitHub</a><a href=\"https://github.com/sponsors/chasebryan\" class=\"nav-btn-sponsor\" target=\"_blank\" rel=\"noopener\">Sponsor FCF</a></nav>\n  </header>\n",
-        rel, rel, rel, rel, rel
+        "  <header class=\"masthead home-masthead\" id=\"centl-hub\" tabindex=\"-1\" autofocus>\n    <div class=\"brand\"><a href=\"{}index.html#top\"><strong>FCF</strong><div class=\"brand-meta\"><span>Free Computation Foundation</span><small>Advanced Computational Science · CentL26.10</small></div></a></div>\n    <nav class=\"masthead-nav\" aria-label=\"Quick Links\"><a href=\"{}software.html\" class=\"nav-btn-highlight\">[DL] DOWNLOAD CENTL26</a><a href=\"{}software.html\">Desktop Apps</a><a href=\"{}docs.html\">Docs</a><a href=\"{}research.html\">Research</a><a href=\"{}mirrors.html\">The Bazaar</a><a href=\"https://github.com/chasebryan/centl\" target=\"_blank\" rel=\"noopener\">GitHub</a><a href=\"https://github.com/sponsors/chasebryan\" class=\"nav-btn-sponsor\" target=\"_blank\" rel=\"noopener\">Sponsor FCF</a></nav>\n  </header>\n",
+        rel, rel, rel, rel, rel, rel
     ));
     page.push_str("  <div class=\"layout\">\n");
     page.push_str("    <nav aria-label=\"Primary\">\n");
