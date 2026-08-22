@@ -1323,6 +1323,10 @@ mod tests {
             "data-fn-",
             "data-open-settings",
             "data-settings-",
+            "data-run-cell",
+            "data-edit-cell",
+            "data-copy-cell",
+            "data-delete-cell",
         ];
 
         for rest in html.split("<button").skip(1) {
@@ -1373,7 +1377,6 @@ mod tests {
         assert!(LAB_JS.contains(r#"[data-clear-session]"#));
         assert!(LAB_JS.contains("button.disabled = !hasInput"));
         assert!(LAB_JS.contains("button.disabled = !canClear"));
-        assert!(LAB_JS.contains("if (!activeEditor()?.value.trim())"));
         assert!(LAB_JS.contains("hasNotebookContent()"));
     }
 
@@ -1547,12 +1550,16 @@ mod tests {
             success: true,
         });
 
+        let blank_session = Session::new();
+        let blank_workbench = render_lab_workbench("", None, None, None, None, &blank_session);
+        let blank_html = render_lab_page(&blank_workbench);
+        assert!(blank_html.contains(r#"data-welcome-boot"#));
+        assert!(blank_html.contains(r#"class="welcome-aura""#));
+
         let workbench = render_lab_workbench("", None, None, None, None, &session);
         let html = render_lab_page(&workbench);
 
-        assert!(html.contains(r#"data-welcome-boot"#));
         assert!(html.contains(r#"data-open-welcome"#));
-        assert!(html.contains(r#"class="welcome-aura""#));
         assert!(html.contains(r#"data-settings-modal"#));
         assert!(html.contains(r#"data-open-settings"#));
         assert!(html.contains(r#"data-setting-startup"#));

@@ -30,9 +30,10 @@ pub fn render_centl_work_area(
     html.push_str(r#"<div class="centl-work-area" id="centl-console">"#);
     html.push_str(r#"<div class="centl-work-header">"#);
     html.push_str(r#"<div class="work-header-left">"#);
+    html.push_str(r#"<div class="mac-dots"><span class="mac-dot dot-red"></span><span class="mac-dot dot-yellow"></span><span class="mac-dot dot-green"></span></div>"#);
     html.push_str(r#"<span class="status-dot"></span>"#);
     html.push_str(
-        r#"<strong class="terminal-title">CENTL v0.15.0 Al-Nur · Exact Calculation Hub</strong>"#,
+        r#"<strong class="terminal-title">centl26 — exact interpreter · v0.15.0 Al-Nur</strong>"#,
     );
     html.push_str(r#"</div>"#);
     html.push_str(r#"<div class="work-header-right">"#);

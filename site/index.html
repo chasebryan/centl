@@ -8,8 +8,8 @@
   <link rel="canonical" href="https://freecomputation.org/">
   <meta name="robots" content="index,follow,max-image-preview:large">
   <meta name="author" content="Free Computation Foundation">
-  <meta name="keywords" content="Free Computation Foundation, FCF, CENTL, exact calculator, exact mathematics, interval arithmetic, scientific computation, Erdős-Straus, Type A, Type B, congruence shadow, Bryan Recursive Entanglement Calculus, BREC, MCP math, computer algebra, Oasis release, zero javascript">
-  <meta name="theme-color" content="#0b1020">
+  <meta name="keywords" content="Free Computation Foundation, FCF, CENTL, CentL26, exact calculator, exact mathematics, interval arithmetic, scientific computation, Erdős-Straus, Type A, Type B, congruence shadow, Bryan Recursive Entanglement Calculus, BREC, MCP math, computer algebra, Oasis release, zero javascript">
+  <meta name="theme-color" content="#0a0f1d">
   <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
   <link rel="me" href="https://github.com/chasebryan/centl">
   <meta property="og:type" content="website">
@@ -31,20 +31,37 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="style.css?v=3">
-  <link rel="stylesheet" href="library-layout.css?v=2">
+  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="library-layout.css?v=3">
 </head>
 <body>
 <div class="shell" id="top">
   <a class="skip" href="#content">Skip to content</a>
   <header class="masthead home-masthead" id="centl-hub" tabindex="-1" autofocus>
-    <div class="brand"><a href="index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="brand">
+      <a href="index.html#top">
+        <strong>FCF</strong>
+        <div class="brand-meta">
+          <span>Free Computation Foundation</span>
+          <small>Free for science · CentL26.10</small>
+        </div>
+      </a>
+    </div>
+    <nav class="masthead-nav" aria-label="Quick Links">
+      <a href="#centl-console" class="nav-btn-highlight">⚡ Live Terminal</a>
+      <a href="software.html">Desktop Apps</a>
+      <a href="docs.html">Docs</a>
+      <a href="research.html">Research</a>
+      <a href="mirrors.html">The Bazaar</a>
+      <a href="https://github.com/chasebryan/centl" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/sponsors/chasebryan" class="nav-btn-sponsor" target="_blank" rel="noopener">♥ Sponsor</a>
+    </nav>
   </header>
   <div class="layout">
-        <nav aria-label="Primary">
+    <nav aria-label="Primary Navigation">
       <h2>CENTL &amp; Hub</h2>
       <ul>
-        <li><a href="index.html#top">CENTL Work Area</a></li>
+        <li><a href="index.html#top" class="is-active">CENTL Work Area</a></li>
         <li><a href="free-computation.html#top">What is Free Computation?</a></li>
         <li><a href="centl.html#top">About CENTL</a></li>
         <li><a href="research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
@@ -69,23 +86,40 @@
         <li><a href="about.html#top">About FCF</a></li>
         <li><a href="funding.html#top">Funding &amp; Sponsors</a></li>
         <li><a href="mirrors.html#top">The Bazaar</a></li>
-        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+        <li><a href="https://github.com/chasebryan/centl" target="_blank" rel="noopener">GitHub Repository</a></li>
       </ul>
     </nav>
     <main id="content">
       <img class="banner" src="assets/fcf-centl-banner.png" alt="Free Computation Foundation and CENTL camel banner">
 
+      <div class="hero-badges">
+        <span class="hero-badge highlight">✦ CentL26.10 Universal Release</span>
+        <span class="hero-badge">ℚ Exact Rational Core</span>
+        <span class="hero-badge">⚡ 100% Offline &amp; Deterministic</span>
+        <span class="hero-badge">🔒 Zero JavaScript Web App</span>
+      </div>
+
       <h1>Free Computation for Science</h1>
-      <p>CENTL is the Free Computation Foundation's exact-first calculator and scientific computation system. Use it for exact mathematics, symbolic calculus, physics, numerical enclosures, and reproducible research. Exact values stay exact; approximations carry justified enclosures. This work area runs with <strong>zero JavaScript</strong>.</p>
-      <p class="card-links"><a href="free-computation.html">Learn what free computation means</a> · <a href="centl.html">Explore CENTL</a> · <a href="software.html">Install the software</a></p>
+      <p>CENTL is the Free Computation Foundation's exact-first calculator, computer algebra system, and scientific computation environment. Use it for exact rational arithmetic, symbolic algebra, chemistry stoichiometry, continuum physics, numerical enclosures, and reproducible research. Exact values stay exact; approximations carry justified enclosures. This work area runs with <strong>zero JavaScript</strong>.</p>
+      
+      <div class="hero-actions">
+        <a href="#centl-console" class="btn-cta-primary">⚡ Open Exact Web Terminal</a>
+        <a href="software.html" class="btn-cta-secondary">💻 Download CentL26 Desktop</a>
+        <a href="research.html" class="btn-cta-secondary">📖 Explore Research Papers</a>
+      </div>
 
       <h2>CENTL Exact Work Area</h2>
 
       <div class="centl-work-area" id="centl-console">
         <div class="centl-work-header">
           <div class="work-header-left">
+            <div class="mac-dots">
+              <span class="mac-dot dot-red"></span>
+              <span class="mac-dot dot-yellow"></span>
+              <span class="mac-dot dot-green"></span>
+            </div>
             <span class="status-dot"></span>
-            <strong class="terminal-title">CENTL v0.15.0 Al-Nur · Exact Calculation Hub</strong>
+            <strong class="terminal-title">centl26 — exact interpreter · v0.15.0 Al-Nur</strong>
           </div>
           <div class="work-header-right">
             <span class="badge-oasis">Oasis Standard</span>
@@ -131,7 +165,7 @@
       <div class="hub-pathways">
         <section class="hub-card">
           <h3>1. Exact Mathematics &amp; Physics</h3>
-          <p>CENTL preserves exact rational values and rigorously bounds approximations. Includes typed physics units, collisions, and kinematics.</p>
+          <p>CENTL preserves exact rational values and rigorously bounds approximations. Includes typed physics units, elastic collisions, and kinematics.</p>
           <p class="card-links"><a href="centl.html">About CENTL</a> · <a href="manuals/numerics.html">Numerical Contract</a> · <a href="manuals/syntax.html">Syntax</a></p>
         </section>
 
@@ -155,15 +189,18 @@
       </div>
 
       <h2>Install CENTL Locally</h2>
-      <pre><code>curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
-sh install
-centl-sci</code></pre>
-      <p>GNU/Linux x86_64 Oasis product. Details: <a href="manuals/install.html">installation guide</a>.</p>
+      <pre><code># 1-Command Universal Linux & macOS Setup:
+curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install.sh
+sh install.sh
+
+# Launch exact CLI or desktop application:
+centl26</code></pre>
+      <p>GNU/Linux x86_64, macOS Apple Silicon/Intel, and Windows 11. Details: <a href="manuals/install.html">installation guide</a>.</p>
 
       <h2>Support the Free Computation Foundation</h2>
       <p>Public sponsorship helps FCF preserve and develop open scientific computing. Details on the <a href="funding.html">funding page</a>.</p>
       <div class="sponsor-actions" aria-label="FCF sponsorship methods">
-        <a class="sponsor-button" href="https://github.com/sponsors/chasebryan">Sponsor FCF with GitHub Sponsors</a>
+        <a class="sponsor-button" href="https://github.com/sponsors/chasebryan" target="_blank" rel="noopener">♥ Sponsor FCF with GitHub Sponsors</a>
       </div>
       <div class="funding-total">
         <span>Public sponsorship funding received</span>
@@ -172,7 +209,7 @@ centl-sci</code></pre>
       </div>
     </main>
   </div>
-  <footer>Free Computation Foundation · Free for science. · Static HTML/CSS · Zero JavaScript</footer>
+  <footer>Free Computation Foundation · Free for science · Apache-2.0 Open Source · Zero JavaScript</footer>
 </div>
 </body>
 </html>
