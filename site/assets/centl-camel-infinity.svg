@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="100%" height="100%">
+  <defs>
+    <!-- Crimson Red to Gold Glow Gradient -->
+    <linearGradient id="camelBodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff2a3b"/>
+      <stop offset="30%" stop-color="#e6192d"/>
+      <stop offset="70%" stop-color="#bf0f20"/>
+      <stop offset="100%" stop-color="#8a0512"/>
+    </linearGradient>
+
+    <!-- Gold Rim Light Gradient -->
+    <linearGradient id="goldRimGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffde59"/>
+      <stop offset="40%" stop-color="#ff914d"/>
+      <stop offset="80%" stop-color="#ff3131"/>
+      <stop offset="100%" stop-color="#ffde59"/>
+    </linearGradient>
+
+    <!-- Binary Particle Gold Glow -->
+    <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Drop Shadow for Silhouette Depth -->
+    <filter id="dropShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000000" flood-opacity="0.85"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#dropShadow)">
+    <!-- LEFT LOOP OF INFINITY: CAMEL'S MAJESTIC DUNE HUMP & RIDGE -->
+    <!-- Outer Gold Ridge -->
+    <path d="M 330,300 C 330,420 220,480 140,420 C 60,360 60,200 150,140 C 240,80 340,160 410,240 L 460,300 C 510,360 590,460 700,450 C 810,440 900,350 890,240 C 880,140 790,90 710,130 C 640,165 590,230 540,290 L 500,340 C 430,430 350,470 260,460 C 170,450 110,380 110,300 C 110,220 170,160 250,160 C 320,160 370,220 410,270 Z" 
+          fill="none" stroke="url(#goldRimGrad)" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/>
+
+    <!-- Left Infinity Body with Desert Dunes / Camel Spine Ridge -->
+    <path d="M 500,300 C 420,200 340,120 230,120 C 120,120 40,200 40,300 C 40,400 120,480 230,480 C 340,480 430,390 500,300 Z" 
+          fill="url(#camelBodyGrad)"/>
+    
+    <!-- Left Loop Inner Cutout (Forms the left loop of Infinity) -->
+    <path d="M 500,300 C 440,370 360,420 250,420 C 160,420 100,360 100,300 C 100,240 160,180 250,180 C 340,180 430,240 500,300 Z" 
+          fill="#0c0d10"/>
+
+    <!-- Decorative Ridge Scales along Left Curve (Desert Caravan & Dune crests) -->
+    <g fill="#ffde59" opacity="0.9">
+      <polygon points="120,180 140,150 150,185"/>
+      <polygon points="160,145 185,120 195,155"/>
+      <polygon points="210,120 240,95 250,130"/>
+      <polygon points="265,115 295,95 300,135"/>
+      <polygon points="70,230 45,210 80,250"/>
+      <polygon points="50,280 25,270 60,305"/>
+      <polygon points="50,330 25,345 65,355"/>
+      <polygon points="75,385 55,410 95,405"/>
+      <polygon points="120,435 105,465 145,445"/>
+      <polygon points="175,465 170,500 205,475"/>
+      <polygon points="240,480 245,510 270,475"/>
+    </g>
+
+    <!-- RIGHT LOOP OF INFINITY: CAMEL'S MAJESTIC HEAD, PROUD MUZZLE & FLOWING MANE -->
+    <path d="M 500,300 C 570,210 660,120 770,120 C 880,120 960,200 960,300 C 960,400 880,480 770,480 C 660,480 580,390 500,300 Z" 
+          fill="url(#camelBodyGrad)"/>
+
+    <!-- Right Loop Inner Cutout -->
+    <path d="M 500,300 C 570,230 650,180 750,180 C 840,180 900,240 900,300 C 900,360 840,420 750,420 C 660,420 570,370 500,300 Z" 
+          fill="#0c0d10"/>
+
+    <!-- CAMEL HEAD SCULPTURE (FACING LEFT/CENTER, ROARING WITH INTELLIGENCE) -->
+    <!-- Elegant Curved Neck, Jaw, Nostril and Eye -->
+    <g transform="translate(480, 110)">
+      <!-- Head Silhouette -->
+      <path d="M 280,140 C 270,90 230,50 180,40 C 130,30 80,50 40,70 C 10,85 -20,110 -40,140 C -30,145 -10,140 10,135 C -20,155 -35,180 -25,195 C -15,205 20,185 50,165 C 20,195 15,225 35,230 C 55,235 90,195 120,170 C 130,220 180,250 240,240 C 270,200 285,170 280,140 Z" 
+            fill="url(#camelBodyGrad)" stroke="#ffde59" stroke-width="4"/>
+
+      <!-- Camel Proud Ear -->
+      <path d="M 170,45 C 180,10 205,-5 215,15 C 215,35 195,50 170,45 Z" fill="#ff2a3b" stroke="#ffde59" stroke-width="3"/>
+      <path d="M 180,40 C 185,20 198,10 205,22 C 205,32 195,42 180,40 Z" fill="#ffde59"/>
+
+      <!-- Glowing Intelligent Eye -->
+      <circle cx="115" cy="95" r="9" fill="#ffde59" filter="url(#goldGlow)"/>
+      <polygon points="105,95 125,92 118,100" fill="#000000"/>
+
+      <!-- Nostril / Muzzle Detail -->
+      <path d="M -15,135 C -25,135 -30,145 -20,150 C -10,155 0,145 -15,135 Z" fill="#500008"/>
+
+      <!-- Expressive Desert Mane Tuft -->
+      <path d="M 120,170 C 140,200 130,240 160,255 C 170,225 180,210 190,200 C 210,230 220,250 250,245 C 250,215 240,190 230,175 Z" fill="#bf0f20" stroke="#ff914d" stroke-width="3"/>
+    </g>
+
+    <!-- DIGITAL BINARY & MATHEMATICAL STREAM (POURING INTO THE CENTRAL NEXUS) -->
+    <g font-family="Courier, monospace" font-weight="900" font-size="15" fill="#ffde59" filter="url(#goldGlow)" opacity="0.95">
+      <text x="475" y="225">1</text>
+      <text x="495" y="240">0</text>
+      <text x="515" y="230">1</text>
+      <text x="460" y="260">0 1</text>
+      <text x="490" y="275">1 0 1</text>
+      <text x="525" y="265">0</text>
+      <text x="450" y="295">1 1 0</text>
+      <text x="485" y="310">0 1 0 1</text>
+      <text x="440" y="330">0 1 0</text>
+      <text x="475" y="345">1 0 1 1</text>
+      <text x="515" y="335">0 1</text>
+      <text x="430" y="365">1 0 1 0 0</text>
+      <text x="480" y="380">0 1 1 0</text>
+      <text x="420" y="400">0 1 0 1 1 0</text>
+      <text x="410" y="430">1 0 0 1 0 1</text>
+      <text x="395" y="460">0 1 1 0 1</text>
+    </g>
+
+    <!-- Matrix Pixels Dispersing across Left Infinity Ribbon -->
+    <g fill="#ff914d" opacity="0.9">
+      <rect x="380" y="465" width="8" height="8"/>
+      <rect x="365" y="475" width="8" height="8"/>
+      <rect x="350" y="480" width="8" height="8"/>
+      <rect x="375" y="490" width="8" height="8"/>
+      <rect x="390" y="480" width="8" height="8"/>
+      <rect x="360" y="495" width="8" height="8"/>
+      <rect x="340" y="490" width="8" height="8"/>
+      <rect x="325" y="500" width="8" height="8"/>
+      <rect x="310" y="495" width="8" height="8"/>
+      <rect x="330" y="510" width="8" height="8"/>
+    </g>
+  </g>
+</svg>
