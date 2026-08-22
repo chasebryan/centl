@@ -33,6 +33,7 @@ pub fn render_lab_page(workbench: &str) -> String {
         </div>
       </a>
       <div class="workspace-path"><button type="button" data-toggle-explorer title="Toggle workspace explorer">Workspace</button><span>/</span><input type="text" class="notebook-rename-input" data-rename-notebook value="Notebook 01" aria-label="Rename active notebook" spellcheck="false" title="Click to rename active notebook"></div>
+      <div class="command-center" hidden></div>
       <div class="header-omnibar" role="search">
         <div class="omnibar-input-wrap">
           <span class="omnibar-fcf-chrome-icon" title="FCF STEM Chrome Academic Router">

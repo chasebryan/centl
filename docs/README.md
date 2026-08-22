@@ -8,32 +8,37 @@ The repository remains canonical.
 
 ## Start here
 
-### CentL26 — flagship main release
+### CentL26 — Flagship Universal Release
 
 [CentL26](CENTL26-ARCHITECTURE.md) is the single cohesive product direction of
-CENTL: the standalone, offline scientific IDE where all future computation,
+CENTL: the standalone, offline scientific IDE where all computation,
 research, and capability work is assembled for users. The 26 identifies the
 product year; maintenance updates retain the same CentL26 name while publishing
 new immutable build snapshots.
-The current release combines the
-approved visual system, durable project notebooks, exact-first computation,
-authenticated local execution, and the native macOS application shell.
+The current **CentL26.10** release combines the
+approved visual system, continuous Jupyter-grade notebooks, in-app paper reading,
+exact polynomial algebra, higher-order calculus, interactive STEM dynamic visualizer,
+academic search omnibar, and universal native support across macOS, Linux, and Windows 11.
 
-Public release documentation: [CentL26 release architecture](CENTL26-ARCHITECTURE.md) ·
+Public release documentation: [CentL26.10 Universal Release Notes](releases/26.10.0.md) · [CentL26 release architecture](CENTL26-ARCHITECTURE.md) ·
 [design contract](CENTL26-DESIGN-CONTRACT.md) · [native packaging guide](../desktop/centl26/macos/README.md).
 
 | Document | When to open it |
 | --- | --- |
-| [INSTALL.md](INSTALL.md) · [hosted](https://freecomputation.org/manuals/install.html) | GNU/Linux install |
+| [INSTALL.md](INSTALL.md) · [hosted](https://freecomputation.org/manuals/install.html) | Universal installation across macOS, Linux, Windows 11 |
 | [NUMERICS.md](NUMERICS.md) · [hosted](https://freecomputation.org/manuals/numerics.html) | what a printed digit means |
-| [SCI.md](SCI.md) · [hosted](https://freecomputation.org/manuals/sci.html) | CENTL-SCi |
-| [SYNTAX.md](SYNTAX.md) · [hosted](https://freecomputation.org/manuals/syntax.html) | language |
-| [MATHEMATICIANS.md](MATHEMATICIANS.md) · [hosted](https://freecomputation.org/manuals/mathematicians.html) | mathematics only |
-| [PHYSICISTS.md](PHYSICISTS.md) · [hosted](https://freecomputation.org/manuals/physicists.html) | typed physics only |
+| [ALGEBRA.md](ALGEBRA.md) · [hosted](https://freecomputation.org/manuals/algebra.html) | exact polynomial algebra, rational root solver, equations |
+| [CALCULUS.md](CALCULUS.md) · [hosted](https://freecomputation.org/manuals/calculus.html) | derivatives, integration, limits, Taylor series |
+| [SCI.md](SCI.md) · [hosted](https://freecomputation.org/manuals/sci.html) | CentL-SCi natural language problem solver & AI co-pilot |
+| [CHEMISTRY.md](CHEMISTRY.md) · [hosted](https://freecomputation.org/manuals/chemistry.html) | stoichiometry, reaction balancing, sample spread |
+| [SYNTAX.md](SYNTAX.md) · [hosted](https://freecomputation.org/manuals/syntax.html) | CAS syntax & functions reference |
+| [MATHEMATICIANS.md](MATHEMATICIANS.md) · [hosted](https://freecomputation.org/manuals/mathematicians.html) | mathematics onboarding |
+| [PHYSICISTS.md](PHYSICISTS.md) · [hosted](https://freecomputation.org/manuals/physicists.html) | typed physics onboarding |
 | [SCIENCE-DOMAINS-PLAN.md](SCIENCE-DOMAINS-PLAN.md) | full multi-domain science scheme |
 | [CENTL26-ARCHITECTURE.md](CENTL26-ARCHITECTURE.md) | standalone CentL26 product and backend architecture |
 | [CENTL26-DESIGN-CONTRACT.md](CENTL26-DESIGN-CONTRACT.md) | approved interface freeze and review gate |
-| [releases/26.0.0.md](releases/26.0.0.md) | CentL26 flagship main-release notes |
+| [releases/26.10.0.md](releases/26.10.0.md) | CentL26.10 flagship universal release notes |
+| [releases/26.0.0.md](releases/26.0.0.md) | CentL26 initial release notes |
 
 ## Use
 

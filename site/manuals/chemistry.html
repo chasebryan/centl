@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Status: Integrated in CentL26.10 Official Universal Release.">
+  <title>CentL26 Stoichiometry &amp; Reaction Balancing — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/chemistry.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/chemistry.html">
+  <meta property="og:title" content="CentL26 Stoichiometry &amp; Reaction Balancing — Free Computation Foundation">
+  <meta property="og:description" content="Status: Integrated in CentL26.10 Official Universal Release.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>CentL26 Stoichiometry &amp; Reaction Balancing</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../free-computation.html#top">What is Free Computation?</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">Status: Integrated in CentL26.10 Official Universal Release.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/oasis/docs/CHEMISTRY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>Status: <strong>Integrated in CentL26.10 Official Universal Release</strong>.</p>
+<p>CentL26 provides an exact-first chemical computation and stoichiometry engine:</p>
+<ol><li><strong>Deterministic Formula &amp; Reaction Chemistry</strong>: Chemical formula parsing, atom counting, 118-element periodic table catalog, exact reaction balancing via rational nullspace matrices, canonical coefficient normalization, and independent mass/atom conservation verification.</li><li><strong>Sample Spread Statistics</strong>: Descriptive sample statistics (<code>spread measured</code>, <code>spread exact</code>), bounded replicate ingestion, and exact preservation of irrational standard deviations without confusing sample spread with measurement uncertainty.</li><li><strong>Molar Mass &amp; Concentration Solvers</strong>: Direct computation of molar masses, molarity, solution dilutions, and titration equivalence in plain English or symbolic syntax.</li></ol>
+<p>The implementation reuses CENTL&#x27;s existing arbitrary-precision rational matrix and physical-unit machinery. It does not introduce floating-point balancing or a second arithmetic system.</p>
+<h2>Command surface</h2>
+<p>The development executable is:</p>
+<pre><code class="language-sh">centl-chem</code></pre>
+<p>Current commands:</p>
+<pre><code class="language-sh">centl-chem atoms FORMULA
+centl-chem balance &#x27;REACTION&#x27;
+centl-chem spread UNIT VALUE [VALUE ...]
+centl-chem spread measured UNIT VALUE [VALUE ...]
+centl-chem spread exact UNIT VALUE [VALUE ...]
+
+centl-chem --json atoms FORMULA
+centl-chem --json balance &#x27;REACTION&#x27;
+centl-chem --json spread UNIT VALUE [VALUE ...]
+centl-chem --json spread measured UNIT VALUE [VALUE ...]
+centl-chem --json spread exact UNIT VALUE [VALUE ...]</code></pre>
+<p>Plain <code>spread</code> defaults to <code>measured</code> input semantics. <code>spread exact</code> is an explicit caller declaration and must not be inferred merely because an input was written as a terminating decimal.</p>
+<h2>Formula syntax</h2>
+<p>The first parser accepts:</p>
+<pre><code class="language-text">formula := term+
+term    := element count?
+         | &#x27;(&#x27; formula &#x27;)&#x27; count?
+element := uppercase lowercase?
+count   := positive integer</code></pre>
+<p>Examples:</p>
+<pre><code class="language-text">H2O
+Ca(OH)2
+Al2(SO4)3
+Fe2(SO4)3</code></pre>
+<p>Atom counts are arbitrary-precision integers.</p>
+<p>The parser validates element symbols against the current 118-element symbol set. Unknown symbols are errors rather than user-defined pseudo-elements.</p>
+<p>Current bounded-parser limits include:</p>
+<ul><li>maximum formula text length: 4096 characters;</li><li>maximum nesting depth: 64;</li><li>maximum decimal digits in one subscript: 128;</li><li>maximum reaction text length: 16384 characters;</li><li>maximum species per request: 128.</li></ul>
+<p>These are resource boundaries, not chemistry claims.</p>
+<h3>Explicitly unsupported formula syntax in this slice</h3>
+<p>The first parser does not yet claim support for:</p>
+<ul><li>isotope notation;</li><li>ionic charge notation;</li><li>square-bracket coordination syntax;</li><li>hydrate/dot notation such as <code>CuSO4·5H2O</code>;</li><li>state labels such as <code>(aq)</code> or <code>(s)</code>;</li><li>polymer repeat notation;</li><li>structural formulas, SMILES, InChI, stereochemistry, or molecular graphs.</li></ul>
+<p>Unsupported notation must fail rather than being silently reinterpreted.</p>
+<h2>Exact atom counting</h2>
+<p>Example:</p>
+<pre><code class="language-sh">centl-chem atoms &#x27;Ca(OH)2&#x27;</code></pre>
+<p>Development output:</p>
+<pre><code class="language-text">Ca=1
+H=2
+O=2</code></pre>
+<p>Human output uses deterministic alphabetical element ordering. The JSON form carries counts as strings so arbitrary-precision integers are never routed through a lossy host JSON number.</p>
+<h2>Reaction parsing</h2>
+<p>A reaction contains exactly one ASCII arrow:</p>
+<pre><code class="language-text">reactants -&gt; products</code></pre>
+<p>Species on each side are separated by <code>+</code>.</p>
+<p>Positive integer coefficients may be supplied in front of species, with or without whitespace. They are parsed as input evidence but the balancing operation recomputes the canonical primitive coefficient vector instead of trusting the supplied coefficients.</p>
+<p>For example:</p>
+<pre><code class="language-text">8 Fe + 6 O2 -&gt; 4 Fe2O3</code></pre>
+<p>canonicalizes to:</p>
+<pre><code class="language-text">4 Fe + 3 O2 -&gt; 2 Fe2O3</code></pre>
+<h2>Stoichiometric matrix</h2>
+<p>For a reaction with elements as rows and species as columns, CENTL Chemistry constructs an exact matrix using the sign convention:</p>
+<pre><code class="language-text">reactants = positive
+products  = negative</code></pre>
+<p>For:</p>
+<pre><code class="language-text">Fe + O2 -&gt; Fe2O3</code></pre>
+<p>the exact matrix is:</p>
+<pre><code class="language-text">       Fe  O2  Fe2O3
+Fe      1   0   -2
+O       0   2   -3</code></pre>
+<p>Balancing solves the homogeneous system:</p>
+<pre><code class="language-text">A x = 0</code></pre>
+<p>over exact rationals using the existing CENTL matrix nullspace implementation.</p>
+<p>No SVD tolerance, floating-point epsilon, or approximate rank decision is used in this path.</p>
+<h2>Admission and canonicalization</h2>
+<p>The first balancing contract is intentionally strict.</p>
+<p>A result is admitted only when:</p>
+<ol><li>the reaction parses under the supported grammar;</li><li>the exact stoichiometric matrix has a one-dimensional nullspace;</li><li>the null vector can be oriented so every species coefficient is strictly positive;</li><li>rational denominators are cleared exactly;</li><li>all integer coefficients are divided by their common GCD;</li><li>the resulting primitive coefficient vector is unique under the supported contract;</li><li>an independent second pass verifies every element count on both sides.</li></ol>
+<p>A zero-dimensional nullspace returns <code>impossible_balance</code>.</p>
+<p>A nullspace of dimension greater than one returns <code>underdetermined_balance</code> rather than selecting an arbitrary solution.</p>
+<p>A vector requiring a zero species coefficient is refused rather than quietly deleting the species.</p>
+<h2>Balancing examples</h2>
+<pre><code class="language-sh">centl-chem balance &#x27;Fe + O2 -&gt; Fe2O3&#x27;</code></pre>
+<pre><code class="language-text">4 Fe + 3 O2 -&gt; 2 Fe2O3
+Fe: 4 = 4
+O: 6 = 6
+verified=true</code></pre>
+<pre><code class="language-sh">centl-chem balance &#x27;C2H6 + O2 -&gt; CO2 + H2O&#x27;</code></pre>
+<pre><code class="language-text">2 C2H6 + 7 O2 -&gt; 4 CO2 + 6 H2O
+C: 4 = 4
+H: 12 = 12
+O: 14 = 14
+verified=true</code></pre>
+<pre><code class="language-sh">centl-chem balance &#x27;KMnO4 + HCl -&gt; KCl + MnCl2 + H2O + Cl2&#x27;</code></pre>
+<pre><code class="language-text">2 KMnO4 + 16 HCl -&gt; 2 KCl + 2 MnCl2 + 8 H2O + 5 Cl2
+Cl: 16 = 16
+H: 16 = 16
+K: 2 = 2
+Mn: 2 = 2
+O: 8 = 8
+verified=true</code></pre>
+<h2>Sample spread foundation</h2>
+<p>Chemists often need the observations and their spread, not a collapsed number. The development <code>spread</code> surface therefore preserves the replicate values and computes descriptive statistics exactly over the values as reported.</p>
+<p>Example:</p>
+<pre><code class="language-sh">centl-chem spread g 10.01 10.04 9.98 10.03 9.99</code></pre>
+<p>The first two lines state the two independent semantic axes:</p>
+<pre><code class="language-text">source_class=measured
+arithmetic_class=exact_over_reported_values</code></pre>
+<p>This distinction is mandatory.</p>
+<p><code>source_class=measured</code> means the reported numbers are observations of the physical world. Parsing <code>10.01</code> as the rational number <code>1001/100</code> does not claim that the underlying physical measurand is mathematically exact.</p>
+<p><code>arithmetic_class=exact_over_reported_values</code> means CENTL performs the descriptive calculation without adding binary floating-point rounding to the supplied decimal/rational reports.</p>
+<p>A caller may intentionally declare mathematical data exact:</p>
+<pre><code class="language-sh">centl-chem spread exact mol 1/3 2/3</code></pre>
+<p>which changes the source class to:</p>
+<pre><code class="language-text">source_class=declared_exact</code></pre>
+<p>The default remains measured.</p>
+<h3>Current spread statistics</h3>
+<p>For one common unit shared by all observations, the current exact spread layer returns:</p>
+<ul><li>raw reported observations, represented as exact rationals;</li><li><code>n</code>;</li><li>sum and sum of squares;</li><li>arithmetic mean;</li><li>median;</li><li>minimum and maximum;</li><li>range;</li><li>median absolute deviation (MAD);</li><li>population variance;</li><li>population standard deviation;</li><li>sample variance when <code>n &gt;= 2</code>;</li><li>sample standard deviation when <code>n &gt;= 2</code>;</li><li>standard error of the mean when <code>n &gt;= 2</code>;</li><li>relative standard deviation as a dimensionless fraction when defined.</li></ul>
+<p>The sample request is bounded to 10,000 observations.</p>
+<p>The unit must already be known to CENTL Physics. All values in one spread request currently share that one unit. Mixed-unit replicate ingestion is not yet admitted.</p>
+<h3>Exact radicals instead of fake decimals</h3>
+<p>A standard deviation need not be rational even when every observation is rational. CENTL preserves that exact structure.</p>
+<p>For example, for observations <code>1 g</code> and <code>3 g</code>, the sample variance is exactly:</p>
+<pre><code class="language-text">2 g^2</code></pre>
+<p>so the sample standard deviation is represented as:</p>
+<pre><code class="language-text">sqrt(2) g</code></pre>
+<p>rather than an unjustified decimal pretending to be exact.</p>
+<p>The JSON representation distinguishes <code>exact_rational</code> from <code>exact_radical</code> and carries the radical&#x27;s rational radicand explicitly.</p>
+<h3>Spread is not measurement uncertainty</h3>
+<p>The current spread command deliberately emits:</p>
+<pre><code class="language-text">confidence_interval=not_computed(requires_declared_confidence_model_and_level)
+measurement_uncertainty=not_provided</code></pre>
+<p>CENTL does not infer a confidence interval without a declared confidence model, level, and method. It does not treat sample standard deviation or standard error as a complete measurement-uncertainty budget.</p>
+<p>The machine result similarly keeps these concepts explicit:</p>
+<pre><code class="language-text">source_class
+arithmetic_class
+sample spread
+confidence_interval.status=not_computed
+measurement_uncertainty.status=not_provided</code></pre>
+<p>Future metrology work must introduce its own uncertainty components, traceability, coverage rules, corrections, and provenance rather than overloading the descriptive spread.</p>
+<h2>Chemical data and molar mass</h2>
+<p>The current data slice admits versioned standard atomic-weight intervals for H, C, N, and O from the IUPAC-CIAAW 2021 table. These values remain measured intervals and are never labeled exact.</p>
+<pre><code class="language-sh">centl-chem molar-mass H2O
+centl-chem --json molar-mass H2O</code></pre>
+<p>Results report lower and upper molar-mass bounds in <code>g/mol</code>, an explicit <code>exact=false</code> flag, and dataset provenance. Formulae containing elements without an admitted versioned data record are refused.</p>
+<p>Reference: <a href="https://iupac.org/what-we-do/periodic-table-of-elements/">IUPAC periodic table and CIAAW standard atomic weights</a>.</p>
+<h2>Exact supported models</h2>
+<p>The current bounded model layer exposes:</p>
+<ul><li>concentration from nonnegative moles and positive litres;</li><li>dilution through exact <code>C1 V1 = C2 V2</code>;</li><li>percent yield from nonnegative actual and positive theoretical yield;</li><li>ideal-gas pressure <code>P = n R T / V</code> with SI inputs;</li><li>electrochemical charge <code>q = n_e F</code>.</li></ul>
+<p>These operations report their model and inherited constant provenance. They do not establish reaction occurrence, equilibrium, selectivity, safety, or experimental validity.</p>
+<h2>Machine evidence</h2>
+<p>The version-1 development reaction JSON result includes:</p>
+<ul><li>canonical balanced equation;</li><li>arbitrary-precision coefficient strings;</li><li>exact element-row ordering;</li><li>exact stoichiometric matrix entries as rational strings;</li><li>reactant/product column metadata;</li><li>originally supplied coefficients;</li><li>matrix sign convention;</li><li>independent per-element conservation evidence;</li><li>final <code>verified</code> flag.</li></ul>
+<p>Representative reaction shape:</p>
+<pre><code class="language-json">{
+  &quot;version&quot;: 1,
+  &quot;kind&quot;: &quot;balanced_reaction&quot;,
+  &quot;equation&quot;: &quot;4 Fe + 3 O2 -&gt; 2 Fe2O3&quot;,
+  &quot;coefficients&quot;: {
+    &quot;reactants&quot;: [&quot;4&quot;, &quot;3&quot;],
+    &quot;products&quot;: [&quot;2&quot;]
+  },
+  &quot;stoichiometric_evidence&quot;: {
+    &quot;elements&quot;: [&quot;Fe&quot;, &quot;O&quot;],
+    &quot;matrix&quot;: [[&quot;1&quot;, &quot;0&quot;, &quot;-2&quot;], [&quot;0&quot;, &quot;2&quot;, &quot;-3&quot;]],
+    &quot;sign_convention&quot;: &quot;reactants_positive_products_negative&quot;
+  },
+  &quot;conservation&quot;: [
+    {&quot;element&quot;: &quot;Fe&quot;, &quot;reactants&quot;: &quot;4&quot;, &quot;products&quot;: &quot;4&quot;, &quot;verified&quot;: true},
+    {&quot;element&quot;: &quot;O&quot;, &quot;reactants&quot;: &quot;6&quot;, &quot;products&quot;: &quot;6&quot;, &quot;verified&quot;: true}
+  ],
+  &quot;verified&quot;: true
+}</code></pre>
+<p>The sample-spread JSON carries both provenance and exact-arithmetic semantics. A measured observation is represented conceptually as:</p>
+<pre><code class="language-json">{
+  &quot;value&quot;: &quot;1001/100&quot;,
+  &quot;unit&quot;: &quot;g&quot;,
+  &quot;source_class&quot;: &quot;measured&quot;,
+  &quot;representation_class&quot;: &quot;exact_rational_of_reported_value&quot;
+}</code></pre>
+<p>A derived statistic records both the source class of its inputs and that its arithmetic was exact over the reported values.</p>
+<p>Machine errors use stable codes such as:</p>
+<pre><code class="language-text">unknown_element
+invalid_subscript
+missing_arrow
+impossible_balance
+underdetermined_balance
+zero_coefficient
+mixed_sign_coefficients
+invalid_observation
+unknown_unit
+too_many_observations</code></pre>
+<p>Human error messages may improve without changing those machine identifiers.</p>
+<h2>What <code>verified=true</code> means</h2>
+<p>In this first reaction slice, <code>verified=true</code> has a narrow meaning:</p>
+<blockquote><p>the returned canonical coefficient vector independently conserves every element represented by the parsed reaction under the admitted formula grammar.</p></blockquote>
+<p>It does <strong>not</strong> mean:</p>
+<ul><li>the reaction occurs physically;</li><li>the reaction is thermodynamically favorable;</li><li>the reaction is kinetically accessible;</li><li>the written species are the actual products;</li><li>the reaction is safe;</li><li>charge is conserved, because ionic charge syntax is not yet admitted;</li><li>mass values or measured chemical properties have been evaluated.</li></ul>
+<p>Those require later contracts.</p>
+<p>Likewise, an exact sample-spread calculation means only that the descriptive arithmetic over the reported values is exact. It is not a claim that the physical measurements, calibration, sampling process, or measurand are exact.</p>
+<h2>CPS relationship</h2>
+<p>Composition Predictive Simulation is a later layer, documented in <a href="https://github.com/chasebryan/centl/blob/main/docs/CPS.md"><code>CPS.md</code></a> and <a href="https://github.com/chasebryan/centl/blob/main/docs/CPS-RESULT-CONTRACT.md"><code>CPS-RESULT-CONTRACT.md</code></a>.</p>
+<p>CPS must consume deterministic chemistry and sample-evidence structures from this engine rather than reimplementing them. Predictive chemistry remains blocked behind provenance-aware chemical reference data, measurement-uncertainty semantics, explicit thermodynamic/kinetic models, and multidimensional hazard evidence.</p>
+<p>The governing boundary remains:</p>
+<blockquote><p>exact mathematics inside a declared model does not make a physical-world prediction exact.</p></blockquote>
+<h2>Validation status</h2>
+<p>The development branch contains unit, protocol, refusal, adversarial-limit, deterministic-replay, sample-spread, and Cram CLI tests for the implemented slices. Until the branch has passed the repository&#x27;s actual build/format/test gates, this implementation must be described as <strong>implemented but not yet validated green</strong>.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

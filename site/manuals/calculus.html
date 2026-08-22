@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CentL26.10 provides an exact symbolic calculus engine supporting multi-order differentiation, exact integration, symbolic limits, Taylor series expansions, and discrete finite summations and products.">
+  <title>Symbolic Calculus &amp; Discrete Series — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/calculus.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/calculus.html">
+  <meta property="og:title" content="Symbolic Calculus &amp; Discrete Series — Free Computation Foundation">
+  <meta property="og:description" content="CentL26.10 provides an exact symbolic calculus engine supporting multi-order differentiation, exact integration, symbolic limits, Taylor series expansions, and discrete finite summations and products.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Symbolic Calculus &amp; Discrete Series</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../free-computation.html#top">What is Free Computation?</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">CentL26.10 provides an exact symbolic calculus engine supporting multi-order differentiation, exact integration, symbolic limits, Taylor series expansions, and discrete finite summations and products.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/oasis/docs/CALCULUS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>CentL26.10 provides an exact symbolic calculus engine supporting multi-order differentiation, exact integration, symbolic limits, Taylor series expansions, and discrete finite summations and products.</p>
+<hr>
+<h2>Symbolic Differentiation</h2>
+<p>Differentiate symbolic expressions with respect to a named variable:</p>
+<pre><code class="language-text">diff(x^3 + 2*x + 1, x)
+3*x^2 + 2
+
+diff(sin(x) * exp(x), x)
+exp(x)*sin(x) + exp(x)*cos(x)</code></pre>
+<h3>Higher-Order Differentiation</h3>
+<p>Pass a third argument <code>n</code> to compute the $n$-th derivative:</p>
+<pre><code class="language-text">diff(x^4, x, 3)
+24*x
+
+diff(sin(x), x, 4)
+sin(x)
+
+diff(exp(2*x), x, 3)
+8*exp(2*x)</code></pre>
+<p>The differentiation engine knows exact derivative rules for polynomials, integer/rational powers, trigonometric functions (<code>sin</code>, <code>cos</code>, <code>tan</code>, <code>asin</code>, <code>acos</code>, <code>atan</code>), hyperbolic functions (<code>sinh</code>, <code>cosh</code>, <code>tanh</code>), <code>exp</code>, <code>log</code>, <code>sqrt</code>, and product/quotient/chain rules.</p>
+<hr>
+<h2>Exact Integration</h2>
+<h3>Indefinite Integration (Antiderivatives)</h3>
+<p><code>integrate(f, x)</code> computes the exact canonical antiderivative:</p>
+<pre><code class="language-text">integrate(3*x^2 + 2*x + 1, x)
+x^3 + x^2 + x
+
+integrate(sin(x), x)
+-cos(x)
+
+integrate(exp(x), x)
+exp(x)</code></pre>
+<h3>Definite Integration</h3>
+<p><code>integrate(f, x, a, b)</code> evaluates the integral over the interval $[a, b]$ with exact bounds:</p>
+<pre><code class="language-text">integrate(3*x^2 + 2*x, x, 0, 3)
+36
+
+integrate(x^2, x, 0, 1)
+1/3</code></pre>
+<hr>
+<h2>Symbolic Limits &amp; L&#x27;Hôpital&#x27;s Rule</h2>
+<p>Compute analytical limits with automatic resolution of indeterminate forms ($0/0$, $\infty/\infty$) via L&#x27;Hôpital&#x27;s Rule:</p>
+<pre><code class="language-text">limit((x^2 - 1)/(x - 1), x, 1)
+2
+
+limit(sin(x)/x, x, 0)
+1
+
+limit((exp(x) - 1)/x, x, 0)
+1</code></pre>
+<hr>
+<h2>Taylor &amp; Maclaurin Series</h2>
+<p>Generate exact Taylor polynomial approximations around a point $x = a$ up to order $n$:</p>
+<pre><code class="language-text"># Maclaurin expansion of exp(x) up to degree 3:
+taylor(exp(x), x, 0, 3)
+1 + x + 1/2*x^2 + 1/6*x^3
+
+# Taylor expansion of sin(x) around 0 up to degree 5:
+taylor(sin(x), x, 0, 5)
+x - 1/6*x^3 + 1/120*x^5
+
+# Taylor expansion of cos(x) around 0 up to degree 4:
+taylor(cos(x), x, 0, 4)
+1 - 1/2*x^2 + 1/24*x^4</code></pre>
+<hr>
+<h2>Discrete Summations &amp; Products</h2>
+<p>Evaluate finite discrete sums and products over closed integer intervals:</p>
+<pre><code class="language-text"># Sum of k^2 from k = 1 to 5:
+sum(k^2, k, 1, 5)
+55
+
+# Product of k from k = 1 to 5 (Factorial):
+product(k, k, 1, 5)
+120
+
+# Sum of 2^k from k = 0 to 10:
+sum(2^k, k, 0, 10)
+2047</code></pre>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

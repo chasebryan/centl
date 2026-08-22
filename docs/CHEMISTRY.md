@@ -1,11 +1,12 @@
-# CENTL Chemistry
+# CentL26 Stoichiometry & Reaction Balancing
 
-Status: **development implementation on `feature/centl-chem-phase1`**. This document does not claim that `centl-chem` has been merged, released, or Oasis-qualified.
+Status: **Integrated in CentL26.10 Official Universal Release**.
 
-CENTL Chemistry is the exact-first chemical-computation layer of CENTL. The first development slice now contains two foundations:
+CentL26 provides an exact-first chemical computation and stoichiometry engine:
 
-1. deterministic formula/reaction chemistry: formula parsing, atom counting, exact reaction balancing, canonical coefficient normalization, and independent conservation verification;
-2. exact-over-reported-values sample spread: bounded replicate ingestion, descriptive spread statistics, and exact symbolic preservation of irrational standard deviations without confusing sample spread with measurement uncertainty.
+1. **Deterministic Formula & Reaction Chemistry**: Chemical formula parsing, atom counting, 118-element periodic table catalog, exact reaction balancing via rational nullspace matrices, canonical coefficient normalization, and independent mass/atom conservation verification.
+2. **Sample Spread Statistics**: Descriptive sample statistics (`spread measured`, `spread exact`), bounded replicate ingestion, and exact preservation of irrational standard deviations without confusing sample spread with measurement uncertainty.
+3. **Molar Mass & Concentration Solvers**: Direct computation of molar masses, molarity, solution dilutions, and titration equivalence in plain English or symbolic syntax.
 
 The implementation reuses CENTL's existing arbitrary-precision rational matrix and physical-unit machinery. It does not introduce floating-point balancing or a second arithmetic system.
 

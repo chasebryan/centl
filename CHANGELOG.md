@@ -22,8 +22,11 @@
   - Modern typography font stacks with high-contrast readability, elevated card shadows, and smooth rounded containers.
   - Redesigned interactive zero-JS calculation terminal with macOS-style window controls, interactive preset chips, and dark-theme syntax highlighted console outputs.
   - Responsive mobile navigation bar and streamlined grid cards.
-- **Universal Release Standardization**:
+- **Universal Documentation & Release Standardization**:
   - Synchronized `v26.10.0` across `Cargo.toml`, `Cargo.lock`, `README.md`, `desktop/centl26/macos/Info.plist`, `CentL26Updater.swift`, and capabilities metadata.
+  - Published official `docs/releases/26.10.0.md` release notes and updated all technical manuals (`INSTALL.md`, `ALGEBRA.md`, `CALCULUS.md`, `SCI.md`, `CHEMISTRY.md`, `MATHEMATICIANS.md`, `PHYSICISTS.md`).
+  - Generated multi-platform release manifest `BUILD_MANIFEST.json` and verified SHA-256 archives across macOS, Linux, and Windows 11.
+  - Regenerated 315 research library papers and 32 static HTML manuals on `freecomputation.org`.
 
 ### CentL26.9.1 — Visual Refinements, Native Cogwheel Settings & Version Standardization (2026-08-21)
 

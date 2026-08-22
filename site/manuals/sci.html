@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Status: active development toward CENTL-SCi v0.0.2-Caramels. This document describes the Caramels development branch; it is not a claim that the release has been tagged or published.">
-  <title>CENTL-SCi — Free Computation Foundation</title>
+  <meta name="description" content="Status: Integrated in CentL26.10 Official Universal Release.">
+  <title>CENTL-SCi Natural Language Problem Solver — Free Computation Foundation</title>
   <link rel="canonical" href="https://freecomputation.org/manuals/sci.html">
   <meta name="robots" content="index,follow">
   <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://freecomputation.org/manuals/sci.html">
-  <meta property="og:title" content="CENTL-SCi — Free Computation Foundation">
-  <meta property="og:description" content="Status: active development toward CENTL-SCi v0.0.2-Caramels. This document describes the Caramels development branch; it is not a claim that the release has been tagged or published.">
+  <meta property="og:title" content="CENTL-SCi Natural Language Problem Solver — Free Computation Foundation">
+  <meta property="og:description" content="Status: Integrated in CentL26.10 Official Universal Release.">
   <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
   <link rel="stylesheet" href="../style.css">
   
@@ -21,7 +21,7 @@
   <a class="skip" href="#content">Skip to content</a>
   <header class="masthead">
     <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
-    <div class="title"><h1>CENTL-SCi</h1><p>Manual · hosted from the CENTL repository</p></div>
+    <div class="title"><h1>CENTL-SCi Natural Language Problem Solver</h1><p>Manual · hosted from the CENTL repository</p></div>
   </header>
   <div class="layout">
     <nav aria-label="Primary">
@@ -60,16 +60,15 @@
       <article class="paper">
         <header class="paper-head">
           <p class="kicker">Manual</p>
-          <p class="dek">Status: active development toward CENTL-SCi v0.0.2-Caramels. This document describes the Caramels development branch; it is not a claim that the release has been tagged or published.</p>
+          <p class="dek">Status: Integrated in CentL26.10 Official Universal Release.</p>
           <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/oasis/docs/SCI.md">Source in the repository</a></p>
         </header>
         <div class="paper-body">
-<p>Status: active development toward <strong>CENTL-SCi <code>v0.0.2-Caramels</code></strong>. This document describes the Caramels development branch; it is not a claim that the release has been tagged or published.</p>
-<p><strong>CENTL-SCi means Specific CENTL Interpreter.</strong> It is developed as part of CENTL under the Free Computation Foundation.</p>
+<p>Status: <strong>Integrated in CentL26.10 Official Universal Release</strong>.</p>
+<p><strong>CENTL-SCi means Specific CENTL Interpreter.</strong> It is the offline natural-language STEM problem-solving engine and local interaction layer of CentL26.</p>
 <blockquote><p>Free for science.</p></blockquote>
-<p>CENTL-SCi is a local interaction and interpretation layer for mathematics, physics, and user-owned CENTL extension. It is not a general-purpose chatbot and it is not a second mathematical or physics evaluator.</p>
-<p>Its scientific job is to interpret a problem, produce a validated representation, dispatch that representation to CENTL&#x27;s deterministic machinery, and present only what the resulting evidence justifies.</p>
-<p>Its BUILD job is different: help the user inspect, extend, modify, and own their downstream CENTL environment while keeping local/generated/external assurance visibly separate from verified core assurance.</p>
+<p>CENTL-SCi parses and solves STEM questions formulated in plain English across mathematics, physics, stoichiometry/chemistry, calculus, and geometry. It automatically structures natural-language problem statements into verified canonical representations, dispatches them to CentL26&#x27;s deterministic computational engines, and provides step-by-step explanations backed by exact mathematical receipts.</p>
+<p>When configured, it bridges optionally to the hybrid Gemini AI co-pilot with multi-model fallback (<code>2.5-flash</code> $\rightarrow$ <code>2.0-flash</code> $\rightarrow$ <code>1.5-flash</code> $\rightarrow$ <code>1.5-pro</code>) to decompose complex word problems into atomic CentL computational statements.</p>
 <h2>Caramels interaction model</h2>
 <p>Caramels exposes four explicit modes:</p>
 <pre><code class="language-text">MATH&gt;    mathematics-first interaction

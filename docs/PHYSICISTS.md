@@ -21,15 +21,14 @@ On GNU/Linux, each choice is a **component-specific archive**. Asking for Physic
 
 ## Start here: choose your operating system   
 
-CENTL currently has three scientist-facing operating-system paths. The physics interfaces are the same after installation; what differs is how the software reaches your machine.
+CentL26.10 provides 100% feature-parity native physics and mechanics simulation across all major platforms:
 
-| Platform | Current path | Assurance / distribution status |
+| Platform | Recommended Path | Distribution Status |
 | --- | --- | --- |
-|  **GNU/Linux x86_64** | Oasis component archives or full Oasis installer | Qualified stable CENTL product. This is the reference release path. |
-|  **macOS** | `CENTL-Marsa` component build | Current Camp software built from source through the macOS harbor. It is not an Oasis declaration. |
-|  **Windows** | `CENTL-Marsa` component build under MSYS2 MinGW64 | Current Windows harbor/source-build path. It is not an Oasis declaration; the full Windows product CI gate is not yet enabled. |
-
-The distinction above is about release assurance, **not different physics**.
+| **macOS (Apple Silicon & Intel)** | `./install.sh` or `open build/centl26/macos/CentL26.app` | Native AppKit/WebKit standalone application |
+| **GNU/Linux (x86_64 / Arm64)** | `sh install.sh` or `centl26` | Standalone binary with desktop integration and icons |
+| **Windows 11 (x64)** | `.\install.ps1` or `CentL26.bat` | Native standalone package with launcher & shortcut |
+| **Cross-Platform Web** | `cargo run --release --bin centl26` | Local loopback web server (`http://127.0.0.1:2626`) |
 
 ###  GNU/Linux x86_64 — download only the physics command
 

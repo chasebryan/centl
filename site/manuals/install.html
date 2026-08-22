@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="CENTL has two GNU/Linux installation channels:">
-  <title>Install CENTL — Free Computation Foundation</title>
+  <meta name="description" content="CentL26.10 is the official universal release of the Free Computation Foundation across macOS (Apple Silicon Arm64 &amp; Intel), GNU/Linux (Debian, Ubuntu, Fedora, RHEL, Arch), and Windows 11 (x64). All platforms provide 100% offline,…">
+  <title>Install CentL26 / CENTL — Free Computation Foundation</title>
   <link rel="canonical" href="https://freecomputation.org/manuals/install.html">
   <meta name="robots" content="index,follow">
   <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://freecomputation.org/manuals/install.html">
-  <meta property="og:title" content="Install CENTL — Free Computation Foundation">
-  <meta property="og:description" content="CENTL has two GNU/Linux installation channels:">
+  <meta property="og:title" content="Install CentL26 / CENTL — Free Computation Foundation">
+  <meta property="og:description" content="CentL26.10 is the official universal release of the Free Computation Foundation across macOS (Apple Silicon Arm64 &amp; Intel), GNU/Linux (Debian, Ubuntu, Fedora, RHEL, Arch), and Windows 11 (x64). All platforms provide 100% offline,…">
   <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
   <link rel="stylesheet" href="../style.css">
   
@@ -21,7 +21,7 @@
   <a class="skip" href="#content">Skip to content</a>
   <header class="masthead">
     <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
-    <div class="title"><h1>Install CENTL</h1><p>Manual · hosted from the CENTL repository</p></div>
+    <div class="title"><h1>Install CentL26 / CENTL</h1><p>Manual · hosted from the CENTL repository</p></div>
   </header>
   <div class="layout">
     <nav aria-label="Primary">
@@ -60,37 +60,40 @@
       <article class="paper">
         <header class="paper-head">
           <p class="kicker">Manual</p>
-          <p class="dek">CENTL has two GNU/Linux installation channels:</p>
+          <p class="dek">CentL26.10 is the official universal release of the Free Computation Foundation across macOS (Apple Silicon Arm64 &amp; Intel), GNU/Linux (Debian, Ubuntu, Fedora, RHEL, Arch), and Windows 11 (x64). All platforms provide 100% offline,…</p>
           <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/oasis/docs/INSTALL.md">Source in the repository</a></p>
         </header>
         <div class="paper-body">
-<p>CENTL has two GNU/Linux installation channels:</p>
-<ul><li><strong>Oasis</strong> is the qualified stable product and the recommended default.</li><li><strong>Mirage</strong> is the rolling development product. It begins from the current Oasis baseline and may contain newer experimental work that has not earned Oasis qualification.</li></ul>
-<p>The channels install independently and can coexist on the same machine.</p>
-<p>CENTL&#x27;s qualified native release target is currently <strong>GNU/Linux x86_64</strong>. macOS and Windows use the current Camp software through <a href="marsa.html">CENTL Marsa</a>; those ports are not Oasis declarations.</p>
-<h2>Install only what you need</h2>
-<p>The full CENTL bundle is convenient, but it is not mandatory.</p>
-<p>If you want exactly one public scientific command on GNU/Linux x86_64, use the component installer:</p>
-<pre><code class="language-sh">curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install-component</code></pre>
-<p>Then choose one component:</p>
-<pre><code class="language-sh"># exact mathematics only
-sh install-component --component centl
+<p><strong>CentL26.10</strong> is the official universal release of the Free Computation Foundation across <strong>macOS</strong> (Apple Silicon Arm64 &amp; Intel), <strong>GNU/Linux</strong> (Debian, Ubuntu, Fedora, RHEL, Arch), and <strong>Windows 11</strong> (x64). All platforms provide 100% offline, deterministic scientific computing backed by the same high-performance Rust core engine.</p>
+<hr>
+<h2>1-Command Universal Installation</h2>
+<h3>1. macOS (Apple Silicon &amp; Intel)</h3>
+<p>Run the universal setup script from the terminal:</p>
+<pre><code class="language-sh"># Automated 1-Command Setup:
+./install.sh
 
-# typed exact-first physics only
-sh install-component --component physics
+# Or compile and launch the native AppKit/WebKit application bundle:
+./desktop/centl26/macos/build.sh
+open build/centl26/macos/CentL26.app</code></pre>
+<h3>2. GNU/Linux (Debian, Ubuntu, Fedora, RHEL, Arch)</h3>
+<pre><code class="language-sh"># Automated 1-Command Setup (Installs binary, desktop launcher, and hicolor icons):
+./install.sh
 
-# CENTL-SCi interpreter only
-sh install-component --component sci</code></pre>
-<p>The Oasis component installer downloads a <strong>component-specific archive</strong>. It does not first download the full three-command product and discard the commands you did not ask for.</p>
-<p>Each component archive contains only the selected public launcher/executable plus the shared runtime libraries, license material, and provenance metadata required to run and redistribute it correctly. It does not contain the other two public command executables.</p>
-<p>Typical scientist choices are:</p>
-<table class="directory"><thead><tr><th>Need</th><th>Install</th></tr></thead><tbody><tr><td>Pure formal mathematics</td><td><code>--component centl</code></td></tr><tr><td>Typed physics only</td><td><code>--component physics</code></td></tr><tr><td>Natural-language scientific interaction only</td><td><code>--component sci</code></td></tr><tr><td>Mathematics + SCi, no Physics command</td><td>install <code>centl</code>, then <code>sci</code></td></tr><tr><td>Physics + direct mathematics, no SCi</td><td>install <code>physics</code>, then <code>centl</code></td></tr><tr><td>Everything</td><td>use the full installer below</td></tr></tbody></table>
-<p>For field-specific guidance, start with <a href="mathematicians.html">🧮 📐 Mathematician onboarding</a> or <a href="physicists.html">⚛️ 🔬 Physicist onboarding</a>.</p>
-<p>On macOS and Windows, <code>CENTL-Marsa</code> provides the same installed-command selection through:</p>
-<pre><code class="language-sh">sh scripts/marsa-install --component centl
-sh scripts/marsa-install --component physics
-sh scripts/marsa-install --component sci</code></pre>
-<p>Marsa currently builds from the shared source graph, so its source checkout still contains shared build code. Its <strong>installed command surface</strong> is selective. See <a href="marsa.html">CENTL Marsa</a>.</p>
+# Or run the dedicated Linux installer:
+sh scripts/install-linux.sh
+centl26</code></pre>
+<h3>3. Windows 11 (PowerShell &amp; Terminal)</h3>
+<pre><code class="language-powershell"># Automated 1-Command PowerShell Setup (Installs binary, Start Menu &amp; Desktop shortcuts):
+.\install.ps1
+
+# Or 1-click batch launcher:
+.\desktop\centl26\windows\CentL26.bat</code></pre>
+<h3>4. Cross-Platform Local Web Browser</h3>
+<pre><code class="language-sh">cargo run --release --bin centl26
+# Open http://127.0.0.1:2626</code></pre>
+<hr>
+<h2>Component &amp; Legacy Installation</h2>
+<p>For developers or headless Linux environments requiring single-command tools (<code>centl</code>, <code>centl-physics</code>, <code>centl-sci</code>), component installation remains available:</p>
 <h2>Quick full install</h2>
 <p>Use the ordinary installer when you intentionally want the complete GNU/Linux product bundle:</p>
 <pre><code class="language-sh">curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install

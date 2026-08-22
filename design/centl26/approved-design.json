@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "approval": {
-    "change_note": "Streamlined Gemini AI panel, moved Clear button, hidden auto-mode",
+    "change_note": "Approved CentL26.10 continuous notebooks, in-app doc reader, and academic search.",
     "release": "CentL26",
     "reviewed_viewports": [
       "1366x768",
@@ -12,9 +12,9 @@
   "files": {
     "desktop/centl26/macos/Assets/CentL26Icon.png": "f8654785b5f6441a1b54a0859490dd09a4447b00547209f6ada2fb26b663baef",
     "desktop/centl26/macos/Assets/CentL26Icon.svg": "a62da90372e32287849ea8d33bb6ed2fa5ec1f314528924f1fd4ff01bfc7acc7",
-    "src-web/server/lab.css": "dd03841672f85f5c2e4ee7329f94ea84a672ef25766451f0418a306897977c5d",
-    "src-web/server/lab.js": "26d1155d3578188da8202d78be617053f91405abd56cd053bb2a7d3d9d1d7ee0",
-    "src-web/server/lab_template.rs": "576150431527ad0c96d052e409bf5e8cbceb820594fd6e1961423b38b974ac6f"
+    "src-web/server/lab.css": "d650dfcb3369b3c4754d60a66a15c42bb483a8e495990df14cba3cca5cb64518",
+    "src-web/server/lab.js": "61b45c9ecc8e4eb2683642b2fd32f8790040508ec65c28370fe6e60bf5210d23",
+    "src-web/server/lab_template.rs": "e09abd71c044b49e210295f02be3bc497bf5e935dbc89db08a3c4df726407ae0"
   },
   "schema": 1,
   "semantic_contract": {

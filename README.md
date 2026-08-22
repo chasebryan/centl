@@ -70,10 +70,22 @@ cargo run --release --bin centl26
 
 ---
 
-## Key Highlights in CentL26.9
+## Key Highlights in CentL26.10
 
-### 1. Robust Algebraic Engine & Canonical Polynomial Solver
-- **High-Precision Rational Root Theorem Solver**: Exact root extraction for linear, quadratic, cubic, quartic, and higher-degree polynomials with synthetic division (`synthetic_divide_root`) and exact radical isolation.
+### 1. Continuous Jupyter-Grade Notebooks & Export
+- **Seamless Interactive Multi-Step Calculations**: Execute multi-statement computation cells with live reactive output, inline cell editing, cell deletion, re-running, and persistent state history.
+- **Direct Jupyter Notebook (`.ipynb`) Export**: Export computational notebooks directly to standard Jupyter Notebook format with full input/output cell mapping for immediate sharing with research teams.
+- **Multi-Notebook Tabs & Workspaces**: Organize independent computations across named tabs with safe keyboard shortcuts (`⌥ W` / `⌘ ⇧ W`).
+
+### 2. Smooth In-App Paper & Documentation Scrolling
+- **Integrated FCF Knowledge Center**: Offline indexed document browser with responsive Markdown rendering and smooth scrolling for all FCF operator manuals, mathematical architecture specifications, and theoretical research preprints (Bryan Recursive Entanglement Calculus v1.0, Erdős–Straus Modular Decomposition, Collatz Modular Trajectory Dynamics, and Ramanujan Tau asymptotics).
+
+### 3. Complete Windows 11 Build & 1-Command Universal Installation
+- **Automated Windows 11 Packaging**: Native `desktop/centl26/windows/build.ps1` produces standalone `CentL26-Windows-x64.zip` / `CentL26-Windows-x86_64.zip` distributions with 1-click batch launcher (`CentL26.bat`), native application icon, and SHA-256 integrity verification.
+- **1-Command Universal Setup**: Fast cross-platform setup on macOS (`./install.sh`), Linux (`./install.sh`), and Windows 11 (`.\install.ps1`).
+
+### 4. Robust Algebraic Engine & Canonical Polynomial Solver
+- **Arbitrary-Precision Rational Root Theorem Solver**: Exact root extraction for linear, quadratic, cubic, quartic, and higher-degree polynomials with synthetic division (`synthetic_divide_root`) and exact radical isolation.
 - **Direct Algebraic Equation Auto-Solving**: Free variable analysis automatically differentiates variable assignment (`x = 5`) from equations (`2x + 3 = 7` $\rightarrow x = 2$, `x^2 - 5x + 6 = 0` $\rightarrow x = 2, x = 3$).
 - **Constant Mathematical Equality Verification**: Immediate truth-value validation (`2 + 3 = 5` $\rightarrow true$, `2 + 3 = 6` $\rightarrow false$, `2^10 = 1024` $\rightarrow true$).
 - **Polynomial Expansion & Factorization**:
@@ -83,21 +95,23 @@ cargo run --release --bin centl26
   - `expand((x - 1)*(x + 1))` $\rightarrow x^2 - 1$
 - **Smart Implicit Multiplication**: Natural parsing of mathematical notation (`2x`, `5x^2`, `3(x+1)`, `(x-1)(x+1)`, `4pi`, `2sin(x)`) while preserving English natural language sentences.
 
-### 2. Calculus, Discrete Mathematics & Series
+### 5. Advanced Calculus, Discrete Mathematics & Series
 - **Higher-Order Differentiation**: `diff(f, x, n)` (e.g. `diff(x^4, x, 3)` $\rightarrow 24x$).
 - **Definite & Indefinite Integration**: `integrate(3x^2 + 2x, x, 0, 3)` $\rightarrow 36$.
 - **Symbolic Limits & L'Hôpital's Rule**: `limit((x^2 - 1)/(x - 1), x, 1)` $\rightarrow 2$.
 - **Taylor Series Expansion**: `taylor(exp(x), x, 0, 3)` $\rightarrow 1 + x + \frac{1}{2}x^2 + \frac{1}{6}x^3$.
 - **Discrete Summations & Products**: `sum(k^2, k, 1, 5)` $\rightarrow 55$, `product(k, k, 1, 5)` $\rightarrow 120$.
 
-### 3. Interactive STEM Animated Visualizer & Theorem Studio
+### 6. Interactive STEM Animated Visualizer & Theorem Studio
 - Engage directly with dynamic mathematical theorems, Fourier harmonics, ODE wave animations, Lorenz chaotic attractors, particle physics simulations, and Bravais crystal lattice geometry.
 
-### 4. Calm Welcome Experience & Preferences
-- Clean Welcome surface with customizable boot behavior (`"Resume Previous Session"` or `"Start Fresh Computation"`).
-- Keyboard-safe tab closing accelerators (`⌥ W` / `⌘ ⇧ W`) and native Settings cogwheel interface.
+### 7. STEM Academic Search Engine Omnibar
+- Omni-routing academic queries directly to Google Scholar, arXiv, PubMed, Wolfram MathWorld, OEIS, NIST Chemistry WebBook, and NASA ADS with intelligent domain detection.
 
-### 5. Exhaustive 100-Test Automated Non-Regression Suite
+### 8. Resilient Multi-Model Gemini AI Co-Pilot
+- Multi-model automatic fallback (`2.5-flash` $\rightarrow$ `2.0-flash` $\rightarrow$ `1.5-flash` $\rightarrow$ `1.5-pro`), persistent cross-platform API key management, and atomic JSON decomposition with exact offline CAS verification.
+
+### 9. Exhaustive 100-Test Automated Non-Regression Suite
 - Dedicated offline test verification across arithmetic, linear/quadratic/polynomial algebra, calculus, stoichiometry, and modern physics.
 
 ---
@@ -150,13 +164,20 @@ The CENTL research program includes active exploration of **Erdős–Straus Diop
 
 ---
 
-## Documentation
+## Documentation & Manuals
 
 - [CentL26 Architecture Guide](docs/CENTL26-ARCHITECTURE.md)
-- [CentL26 Design Contract](docs/CENTL26-DESIGN-CONTRACT.md)
-- [Numerical & Exactness Contract](docs/NUMERICS.md)
-- [Mathematician Onboarding](docs/MATHEMATICIANS.md)
-- [Physicist Onboarding](docs/PHYSICISTS.md)
+- [CentL26.10 Universal Release Notes](docs/releases/26.10.0.md)
+- [Universal Multi-Platform Installation](docs/INSTALL.md)
+- [Exact Numerical & Algebraic Contract](docs/NUMERICS.md)
+- [Exact Polynomial & Matrix Algebra Guide](docs/ALGEBRA.md)
+- [Symbolic Calculus & Series Manual](docs/CALCULUS.md)
+- [CentL-SCi Natural Language Problem Solver](docs/SCI.md)
+- [Stoichiometry & Reaction Balancing Manual](docs/CHEMISTRY.md)
+- [CAS Syntax & Functions Reference](docs/SYNTAX.md)
+- [CentL26 Approved Design Contract](docs/CENTL26-DESIGN-CONTRACT.md)
+- [Mathematician Onboarding Guide](docs/MATHEMATICIANS.md)
+- [Physicist Onboarding Guide](docs/PHYSICISTS.md)
 - [Native macOS Packaging](desktop/centl26/macos/README.md)
 
 ---

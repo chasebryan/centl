@@ -3823,7 +3823,22 @@ pub fn execute_repo_update() -> serde_json::Value {
                                 candidate_bin = tmp_dir.join("CentL26-Linux-x86_64/centl26");
                             }
                             if !candidate_bin.exists() {
+                                candidate_bin = tmp_dir.join("bin/centl26");
+                            }
+                            if !candidate_bin.exists() {
+                                candidate_bin = tmp_dir.join("centl26");
+                            }
+                            if !candidate_bin.exists() {
                                 candidate_bin = tmp_dir.join("CentL26-Windows-x64/centl26.exe");
+                            }
+                            if !candidate_bin.exists() {
+                                candidate_bin = tmp_dir.join("CentL26-Windows-x86_64/centl26.exe");
+                            }
+                            if !candidate_bin.exists() {
+                                candidate_bin = tmp_dir.join("windows/centl26.exe");
+                            }
+                            if !candidate_bin.exists() {
+                                candidate_bin = tmp_dir.join("centl26.exe");
                             }
 
                             if candidate_bin.exists() {

@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="compatibility, and release qualification">
+  <title>CentL26 product and platform architecture — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/centl26-architecture.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/centl26-architecture.html">
+  <meta property="og:title" content="CentL26 product and platform architecture — Free Computation Foundation">
+  <meta property="og:description" content="compatibility, and release qualification">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>CentL26 product and platform architecture</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../free-computation.html#top">What is Free Computation?</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">compatibility, and release qualification</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/oasis/docs/CENTL26-ARCHITECTURE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> normative architecture for the new main application line</p>
+<p><strong>Product:</strong> CentL26</p>
+<p><strong>Organization:</strong> FCF — Free Computation Foundation</p>
+<p><strong>Scope:</strong> standalone desktop product, project format, capability integration,</p>
+<p>compatibility, and release qualification</p>
+<blockquote><p>Free for science.</p></blockquote>
+<h2>1. Product definition</h2>
+<p><strong>CentL26 is the product.</strong> It is the all-encompassing, standalone scientific</p>
+<p>work environment through which people use CENTL mathematics, physics, chemistry, scientific interpretation, research, evidence, extension, and preservation facilities.</p>
+<p>CentL26 replaces <strong>CENTL Lab</strong> as the user-facing application name. “Lab” may remain a descriptive noun and a migration term, but it is not a separate product line. The application launches as a desktop program, owns its window, opens projects directly, and does not require the user to operate it through a general-purpose browser.</p>
+<p>CentL26 is not a new evaluator and is not a monolith that rewrites every existing engine. It is a coherent product shell, project system, and execution boundary over versioned backend capabilities. Existing CENTL productry becomes an integrated capability family behind that boundary rather than a collection of competing top-level applications.</p>
+<p>The product must preserve these rules:</p>
+<ol><li>The project is the durable unit of work; a page, prompt, or process is not.</li><li>Scientific semantics belong to authoritative engines, never to the UI.</li><li>Exact, proved, bounded, deterministic, experimental, untrusted, failed, and unsupported outcomes remain distinguishable.</li><li>Every admitted execution is attributable to its inputs, project revision, capability contract, executor build, policy, and evidence.</li><li>Backend availability never implies verified-core assurance.</li><li>The complete primary workflow works offline after installation.</li><li>The product presents one calm work surface; advanced facilities are reached progressively through commands, inspectors, and contextual tools.</li><li>A typical laptop window has no whole-application document scroll. Individual editors, notebooks, tables, consoles, and inspectors own their local scroll.</li></ol>
+<h2>2. Canonical identity and naming</h2>
+<p>The following names have different responsibilities and must not be collapsed:</p>
+<table class="directory"><thead><tr><th>Name</th><th>Meaning</th></tr></thead><tbody><tr><td><strong>CentL26</strong></td><td>The composed 2026 desktop product and main user experience.</td></tr><tr><td><strong>CENTL</strong></td><td>The computational lineage and exact-first core engine family.</td></tr><tr><td><strong>FCF</strong></td><td>The organization abbreviation.</td></tr><tr><td><strong>Free Computation Foundation</strong></td><td>The full organization identity.</td></tr><tr><td><strong>Oasis</strong></td><td>A qualification state for an exact release snapshot, not a product version.</td></tr><tr><td><strong>MIRAGE, SCi, Physics, Chemistry, CARAVAN, CENTLAMP</strong></td><td>Capability families, services, or development programs presented through CentL26.</td></tr><tr><td><strong>Camp, Marsa, Wellspring</strong></td><td>Distribution, historical, governance, or knowledge concepts; not competing application brands.</td></tr></tbody></table>
+<p>Normal application chrome should say <strong>CentL26</strong>, not <code>centl-web</code>, <code>centl-lab</code>, an engine version, a model vendor, or a development branch. <code>FCF</code> may appear in compact persistent identity, while <strong>Free Computation Foundation</strong> appears in the welcome surface, About, release provenance, exports, and other durable identity locations. Backend names remain visible where they are useful: capability selection, evidence, diagnostics, receipts, licenses, and About.</p>
+<p>The desktop bundle identifier should remain stable across annual trains so an operating system sees one continuing application. Year-specific display names and launch aliases may coexist, but they must not fragment project ownership or application updates.</p>
+<h2>3. Stable product identity and build metadata</h2>
+<p>The human-facing product name remains <strong>CentL26</strong> throughout the continuing 2026 channel. Feature work, backend integration, and maintenance do not create public <code>CentL26.N</code> editions. The native bundle and Cargo package retain the internal compatibility value <code>26.0.0</code>; the source commit, build identifier, and composition manifest distinguish exact builds.</p>
+<p>Internal build metadata never enters the brand. Diagnostic and provenance surfaces may report <code>26.0.0</code>, a source commit, and a build identifier, while normal application chrome and release communication continue to say CentL26. Backend engines retain their own independent versions.</p>
+<h3>3.1 Independent version axes</h3>
+<p>A CentL26 build is a composition, not a single source version. Its release manifest must record every independent axis:</p>
+<table class="directory"><thead><tr><th>Axis</th><th>Example form</th><th>Compatibility question</th></tr></thead><tbody><tr><td>Product build</td><td><code>CentL26</code> + source/build identity</td><td>Which complete application composition is running?</td></tr><tr><td>Project schema</td><td><code>centl.project/1</code></td><td>Can this project be opened and written safely?</td></tr><tr><td>Broker protocol</td><td><code>centl.broker/1</code></td><td>Can the shell and broker exchange requests?</td></tr><tr><td>Capability contract</td><td><code>org.fcf.centl.math.evaluate/1</code></td><td>Does this request/result shape have the expected meaning?</td></tr><tr><td>Adapter</td><td>adapter SemVer + build digest</td><td>Can the broker invoke this engine correctly?</td></tr><tr><td>Backend engine</td><td>engine SemVer or native build ID</td><td>Which implementation performed the work?</td></tr><tr><td>Receipt/evidence schema</td><td><code>centl.receipt/1</code></td><td>Can evidence be read and verified?</td></tr><tr><td>SCi model/runtime</td><td>model, grammar, runtime, and weight digest</td><td>Which untrusted interpreter produced the IR?</td></tr><tr><td>Dataset/constant catalog</td><td>catalog ID + revision/digest</td><td>Which scientific data informed the result?</td></tr><tr><td>Extension</td><td>package version + content digest</td><td>Which user or third-party code ran?</td></tr></tbody></table>
+<p>The About surface may summarize these values, but the complete composition must remain exportable as a machine-readable bill of materials. Receipts record the versions relevant to their individual run.</p>
+<p>An engine or product update does not rename CentL26. The product manifest is the authoritative mapping between the stable application identity and its exact components.</p>
+<h2>4. Standalone application boundary</h2>
+<p>The target runtime topology is:</p>
+<pre><code class="language-text">CentL26 native window
+  |
+  +-- application controller
+  |     +-- commands, documents, layout, accessibility, recovery
+  |
+  +-- project service
+  |     +-- object graph, revisions, content store, migrations, search
+  |
+  +-- capability broker
+  |     +-- registry, validation, routing, budgets, cancellation, receipts
+  |
+  +-- worker supervisor
+  |     +-- built-in adapters -&gt; authoritative CENTL engines
+  |     +-- optional adapters  -&gt; models, research kernels, extensions
+  |
+  +-- artifact and evidence service
+        +-- immutable runs, artifacts, receipts, provenance graph</code></pre>
+<p>The shipped artifact is a desktop application bundle or native package. UI assets and required engines are included in the installation. Double-clicking the application or a project opens an application window; it must not instruct the user to copy a loopback URL into a browser.</p>
+<p>The first native release may retain the existing embedded HTML/CSS/JavaScript renderer inside a private webview. That is an implementation technique, not a web product boundary. If a loopback server remains temporarily necessary, it must be child-process-owned, authenticated, dynamically addressed, unreachable from non-loopback interfaces, and stopped with the application. Local IPC is the preferred stable boundary.</p>
+<p>The public <code>freecomputation.org</code> site is documentation, publication, and public research infrastructure. CentL26 does not load its runtime, fonts, analytics, scripts, or visual assets from that site. Hosted services, when explicitly enabled, are optional capability providers and must be visibly distinct from local execution.</p>
+<h3>4.1 Window and work-surface contract</h3>
+<p>The application controller exposes a stable IDE anatomy without displaying all facilities at once:</p>
+<ul><li>a compact title/command region;</li><li>one narrow activity switcher;</li><li>an optional project navigator;</li><li>a central document/work area;</li><li>one contextual inspector region;</li><li>an optional bottom panel for trace, problems, jobs, or terminal work;</li><li>a small status line for project, execution, assurance, and background state.</li></ul>
+<p>Navigator, inspector, and bottom panel are independently collapsible and resizable. The center retains priority. At supported laptop minimum sizes, the frame remains fixed to the window and no global vertical page is created. Commands, keyboard navigation, document tabs, quick-open, and contextual actions provide access to depth without permanent dashboard density.</p>
+<p>Layout is a user preference, not project scientific state. It may be synced or restored separately, but it must not change a project&#x27;s computational revision.</p>
+<h3>4.2 Automatic update channel</h3>
+<p>The status-line <strong>Update</strong> action is a native application operation, not a link to the source repository. On macOS it asks the host to check the repository&#x27;s published immutable CentL26 snapshots, offers the newest qualified build for the current architecture, downloads it after confirmation, replaces <code>CentL26.app</code>, and relaunches the application. A browser-hosted development surface reports that updates require the native app and does not redirect elsewhere.</p>
+<p>The public name and bundle version remain CentL26 and <code>26.0.0</code>; the release and build manifests carry an internal build identity and monotonic sequence. Each technical release tag is unique, while its human-facing title remains exactly CentL26. A draft receives one architecture-specific ZIP, adjacent checksum, and release manifest; it becomes discoverable only when publishing freezes its tag and assets. Published snapshots are never replaced or deleted. Local ad-hoc or unpinned builds remain development artifacts and do not masquerade as installable updates.</p>
+<h2>5. Capability broker</h2>
+<p>The capability broker is the only supported application-level route from the CentL26 work surface to computation. It is a semantic firewall, dispatcher, and evidence coordinator; it is not another mathematics or physics engine.</p>
+<h3>5.1 Responsibilities</h3>
+<p>The broker must:</p>
+<ol><li>discover built-in, optional, and project-local capability manifests;</li><li>select by stable capability ID and compatible contract version;</li><li>validate request structure before execution;</li><li>enforce project policy, trust, resource, filesystem, network, and concurrency boundaries;</li><li>route deterministically to one declared adapter, never by undocumented fallback;</li><li>supervise start, progress, cancellation, timeout, crash, and retry behavior;</li><li>validate the returned envelope without reinterpreting scientific meaning;</li><li>commit immutable run, artifact, diagnostic, and receipt objects atomically;</li><li>report unavailable or incompatible work as such instead of manufacturing a substitute;</li><li>expose capability status separately from result assurance.</li></ol>
+<h3>5.2 Capability manifest</h3>
+<p>Every provider supplies a signed or installation-trusted manifest containing at least:</p>
+<pre><code class="language-text">capability_id
+contract_versions
+provider_id
+adapter_version
+backend_identity_and_build
+domain_and_operations
+maturity: stable | preview | experimental | disabled
+assurance_classes_the_provider_may_report
+determinism_and_replay_properties
+required_permissions
+resource_limits
+input_and_output_schema_digests
+receipt_and_evidence_schema_versions
+platform_constraints
+license_and_provenance</code></pre>
+<p>Capability maturity describes product support. Assurance describes a specific result. A stable capability can return <code>unsupported</code>; an experimental provider can produce a deterministically replayable result without thereby becoming verified core.</p>
+<p>Stable IDs describe meaning, not a binary name. Representative families are:</p>
+<pre><code class="language-text">org.fcf.centl.math.evaluate
+org.fcf.centl.math.verify
+org.fcf.centl.numerics.enclose
+org.fcf.centl.physics.convert
+org.fcf.centl.physics.simulate
+org.fcf.centl.chemistry.compute
+org.fcf.centl.sci.interpret
+org.fcf.centl.research.erdos_straus
+org.fcf.centl.mirage.develop
+org.fcf.centl.caravan.retrieve
+org.fcf.centl.search.rank</code></pre>
+<p>The examples establish a namespace, not a declaration that every listed contract is currently implemented or stable.</p>
+<h3>5.3 Request and result envelopes</h3>
+<p>A broker request contains:</p>
+<ul><li>request and run IDs;</li><li>project ID and exact input revision;</li><li>capability ID and accepted contract range;</li><li>typed operation and references to input objects;</li><li>explicit parameters, assumptions, units, and requested assurance where applicable;</li><li>time, memory, output, filesystem, and network budgets;</li><li>user cancellation token and project policy identity.</li></ul>
+<p>A broker result contains:</p>
+<ul><li>terminal state: completed, partial, unsupported, rejected, cancelled, timed out, or failed;</li><li>typed values and/or artifact references;</li><li>executor-returned evidence and assurance classification;</li><li>residuals, assumptions, bounds, warnings, and diagnostics;</li><li>provider, adapter, backend, contract, schema, and build identity;</li><li>input/output digests, timing, resource use, and replay information;</li><li>the immutable receipt reference.</li></ul>
+<p>The renderer may format this envelope but may not promote its assurance, erase its residuals, infer absent values, or replace it with model-generated output.</p>
+<h3>5.4 Provider isolation</h3>
+<p>Built-in verified engines may run in-process only when their memory-safety, failure, and cancellation properties justify it. Native kernels, model runtimes, research programs, user extensions, and third-party tools normally run in supervised workers with narrowly granted filesystem and network access.</p>
+<p>A worker crash fails its run, not the project or application. Restart and retry are explicit events. A retry receives a new run ID and links to the failed attempt; history is never rewritten to make the failure disappear.</p>
+<h2>6. Backend unification map</h2>
+<p>The existing system is integrated by adapter and contract, not by renaming all source modules or merging all numerical implementations immediately.</p>
+<table class="directory"><thead><tr><th>Existing family</th><th>CentL26 role</th><th>Integration rule</th></tr></thead><tbody><tr><td>CENTL OCaml/F*/native core</td><td>Exact mathematics, symbolic work, verification, and protocols</td><td>Remains authoritative for the contracts it owns; no UI reimplementation.</td></tr><tr><td>Rust web engine</td><td>Current exact/symbolic and numerical implementation used by the private host</td><td>Reconcile contract-by-contract with the authoritative core; duplicates require parity tests and an explicit owner.</td></tr><tr><td>CENTL Physics</td><td>Typed quantities, constants, particles, worlds, collision/contact, and physics protocols</td><td>Exposed through typed physics contracts and evidence-preserving adapters.</td></tr><tr><td>CENTL Chemistry</td><td>Exact-first amount, constants, data, thermo, limiting-reagent, and model work</td><td>Enabled only for operations whose public contracts and assurance are qualified.</td></tr><tr><td>CENTL-SCi / Caramels</td><td>Conservative scientific intent compilation and presentation metadata</td><td>Produces validated IR; never supplies scientific truth or bypasses an engine.</td></tr><tr><td>BUILD / MIRAGE</td><td>Capability discovery, project-local development, review, materialization, and extension lifecycle</td><td>Runs in an assurance-separated development workspace with explicit promotion.</td></tr><tr><td>Research kernels</td><td>Bounded searches, expeditions, certificates, and analysis</td><td>Each kernel declares finite scope, grade, determinism, and artifact contracts.</td></tr><tr><td>CARAVAN</td><td>Verified retrieval, preservation, catalog, and optional collaboration transport</td><td>Optional network capability; retrieved bytes do not gain scientific authority from transport.</td></tr><tr><td>CENTLAMP</td><td>Search/rank protocol and evidence</td><td>Added only through versioned ranking contracts and replayable profiles.</td></tr><tr><td>Wellsprings, Camps, release records</td><td>Knowledge, provenance, and governance objects</td><td>Imported and linked as records; not treated as executors.</td></tr><tr><td>Public site and Hub</td><td>Publication and transitional access surfaces</td><td>They do not become the desktop runtime or its design authority.</td></tr></tbody></table>
+<p>Where two engines currently answer the same operation, CentL26 must not route between them opportunistically. The capability manifest identifies the owner; parity work runs as conformance testing or an explicitly requested comparison.</p>
+<h3>6.1 Current CentL26 implementation boundary</h3>
+<p>The shipping implementation is intentionally narrower than the target broker described above. Its current, testable boundary is:</p>
+<ul><li>one durable local <code>centl.project/1</code> project with one notebook, revisioned execution history, typed provider evidence, and atomic restart persistence;</li><li>a runtime-overlay capability registry at <code>GET /api/capabilities</code> and a project/notebook read model at <code>GET /api/workspace</code>;</li><li>built-in exact/symbolic mathematics, typed physics, and bounded Erdős–Straus execution, plus explicitly resolved <code>centl</code> rigorous-numerics and <code>centl-chem</code> chemistry providers;</li><li>one authenticated compatibility mutation route, <code>POST /api/run</code>, whose admitted results are persisted before the refreshed workbench is returned;</li><li>distinct Work, Projects, Tools, Data, Models, Research, and Build surfaces. Data objects, model/SCi execution, multi-project switching, and the BUILD/MIRAGE extension workbench report unavailable or planned status rather than presenting decorative controls as working product features.</li></ul>
+<p><code>POST /api/run</code> is not yet the complete typed broker envelope from Section 5. New capability families must not add more UI-only prefix routing; they should enter through a versioned request/response adapter and then migrate this compatibility route behind the same dispatcher.</p>
+<h2>7. Project object model</h2>
+<p>The CentL26 project format is year-neutral so projects survive annual product names. Its root schema begins at <code>centl.project/1</code>; it is not called <code>centl26.project</code>.</p>
+<pre><code class="language-text">Project
+├── Manifest and project policy
+├── Sources and documents
+├── Experiments
+│   ├── Notebooks
+│   │   └── typed cells
+│   ├── Workflows
+│   └── run collections
+├── Datasets and data views
+├── Mathematical, physical, and chemical models
+├── Programs, packages, and local extensions
+├── Runs (immutable attempts)
+├── Artifacts
+├── Receipts and evidence graph
+├── Environment lock and capability requirements
+├── Publications and exports
+└── Project history and migration journal</code></pre>
+<h3>7.1 Common object header</h3>
+<p>Every durable object has:</p>
+<ul><li>a stable project-scoped object ID;</li><li>a type ID and schema version;</li><li>a monotonic revision identity;</li><li>content and attachment digests;</li><li>created/modified provenance;</li><li>parent, dependency, and derived-from edges where applicable;</li><li>assurance and trust metadata where applicable;</li><li>deletion/tombstone state rather than ambiguous disappearance;</li><li>extension fields that preserve unknown compatible data.</li></ul>
+<p>Mutable authoring objects create revisions. Runs, receipts, and published artifacts are immutable; corrections create linked successors.</p>
+<h3>7.2 Principal types</h3>
+<ul><li><strong>Project</strong> — portable assurance, policy, naming, and storage boundary.</li><li><strong>Source/document</strong> — canonical code, structured text, report, protocol, or domain document.</li><li><strong>Experiment</strong> — a scientific question, method, assumptions, inputs, and related executions.</li><li><strong>Notebook</strong> — ordered narrative and executable cells; it is one project tool, not the product itself.</li><li><strong>Cell</strong> — typed source, note, protocol, dataset, visualization, or control unit with stable identity across edits.</li><li><strong>Dataset</strong> — typed data plus schema, units, provenance, import digest, and transformation lineage.</li><li><strong>Model</strong> — reusable mathematical, physical, chemical, search, or other domain representation.</li><li><strong>Workflow</strong> — explicit dependency graph of capability requests.</li><li><strong>Run</strong> — one immutable execution attempt against exact input revisions.</li><li><strong>Artifact</strong> — content-addressed plot, table, certificate, snapshot, report, binary, or exported result.</li><li><strong>Receipt</strong> — machine-readable claim about one execution and its evidence.</li><li><strong>Evidence edge</strong> — relation among input, executor, run, result, proof, enclosure, validation, or review records.</li><li><strong>Extension/package</strong> — user or third-party capability code with origin, permissions, tests, and assurance separated from the core.</li><li><strong>Environment lock</strong> — required capability contract ranges and the exact provider composition used for reproducibility.</li></ul>
+<h3>7.3 Storage requirements</h3>
+<p>The canonical form is a directory project suitable for version control and recovery. A portable archive may use <code>.centlproj</code>, but the internal schema and content digests—not the filename extension—define identity. Large immutable attachments live in a content-addressed store referenced by project objects.</p>
+<p>Writes are atomic. Before schema migration, CentL26 creates a recoverable snapshot and a migration journal. Cache, index, layout, hover, selection, transient console, and task-progress state are replaceable application state and must not be mistaken for authoritative project content.</p>
+<h2>8. Migration and compatibility</h2>
+<h3>8.1 Legacy application surfaces</h3>
+<p>Existing commands such as <code>centl</code>, <code>centl-physics</code>, and <code>centl-sci</code> remain supported automation and compatibility interfaces while their contracts are in use. CentL26 invokes engines through libraries or machine protocols; it never screen-scrapes their human terminal output.</p>
+<p><code>centl-lab</code> may become a transitional launcher alias for CentL26. <code>centl-web</code> and <code>centl-hub</code> remain separate publication/compatibility surfaces until their unique functions are either integrated or explicitly retired. None of these legacy executable names is the CentL26 product version.</p>
+<p>The current process-local Lab session format is not a durable project contract. If a historical build has no persistent source, CentL26 cannot claim to recover it. Any files or <code>.centllab</code> formats introduced during transition receive an explicit importer and are converted into the year-neutral project schema.</p>
+<h3>8.2 Project opening rules</h3>
+<p>When opening a project, CentL26 must choose exactly one of these states:</p>
+<ol><li><strong>read/write compatible</strong> — no migration required;</li><li><strong>migratable</strong> — backup, preview, migration, validation, and journal succeed;</li><li><strong>read-only preserved</strong> — content can be displayed/exported but safe writing is not possible;</li><li><strong>unsupported but intact</strong> — the application explains what is missing and does not modify the project;</li><li><strong>damaged</strong> — recovery tools operate on a copy and never conceal data loss.</li></ol>
+<p>Unknown object types and fields are preserved when safe. They are not discarded merely because the installed product cannot render them. Downgrade never silently rewrites a newer project.</p>
+<h3>8.3 Capability compatibility</h3>
+<p>Compatibility is negotiated from declared contract ranges, not inferred from binary filenames or product versions. An adapter may bridge an older backend only when conformance tests establish equivalent semantics. Incompatible providers are disabled with an actionable diagnostic; the broker does not guess at request translation.</p>
+<p>A newer provider may replay an old run only if the user requests replay. The original receipt continues to name the original executor and remains immutable. Recomputed results are linked comparisons, not replacements.</p>
+<h3>8.4 Release composition</h3>
+<p>Every product artifact contains a signed release manifest that pins:</p>
+<ul><li>product and source snapshot;</li><li>project/broker/receipt schema ranges;</li><li>built-in capability contracts and maturity;</li><li>adapters, backends, models, catalogs, and their digests;</li><li>optional components and platform constraints;</li><li>licenses, SBOM, signing identity, and reproducible-build evidence.</li></ul>
+<p>The historical Oasis SemVer line remains valid as backend and source history. A stable CentL26 release is still promoted from an exact Oasis-qualified snapshot; <strong>Oasis remains the quality declaration and CentL26 becomes the product identity</strong>. Release policy and automation must be updated together before the first final CentL26 tag so neither tag family is ambiguously called the main product version.</p>
+<h2>9. Release gates</h2>
+<p>Presence in the repository or capability registry is not release qualification. Each CentL26 release must pass the following gates on its exact signed composition.</p>
+<h3>9.1 Product and experience</h3>
+<ul><li>installs, launches, updates, opens files, and uninstalls as a desktop application without a general-purpose browser;</li><li>completes first-run and primary project workflows with networking disabled;</li><li>has no whole-application scroll at the declared laptop minimum viewport;</li><li>preserves central workspace priority when side and bottom panes are open;</li><li>supports keyboard-only command discovery, focus traversal, execution, cancellation, document switching, and panel control;</li><li>satisfies declared accessibility targets for contrast, scaling, semantics, motion, screen readers, and reduced-motion operation;</li><li>restores a useful window after restart or renderer/worker failure;</li><li>meets explicit cold-start, warm-start, interaction, memory, and large-project budgets for every supported platform.</li></ul>
+<h3>9.2 Scientific correctness and assurance</h3>
+<ul><li>authoritative engines pass their existing deterministic, protocol, verification, and domain suites;</li><li>adapters pass contract conformance and negative/refusal tests;</li><li>duplicate implementations pass parity tests for their shared declared domain;</li><li>unsupported, ambiguous, unbounded, and unjustified work remains visible;</li><li>assurance labels, assumptions, units, bounds, residuals, and provenance survive execution, rendering, copy, export, save, reopen, and replay;</li><li>semantic-model output cannot bypass IR validation or become scientific authority;</li><li>advertised capability status matches the signed manifest.</li></ul>
+<h3>9.3 Project integrity and compatibility</h3>
+<ul><li>atomic-write, crash-interruption, recovery, and content-digest tests pass;</li><li>migration fixtures cover every supported historical project schema;</li><li>migrations create and validate backups and do not lose unknown preserved data;</li><li>a supported previous release can open unchanged compatible projects;</li><li>immutable runs and receipts cannot be mutated through normal APIs;</li><li>export/import and archive round trips preserve authoritative content.</li></ul>
+<h3>9.4 Security and privacy</h3>
+<ul><li>native shell, broker, project parser, protocol adapters, worker supervisor, extension runtime, updater, and optional network services are threat-modeled;</li><li>project paths, archives, HTML/rendered output, IPC, loopback transport, and capability inputs pass adversarial tests;</li><li>workers receive least privilege and explicit resource limits;</li><li>local-only operation performs no analytics, remote font, CDN, update, model, or telemetry request without an explicit policy and user action;</li><li>dependencies, models, catalogs, and update artifacts are digest-checked and provenance-recorded;</li><li>security response, signing, rollback, and compromised-update procedures are documented and exercised.</li></ul>
+<h3>9.5 Packaging, reproducibility, and governance</h3>
+<ul><li>platform-native packages are signed/notarized where applicable and verified on clean supported systems;</li><li>the release artifact is reproducible or any remaining variance is documented and independently attributable;</li><li>SBOM, third-party notices, source obligations, model/data licenses, checksums, and release manifest ship with the product;</li><li>FCF identity and trademark use are correct without obscuring upstream provenance;</li><li>release notes distinguish stable, preview, experimental, unavailable, and removed capabilities;</li><li>the exact snapshot passes the complete Oasis qualification gate.</li></ul>
+<p>Release gates use platform-specific, measurable budgets fixed before release candidate testing. Targets are not weakened after results are observed merely to admit the candidate.</p>
+<h2>10. Phased backend unification</h2>
+<p>The product can become comprehensive without attempting a hazardous single-step rewrite.</p>
+<h3>Phase 0 — inventory and contract freeze</h3>
+<ul><li>enumerate every shipped executable, protocol, engine, schema, research kernel, data catalog, and assurance class;</li><li>identify duplicated semantics and name the current authority for each operation;</li><li>assign stable capability IDs and initial contract versions;</li><li>publish the first release-composition and compatibility matrices.</li></ul>
+<p><strong>Exit:</strong> every product-visible operation has an owner, contract, maturity, and</p>
+<p>evidence story, or is explicitly excluded.</p>
+<h3>Phase 1 — CentL26 shell and broker boundary</h3>
+<ul><li>package the existing private Lab renderer in an owned desktop window;</li><li>replace CENTL Lab branding with CentL26 and establish the restrained, viewport-bound work surface;</li><li>introduce application controller, capability registry, broker envelopes, and worker supervision;</li><li>route the already implemented mathematics, symbolic, physics, and Erdős–Straus slices through adapters.</li></ul>
+<p><strong>Exit:</strong> the app runs without a user browser, direct UI-to-engine paths are</p>
+<p>removed, and every execution has a broker receipt.</p>
+<h3>Phase 2 — durable project foundation</h3>
+<ul><li>implement <code>centl.project/1</code>, atomic persistence, revisions, recovery, artifact storage, environment locks, and migration tooling;</li><li>make notebooks, datasets, models, runs, receipts, and artifacts real project objects rather than illustrative UI;</li><li>add project search, command routing, and local layout persistence.</li></ul>
+<p><strong>Exit:</strong> complete projects survive crashes, upgrades, export/import, and</p>
+<p>offline reopening without evidence loss.</p>
+<h3>Phase 3 — authoritative scientific convergence</h3>
+<ul><li>reconcile Rust and OCaml/F*/native mathematical ownership contract by contract;</li><li>integrate full exact mathematics, rigorous numerics, verification, and typed physics protocols;</li><li>bind visualizations to artifact specifications that retain exactness, enclosures, units, and source revisions;</li><li>qualify chemistry operations individually as their contracts mature.</li></ul>
+<p><strong>Exit:</strong> primary mathematics and physics work no longer depends on duplicated</p>
+<p>UI semantics, and qualified chemistry appears only where honest.</p>
+<h3>Phase 4 — scientific interaction and research</h3>
+<ul><li>expose SCi as a conservative intent-to-IR capability with resident optional model workers;</li><li>make clarification, assumptions, interpreter path, and authoritative executor inspectable;</li><li>integrate bounded research kernels as expedition/run objects with grades, checkpoints, certificates, and comparison tools;</li><li>add domain-specific editors only when their object and capability contracts are durable.</li></ul>
+<p><strong>Exit:</strong> natural language and research workflows create reproducible project</p>
+<p>objects without weakening scientific authority.</p>
+<h3>Phase 5 — BUILD, MIRAGE, and extension workbench</h3>
+<ul><li>integrate discovery, planning, code, tests, review, evidence, snapshots, and materialization as project workflows;</li><li>isolate generated, external, and user-local code in supervised workers;</li><li>make permissions, provenance, test evidence, and assurance transitions explicit;</li><li>provide a documented capability SDK using the same broker contracts.</li></ul>
+<p><strong>Exit:</strong> users can extend CentL26 from inside the application while the verified</p>
+<p>core boundary remains intact.</p>
+<h3>Phase 6 — preservation, retrieval, and optional collaboration</h3>
+<ul><li>expose CARAVAN retrieval/preservation through explicit local and network policies;</li><li>add signed catalog, content-addressed exchange, publication, and recovery workflows;</li><li>integrate ranking/search protocols only after their policies and replay evidence are versioned;</li><li>keep remote execution, synchronization, and telemetry off by default unless a separately approved product policy changes that boundary.</li></ul>
+<p><strong>Exit:</strong> movement and preservation of projects are verifiable and do not confer</p>
+<p>scientific authority on transported content.</p>
+<h3>Phase 7 — compatibility retirement</h3>
+<ul><li>measure real use and parity before deprecating any legacy frontend;</li><li>retain CLI and machine protocols needed for automation;</li><li>ship importers before removing old project/file writers;</li><li>archive historical branding and release mappings;</li><li>remove a duplicate engine path only after contract ownership, replay, and migration evidence are complete.</li></ul>
+<p><strong>Exit:</strong> CentL26 is the clear main product without destroying useful automation,</p>
+<p>reproducibility, or access to historical work.</p>
+<h2>11. Architectural decisions that do not drift</h2>
+<p>The following are release-line invariants:</p>
+<ul><li>The application is <strong>CentL26</strong>; backend versions are not product versions.</li><li>The desktop application is not the public website in a browser.</li><li>The broker routes scientific meaning but does not invent it.</li><li>Projects and capability contracts are year-neutral and versioned independently.</li><li>A result&#x27;s assurance is component-local and evidence-backed.</li><li>Models interpret; authoritative engines compute and verify.</li><li>Unsupported work remains unsupported.</li><li>Runs and receipts are immutable.</li><li>Experimental capability can be present without being promoted.</li><li>FCF identity is visible, while upstream and backend provenance remains inspectable.</li><li>Comprehensiveness is achieved through coherent capabilities and progressive disclosure, not by placing every control on the first screen.</li></ul>
+<p>This architecture makes the annual product line simple for people while keeping the underlying scientific system precise: <strong>one CentL26 application, one project model, one capability boundary, and many independently versioned engines whose claims remain auditable.</strong></p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

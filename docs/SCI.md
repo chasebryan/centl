@@ -1,16 +1,14 @@
-# CENTL-SCi
+# CENTL-SCi Natural Language Problem Solver
 
-Status: active development toward **CENTL-SCi `v0.0.2-Caramels`**. This document describes the Caramels development branch; it is not a claim that the release has been tagged or published.
+Status: **Integrated in CentL26.10 Official Universal Release**.
 
-**CENTL-SCi means Specific CENTL Interpreter.** It is developed as part of CENTL under the Free Computation Foundation.
+**CENTL-SCi means Specific CENTL Interpreter.** It is the offline natural-language STEM problem-solving engine and local interaction layer of CentL26.
 
 > Free for science.
 
-CENTL-SCi is a local interaction and interpretation layer for mathematics, physics, and user-owned CENTL extension. It is not a general-purpose chatbot and it is not a second mathematical or physics evaluator.
+CENTL-SCi parses and solves STEM questions formulated in plain English across mathematics, physics, stoichiometry/chemistry, calculus, and geometry. It automatically structures natural-language problem statements into verified canonical representations, dispatches them to CentL26's deterministic computational engines, and provides step-by-step explanations backed by exact mathematical receipts.
 
-Its scientific job is to interpret a problem, produce a validated representation, dispatch that representation to CENTL's deterministic machinery, and present only what the resulting evidence justifies.
-
-Its BUILD job is different: help the user inspect, extend, modify, and own their downstream CENTL environment while keeping local/generated/external assurance visibly separate from verified core assurance.
+When configured, it bridges optionally to the hybrid Gemini AI co-pilot with multi-model fallback (`2.5-flash` $\rightarrow$ `2.0-flash` $\rightarrow$ `1.5-flash` $\rightarrow$ `1.5-pro`) to decompose complex word problems into atomic CentL computational statements.
 
 ## Caramels interaction model
 

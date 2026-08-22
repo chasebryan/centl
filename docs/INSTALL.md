@@ -1,63 +1,57 @@
-# Install CENTL
+# Install CentL26 / CENTL
 
-CENTL has two GNU/Linux installation channels:
+**CentL26.10** is the official universal release of the Free Computation Foundation across **macOS** (Apple Silicon Arm64 & Intel), **GNU/Linux** (Debian, Ubuntu, Fedora, RHEL, Arch), and **Windows 11** (x64). All platforms provide 100% offline, deterministic scientific computing backed by the same high-performance Rust core engine.
 
-- **Oasis** is the qualified stable product and the recommended default.
-- **Mirage** is the rolling development product. It begins from the current Oasis baseline and may contain newer experimental work that has not earned Oasis qualification.
+---
 
-The channels install independently and can coexist on the same machine.
+## 1-Command Universal Installation
 
-CENTL's qualified native release target is currently **GNU/Linux x86_64**. macOS and Windows use the current Camp software through [CENTL Marsa](CENTL-MARSA.md); those ports are not Oasis declarations.
+### 1. macOS (Apple Silicon & Intel)
 
-## Install only what you need
-
-The full CENTL bundle is convenient, but it is not mandatory.
-
-If you want exactly one public scientific command on GNU/Linux x86_64, use the component installer:
+Run the universal setup script from the terminal:
 
 ```sh
-curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install-component
+# Automated 1-Command Setup:
+./install.sh
+
+# Or compile and launch the native AppKit/WebKit application bundle:
+./desktop/centl26/macos/build.sh
+open build/centl26/macos/CentL26.app
 ```
 
-Then choose one component:
+### 2. GNU/Linux (Debian, Ubuntu, Fedora, RHEL, Arch)
 
 ```sh
-# exact mathematics only
-sh install-component --component centl
+# Automated 1-Command Setup (Installs binary, desktop launcher, and hicolor icons):
+./install.sh
 
-# typed exact-first physics only
-sh install-component --component physics
-
-# CENTL-SCi interpreter only
-sh install-component --component sci
+# Or run the dedicated Linux installer:
+sh scripts/install-linux.sh
+centl26
 ```
 
-The Oasis component installer downloads a **component-specific archive**. It does not first download the full three-command product and discard the commands you did not ask for.
+### 3. Windows 11 (PowerShell & Terminal)
 
-Each component archive contains only the selected public launcher/executable plus the shared runtime libraries, license material, and provenance metadata required to run and redistribute it correctly. It does not contain the other two public command executables.
+```powershell
+# Automated 1-Command PowerShell Setup (Installs binary, Start Menu & Desktop shortcuts):
+.\install.ps1
 
-Typical scientist choices are:
+# Or 1-click batch launcher:
+.\desktop\centl26\windows\CentL26.bat
+```
 
-| Need | Install |
-| --- | --- |
-| Pure formal mathematics | `--component centl` |
-| Typed physics only | `--component physics` |
-| Natural-language scientific interaction only | `--component sci` |
-| Mathematics + SCi, no Physics command | install `centl`, then `sci` |
-| Physics + direct mathematics, no SCi | install `physics`, then `centl` |
-| Everything | use the full installer below |
-
-For field-specific guidance, start with [🧮 📐 Mathematician onboarding](MATHEMATICIANS.md) or [⚛️ 🔬 Physicist onboarding](PHYSICISTS.md).
-
-On macOS and Windows, `CENTL-Marsa` provides the same installed-command selection through:
+### 4. Cross-Platform Local Web Browser
 
 ```sh
-sh scripts/marsa-install --component centl
-sh scripts/marsa-install --component physics
-sh scripts/marsa-install --component sci
+cargo run --release --bin centl26
+# Open http://127.0.0.1:2626
 ```
 
-Marsa currently builds from the shared source graph, so its source checkout still contains shared build code. Its **installed command surface** is selective. See [CENTL Marsa](CENTL-MARSA.md).
+---
+
+## Component & Legacy Installation
+
+For developers or headless Linux environments requiring single-command tools (`centl`, `centl-physics`, `centl-sci`), component installation remains available:
 
 ## Quick full install
 

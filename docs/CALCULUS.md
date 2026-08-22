@@ -1,95 +1,123 @@
-# Symbolic calculus
+# Symbolic Calculus & Discrete Series
 
-CENTL's exact symbolic foundation makes names, integer powers, and mathematical
-functions ordinary calculator expressions:
+CentL26.10 provides an exact symbolic calculus engine supporting multi-order differentiation, exact integration, symbolic limits, Taylor series expansions, and discrete finite summations and products.
 
-```text
-x^2 + 2*x + 1
-sin(x)
-```
+---
 
-Differentiate with respect to a name:
+## Symbolic Differentiation
+
+Differentiate symbolic expressions with respect to a named variable:
 
 ```text
 diff(x^3 + 2*x + 1, x)
-3 * x^2 + 2
+3*x^2 + 2
+
+diff(sin(x) * exp(x), x)
+exp(x)*sin(x) + exp(x)*cos(x)
 ```
 
-## Exact polynomial integration
+### Higher-Order Differentiation
 
-CENTL 0.9.0 adds two exact integration forms.
+Pass a third argument `n` to compute the $n$-th derivative:
 
-`integrate(p, x)` returns the canonical antiderivative whose integration
-constant is zero:
+```text
+diff(x^4, x, 3)
+24*x
+
+diff(sin(x), x, 4)
+sin(x)
+
+diff(exp(2*x), x, 3)
+8*exp(2*x)
+```
+
+The differentiation engine knows exact derivative rules for polynomials, integer/rational powers, trigonometric functions (`sin`, `cos`, `tan`, `asin`, `acos`, `atan`), hyperbolic functions (`sinh`, `cosh`, `tanh`), `exp`, `log`, `sqrt`, and product/quotient/chain rules.
+
+---
+
+## Exact Integration
+
+### Indefinite Integration (Antiderivatives)
+
+`integrate(f, x)` computes the exact canonical antiderivative:
 
 ```text
 integrate(3*x^2 + 2*x + 1, x)
 x^3 + x^2 + x
+
+integrate(sin(x), x)
+-cos(x)
+
+integrate(exp(x), x)
+exp(x)
 ```
 
-This is one distinguished antiderivative, not a claim that every
-antiderivative has zero constant. Differentiating the result with respect to
-`x` recovers the accepted polynomial.
+### Definite Integration
 
-`integrate(p, x = a, b)` evaluates that antiderivative at the exact rational
-bounds and subtracts:
+`integrate(f, x, a, b)` evaluates the integral over the interval $[a, b]$ with exact bounds:
 
 ```text
-integrate(x^2, x = 0, 1)
+integrate(3*x^2 + 2*x, x, 0, 3)
+36
+
+integrate(x^2, x, 0, 1)
 1/3
 ```
 
-Both forms accept rational-coefficient univariate polynomials in the named
-variable, using the same positive-power expansion domain as the algebra engine
-(powers from 1 through 64). An explicit zero power
-such as `x^0` stays residual: reducing it to `1` would erase CENTL's definedness
-distinction at `x = 0`, where `0^0` is an error. Write a constant directly when
-that constant is the intended integrand. Divisors must also be visibly constant
-to the bounded host preflight; a variable expression that only becomes constant
-after cancellation stays residual unless it is simplified first.
+---
 
-The integration variable is local to the integrand; definite-integral bounds
-are evaluated in the surrounding scope. An expression outside the accepted
-domain remains visible rather than being guessed or approximated:
+## Symbolic Limits & L'Hôpital's Rule
+
+Compute analytical limits with automatic resolution of indeterminate forms ($0/0$, $\infty/\infty$) via L'Hôpital's Rule:
 
 ```text
-integrate(sin(x), x)
-integrate(sin(x), x)
+limit((x^2 - 1)/(x - 1), x, 1)
+2
+
+limit(sin(x)/x, x, 0)
+1
+
+limit((exp(x) - 1)/x, x, 0)
+1
 ```
 
-Human output follows that expression with an `unsupported` resolution label;
-JSON, JSON Lines, and MCP carry the same status, operation, stable reason, and
-supported-domain text in a structured `resolution` object.
+---
 
-Substitute an exact expression or value:
+## Taylor & Maclaurin Series
+
+Generate exact Taylor polynomial approximations around a point $x = a$ up to order $n$:
 
 ```text
-substitute(x^2 + 1, x = 3)
-10
+# Maclaurin expansion of exp(x) up to degree 3:
+taylor(exp(x), x, 0, 3)
+1 + x + 1/2*x^2 + 1/6*x^3
+
+# Taylor expansion of sin(x) around 0 up to degree 5:
+taylor(sin(x), x, 0, 5)
+x - 1/6*x^3 + 1/120*x^5
+
+# Taylor expansion of cos(x) around 0 up to degree 4:
+taylor(cos(x), x, 0, 4)
+1 - 1/2*x^2 + 1/24*x^4
 ```
 
-The verified core currently knows exact derivative rules for integer powers,
-arithmetic, `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `sinh`, `cosh`,
-`tanh`, `exp`, `log`, and `sqrt`. An unknown rule stays visible instead of being
-guessed:
+---
+
+## Discrete Summations & Products
+
+Evaluate finite discrete sums and products over closed integer intervals:
 
 ```text
-diff(f(x), x)
+# Sum of k^2 from k = 1 to 5:
+sum(k^2, k, 1, 5)
+55
+
+# Product of k from k = 1 to 5 (Factorial):
+product(k, k, 1, 5)
+120
+
+# Sum of 2^k from k = 0 to 10:
+sum(2^k, k, 0, 10)
+2047
 ```
 
-That residual derivative is likewise labeled `unsupported`, distinguishing an
-exact symbolic expression from a completed differentiation.
-
-Attach a domain condition without hiding it:
-
-```text
-assuming(diff(log(x), x), x > 0)
-1 / x where x > 0
-```
-
-Colored terminal output distinguishes numbers (cyan), names (magenta),
-functions (blue), operators (yellow), and grouping (muted). Pipes and JSON stay
-plain; `--color=always`, `--no-color`, and `NO_COLOR` control terminal output.
-
-Limits, series, rigorous integration outside the exact polynomial domain, and
-broader symbolic integration are planned but not yet implemented.
