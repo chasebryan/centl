@@ -222,6 +222,56 @@ impl BigInt {
         let div = &a.abs() / &g;
         &div * &b.abs()
     }
+
+    pub fn sqrt(&self) -> Result<BigInt, String> {
+        if !self.sign && !self.is_zero() {
+            return Err("cannot compute square root of negative integer".to_string());
+        }
+        if self.is_zero() || self.is_one() {
+            return Ok(self.clone());
+        }
+        let f = self.to_f64();
+        let mut x = if f.is_finite() && f > 0.0 {
+            BigInt::from_u64(f.sqrt().round().max(1.0) as u64)
+        } else {
+            let mut s = BigInt::one();
+            for _ in 0..(self.digits.len() / 2 + 1) {
+                s = &s * &BigInt::from_i64(1_000_000);
+            }
+            s
+        };
+        if x.is_zero() {
+            x = BigInt::one();
+        }
+        let two = BigInt::from_i64(2);
+        loop {
+            let div_val = self / &x;
+            let next_x = &(&x + &div_val) / &two;
+            if next_x >= x {
+                break;
+            }
+            x = next_x;
+        }
+        Ok(x)
+    }
+
+    pub fn exact_sqrt(&self) -> Option<BigInt> {
+        if !self.sign && !self.is_zero() {
+            return None;
+        }
+        if self.is_zero() {
+            return Some(BigInt::zero());
+        }
+        if self.is_one() {
+            return Some(BigInt::one());
+        }
+        if let Ok(s) = self.sqrt() {
+            if &(&s * &s) == self {
+                return Some(s);
+            }
+        }
+        None
+    }
 }
 
 impl PartialOrd for BigInt {
@@ -530,6 +580,10 @@ impl BigRational {
         }
     }
 
+    pub fn is_one(&self) -> bool {
+        self.numer.is_one() && self.denom.is_one()
+    }
+
     pub fn one() -> Self {
         BigRational {
             numer: BigInt::one(),
@@ -639,6 +693,15 @@ impl BigRational {
 
     pub fn to_f64(&self) -> f64 {
         self.numer.to_f64() / self.denom.to_f64()
+    }
+
+    pub fn exact_sqrt(&self) -> Option<BigRational> {
+        if self.is_negative() {
+            return None;
+        }
+        let num_sq = self.numer.exact_sqrt()?;
+        let den_sq = self.denom.exact_sqrt()?;
+        Some(BigRational::new(num_sq, den_sq))
     }
 
     pub fn to_decimal_string(&self, digits: usize) -> String {

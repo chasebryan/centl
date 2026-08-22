@@ -632,20 +632,24 @@ pub fn try_solve_natural_arithmetic(prompt: &str, session: &mut Session) -> Opti
         } else {
             core["sqrt of ".len()..].trim()
         };
-        let cmd = format!("sqrt({})", val);
-        if let Ok(res) = evaluate(&cmd, session) {
-            return Some(SciSolution {
-                summary: format!("Square Root Calculation: √({})", val),
-                steps: vec![
-                    format!("Radicand: {}", val),
-                    format!("Exact evaluation: {}", res.text),
-                ],
-                exact_result: Some(res.text),
-                approximate_result: res.approximate,
-                domain: "Algebra",
-                confidence: "Exact Radical / Rational",
-                raw_centl_command: Some(cmd),
-            });
+        let val_lower = val.to_ascii_lowercase();
+        let has_compound_words = val_lower.contains("plus") || val_lower.contains("minus") || val_lower.contains("times") || val_lower.contains("multiplied") || val_lower.contains("divided") || val_lower.contains(" and ");
+        if !has_compound_words {
+            let cmd = format!("sqrt({})", val);
+            if let Ok(res) = evaluate(&cmd, session) {
+                return Some(SciSolution {
+                    summary: format!("Square Root Calculation: √({})", val),
+                    steps: vec![
+                        format!("Radicand: {}", val),
+                        format!("Exact evaluation: {}", res.text),
+                    ],
+                    exact_result: Some(res.text),
+                    approximate_result: res.approximate,
+                    domain: "Arithmetic",
+                    confidence: "Exact Radical / Rational",
+                    raw_centl_command: Some(cmd),
+                });
+            }
         }
     }
     if core_lower.starts_with("cube root of ") || core_lower.starts_with("cbrt of ") {
@@ -654,20 +658,24 @@ pub fn try_solve_natural_arithmetic(prompt: &str, session: &mut Session) -> Opti
         } else {
             core["cbrt of ".len()..].trim()
         };
-        let cmd = format!("cbrt({})", val);
-        if let Ok(res) = evaluate(&cmd, session) {
-            return Some(SciSolution {
-                summary: format!("Cube Root Calculation: ∛({})", val),
-                steps: vec![
-                    format!("Radicand: {}", val),
-                    format!("Exact evaluation: {}", res.text),
-                ],
-                exact_result: Some(res.text),
-                approximate_result: res.approximate,
-                domain: "Algebra",
-                confidence: "Exact Radical / Rational",
-                raw_centl_command: Some(cmd),
-            });
+        let val_lower = val.to_ascii_lowercase();
+        let has_compound_words = val_lower.contains("plus") || val_lower.contains("minus") || val_lower.contains("times") || val_lower.contains("multiplied") || val_lower.contains("divided") || val_lower.contains(" and ");
+        if !has_compound_words {
+            let cmd = format!("cbrt({})", val);
+            if let Ok(res) = evaluate(&cmd, session) {
+                return Some(SciSolution {
+                    summary: format!("Cube Root Calculation: ∛({})", val),
+                    steps: vec![
+                        format!("Radicand: {}", val),
+                        format!("Exact evaluation: {}", res.text),
+                    ],
+                    exact_result: Some(res.text),
+                    approximate_result: res.approximate,
+                    domain: "Arithmetic",
+                    confidence: "Exact Radical / Rational",
+                    raw_centl_command: Some(cmd),
+                });
+            }
         }
     }
 

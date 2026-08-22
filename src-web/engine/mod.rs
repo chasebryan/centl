@@ -309,29 +309,32 @@ pub fn evaluate_single(input: &str, session: &mut Session) -> Result<ExecutionRe
     // Handle variable assignments: var = expr
     if let Expr::Equation(lhs, rhs) = &expr {
         if let Expr::Variable(var_name) = lhs.as_ref() {
-            let eval_rhs = eval_expr(rhs, session)?;
-            let text = format!("{} = {}", var_name, eval_rhs);
-            let exact = match &eval_rhs {
-                Expr::Number(n) => Some(n.clone()),
-                _ => None,
-            };
-            session.variables.insert(var_name.clone(), eval_rhs.clone());
-            let exec_res = ExecutionResult {
-                text,
-                exact_rational: exact,
-                approximate: None,
-                symbolic_expr: Some(Expr::Equation(lhs.clone(), Box::new(eval_rhs))),
-                execution_micros: start_time.elapsed().as_micros(),
-            };
-            session.history.push(HistoryEntry {
-                command: trimmed.to_string(),
-                result: exec_res.text.clone(),
-                exact_repr: exec_res.exact_rational.as_ref().map(|r| format!("{}", r)),
-                approximate_repr: None,
-                execution_micros: exec_res.execution_micros,
-                success: true,
-            });
-            return Ok(exec_res);
+            let rhs_vars = rhs.free_variables();
+            if !rhs_vars.contains(var_name) {
+                let eval_rhs = eval_expr(rhs, session)?;
+                let text = format!("{} = {}", var_name, eval_rhs);
+                let exact = match &eval_rhs {
+                    Expr::Number(n) => Some(n.clone()),
+                    _ => None,
+                };
+                session.variables.insert(var_name.clone(), eval_rhs.clone());
+                let exec_res = ExecutionResult {
+                    text,
+                    exact_rational: exact,
+                    approximate: None,
+                    symbolic_expr: Some(Expr::Equation(lhs.clone(), Box::new(eval_rhs))),
+                    execution_micros: start_time.elapsed().as_micros(),
+                };
+                session.history.push(HistoryEntry {
+                    command: trimmed.to_string(),
+                    result: exec_res.text.clone(),
+                    exact_repr: exec_res.exact_rational.as_ref().map(|r| format!("{}", r)),
+                    approximate_repr: None,
+                    execution_micros: exec_res.execution_micros,
+                    success: true,
+                });
+                return Ok(exec_res);
+            }
         }
     }
 
@@ -590,29 +593,46 @@ pub fn evaluate_single(input: &str, session: &mut Session) -> Result<ExecutionRe
                     Expr::Variable(v) => v.as_str(),
                     _ => "x",
                 };
-                let degree = if args.len() >= 3 {
-                    match &args[2] {
-                        Expr::Number(n) => n.numer.to_i64().unwrap_or(4).max(1).min(10) as usize,
+                let (center_rat, degree) = if args.len() >= 4 {
+                    let c = match &args[2] {
+                        Expr::Number(n) => n.clone(),
+                        _ => BigRational::zero(),
+                    };
+                    let d = match &args[3] {
+                        Expr::Number(n) => n.numer.to_i64().unwrap_or(4).max(1).min(20) as usize,
                         _ => 4,
-                    }
+                    };
+                    (c, d)
+                } else if args.len() >= 3 {
+                    let d = match &args[2] {
+                        Expr::Number(n) => n.numer.to_i64().unwrap_or(4).max(1).min(20) as usize,
+                        _ => 4,
+                    };
+                    (BigRational::zero(), d)
                 } else {
-                    4
+                    (BigRational::zero(), 4)
                 };
+                let center_expr = Expr::Number(center_rat.clone());
                 let mut terms = Vec::new();
                 let mut current_deriv = target.clone();
                 for k in 0..=degree {
-                    let coeff_expr = current_deriv.substitute(var_name, &Expr::num(0)).simplify();
+                    let coeff_expr = current_deriv.substitute(var_name, &center_expr).simplify();
                     let fact = crate::engine::functions::factorial(k as u64).unwrap_or_else(|_| BigInt::one());
                     let fact_rat = BigRational::from_bigint(fact);
                     let term = match coeff_expr {
                         Expr::Number(ref n) if !n.is_zero() => {
                             let coeff = n / &fact_rat;
+                            let delta_var = if center_rat.is_zero() {
+                                Expr::var(var_name)
+                            } else {
+                                Expr::Sub(Box::new(Expr::var(var_name)), Box::new(center_expr.clone()))
+                            };
                             if k == 0 {
                                 Some(Expr::Number(coeff))
                             } else if k == 1 {
-                                Some(Expr::Mul(Box::new(Expr::Number(coeff)), Box::new(Expr::var(var_name))).simplify())
+                                Some(Expr::Mul(Box::new(Expr::Number(coeff)), Box::new(delta_var)).simplify())
                             } else {
-                                Some(Expr::Mul(Box::new(Expr::Number(coeff)), Box::new(Expr::Pow(Box::new(Expr::var(var_name)), k as i32))).simplify())
+                                Some(Expr::Mul(Box::new(Expr::Number(coeff)), Box::new(Expr::Pow(Box::new(delta_var), k as i32))).simplify())
                             }
                         }
                         _ => None,
@@ -696,6 +716,132 @@ pub fn evaluate_single(input: &str, session: &mut Session) -> Result<ExecutionRe
                     exact_rational: None,
                     approximate: None,
                     symbolic_expr: None,
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+            "sum" if args.len() == 4 => {
+                let target = &args[0];
+                let var_name = match &args[1] {
+                    Expr::Variable(v) => v.as_str(),
+                    _ => "k",
+                };
+                let lower_val = eval_expr(&args[2], session)?;
+                let upper_val = eval_expr(&args[3], session)?;
+                let start = match lower_val {
+                    Expr::Number(n) => n.numer.to_i64().unwrap_or(1),
+                    _ => 1,
+                };
+                let end = match upper_val {
+                    Expr::Number(n) => n.numer.to_i64().unwrap_or(10),
+                    _ => 10,
+                };
+                if end < start || (end - start) > 100_000 {
+                    return Err(format!("sum bounds must satisfy start <= end and span <= 100,000 (got {} to {})", start, end));
+                }
+                let mut total_rat: Option<BigRational> = Some(BigRational::zero());
+                let mut total_expr: Expr = Expr::num(0);
+                for k in start..=end {
+                    let k_expr = Expr::num(k);
+                    let sub = target.substitute(var_name, &k_expr);
+                    let eval_k = eval_expr(&sub, session)?;
+                    if let (Some(ref acc), Expr::Number(ref n)) = (&total_rat, &eval_k) {
+                        total_rat = Some(acc + n);
+                    } else {
+                        total_rat = None;
+                        total_expr = Expr::Add(Box::new(total_expr), Box::new(eval_k)).simplify();
+                    }
+                }
+                let (text, exact) = if let Some(rat) = total_rat {
+                    (format!("{}", rat), Some(rat))
+                } else {
+                    (format!("{}", total_expr), None)
+                };
+                ExecutionResult {
+                    text,
+                    exact_rational: exact,
+                    approximate: None,
+                    symbolic_expr: None,
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+            "product" if args.len() == 4 => {
+                let target = &args[0];
+                let var_name = match &args[1] {
+                    Expr::Variable(v) => v.as_str(),
+                    _ => "k",
+                };
+                let lower_val = eval_expr(&args[2], session)?;
+                let upper_val = eval_expr(&args[3], session)?;
+                let start = match lower_val {
+                    Expr::Number(n) => n.numer.to_i64().unwrap_or(1),
+                    _ => 1,
+                };
+                let end = match upper_val {
+                    Expr::Number(n) => n.numer.to_i64().unwrap_or(10),
+                    _ => 10,
+                };
+                if end < start || (end - start) > 100_000 {
+                    return Err(format!("product bounds must satisfy start <= end and span <= 100,000 (got {} to {})", start, end));
+                }
+                let mut total_rat: Option<BigRational> = Some(BigRational::one());
+                let mut total_expr: Expr = Expr::num(1);
+                for k in start..=end {
+                    let k_expr = Expr::num(k);
+                    let sub = target.substitute(var_name, &k_expr);
+                    let eval_k = eval_expr(&sub, session)?;
+                    if let (Some(ref acc), Expr::Number(ref n)) = (&total_rat, &eval_k) {
+                        total_rat = Some(acc * n);
+                    } else {
+                        total_rat = None;
+                        total_expr = Expr::Mul(Box::new(total_expr), Box::new(eval_k)).simplify();
+                    }
+                }
+                let (text, exact) = if let Some(rat) = total_rat {
+                    (format!("{}", rat), Some(rat))
+                } else {
+                    (format!("{}", total_expr), None)
+                };
+                ExecutionResult {
+                    text,
+                    exact_rational: exact,
+                    approximate: None,
+                    symbolic_expr: None,
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+            "limit" if args.len() >= 3 => {
+                let target = &args[0];
+                let var_name = match &args[1] {
+                    Expr::Variable(v) => v.as_str(),
+                    _ => "x",
+                };
+                let target_point = eval_expr(&args[2], session)?;
+                let sub = target.substitute(var_name, &target_point).simplify();
+                let is_indeterminate = match &sub {
+                    Expr::Div(num, den) => num.is_zero() && den.is_zero(),
+                    _ => false,
+                };
+                let limit_res = if is_indeterminate {
+                    if let Expr::Div(num, den) = target {
+                        let d_num = num.diff(var_name);
+                        let d_den = den.diff(var_name);
+                        Expr::Div(Box::new(d_num), Box::new(d_den)).substitute(var_name, &target_point).simplify()
+                    } else {
+                        sub
+                    }
+                } else {
+                    sub
+                };
+                let text = format!("{}", limit_res);
+                let exact = match &limit_res {
+                    Expr::Number(n) => Some(n.clone()),
+                    _ => None,
+                };
+                ExecutionResult {
+                    text,
+                    exact_rational: exact,
+                    approximate: None,
+                    symbolic_expr: Some(limit_res),
                     execution_micros: start_time.elapsed().as_micros(),
                 }
             }
@@ -1389,6 +1535,53 @@ pub fn evaluate_single(input: &str, session: &mut Session) -> Result<ExecutionRe
                 }
             }
         },
+        Expr::Equation(lhs, rhs) => {
+            let diff = Expr::Sub(lhs.clone(), rhs.clone());
+            let vars = diff.free_variables();
+            if vars.len() == 1 {
+                let var_name = &vars[0];
+                let roots = diff.solve(var_name)?;
+                let root_strs: Vec<String> = roots.iter().map(|r| format!("{} = {}", var_name, r)).collect();
+                let text = root_strs.join(", ");
+                let exact = if roots.len() == 1 {
+                    match &roots[0] {
+                        Expr::Number(n) => Some(n.clone()),
+                        _ => None,
+                    }
+                } else {
+                    None
+                };
+                ExecutionResult {
+                    text,
+                    exact_rational: exact,
+                    approximate: None,
+                    symbolic_expr: None,
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            } else if vars.is_empty() {
+                let el = eval_expr(lhs, session)?;
+                let er = eval_expr(rhs, session)?;
+                let diff_eval = Expr::Sub(Box::new(el), Box::new(er)).simplify();
+                let is_equal = diff_eval.is_zero();
+                let text = if is_equal { "true".to_string() } else { "false".to_string() };
+                ExecutionResult {
+                    text,
+                    exact_rational: Some(BigRational::from_u64(if is_equal { 1 } else { 0 })),
+                    approximate: None,
+                    symbolic_expr: None,
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            } else {
+                let text = format!("{} = {}", lhs, rhs);
+                ExecutionResult {
+                    text,
+                    exact_rational: None,
+                    approximate: None,
+                    symbolic_expr: Some(expr.clone()),
+                    execution_micros: start_time.elapsed().as_micros(),
+                }
+            }
+        }
         _ => {
             let eval = eval_expr(&expr, session)?;
             let text = format!("{}", eval);
