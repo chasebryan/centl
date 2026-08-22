@@ -31,25 +31,11 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="style.css?v=6">
-  <link rel="stylesheet" href="library-layout.css?v=5">
+  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="library-layout.css?v=6">
 </head>
 <body>
-<!-- 9-Second Soft Cosmic Aura Overlay -->
-<div id="fcf-aura-intro" class="fcf-aura-overlay" onclick="this.style.opacity='0';setTimeout(()=>this.remove(),600);">
-  <div class="aura-glow-orb"></div>
-  <div class="aura-content-box">
-    <div class="aura-badge">// INITIALIZING QUANTUM COMPUTATIONAL MATRIX //</div>
-    <h1 class="aura-title">Free Computation Foundation</h1>
-    <p class="aura-subtitle">INSTITUTE FOR ADVANCED COMPUTATIONAL SCIENCE · CENTL26.10</p>
-    <div class="aura-telemetry-strip">
-      <span class="aura-telemetry-item"><span class="aura-dot"></span>SYS.ONLINE</span>
-      <span class="aura-telemetry-item">PRECISION: EXACT RATIONAL</span>
-      <span class="aura-telemetry-item">AEROSPACE GRADE DETERMINISTIC CAS</span>
-    </div>
-    <div class="aura-dismiss-hint">[Click anywhere to enter]</div>
-  </div>
-</div>
+<canvas id="space-drift-canvas"></canvas>
 
 <div class="shell" id="top">
   <a class="skip" href="#content">Skip to content</a>
@@ -60,7 +46,7 @@
         <strong>FCF</strong>
         <div class="brand-meta">
           <span>Free Computation Foundation</span>
-          <small>Advanced Computational Science &amp; Research · CentL26.10</small>
+          <small>Advanced Computational Science · CentL26.10</small>
         </div>
       </a>
     </div>
@@ -110,10 +96,19 @@
     </nav>
 
     <main id="content">
-      <!-- High-Tech Quantum Canvas Hero -->
+      <!-- High-Tech Hero with 9-Second Cosmic Aura Banner -->
       <section class="hero-wrapper">
         <canvas id="quantum-canvas"></canvas>
         <div class="hero-content">
+          <div class="fcf-cosmic-aura-banner" id="fcf-aura-banner">
+            <div class="aura-halo-glow"></div>
+            <div class="aura-brand-lockup">
+              <span class="aura-kicker">// QUANTUM RESEARCH MATRIX ACTIVE //</span>
+              <h1 class="aura-glowing-title">Free Computation Foundation</h1>
+              <p class="aura-glowing-tagline">INSTITUTE FOR ADVANCED COMPUTATIONAL SCIENCE · CENTL26.10</p>
+            </div>
+          </div>
+
           <div class="hero-badges">
             <span class="hero-badge highlight">[FLAGSHIP] CENTL26.10 UNIVERSAL RELEASE</span>
             <span class="hero-badge">[CORE] EXACT RATIONAL CAS</span>
@@ -121,7 +116,6 @@
             <span class="hero-badge">[PLATFORMS] MACOS · LINUX · WINDOWS 11</span>
           </div>
 
-          <h1>The Sovereign Scientific Computing Laboratory</h1>
           <p>The Free Computation Foundation develops exact-first computational platforms for theoretical physics, symbolic mathematics, chemical stoichiometry, and discrete consequence calculus. Deterministic execution with mathematical honesty: exact quantities remain exact, approximations carry certified interval enclosures, and cloud dependencies are completely eliminated.</p>
 
           <div class="hero-actions">

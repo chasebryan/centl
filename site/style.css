@@ -2,7 +2,7 @@
    FREE COMPUTATION FOUNDATION (FCF)
    INSTITUTE FOR ADVANCED COMPUTATIONAL SCIENCE & RESEARCH
    Flagship Platform: CentL26 Native Desktop Suite
-   Aesthetics: SpaceX Aerospace Precision · Google DeepMind AI Elegance · xAI Cosmic Aura
+   Design DNA: SpaceX Aerospace Industrial · Google DeepMind AI · xAI Cosmic Aura
    ========================================================================== */
 
 :root {
@@ -10,17 +10,17 @@
   
   /* Deep Space Cosmic Base */
   --bg-deep: #02040a;
-  --bg-surface: rgba(6, 11, 24, 0.72);
-  --bg-panel: rgba(10, 18, 38, 0.65);
-  --bg-panel-elevated: rgba(16, 28, 58, 0.78);
-  --bg-panel-hover: rgba(24, 42, 86, 0.9);
-  --bg-glass: rgba(8, 14, 30, 0.55);
+  --bg-surface: rgba(6, 11, 26, 0.55);
+  --bg-panel: rgba(10, 18, 42, 0.58);
+  --bg-panel-elevated: rgba(18, 30, 68, 0.72);
+  --bg-panel-hover: rgba(26, 46, 96, 0.85);
+  --bg-glass: rgba(8, 16, 36, 0.45);
   
   /* Luminous Aerospace & Quantum Energy Accents */
   --cyan-beam: #00f0ff;
   --cyan-bright: #38bdf8;
-  --cyan-glow: rgba(0, 240, 255, 0.4);
-  --cyan-border: rgba(56, 189, 248, 0.45);
+  --cyan-glow: rgba(0, 240, 255, 0.5);
+  --cyan-border: rgba(56, 189, 248, 0.5);
   
   --blue-primary: #0284c7;
   --blue-vibrant: #2563eb;
@@ -29,14 +29,14 @@
   
   --emerald-pure: #10b981;
   --emerald-bright: #34d399;
-  --emerald-glow: rgba(16, 185, 129, 0.35);
+  --emerald-glow: rgba(16, 185, 129, 0.4);
   
   --solar-orange: #f97316;
-  --solar-glow: rgba(249, 115, 22, 0.35);
+  --solar-glow: rgba(249, 115, 22, 0.4);
   
   --violet-quantum: #8b5cf6;
   --violet-bright: #a78bfa;
-  --violet-glow: rgba(139, 92, 246, 0.35);
+  --violet-glow: rgba(139, 92, 246, 0.4);
   
   --pink-sponsor: #ec4899;
   --pink-gradient: linear-gradient(135deg, #ec4899 0%, #db2777 50%, #be185d 100%);
@@ -50,8 +50,8 @@
   
   /* Laser Borders & Dividers */
   --border-subtle: rgba(255, 255, 255, 0.12);
-  --border-medium: rgba(255, 255, 255, 0.2);
-  --border-highlight: rgba(56, 189, 248, 0.5);
+  --border-medium: rgba(255, 255, 255, 0.22);
+  --border-highlight: rgba(56, 189, 248, 0.55);
   
   /* Typography */
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -61,12 +61,12 @@
   --radius-xs: 4px;
   --radius-sm: 8px;
   --radius-md: 14px;
-  --radius-lg: 22px;
+  --radius-lg: 24px;
   --radius-full: 9999px;
   
-  --shadow-panel: 0 20px 50px -10px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.12);
-  --shadow-glow-cyan: 0 0 32px rgba(0, 240, 255, 0.45);
-  --shadow-glow-blue: 0 8px 32px rgba(14, 165, 233, 0.45);
+  --shadow-panel: 0 24px 60px -12px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.12);
+  --shadow-glow-cyan: 0 0 36px rgba(0, 240, 255, 0.5);
+  --shadow-glow-blue: 0 8px 36px rgba(14, 165, 233, 0.5);
 }
 
 * { box-sizing: border-box; }
@@ -83,7 +83,13 @@ body {
   margin: 0;
   padding: 0;
   color: var(--text-primary);
-  background: transparent !important;
+  background: #02040a;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.22) 0%, transparent 55%),
+    radial-gradient(circle at 15% 40%, rgba(168, 85, 247, 0.16) 0%, transparent 45%),
+    radial-gradient(circle at 85% 65%, rgba(0, 240, 255, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.12) 0%, transparent 55%);
+  background-attachment: fixed;
   font: 15px/1.68 var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -93,7 +99,7 @@ body {
 }
 
 /* ==========================================================================
-   Fixed 3D Space Drift Background Canvas (High-Visibility)
+   Fixed 3D Space Drift Background Canvas (High-Visibility Layer)
    ========================================================================== */
 #space-drift-canvas {
   position: fixed !important;
@@ -101,9 +107,8 @@ body {
   left: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  z-index: 1 !important;
+  z-index: 0 !important;
   pointer-events: none !important;
-  background: radial-gradient(circle at 50% 20%, #060e24 0%, #02040a 100%);
 }
 
 a {
@@ -113,7 +118,7 @@ a {
 }
 a:hover {
   color: var(--cyan-beam);
-  text-shadow: 0 0 12px var(--cyan-glow);
+  text-shadow: 0 0 14px var(--cyan-glow);
 }
 
 .skip {
@@ -134,153 +139,111 @@ a:hover {
 .skip:focus { left: 16px; }
 
 /* ==========================================================================
-   9-Second Soft Cosmic Aura Overlay ("Free Computation Foundation")
+   9-Second Cosmic Aura Banner in Hero ("Free Computation Foundation")
    ========================================================================== */
-.fcf-aura-overlay {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 99999;
-  background: radial-gradient(circle at 50% 50%, rgba(6, 12, 30, 0.94) 0%, rgba(2, 4, 10, 0.98) 100%);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  cursor: pointer;
-  animation: auraContainerLife 9.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.fcf-cosmic-aura-banner {
+  position: relative;
+  margin: 0 0 28px;
+  padding: 32px 36px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.18) 0%, rgba(168, 85, 247, 0.14) 50%, rgba(6, 11, 26, 0.75) 100%);
+  border: 1px solid var(--border-highlight);
+  box-shadow: 0 0 40px rgba(14, 165, 233, 0.25), inset 0 0 30px rgba(0, 240, 255, 0.12);
   overflow: hidden;
+  animation: cosmicAuraIntro 9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes auraContainerLife {
-  0% { opacity: 0; visibility: visible; }
-  10% { opacity: 1; visibility: visible; }
-  85% { opacity: 1; visibility: visible; }
-  98% { opacity: 0; visibility: visible; }
-  100% { opacity: 0; visibility: hidden; pointer-events: none; }
+@keyframes cosmicAuraIntro {
+  0% {
+    box-shadow: 0 0 80px rgba(0, 240, 255, 0.6), inset 0 0 50px rgba(168, 85, 247, 0.4);
+    border-color: var(--cyan-beam);
+    transform: scale(0.99);
+  }
+  30% {
+    box-shadow: 0 0 100px rgba(168, 85, 247, 0.55), 0 0 50px rgba(0, 240, 255, 0.4), inset 0 0 40px rgba(14, 165, 233, 0.3);
+    border-color: rgba(168, 85, 247, 0.8);
+    transform: scale(1);
+  }
+  70% {
+    box-shadow: 0 0 70px rgba(0, 240, 255, 0.45), inset 0 0 30px rgba(0, 240, 255, 0.2);
+    border-color: var(--cyan-border);
+  }
+  100% {
+    box-shadow: 0 0 36px rgba(14, 165, 233, 0.2), inset 0 0 20px rgba(0, 240, 255, 0.08);
+    border-color: var(--border-highlight);
+  }
 }
 
-.aura-glow-orb {
+.aura-halo-glow {
   position: absolute;
-  width: 650px;
-  height: 650px;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 500px;
+  height: 250px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(0, 240, 255, 0.35) 0%, rgba(139, 92, 246, 0.28) 40%, rgba(14, 165, 233, 0.15) 70%, transparent 100%);
-  filter: blur(65px);
-  animation: auraPulse 6s ease-in-out infinite alternate;
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.35) 0%, rgba(139, 92, 246, 0.25) 50%, transparent 80%);
+  filter: blur(50px);
   pointer-events: none;
+  animation: haloBreathe 6s ease-in-out infinite alternate;
 }
 
-@keyframes auraPulse {
-  0% { transform: scale(0.85); opacity: 0.75; }
-  50% { transform: scale(1.2) rotate(15deg); opacity: 1; filter: blur(80px); }
-  100% { transform: scale(0.95) rotate(-10deg); opacity: 0.85; }
+@keyframes haloBreathe {
+  0% { opacity: 0.6; transform: translateX(-50%) scale(0.9); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1.15); }
 }
 
-.aura-content-box {
+.aura-brand-lockup {
   position: relative;
   z-index: 2;
-  text-align: center;
-  padding: 40px 24px;
-  max-width: 920px;
-  animation: auraContentFloat 9s ease-in-out forwards;
 }
 
-@keyframes auraContentFloat {
-  0% { transform: translateY(22px); opacity: 0; }
-  12% { transform: translateY(0); opacity: 1; }
-  85% { transform: translateY(0); opacity: 1; }
-  100% { transform: translateY(-16px); opacity: 0.8; }
-}
-
-.aura-badge {
+.aura-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 800;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.18em;
   color: var(--cyan-beam);
-  text-shadow: 0 0 16px var(--cyan-glow);
-  margin-bottom: 20px;
+  text-shadow: 0 0 14px var(--cyan-glow);
+  text-transform: uppercase;
+  margin-bottom: 12px;
 }
 
-.aura-title {
-  margin: 0 0 16px;
-  font: 900 clamp(38px, 5.2vw, 68px)/1.08 var(--font-sans);
+.aura-glowing-title {
+  margin: 0 0 10px;
+  font: 900 clamp(32px, 4.4vw, 54px)/1.1 var(--font-sans);
   letter-spacing: -0.04em;
   background: var(--iridescent-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 32px rgba(0, 240, 255, 0.5));
+  filter: drop-shadow(0 0 24px rgba(0, 240, 255, 0.45));
 }
 
-.aura-subtitle {
-  margin: 0 0 30px;
+.aura-glowing-tagline {
+  margin: 0 0 18px;
   font-family: var(--font-mono);
-  font-size: clamp(12.5px, 1.7vw, 15.5px);
-  font-weight: 750;
-  letter-spacing: 0.14em;
+  font-size: clamp(12px, 1.4vw, 14px);
+  font-weight: 700;
+  letter-spacing: 0.12em;
   color: var(--text-secondary);
   text-transform: uppercase;
 }
 
-.aura-telemetry-strip {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  padding: 10px 22px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--border-highlight);
-  border-radius: var(--radius-full);
-}
-
-.aura-telemetry-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-  font-weight: 750;
-  color: var(--text-white);
-  letter-spacing: 0.06em;
-}
-
-.aura-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--emerald-pure);
-  box-shadow: 0 0 12px var(--emerald-pure);
-}
-
-.aura-dismiss-hint {
-  margin-top: 24px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-muted);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.75;
-}
-
 /* ==========================================================================
-   Main Laboratory Shell
+   Main Laboratory Shell (Translucent Crystal Glass)
    ========================================================================== */
 .shell {
   width: min(1320px, 94vw);
   margin: 24px auto 70px;
   background: var(--bg-surface);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-panel);
+  box-shadow: var(--shadow-panel), 0 0 40px rgba(0, 240, 255, 0.08);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -296,7 +259,7 @@ a:hover {
   font-size: 16px;
   font-weight: 800;
   color: var(--cyan-beam);
-  opacity: 0.9;
+  opacity: 0.95;
   pointer-events: none;
   z-index: 20;
 }
@@ -404,7 +367,7 @@ a:hover {
   background: rgba(255, 255, 255, 0.08);
 }
 .masthead-nav a.nav-btn-highlight {
-  background: rgba(0, 240, 255, 0.15);
+  background: rgba(0, 240, 255, 0.16);
   border: 1px solid var(--cyan-border);
   color: var(--cyan-beam);
   font-family: var(--font-mono);
@@ -441,7 +404,7 @@ a:hover {
 /* High-Tech Aerospace Sidebar */
 nav {
   padding: 28px 18px 48px;
-  background: rgba(4, 8, 18, 0.68);
+  background: rgba(4, 8, 18, 0.7);
   border-right: 1px solid var(--border-subtle);
   font-family: var(--font-sans);
 }
@@ -453,7 +416,7 @@ nav h2 {
   text-transform: uppercase;
   letter-spacing: .14em;
   color: var(--cyan-beam);
-  opacity: 0.9;
+  opacity: 0.95;
 }
 nav h2:first-child { margin-top: 0; }
 nav ul { list-style: none; padding: 0; margin: 0; }
@@ -478,7 +441,7 @@ nav a:hover {
 }
 nav a.is-active, nav li.active a {
   color: #fff;
-  background: rgba(2, 132, 199, 0.22);
+  background: rgba(2, 132, 199, 0.25);
   border-left-color: var(--cyan-beam);
   font-weight: 750;
 }
@@ -527,13 +490,13 @@ main p {
   position: relative;
   margin: -10px 0 36px;
   padding: 38px 42px;
-  background: linear-gradient(135deg, rgba(13, 22, 44, 0.7) 0%, rgba(6, 10, 24, 0.85) 100%);
+  background: linear-gradient(135deg, rgba(13, 22, 44, 0.72) 0%, rgba(6, 10, 24, 0.85) 100%);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-highlight);
   border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(14, 165, 233, 0.08);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), inset 0 0 30px rgba(14, 165, 233, 0.1);
 }
 #quantum-canvas {
   position: absolute;
@@ -542,7 +505,7 @@ main p {
   height: 100%;
   pointer-events: auto;
   z-index: 1;
-  opacity: 0.65;
+  opacity: 0.7;
 }
 .hero-content {
   position: relative;
@@ -577,7 +540,7 @@ main p {
   letter-spacing: 0.05em;
 }
 .hero-badge.highlight {
-  background: rgba(0, 240, 255, 0.12);
+  background: rgba(0, 240, 255, 0.14);
   border-color: var(--cyan-border);
   color: var(--cyan-beam);
 }
@@ -639,12 +602,12 @@ main p {
    ========================================================================== */
 .centl-app-showcase {
   margin: 36px 0 44px;
-  background: rgba(6, 12, 28, 0.85);
+  background: rgba(6, 12, 28, 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-highlight);
   border-radius: var(--radius-md);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), inset 0 0 24px rgba(14, 165, 233, 0.06);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), inset 0 0 24px rgba(14, 165, 233, 0.08);
   overflow: hidden;
   padding: 32px;
 }
@@ -681,7 +644,7 @@ main p {
   height: 8px;
   border-radius: 50%;
   background: var(--emerald-pure);
-  box-shadow: 0 0 10px var(--emerald-pure);
+  box-shadow: 0 0 12px var(--emerald-pure);
 }
 
 .app-download-grid {
@@ -692,7 +655,7 @@ main p {
 }
 .app-download-card {
   padding: 24px 20px;
-  background: rgba(14, 24, 52, 0.7);
+  background: rgba(14, 24, 52, 0.72);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   display: flex;
@@ -702,12 +665,12 @@ main p {
 }
 .app-download-card:hover {
   border-color: var(--cyan-border);
-  box-shadow: 0 0 20px var(--cyan-glow);
+  box-shadow: 0 0 24px var(--cyan-glow);
   transform: translateY(-2px);
 }
 .app-download-card h4 {
   margin: 0 0 8px;
-  font-size: 16px;
+  font-size: 16.5px;
   font-weight: 800;
   color: #fff;
 }
@@ -721,7 +684,7 @@ main p {
   margin: 0 0 14px;
   padding: 10px 12px;
   font-size: 12px;
-  background: rgba(3, 6, 16, 0.9);
+  background: rgba(3, 6, 16, 0.92);
 }
 
 /* ==========================================================================
@@ -795,7 +758,7 @@ main p {
 pre {
   margin: 20px 0 26px;
   padding: 20px 24px;
-  background: rgba(3, 6, 16, 0.88);
+  background: rgba(3, 6, 16, 0.9);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
@@ -833,7 +796,7 @@ table {
 }
 th {
   padding: 14px 20px;
-  background: rgba(10, 17, 36, 0.85);
+  background: rgba(10, 17, 36, 0.88);
   border-bottom: 1px solid var(--border-medium);
   color: var(--text-white);
   font-weight: 800;
@@ -897,7 +860,7 @@ tr:hover td { background: rgba(255, 255, 255, 0.04); }
    ========================================================================== */
 footer {
   padding: 36px 40px;
-  background: rgba(4, 8, 20, 0.85);
+  background: rgba(4, 8, 20, 0.88);
   border-top: 1px solid var(--border-subtle);
   color: var(--text-muted);
   font-size: 13px;
