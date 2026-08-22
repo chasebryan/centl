@@ -1,13 +1,14 @@
 /**
- * Free Computation Foundation — Advanced Scientific Research Laboratory
- * 3D Cosmic Space Drift Engine & Interactive Telemetry
+ * Free Computation Foundation — Advanced Deep Space Research Laboratory
+ * SpaceX / Google AI / xAI Hybrid Aesthetic Engine
+ * 3D Starfield Space Drift, Nebula Atmosphere & 9-Second Cosmic Aura Intro
  * Version: CentL26.10
  */
 
 (function() {
   'use strict';
 
-  // 1. Multi-Layered 3D Space Drift Starfield & Nebula Animation
+  // 1. High-Visibility 3D Space Drift Engine (Vivid Starfield & Cosmic Nebulas)
   function initSpaceDrift() {
     let canvas = document.getElementById('space-drift-canvas');
     if (!canvas) {
@@ -21,57 +22,67 @@
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
-    const STAR_COUNT = Math.min(Math.floor((width * height) / 4000), 380);
-    const SPEED = 0.45;
+    const STAR_COUNT = Math.min(Math.floor((width * height) / 3200), 450);
+    const SPEED = 0.65;
     const stars = [];
     const nebulas = [];
     let mouse = { x: width / 2, y: height / 2, targetX: width / 2, targetY: height / 2 };
 
-    // Initialize 3D Stars
+    // Initialize 3D Stars with High Visibility and Color Temperature
     for (let i = 0; i < STAR_COUNT; i++) {
       stars.push({
-        x: (Math.random() - 0.5) * width * 2,
-        y: (Math.random() - 0.5) * height * 2,
+        x: (Math.random() - 0.5) * width * 2.2,
+        y: (Math.random() - 0.5) * height * 2.2,
         z: Math.random() * 1000 + 1,
-        origZ: 1000,
-        size: Math.random() * 1.5 + 0.5,
-        twinkleSpeed: Math.random() * 0.03 + 0.01,
+        size: Math.random() * 2.2 + 0.8,
+        twinkleSpeed: Math.random() * 0.04 + 0.015,
         twinklePhase: Math.random() * Math.PI * 2,
-        hue: Math.random() > 0.4 ? (Math.random() > 0.5 ? 195 : 220) : (Math.random() > 0.5 ? 160 : 270) // Cyan, Azure, Emerald, Violet
+        hue: Math.random() > 0.35 
+          ? (Math.random() > 0.5 ? 195 : 215) // Electric Cyan / Deep Space Azure
+          : (Math.random() > 0.5 ? 275 : 160) // Quantum Violet / Pulsar Emerald
       });
     }
 
-    // Initialize Cosmic Nebula Clouds
-    for (let i = 0; i < 4; i++) {
+    // Initialize Vivid Cosmic Nebula Clouds
+    const nebulaColors = [
+      { r: 14, g: 165, b: 233, a: 0.12 },  // Cyan Glow
+      { r: 99, g: 102, b: 241, a: 0.10 },  // Indigo Energy
+      { r: 168, g: 85, b: 247, a: 0.09 },  // Violet Radiance
+      { r: 16, g: 185, b: 129, a: 0.08 }   // Emerald Aurora
+    ];
+
+    for (let i = 0; i < 5; i++) {
+      const col = nebulaColors[i % nebulaColors.length];
       nebulas.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        radius: Math.random() * 260 + 180,
-        vx: (Math.random() - 0.5) * 0.15,
-        vy: (Math.random() - 0.5) * 0.15,
-        color: i % 2 === 0 ? 'rgba(14, 165, 233, 0.035)' : 'rgba(99, 102, 241, 0.03)'
+        radius: Math.random() * 320 + 240,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: (Math.random() - 0.5) * 0.25,
+        col: col
       });
     }
 
-    // Shooting Star Manager
-    let shootingStar = null;
-    function spawnShootingStar() {
-      if (shootingStar || Math.random() > 0.015) return;
-      shootingStar = {
-        x: Math.random() * width * 0.8,
-        y: Math.random() * height * 0.4,
-        length: Math.random() * 120 + 80,
-        speed: Math.random() * 10 + 12,
-        angle: Math.PI / 4 + (Math.random() - 0.5) * 0.2,
-        opacity: 1,
-        decay: Math.random() * 0.025 + 0.018
-      };
+    // Shooting Stars Manager
+    const shootingStars = [];
+    function maybeSpawnShootingStar() {
+      if (shootingStars.length < 2 && Math.random() < 0.02) {
+        shootingStars.push({
+          x: Math.random() * width * 0.9,
+          y: Math.random() * height * 0.45,
+          length: Math.random() * 160 + 100,
+          speed: Math.random() * 12 + 16,
+          angle: Math.PI / 4 + (Math.random() - 0.5) * 0.25,
+          opacity: 1.0,
+          decay: Math.random() * 0.02 + 0.015
+        });
+      }
     }
 
     function render() {
       ctx.clearRect(0, 0, width, height);
 
-      // 1. Draw Nebula Clouds
+      // 1. Draw Radiant Nebula Clouds
       for (let n of nebulas) {
         n.x += n.vx;
         n.y += n.vy;
@@ -81,7 +92,8 @@
         if (n.y > height + n.radius) n.y = -n.radius;
 
         const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.radius);
-        grad.addColorStop(0, n.color);
+        grad.addColorStop(0, `rgba(${n.col.r}, ${n.col.g}, ${n.col.b}, ${n.col.a})`);
+        grad.addColorStop(0.5, `rgba(${n.col.r}, ${n.col.g}, ${n.col.b}, ${n.col.a * 0.4})`);
         grad.addColorStop(1, 'transparent');
         ctx.fillStyle = grad;
         ctx.beginPath();
@@ -89,72 +101,75 @@
         ctx.fill();
       }
 
-      // Smooth mouse parallax interpolation
-      mouse.x += (mouse.targetX - mouse.x) * 0.05;
-      mouse.y += (mouse.targetY - mouse.y) * 0.05;
-      const offsetX = (mouse.x - width / 2) * 0.08;
-      const offsetY = (mouse.y - height / 2) * 0.08;
+      // Parallax mouse damping
+      mouse.x += (mouse.targetX - mouse.x) * 0.04;
+      mouse.y += (mouse.targetY - mouse.y) * 0.04;
+      const offsetX = (mouse.x - width / 2) * 0.12;
+      const offsetY = (mouse.y - height / 2) * 0.12;
 
       const cx = width / 2 + offsetX;
       const cy = height / 2 + offsetY;
 
-      // 2. Draw 3D Drifting Starfield
+      // 2. Draw 3D Drifting Starfield with Visible Glow
       for (let s of stars) {
         s.z -= SPEED;
         if (s.z <= 0) {
           s.z = 1000;
-          s.x = (Math.random() - 0.5) * width * 2;
-          s.y = (Math.random() - 0.5) * height * 2;
+          s.x = (Math.random() - 0.5) * width * 2.2;
+          s.y = (Math.random() - 0.5) * height * 2.2;
         }
 
-        const k = 400 / s.z;
+        const k = 420 / s.z;
         const px = s.x * k + cx;
         const py = s.y * k + cy;
 
-        if (px >= -20 && px <= width + 20 && py >= -20 && py <= height + 20) {
+        if (px >= -30 && px <= width + 30 && py >= -30 && py <= height + 30) {
           s.twinklePhase += s.twinkleSpeed;
-          const twinkle = (Math.sin(s.twinklePhase) + 1) * 0.25 + 0.5;
-          const alpha = (1 - s.z / 1000) * twinkle;
-          const radius = Math.max(s.size * k * 0.4, 0.6);
+          const twinkle = (Math.sin(s.twinklePhase) + 1) * 0.3 + 0.4;
+          const alpha = Math.min((1 - s.z / 1000) * twinkle * 1.3, 1.0);
+          const radius = Math.max(s.size * k * 0.45, 0.75);
 
           ctx.beginPath();
           ctx.arc(px, py, radius, 0, Math.PI * 2);
-          ctx.fillStyle = `hsla(${s.hue}, 85%, 75%, ${alpha})`;
+          ctx.fillStyle = `hsla(${s.hue}, 95%, 82%, ${alpha})`;
+          
           if (radius > 1.2) {
-            ctx.shadowBlur = 6;
-            ctx.shadowColor = `hsla(${s.hue}, 100%, 70%, ${alpha})`;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = `hsla(${s.hue}, 100%, 75%, ${alpha * 0.9})`;
           }
           ctx.fill();
           ctx.shadowBlur = 0;
         }
       }
 
-      // 3. Draw Shooting Star
-      spawnShootingStar();
-      if (shootingStar) {
-        const sx = shootingStar.x;
-        const sy = shootingStar.y;
-        const ex = sx - Math.cos(shootingStar.angle) * shootingStar.length;
-        const ey = sy - Math.sin(shootingStar.angle) * shootingStar.length;
+      // 3. Draw Shooting Stars
+      maybeSpawnShootingStar();
+      for (let i = shootingStars.length - 1; i >= 0; i--) {
+        const star = shootingStars[i];
+        const sx = star.x;
+        const sy = star.y;
+        const ex = sx - Math.cos(star.angle) * star.length;
+        const ey = sy - Math.sin(star.angle) * star.length;
 
         const grad = ctx.createLinearGradient(sx, sy, ex, ey);
-        grad.addColorStop(0, `rgba(255, 255, 255, ${shootingStar.opacity})`);
-        grad.addColorStop(0.3, `rgba(56, 189, 248, ${shootingStar.opacity * 0.8})`);
+        grad.addColorStop(0, `rgba(255, 255, 255, ${star.opacity})`);
+        grad.addColorStop(0.25, `rgba(56, 189, 248, ${star.opacity * 0.9})`);
+        grad.addColorStop(0.7, `rgba(168, 85, 247, ${star.opacity * 0.5})`);
         grad.addColorStop(1, 'transparent');
 
         ctx.beginPath();
         ctx.moveTo(sx, sy);
         ctx.lineTo(ex, ey);
         ctx.strokeStyle = grad;
-        ctx.lineWidth = 1.8;
+        ctx.lineWidth = 2.2;
         ctx.stroke();
 
-        shootingStar.x += Math.cos(shootingStar.angle) * shootingStar.speed;
-        shootingStar.y += Math.sin(shootingStar.angle) * shootingStar.speed;
-        shootingStar.opacity -= shootingStar.decay;
+        star.x += Math.cos(star.angle) * star.speed;
+        star.y += Math.sin(star.angle) * star.speed;
+        star.opacity -= star.decay;
 
-        if (shootingStar.opacity <= 0 || shootingStar.x > width + 100 || shootingStar.y > height + 100) {
-          shootingStar = null;
+        if (star.opacity <= 0 || star.x > width + 100 || star.y > height + 100) {
+          shootingStars.splice(i, 1);
         }
       }
 
@@ -174,7 +189,60 @@
     render();
   }
 
-  // 2. Quantum Particle Lattice in Hero Container
+  // 2. 9-Second Soft Cosmic Aura Overlay ("Free Computation Foundation")
+  function initCosmicAuraIntro() {
+    // Check if on the forward-facing homepage
+    const isHomePage = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '';
+    if (!isHomePage) return;
+
+    let overlay = document.getElementById('fcf-aura-intro');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'fcf-aura-intro';
+      overlay.className = 'fcf-aura-overlay';
+      overlay.innerHTML = `
+        <div class="aura-glow-orb"></div>
+        <div class="aura-particles-field"></div>
+        <div class="aura-content-box">
+          <div class="aura-badge">// INITIALIZING QUANTUM COMPUTATIONAL MATRIX //</div>
+          <h1 class="aura-title">Free Computation Foundation</h1>
+          <p class="aura-subtitle">INSTITUTE FOR ADVANCED COMPUTATIONAL SCIENCE · CENTL26.10</p>
+          <div class="aura-telemetry-strip">
+            <span class="aura-telemetry-item"><span class="aura-dot"></span>SYS.ONLINE</span>
+            <span class="aura-telemetry-item">PRECISION: EXACT RATIONAL</span>
+            <span class="aura-telemetry-item">AEROSPACE GRADE DETERMINISTIC CAS</span>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+
+    let hasTriggered = false;
+    function triggerAura() {
+      if (hasTriggered) return;
+      hasTriggered = true;
+      overlay.classList.add('aura-active');
+
+      // Softly plays for exactly 9 seconds, then dissolves seamlessly
+      setTimeout(() => {
+        overlay.classList.add('aura-fade-out');
+        setTimeout(() => {
+          overlay.remove();
+        }, 1400);
+      }, 9000);
+    }
+
+    // Auto-trigger on page load with slight entrance delay, or immediately on first click
+    setTimeout(() => {
+      triggerAura();
+    }, 400);
+
+    window.addEventListener('click', () => {
+      triggerAura();
+    }, { once: true });
+  }
+
+  // 3. Interactive Quantum Particle Lattice in Hero
   function initQuantumHeroCanvas() {
     const canvas = document.getElementById('quantum-canvas');
     if (!canvas) return;
@@ -185,17 +253,17 @@
     let height = (canvas.height = canvas.offsetHeight);
 
     const particles = [];
-    const count = Math.min(Math.floor((width * height) / 9000), 70);
-    let mouse = { x: null, y: null, maxDist: 140 };
+    const count = Math.min(Math.floor((width * height) / 8000), 75);
+    let mouse = { x: null, y: null, maxDist: 150 };
 
     class NodeParticle {
       constructor() {
         this.x = Math.random() * width;
         this.y = Math.random() * height;
-        this.vx = (Math.random() - 0.5) * 0.55;
-        this.vy = (Math.random() - 0.5) * 0.55;
-        this.radius = Math.random() * 1.5 + 1;
-        this.color = Math.random() > 0.3 ? 'rgba(56, 189, 248, 0.7)' : 'rgba(16, 185, 129, 0.6)';
+        this.vx = (Math.random() - 0.5) * 0.6;
+        this.vy = (Math.random() - 0.5) * 0.6;
+        this.radius = Math.random() * 1.8 + 1;
+        this.color = Math.random() > 0.3 ? 'rgba(56, 189, 248, 0.75)' : 'rgba(168, 85, 247, 0.65)';
       }
       update() {
         this.x += this.vx;
@@ -207,7 +275,7 @@
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fillStyle = this.color;
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = 10;
         ctx.shadowColor = '#00f0ff';
         ctx.fill();
         ctx.shadowBlur = 0;
@@ -221,19 +289,19 @@
     function animate() {
       ctx.clearRect(0, 0, width, height);
 
-      // Connecting filaments
+      // Connecting lines
       for (let a = 0; a < particles.length; a++) {
         for (let b = a + 1; b < particles.length; b++) {
           const dx = particles[a].x - particles[b].x;
           const dy = particles[a].y - particles[b].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 110) {
-            const alpha = (1 - dist / 110) * 0.28;
+          if (dist < 120) {
+            const alpha = (1 - dist / 120) * 0.35;
             ctx.beginPath();
             ctx.moveTo(particles[a].x, particles[a].y);
             ctx.lineTo(particles[b].x, particles[b].y);
             ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`;
-            ctx.lineWidth = 0.75;
+            ctx.lineWidth = 0.85;
             ctx.stroke();
           }
         }
@@ -246,12 +314,12 @@
           const dy = mouse.y - particles[i].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < mouse.maxDist) {
-            const alpha = (1 - dist / mouse.maxDist) * 0.45;
+            const alpha = (1 - dist / mouse.maxDist) * 0.55;
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(mouse.x, mouse.y);
             ctx.strokeStyle = `rgba(0, 240, 255, ${alpha})`;
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 1.2;
             ctx.stroke();
           }
         }
@@ -284,7 +352,7 @@
     animate();
   }
 
-  // 3. One-Click Copy Buttons with Smooth Tooltip Feedback
+  // 4. One-Click Copy Buttons
   function initCopyButtons() {
     document.querySelectorAll('[data-copy-text]').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -303,7 +371,7 @@
     });
   }
 
-  // 4. Live Search Filter for Documents & Preprints
+  // 5. Live Search Filter
   function initDocSearchFilter() {
     const searchInput = document.getElementById('live-doc-filter');
     if (!searchInput) return;
@@ -322,16 +390,18 @@
     });
   }
 
-  // Initialize all subsystems
+  // Bootstrap
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       initSpaceDrift();
+      initCosmicAuraIntro();
       initQuantumHeroCanvas();
       initCopyButtons();
       initDocSearchFilter();
     });
   } else {
     initSpaceDrift();
+    initCosmicAuraIntro();
     initQuantumHeroCanvas();
     initCopyButtons();
     initDocSearchFilter();

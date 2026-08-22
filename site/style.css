@@ -2,70 +2,71 @@
    FREE COMPUTATION FOUNDATION (FCF)
    INSTITUTE FOR ADVANCED COMPUTATIONAL SCIENCE & RESEARCH
    Flagship Platform: CentL26 Universal Scientific Workbench
-   Design System: Deep Space Cosmic Laboratory & Mass-Market Pro Aesthetics
+   Design Philosophy: SpaceX Aerospace Precision · Google DeepMind AI Elegance · xAI Cosmic Intensity
    ========================================================================== */
 
 :root {
   color-scheme: dark;
   
   /* Deep Space Cosmic Base */
-  --bg-deep: #030712;
-  --bg-surface: rgba(8, 14, 30, 0.82);
-  --bg-panel: rgba(13, 22, 44, 0.72);
-  --bg-panel-elevated: rgba(19, 32, 62, 0.85);
-  --bg-panel-hover: rgba(26, 44, 84, 0.9);
-  --bg-glass: rgba(13, 22, 44, 0.6);
+  --bg-deep: #02040a;
+  --bg-surface: rgba(6, 10, 22, 0.55);
+  --bg-panel: rgba(10, 16, 35, 0.52);
+  --bg-panel-elevated: rgba(15, 25, 52, 0.68);
+  --bg-panel-hover: rgba(22, 38, 78, 0.82);
+  --bg-glass: rgba(8, 14, 30, 0.45);
   
-  /* Luminous Cyber & Scientific Accents */
+  /* Luminous Aerospace & Quantum Energy Accents */
   --cyan-beam: #00f0ff;
   --cyan-bright: #38bdf8;
-  --cyan-glow: rgba(0, 240, 255, 0.28);
-  --cyan-border: rgba(56, 189, 248, 0.35);
+  --cyan-glow: rgba(0, 240, 255, 0.35);
+  --cyan-border: rgba(56, 189, 248, 0.38);
   
   --blue-primary: #0284c7;
   --blue-vibrant: #2563eb;
   --blue-gradient: linear-gradient(135deg, #0ea5e9 0%, #2563eb 50%, #4f46e5 100%);
+  --iridescent-gradient: linear-gradient(135deg, #ffffff 0%, #e0f2fe 30%, #38bdf8 65%, #a855f7 100%);
   
   --emerald-pure: #10b981;
   --emerald-bright: #34d399;
-  --emerald-glow: rgba(16, 185, 129, 0.25);
+  --emerald-glow: rgba(16, 185, 129, 0.3);
   
   --solar-orange: #f97316;
-  --solar-glow: rgba(249, 115, 22, 0.25);
+  --solar-glow: rgba(249, 115, 22, 0.3);
   
   --violet-quantum: #8b5cf6;
   --violet-bright: #a78bfa;
-  --violet-glow: rgba(139, 92, 246, 0.25);
+  --violet-glow: rgba(139, 92, 246, 0.3);
   
   --pink-sponsor: #ec4899;
   --pink-gradient: linear-gradient(135deg, #ec4899 0%, #db2777 50%, #be185d 100%);
   
-  /* High-Contrast Mass-Market Typography */
+  /* Aerospace High-Contrast Typography */
   --text-white: #ffffff;
   --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
   --text-faint: #64748b;
   
-  /* Borders & Dividers */
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-medium: rgba(255, 255, 255, 0.15);
-  --border-highlight: rgba(56, 189, 248, 0.4);
+  /* Laser Borders & Dividers */
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-medium: rgba(255, 255, 255, 0.18);
+  --border-highlight: rgba(56, 189, 248, 0.45);
   
   /* Typography */
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", "Cascadia Code", "Fira Code", Menlo, Monaco, Consolas, monospace;
   
-  /* Geometry & Polish */
+  /* Aerospace Geometry */
   --radius-xs: 4px;
   --radius-sm: 8px;
   --radius-md: 14px;
-  --radius-lg: 20px;
+  --radius-lg: 22px;
   --radius-full: 9999px;
   
-  --shadow-panel: 0 16px 40px -8px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
-  --shadow-glow-cyan: 0 0 28px rgba(0, 240, 255, 0.35);
-  --shadow-glow-blue: 0 8px 30px rgba(14, 165, 233, 0.35);
+  --shadow-panel: 0 16px 48px -8px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  --shadow-glow-cyan: 0 0 32px rgba(0, 240, 255, 0.4);
+  --shadow-glow-blue: 0 8px 32px rgba(14, 165, 233, 0.45);
 }
 
 * { box-sizing: border-box; }
@@ -82,7 +83,7 @@ body {
   padding: 0;
   color: var(--text-primary);
   background: var(--bg-deep);
-  font: 15px/1.65 var(--font-sans);
+  font: 15px/1.68 var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -98,6 +99,7 @@ body {
   height: 100vh;
   z-index: -1;
   pointer-events: none;
+  background: radial-gradient(circle at 50% 15%, #050b1d 0%, #02040a 100%);
 }
 
 a {
@@ -107,14 +109,14 @@ a {
 }
 a:hover {
   color: var(--cyan-beam);
-  text-shadow: 0 0 10px var(--cyan-glow);
+  text-shadow: 0 0 12px var(--cyan-glow);
 }
 
 .skip {
   position: absolute;
   left: -9999px;
   top: 16px;
-  padding: 10px 20px;
+  padding: 10px 22px;
   background: var(--blue-primary);
   color: #fff;
   border-radius: var(--radius-sm);
@@ -128,10 +130,140 @@ a:hover {
 .skip:focus { left: 16px; }
 
 /* ==========================================================================
+   9-Second Soft Cosmic Aura Overlay ("Free Computation Foundation")
+   ========================================================================== */
+.fcf-aura-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999;
+  background: radial-gradient(circle at 50% 50%, rgba(6, 12, 30, 0.92) 0%, rgba(2, 4, 10, 0.97) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 1.2s;
+  overflow: hidden;
+}
+
+.fcf-aura-overlay.aura-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.fcf-aura-overlay.aura-fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 1.4s;
+}
+
+.aura-glow-orb {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.28) 0%, rgba(139, 92, 246, 0.22) 40%, rgba(14, 165, 233, 0.1) 70%, transparent 100%);
+  filter: blur(60px);
+  animation: auraPulse 6s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes auraPulse {
+  0% { transform: scale(0.85); opacity: 0.7; }
+  50% { transform: scale(1.15) rotate(15deg); opacity: 1; filter: blur(75px); }
+  100% { transform: scale(0.95) rotate(-10deg); opacity: 0.8; }
+}
+
+.aura-content-box {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 40px;
+  max-width: 900px;
+  animation: auraContentFloat 9s ease-in-out forwards;
+}
+
+@keyframes auraContentFloat {
+  0% { transform: translateY(18px); opacity: 0; }
+  15% { transform: translateY(0); opacity: 1; }
+  85% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-12px); opacity: 0.9; }
+}
+
+.aura-badge {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: var(--cyan-beam);
+  text-shadow: 0 0 16px var(--cyan-glow);
+  margin-bottom: 18px;
+}
+
+.aura-title {
+  margin: 0 0 14px;
+  font: 900 clamp(36px, 5vw, 64px)/1.1 var(--font-sans);
+  letter-spacing: -0.04em;
+  background: var(--iridescent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 30px rgba(0, 240, 255, 0.45));
+}
+
+.aura-subtitle {
+  margin: 0 0 28px;
+  font-family: var(--font-mono);
+  font-size: clamp(12px, 1.6vw, 15px);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.aura-telemetry-strip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-full);
+}
+
+.aura-telemetry-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 750;
+  color: var(--text-secondary);
+  letter-spacing: 0.06em;
+}
+
+.aura-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--emerald-pure);
+  box-shadow: 0 0 10px var(--emerald-pure);
+}
+
+/* ==========================================================================
    Main Laboratory Shell
    ========================================================================== */
 .shell {
-  width: min(1300px, 94vw);
+  width: min(1320px, 94vw);
   margin: 24px auto 70px;
   background: var(--bg-surface);
   backdrop-filter: blur(28px);
@@ -145,20 +277,20 @@ a:hover {
   position: relative;
 }
 
-/* Precision Crosshairs for Sci-Fi Lab Aesthetics */
+/* Precision Crosshairs for Sci-Fi Aerospace Aesthetics */
 .shell::before, .shell::after {
   content: "+";
   position: absolute;
   font-family: var(--font-mono);
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--cyan-beam);
-  opacity: 0.7;
+  opacity: 0.85;
   pointer-events: none;
   z-index: 20;
 }
-.shell::before { top: 10px; left: 14px; }
-.shell::after { top: 10px; right: 14px; }
+.shell::before { top: 12px; left: 16px; }
+.shell::after { top: 12px; right: 16px; }
 
 /* ==========================================================================
    Universal High-Tech Top Navigation Bar
@@ -168,7 +300,7 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   padding: 16px 32px;
-  background: rgba(6, 11, 24, 0.85);
+  background: rgba(4, 8, 20, 0.7);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-bottom: 1px solid var(--border-subtle);
@@ -193,29 +325,29 @@ a:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   background: var(--blue-gradient);
   border: 1px solid var(--cyan-border);
   border-radius: var(--radius-sm);
-  font: 850 16px/1 var(--font-mono);
+  font: 850 17px/1 var(--font-mono);
   color: #fff;
   letter-spacing: 0.08em;
-  box-shadow: 0 0 14px var(--cyan-glow);
+  box-shadow: 0 0 16px var(--cyan-glow);
 }
 .brand .brand-meta {
   display: flex;
   flex-direction: column;
 }
 .brand span {
-  font-size: 15px;
+  font-size: 15.5px;
   font-weight: 800;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   color: var(--text-white);
 }
 .brand small {
   font-size: 11.5px;
-  font-weight: 650;
+  font-weight: 700;
   font-family: var(--font-mono);
   color: var(--cyan-beam);
   letter-spacing: 0.06em;
@@ -270,7 +402,7 @@ a:hover {
 }
 .masthead-nav a.nav-btn-highlight:hover {
   background: var(--cyan-beam);
-  color: #030712;
+  color: #02040a;
   box-shadow: var(--shadow-glow-cyan);
 }
 .masthead-nav a.nav-btn-sponsor {
@@ -279,10 +411,10 @@ a:hover {
   color: #fff;
   font-size: 13px;
   font-weight: 700;
-  box-shadow: 0 0 16px rgba(236, 72, 153, 0.35);
+  box-shadow: 0 0 18px rgba(236, 72, 153, 0.35);
 }
 .masthead-nav a.nav-btn-sponsor:hover {
-  box-shadow: 0 0 24px rgba(236, 72, 153, 0.55);
+  box-shadow: 0 0 28px rgba(236, 72, 153, 0.6);
   transform: translateY(-1px);
 }
 
@@ -291,14 +423,14 @@ a:hover {
    ========================================================================== */
 .layout {
   display: grid;
-  grid-template-columns: 270px minmax(0, 1fr);
+  grid-template-columns: 275px minmax(0, 1fr);
   min-height: calc(100vh - 180px);
 }
 
-/* High-Tech Laboratory Sidebar */
+/* High-Tech Aerospace Sidebar */
 nav {
   padding: 28px 18px 48px;
-  background: rgba(4, 8, 18, 0.85);
+  background: rgba(4, 8, 18, 0.65);
   border-right: 1px solid var(--border-subtle);
   font-family: var(--font-sans);
 }
@@ -352,7 +484,7 @@ main {
 
 main h1 {
   margin: 0 0 18px;
-  font: 850 clamp(30px, 3.6vw, 44px)/1.15 var(--font-sans);
+  font: 850 clamp(30px, 3.6vw, 46px)/1.15 var(--font-sans);
   color: var(--text-white);
   letter-spacing: -0.03em;
 }
@@ -383,8 +515,10 @@ main p {
 .hero-wrapper {
   position: relative;
   margin: -10px 0 36px;
-  padding: 36px 40px;
-  background: linear-gradient(135deg, rgba(13, 22, 44, 0.85) 0%, rgba(8, 14, 30, 0.95) 100%);
+  padding: 38px 42px;
+  background: linear-gradient(135deg, rgba(13, 22, 44, 0.65) 0%, rgba(6, 10, 24, 0.8) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-highlight);
   border-radius: var(--radius-md);
   overflow: hidden;
@@ -462,7 +596,7 @@ main p {
 }
 .btn-cta-primary:hover {
   background: var(--cyan-beam);
-  color: #030712;
+  color: #02040a;
   box-shadow: var(--shadow-glow-cyan);
   transform: translateY(-2px);
 }
@@ -494,7 +628,9 @@ main p {
    ========================================================================== */
 .centl-work-area {
   margin: 36px 0 44px;
-  background: #040814;
+  background: rgba(4, 8, 20, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-highlight);
   border-radius: var(--radius-md);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(14, 165, 233, 0.05);
@@ -508,7 +644,7 @@ main p {
   align-items: center;
   justify-content: space-between;
   padding: 14px 20px;
-  background: #080e1e;
+  background: rgba(8, 14, 30, 0.9);
   border-bottom: 1px solid var(--border-subtle);
   color: #fff;
 }
@@ -578,7 +714,7 @@ main p {
 /* Preset Matrix Bar */
 .quick-op-bar {
   padding: 12px 18px;
-  background: #091024;
+  background: rgba(9, 16, 36, 0.8);
   border-bottom: 1px solid var(--border-subtle);
 }
 .quick-form {
@@ -597,7 +733,7 @@ main p {
   margin-right: 4px;
 }
 .btn-preset {
-  background: #111a33;
+  background: rgba(17, 26, 51, 0.7);
   border: 1px solid var(--border-subtle);
   padding: 5px 12px;
   font-size: 12.5px;
@@ -639,7 +775,7 @@ main p {
   min-height: 200px;
   max-height: 520px;
   overflow-y: auto;
-  background: #030610;
+  background: rgba(3, 6, 16, 0.85);
   color: var(--text-primary);
   font-family: var(--font-mono);
   font-size: 14px;
@@ -665,7 +801,7 @@ main p {
 .terminal-examples {
   margin-top: 12px;
   padding: 12px 16px;
-  background: #0a1124;
+  background: rgba(10, 17, 36, 0.8);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xs);
   color: var(--cyan-bright);
@@ -682,7 +818,7 @@ main p {
 /* Terminal Input Prompt Form */
 .centl-prompt-form {
   padding: 16px 20px;
-  background: #070d1c;
+  background: rgba(7, 13, 28, 0.9);
   border-top: 1px solid var(--border-subtle);
 }
 .input-row {
@@ -704,7 +840,7 @@ main p {
   font-family: var(--font-mono);
   font-size: 14.5px;
   color: #fff;
-  background: #0d152a;
+  background: rgba(13, 21, 42, 0.8);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-xs);
   outline: none;
@@ -729,7 +865,7 @@ main p {
 }
 .btn-calculate:hover {
   background: var(--cyan-beam);
-  color: #030712;
+  color: #02040a;
   box-shadow: var(--shadow-glow-cyan);
 }
 .btn-clear {
@@ -821,7 +957,7 @@ main p {
 pre {
   margin: 20px 0 26px;
   padding: 20px 24px;
-  background: #030610;
+  background: rgba(3, 6, 16, 0.85);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
@@ -834,7 +970,7 @@ code {
   font-family: var(--font-mono);
   font-size: 13px;
   padding: 2px 7px;
-  background: #0e172e;
+  background: rgba(14, 23, 46, 0.7);
   color: var(--cyan-beam);
   border-radius: var(--radius-xs);
   border: 1px solid var(--border-subtle);
@@ -859,7 +995,7 @@ table {
 }
 th {
   padding: 14px 20px;
-  background: #0a1124;
+  background: rgba(10, 17, 36, 0.85);
   border-bottom: 1px solid var(--border-medium);
   color: var(--text-white);
   font-weight: 800;
@@ -923,7 +1059,7 @@ tr:hover td { background: rgba(255, 255, 255, 0.04); }
    ========================================================================== */
 footer {
   padding: 36px 40px;
-  background: #040814;
+  background: rgba(4, 8, 20, 0.8);
   border-top: 1px solid var(--border-subtle);
   color: var(--text-muted);
   font-size: 13px;
