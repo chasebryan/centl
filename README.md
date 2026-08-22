@@ -5,7 +5,7 @@
 
 # CENTL / CentL26
 
-[![Version](https://img.shields.io/badge/version-26.8.1-blue.svg)](https://github.com/chasebryan/centl)
+[![Version](https://img.shields.io/badge/version-26.9.0-blue.svg)](https://github.com/chasebryan/centl)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-2021%20edition-orange.svg)](https://www.rust-lang.org/)
 [![Offline First](https://img.shields.io/badge/offline-100%25%20local-success.svg)](https://freecomputation.org/)
@@ -19,9 +19,9 @@
 **CentL26** · [freecomputation.org](https://freecomputation.org/) · Apache-2.0
 
 > **CentL26 is the flagship standalone scientific computing environment of CENTL.**  
-> The "26" represents the 2026 flagship product line. CentL26 provides a calm, offline, deterministic scientific workbench that combines exact rational arithmetic, symbolic algebra, physics kernels, chemical stoichiometry, in-app hackability, 2D function plotting, STEM academic search engine, and a comprehensive offline natural language problem solver.
+> The "26" represents the 2026 flagship product line. CentL26 provides a calm, offline, deterministic scientific workbench that combines exact rational arithmetic, canonical polynomial algebra, physics kernels, chemical stoichiometry, in-app hackability, 2D function plotting, interactive STEM animated visualizer & theorem studio, academic search engine, and a comprehensive offline natural language problem solver.
 > 
-> **CentL26.8.1 is the official universal release across all supported desktop and web environments.**
+> **CentL26.9.0 is the official universal release across all supported desktop and web environments.**
 
 ---
 
@@ -70,27 +70,35 @@ cargo run --release --bin centl26
 
 ---
 
-## Key Highlights in CentL26.8
+## Key Highlights in CentL26.9
 
-### 1. STEM Academic Search Engine & Chrome Router
-- Omni-modal search palette (`⌘ K`) featuring dedicated category filtering: **All STEM**, **FCF Manuals & Docs**, **FCF Research Papers**, **Academic Literature (Chrome)**, and **CentL Tools & Solvers**.
-- Direct routing to Google Scholar, arXiv, PubMed, Wolfram MathWorld, OEIS, NIST, IEEE Xplore, and NASA ADS with custom FCF-stylized Chrome vector iconography.
-- Dynamic academic suggestions tailored for literature discovery, journal preprints, and constants lookup.
+### 1. Robust Algebraic Engine & Canonical Polynomial Solver
+- **High-Precision Rational Root Theorem Solver**: Exact root extraction for linear, quadratic, cubic, quartic, and higher-degree polynomials with synthetic division (`synthetic_divide_root`) and exact radical isolation.
+- **Direct Algebraic Equation Auto-Solving**: Free variable analysis automatically differentiates variable assignment (`x = 5`) from equations (`2x + 3 = 7` $\rightarrow x = 2$, `x^2 - 5x + 6 = 0` $\rightarrow x = 2, x = 3$).
+- **Constant Mathematical Equality Verification**: Immediate truth-value validation (`2 + 3 = 5` $\rightarrow true$, `2 + 3 = 6` $\rightarrow false$, `2^10 = 1024` $\rightarrow true$).
+- **Polynomial Expansion & Factorization**:
+  - `factor(x^2 - 9)` $\rightarrow (x + 3)(x - 3)$
+  - `factor(x^2 - 5x + 6)` $\rightarrow (x - 2)(x - 3)$
+  - `factor(x^3 - 6x^2 + 11x - 6)` $\rightarrow (x - 1)(x - 2)(x - 3)$
+  - `expand((x - 1)*(x + 1))` $\rightarrow x^2 - 1$
+- **Smart Implicit Multiplication**: Natural parsing of mathematical notation (`2x`, `5x^2`, `3(x+1)`, `(x-1)(x+1)`, `4pi`, `2sin(x)`) while preserving English natural language sentences.
 
-### 2. FCF Knowledge Center & In-App Markdown Reader
-- Instant offline reading of all FCF operator manuals, mathematical architecture specifications, and theoretical research papers with full typography and math rendering.
+### 2. Calculus, Discrete Mathematics & Series
+- **Higher-Order Differentiation**: `diff(f, x, n)` (e.g. `diff(x^4, x, 3)` $\rightarrow 24x$).
+- **Definite & Indefinite Integration**: `integrate(3x^2 + 2x, x, 0, 3)` $\rightarrow 36$.
+- **Symbolic Limits & L'Hôpital's Rule**: `limit((x^2 - 1)/(x - 1), x, 1)` $\rightarrow 2$.
+- **Taylor Series Expansion**: `taylor(exp(x), x, 0, 3)` $\rightarrow 1 + x + \frac{1}{2}x^2 + \frac{1}{6}x^3$.
+- **Discrete Summations & Products**: `sum(k^2, k, 1, 5)` $\rightarrow 55$, `product(k, k, 1, 5)` $\rightarrow 120$.
 
-### 3. Gemini AI Co-Pilot Resiliency
-- Auto-fallback model chain (`gemini-2.5-flash` $\rightarrow$ `gemini-2.0-flash` $\rightarrow$ `gemini-1.5-flash` $\rightarrow$ `gemini-1.5-pro` $\rightarrow$ `gemini-2.5-pro`) ensuring 100% uptime even during preview model quotas.
-- Automatic multi-variable API key discovery (`CENTL_GEMINI_KEY`, `GEMINI_API_KEY`, `GOOGLE_API_KEY`, `GOOGLE_AI_API_KEY`) and cross-platform disk persistence.
-- Fault-tolerant JSON decomposition and markdown fence sanitization.
+### 3. Interactive STEM Animated Visualizer & Theorem Studio
+- Engage directly with dynamic mathematical theorems, Fourier harmonics, ODE wave animations, Lorenz chaotic attractors, particle physics simulations, and Bravais crystal lattice geometry.
 
-### 4. Intelligent Dual-Channel Updates
-- Rate-limit-free GitHub raw manifest synchronization combined with git commit tracking.
-- Seamless 1-click in-place rebuild and hot auto-reload for local workspaces.
+### 4. Calm Welcome Experience & Preferences
+- Clean Welcome surface with customizable boot behavior (`"Resume Previous Session"` or `"Start Fresh Computation"`).
+- Keyboard-safe tab closing accelerators (`⌥ W` / `⌘ ⇧ W`) and native Settings cogwheel interface.
 
-### 5. Multi-Platform Universal Standard
-- Certified native builds and automated installers across **Windows 11**, **macOS (Apple Silicon & Intel)**, and **Debian/Ubuntu/Fedora/Arch Linux**.
+### 5. Exhaustive 100-Test Automated Non-Regression Suite
+- Dedicated offline test verification across arithmetic, linear/quadratic/polynomial algebra, calculus, stoichiometry, and modern physics.
 
 ---
 

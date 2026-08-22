@@ -1,5 +1,35 @@
 ## Unreleased
 
+### CentL26.9.0 — Full STEM Backend Upgrade, Robust Algebra Engine & Non-Regression Suite (2026-08-21)
+
+- **Canonical Polynomial Engine & Exact Root Finding**:
+  - Implemented high-precision `Polynomial` with arbitrary-precision coefficients (`BigRational`).
+  - Added synthetic division (`synthetic_divide_root`), Rational Root Theorem divisor factorization, and exact root solver for linear, quadratic, cubic, quartic, and higher-degree polynomials.
+  - Added integer square root algorithm on `BigInt` and exact square root extraction on `BigRational` to eliminate precision drift.
+  - Implemented symbolic factoring (`factor(x^2 - 9)` $\rightarrow (x + 3)(x - 3)$, `factor(x^2 - 5x + 6)` $\rightarrow (x - 2)(x - 3)$, `factor(x^3 - 6x^2 + 11x - 6)` $\rightarrow (x - 1)(x - 2)(x - 3)$) and expansion (`expand((x - 1)*(x + 1))` $\rightarrow x^2 - 1$).
+- **Direct Algebraic Equation Auto-Solving & Equality Verification**:
+  - Distinguishes variable assignment (`x = 5`) from algebraic equations (`2x + 3 = 7`, `x = 2x - 5`, `x^2 - 5x + 6 = 0`) using free variable analysis.
+  - Auto-solves linear and polynomial equations directly entered by the user.
+  - Verifies constant mathematical equalities (`2 + 3 = 5` $\rightarrow true$, `2 + 3 = 6` $\rightarrow false$, `2^10 = 1024` $\rightarrow true$).
+- **Smart Context-Aware Implicit Multiplication**:
+  - Robustly parses mathematical notation (`2x`, `5x^2`, `3(x+1)`, `(x-1)(x+1)`, `4pi`, `2sin(x)`).
+  - Preserves natural language word sequences so STEM word queries fall through cleanly to dedicated domain solvers.
+- **Calculus & Discrete Operators**:
+  - Discrete summation: `sum(k^2, k, 1, 5)` $\rightarrow 55$.
+  - Discrete product: `product(k, k, 1, 5)` $\rightarrow 120$.
+  - Symbolic limits with L'Hôpital's rule support: `limit((x^2 - 1)/(x - 1), x, 1)` $\rightarrow 2$.
+  - Multivariant Taylor series: `taylor(exp(x), x, 0, 3)`, `taylor(sin(x), x, 0, 3)`.
+  - Higher-order differentiation: `diff(3x^4 - 5x^2 + 2, x, 2)`.
+- **Interactive STEM Animated Visualizer & Theorem Studio**:
+  - Direct engagement with dynamic mathematical theorems, Fourier harmonics, ODE wave animations, chaotic attractors, particle physics simulations, and Bravais crystal lattice geometry.
+- **Visual & UI Refinement**:
+  - Replaced Settings toolbar icon with a crisp native vector cogwheel/gear symbol.
+  - Synchronized application-wide visual version numbering (`v26.9.0`) across header lockups, about dialogs, and update receipts.
+  - Clean Welcome surface with customizable startup behavior (`"Resume Previous Session"` or `"Start Fresh Computation"`).
+  - Safe tab closing key-combinations (`⌥ W` / `⌘ ⇧ W`) avoiding host browser/system collisions.
+- **100-Test Exhaustive Non-Regression Suite**:
+  - Comprehensive automated test suite verifying linear equations, quadratics, polynomials, factoring, calculus, chemistry molar mass breakdown, and quantum/thermodynamic physics calculations.
+
 ### CentL26.8.1 — Resilient Multi-Strategy Updater, Clean Bin Architecture & Zero Build Warnings (2026-08-21)
 
 - **Resilient Multi-Strategy In-App Updater**: `execute_repo_update` now features a 3-tier compilation and download fallback pipeline:
