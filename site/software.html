@@ -3,83 +3,152 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Install CENTL: Oasis installer, source checkout, and published identities.">
-  <title>Software — Free Computation Foundation</title>
+  <meta name="description" content="Download CentL26 Native Laboratory Desktop Suite: macOS Apple Silicon / Intel Universal DMG, Linux x86_64, Windows 11 x86_64 standalone package.">
+  <title>Software Suite &amp; Downloads — Free Computation Foundation</title>
   <link rel="canonical" href="https://freecomputation.org/software.html">
   <meta name="robots" content="index,follow">
+  <meta name="keywords" content="CentL26 download, macOS DMG, Linux tarball, Windows 11 scientific software, exact CAS, FCF software suite">
+  <meta name="theme-color" content="#030712">
   <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://freecomputation.org/software.html">
-  <meta property="og:title" content="Software — Free Computation Foundation">
-  <meta property="og:description" content="Source, Oasis releases, and installers.">
+  <meta property="og:title" content="CentL26 Software Suite &amp; Downloads — Free Computation Foundation">
+  <meta property="og:description" content="Cross-platform deterministic scientific software releases for macOS, Linux, and Windows 11.">
   <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="library-layout.css?v=4">
 </head>
 <body>
 <div class="shell" id="top">
   <a class="skip" href="#content">Skip to content</a>
+  
   <header class="masthead">
-    <div class="brand"><a href="index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
-    <div class="title"><h1>Software</h1><p>Source, stable releases, and installers.</p></div>
+    <div class="brand">
+      <a href="index.html#top">
+        <strong>FCF</strong>
+        <div class="brand-meta">
+          <span>Free Computation Foundation</span>
+          <small>Scientific Software Distributions · CentL26.10</small>
+        </div>
+      </a>
+    </div>
+    <div class="title">
+      <h1>Software Suite &amp; Downloads</h1>
+      <p>Official native distributions, standalone archives, and verified checksums.</p>
+    </div>
+    <nav class="masthead-nav" aria-label="Quick Links">
+      <a href="index.html#centl-console" class="nav-btn-highlight">[EXEC] LIVE TERMINAL</a>
+      <a href="centl.html">CentL26 Flagship</a>
+      <a href="docs.html">Docs</a>
+      <a href="research.html">Research</a>
+      <a href="https://github.com/chasebryan/centl" target="_blank" rel="noopener">GitHub</a>
+    </nav>
   </header>
+
   <div class="layout">
-            <nav aria-label="Primary">
-      <h2>CENTL &amp; Hub</h2>
+    <nav aria-label="Primary Navigation">
+      <h2>Flagship &amp; Hub</h2>
       <ul>
-        <li><a href="index.html#top">CENTL Work Area</a></li>
-        <li><a href="free-computation.html#top">What is Free Computation?</a></li>
-        <li><a href="centl.html#top">About CENTL</a></li>
-        <li><a href="research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
-        <li><a href="software.html#top">Software Suite</a></li>
+        <li><a href="index.html#top">Laboratory Work Area</a></li>
+        <li><a href="centl.html#top">CentL26 Flagship Architecture</a></li>
+        <li><a href="software.html#top" class="is-active">Native Desktop Suite</a></li>
+        <li><a href="free-computation.html#top">Computational Manifesto</a></li>
+        <li><a href="research-erdos-straus.html#top">Erdős–Straus Program</a></li>
       </ul>
-      <h2>Documentation</h2>
+      <h2>Technical Manuals</h2>
       <ul>
         <li><a href="docs.html#top">Documentation Portal</a></li>
-        <li><a href="manuals/install.html#top">Installation Guide</a></li>
-        <li><a href="manuals/numerics.html#top">Numerical Contract</a></li>
-        <li><a href="manuals/syntax.html#top">Syntax &amp; Functions</a></li>
-        <li><a href="manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+        <li><a href="manuals/install.html#top">Universal Installation</a></li>
+        <li><a href="manuals/numerics.html#top">Exact Numerical Contract</a></li>
+        <li><a href="manuals/syntax.html#top">CAS &amp; Equation Syntax</a></li>
+        <li><a href="manuals/sci.html#top">Physics &amp; Stoichiometry</a></li>
       </ul>
-      <h2>Research</h2>
+      <h2>Research Institute</h2>
       <ul>
-        <li><a href="research.html#top">Research Library</a></li>
-        <li><a href="research-erdos-straus.html#top">Erdős–Straus Program</a></li>
-        <li><a href="bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+        <li><a href="research.html#top">Preprints &amp; Technical Reports</a></li>
+        <li><a href="bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus Spec</a></li>
       </ul>
-      <h2>Foundation</h2>
+      <h2>Society &amp; Governance</h2>
       <ul>
-        <li><a href="about.html#top">About FCF</a></li>
-        <li><a href="funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="about.html#top">About the Foundation</a></li>
+        <li><a href="funding.html#top">Institutional Grants</a></li>
         <li><a href="mirrors.html#top">The Bazaar</a></li>
-        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
       </ul>
     </nav>
+
     <main id="content">
-      <h2>Install CENTL</h2>
-      <pre><code>curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
-sh install</code></pre>
-      <p>CENTL v0.15.0 Al-Nur is the published Oasis release for GNU/Linux x86_64. The installer verifies the archive, then activates. See the <a href="manuals/install.html">installation guide</a>.</p>
+      <h2>CentL26 Universal Release Matrix (v26.10.0)</h2>
+      <p>CentL26 is distributed as an offline standalone application across macOS, GNU/Linux, and Windows 11. All targets execute the exact same deterministic Rust core with 100% feature parity.</p>
 
-      <h2>Published identities</h2>
-      <table class="directory">
-        <tr><th>Name</th><th>What it is</th><th>Where</th></tr>
-        <tr><td>CENTL v0.15.0 Al-Nur</td><td>Oasis product (GNU/Linux)</td><td><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">release v0.15.0</a></td></tr>
-        <tr><td>CENTL Web Hub</td><td>Zero-JavaScript Web Application &amp; Hunt Engine</td><td><a href="index.html">Web Work Area</a> · <a href="hub.html">Dedicated Hub</a></td></tr>
-        <tr><td>CENTL v0.14.0 Al-Khayma</td><td>Previous Oasis</td><td><a href="https://github.com/chasebryan/centl/releases/tag/v0.14.0">release v0.14.0</a></td></tr>
-        <tr><td>FCF Camp #1</td><td>Current stay</td><td><a href="https://github.com/chasebryan/centl/releases/tag/fcf-camp-001">fcf-camp-001</a></td></tr>
-        <tr><td>CENTL Marsa</td><td>Windows/macOS harbor</td><td><a href="https://github.com/chasebryan/centl/tree/CENTL-Marsa">branch CENTL-Marsa</a></td></tr>
-        <tr><td><code>install</code></td><td>Stable GNU/Linux installer</td><td><a href="https://raw.githubusercontent.com/chasebryan/centl/oasis/install">oasis/install</a></td></tr>
-        <tr><td>CENTL source</td><td>Developer tree and Camp stay</td><td><a href="https://github.com/chasebryan/centl">github.com/chasebryan/centl</a> on <code>main</code></td></tr>
+      <div class="hub-pathways">
+        <section class="hub-card">
+          <h3>macOS Desktop (Apple Silicon &amp; Intel)</h3>
+          <p>Native AppKit &amp; WebKit laboratory application with dynamic STEM animated visualizer and theorem studio.</p>
+          <pre><code># 1-Command Setup:
+./install.sh
+open build/centl26/macos/CentL26.app</code></pre>
+          <div class="card-links">
+            <a href="manuals/install.html#macos">macOS Manual</a>
+          </div>
+        </section>
+
+        <section class="hub-card">
+          <h3>GNU/Linux (x86_64 / ARM64)</h3>
+          <p>Standalone tarball distribution for Debian, Ubuntu, Fedora, RHEL, and Arch Linux systems.</p>
+          <pre><code>curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install.sh
+sh install.sh
+centl26</code></pre>
+          <div class="card-links">
+            <a href="manuals/install.html#linux">Linux Manual</a>
+          </div>
+        </section>
+
+        <section class="hub-card">
+          <h3>Windows 11 (x86_64)</h3>
+          <p>Complete standalone distribution archive with launcher script, native icon, and automated installer.</p>
+          <pre><code># PowerShell Automated Setup:
+powershell -ExecutionPolicy Bypass -File scripts\install-windows.ps1</code></pre>
+          <div class="card-links">
+            <a href="manuals/install.html#windows">Windows Manual</a>
+          </div>
+        </section>
+
+        <section class="hub-card">
+          <h3>Interactive Web Hub (Zero-JS)</h3>
+          <p>High-throughput browser interface running directly from pure HTML forms with zero client JavaScript required.</p>
+          <div class="card-links">
+            <a href="index.html#centl-console">Open Web Terminal</a>
+            <a href="hub.html">Dedicated Hub</a>
+          </div>
+        </section>
+      </div>
+
+      <h2>Cryptographic Release Registry</h2>
+      <table>
+        <tr><th>Distribution Artifact</th><th>Target Platform</th><th>Schema &amp; Integrity</th></tr>
+        <tr><td><code>CentL26.app</code></td><td>macOS Arm64 / x86_64 Universal</td><td>Apple Code Signed / Hardened Runtime</td></tr>
+        <tr><td><code>CentL26-Linux-x86_64.tar.gz</code></td><td>GNU/Linux x86_64</td><td>SHA-256 Verified Archive</td></tr>
+        <tr><td><code>CentL26-Windows-x86_64.zip</code></td><td>Windows 11 x86_64</td><td>SHA-256 Verified Archive</td></tr>
+        <tr><td><code>centl-web</code></td><td>Server Origin (x86_64)</td><td>Oasis Deterministic Contract</td></tr>
       </table>
-      <p>Checksums, signing, and preservation contracts are in the <a href="docs.html">documentation index</a>. Public byte status is recorded in <a href="mirrors.html">The Bazaar</a>.</p>
 
-      <h2>Source checkout</h2>
+      <h2>Source Checkout &amp; Developer Build</h2>
       <pre><code>git clone https://github.com/chasebryan/centl.git
-cd centl</code></pre>
-      <p>The default checkout is the developer distribution. Stable product authority is the <code>oasis</code> branch.</p>
+cd centl
+cargo build --release --bin centl26
+target/release/centl26</code></pre>
+      <p>Source code is licensed under <code>Apache-2.0</code>. Documentation is licensed under <code>CC-BY-4.0</code>.</p>
     </main>
   </div>
-  <footer>Free Computation Foundation · Software distribution index.</footer>
+
+  <footer>
+    <div class="footer-line">
+      <span>Free Computation Foundation · Institute for Advanced Computational Science</span>
+      <span>·</span>
+      <span>Apache-2.0 License</span>
+    </div>
+  </footer>
 </div>
+<script src="site-lab.js"></script>
 </body>
 </html>

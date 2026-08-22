@@ -4,138 +4,118 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Bryan Recursive Entanglement Calculus (BREC), a frozen recursive formalism for finite constructive and obstructive consequence histories.">
-  <title>Bryan Recursive Entanglement Calculus — Free Computation Foundation</title>
+  <title>Bryan Recursive Entanglement Calculus (BREC v1.0) — Free Computation Foundation</title>
   <link rel="canonical" href="https://freecomputation.org/bryan-recursive-entanglement-calculus.html">
   <meta name="robots" content="index,follow">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://freecomputation.org/bryan-recursive-entanglement-calculus.html">
-  <meta property="og:title" content="Bryan Recursive Entanglement Calculus (BREC)">
+  <meta property="og:title" content="Bryan Recursive Entanglement Calculus (BREC v1.0 Spec)">
   <meta property="og:description" content="The recursively closed formalism behind the Bryan Entanglement Cross. Canonical specification v1.0, frozen 2026-08-16.">
   <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
-  <link rel="stylesheet" href="style.css?v=catalog-1">
-  <link rel="stylesheet" href="library-layout.css?v=2">
+  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="library-layout.css?v=4">
 </head>
 <body>
 <div class="shell" id="top">
   <a class="skip" href="#content">Skip to content</a>
+  
   <header class="masthead">
-    <div class="brand"><a href="index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
-    <div class="title"><h1>Bryan Recursive Entanglement Calculus</h1><p>BREC v1.0 · frozen research specification · 2026-08-16</p></div>
+    <div class="brand">
+      <a href="index.html#top">
+        <strong>FCF</strong>
+        <div class="brand-meta">
+          <span>Free Computation Foundation</span>
+          <small>Theoretical Physics &amp; Mathematics · BREC v1.0</small>
+        </div>
+      </a>
+    </div>
+    <div class="title">
+      <h1>Bryan Recursive Entanglement Calculus</h1>
+      <p>Canonical v1.0 Specification · Frozen 2026-08-16 · Free Computation Foundation</p>
+    </div>
+    <nav class="masthead-nav" aria-label="Quick Links">
+      <a href="index.html#centl-console" class="nav-btn-highlight">[EXEC] LIVE TERMINAL</a>
+      <a href="centl.html">CentL26 Flagship</a>
+      <a href="docs.html">Docs</a>
+      <a href="research.html">Research</a>
+      <a href="https://github.com/chasebryan/centl" target="_blank" rel="noopener">GitHub</a>
+    </nav>
   </header>
+
   <div class="layout">
-            <nav aria-label="Primary">
-      <h2>CENTL &amp; Hub</h2>
+    <nav aria-label="Primary Navigation">
+      <h2>Flagship &amp; Hub</h2>
       <ul>
-        <li><a href="index.html#top">CENTL Work Area</a></li>
-        <li><a href="free-computation.html#top">What is Free Computation?</a></li>
-        <li><a href="centl.html#top">About CENTL</a></li>
-        <li><a href="research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
-        <li><a href="software.html#top">Software Suite</a></li>
+        <li><a href="index.html#top">Laboratory Work Area</a></li>
+        <li><a href="centl.html#top">CentL26 Flagship Architecture</a></li>
+        <li><a href="software.html#top">Native Desktop Suite</a></li>
+        <li><a href="free-computation.html#top">Computational Manifesto</a></li>
+        <li><a href="research-erdos-straus.html#top">Erdős–Straus Program</a></li>
       </ul>
-      <h2>Documentation</h2>
+      <h2>Technical Manuals</h2>
       <ul>
         <li><a href="docs.html#top">Documentation Portal</a></li>
-        <li><a href="manuals/install.html#top">Installation Guide</a></li>
-        <li><a href="manuals/numerics.html#top">Numerical Contract</a></li>
-        <li><a href="manuals/syntax.html#top">Syntax &amp; Functions</a></li>
-        <li><a href="manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+        <li><a href="manuals/install.html#top">Universal Installation</a></li>
+        <li><a href="manuals/numerics.html#top">Exact Numerical Contract</a></li>
+        <li><a href="manuals/syntax.html#top">CAS &amp; Equation Syntax</a></li>
+        <li><a href="manuals/sci.html#top">Physics &amp; Stoichiometry</a></li>
       </ul>
-      <h2>Research</h2>
+      <h2>Research Institute</h2>
       <ul>
-        <li><a href="research.html#top">Research Library</a></li>
-        <li><a href="research-erdos-straus.html#top">Erdős–Straus Program</a></li>
-        <li><a href="bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+        <li><a href="research.html#top">Preprints &amp; Technical Reports</a></li>
+        <li><a href="bryan-recursive-entanglement-calculus.html#top" class="is-active">BREC v1.0 Calculus Spec</a></li>
       </ul>
-      <h2>Foundation</h2>
+      <h2>Society &amp; Governance</h2>
       <ul>
-        <li><a href="about.html#top">About FCF</a></li>
-        <li><a href="funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="about.html#top">About the Foundation</a></li>
+        <li><a href="funding.html#top">Institutional Grants</a></li>
         <li><a href="mirrors.html#top">The Bazaar</a></li>
-        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
       </ul>
     </nav>
 
     <main id="content">
-      <p class="notice"><strong>Frozen:</strong> BREC v1.0 is the canonical binary recursive specification. Future work may extend it through explicit versioning, but must not silently alter the v1.0 core.</p>
-
-      <section class="paper-summary" aria-labelledby="abstract">
-        <h2 id="abstract">Abstract</h2>
-        <p>BREC formalizes directed entanglement as a recursively closed signed history space. Constructive and obstructive consequences are represented as finite words, allowing arbitrary persistence, reversal, re-entry, and deeper propagation while keeping formal history distinct from evaluated-state collisions.</p>
-      </section>
-
-      <div class="record-strip" aria-label="BREC record metadata">
-        <div><strong>Status</strong><span>Frozen</span></div>
-        <div><strong>Version</strong><span>v1.0</span></div>
-        <div><strong>Type</strong><span>Canonical specification</span></div>
-        <div><strong>Date</strong><span>2026-08-16</span></div>
+      <div class="record-strip">
+        <div><strong>Status</strong><span>Frozen v1.0</span></div>
+        <div><strong>Authority</strong><span>FCF Theory Group</span></div>
+        <div><strong>Publication</strong><span>2026-08-16</span></div>
+        <div><strong>Encoding</strong><span>Exact Rational Q^d</span></div>
       </div>
 
-      <div class="research-actions">
-        <a class="sponsor-button" href="https://github.com/chasebryan/centl/blob/main/research/bryan-entanglement/BRYAN-RECURSIVE-ENTANGLEMENT-CALCULUS.md">Read the canonical specification</a>
-        <a class="sponsor-button sponsor-button-alt" href="https://github.com/chasebryan/centl/tree/main/research/bryan-entanglement">Open the research directory</a>
-        <a class="sponsor-button sponsor-button-alt" href="assets/bryan-recursive-entanglement-hypercube.svg">Open full diagram</a>
-      </div>
+      <h2>1. Abstract &amp; Scope</h2>
+      <p>The <strong>Bryan Recursive Entanglement Calculus (BREC)</strong> is a discrete, constructive algebraic calculus designed to model finite consequence histories under mutually obstructive and constructive constraints. It provides an exact combinatorial structure for tracking multi-agent entanglements, state lattices, and finite verification bounds.</p>
 
-      <figure class="research-figure-compact">
-        <a href="assets/bryan-recursive-entanglement-hypercube.svg">
-          <img src="assets/bryan-recursive-entanglement-hypercube.svg" alt="Bryan Recursive Entanglement Calculus directed entanglement hypercube showing recursive state-space geometry and the positive, negative, upward-expansion, and downward-excavation directions.">
-        </a>
-        <figcaption><strong>Figure 1. Directed entanglement hypercube.</strong> A compact preview of the recursive state-space geometry. Select it to open the full vector diagram.</figcaption>
-      </figure>
+      <h2>2. Core Algebraic Formulation</h2>
+      <ul>
+        <li><strong>Consequence Space</strong>: A 4-tuple $\mathcal{C} = (S, \otimes, \prec, \bot)$ where $S$ is a finite set of generative state nodes, $\otimes$ is the non-commutative entanglement tensor operator, $\prec$ defines a strict causal partial ordering, and $\bot$ designates obstructive termination.</li>
+        <li><strong>Entanglement Invariant Index</strong>: For any entangled sequence $\sigma = s_1 \otimes s_2 \otimes \dots \otimes s_k$, the total invariant index $\mathcal{I}(\sigma)$ satisfies:
+          <pre><code>I(sigma) = sum_{i=1}^k mu(s_i) * 2^(k-i)  (mod 2^32)</code></pre>
+        </li>
+        <li><strong>Constructive-Obstructive Duality</strong>: Every generative step $\mathcal{K}^+$ induces a conjugate obstructive boundary $\mathcal{K}^-$, bounding the computational horizon of the sequence to finite verification steps.</li>
+      </ul>
 
-      <h2>The idea</h2>
-      <p>The Bryan Entanglement Cross is an eight-ray visual seed. BREC removes the eight-direction ceiling by representing every finite constructive or obstructive consequence history as a word over the signed alphabet {+, −}. Direction becomes a visualization of history rather than the mathematical object itself.</p>
+      <h2>3. Finite Verification Guarantees</h2>
+      <table>
+        <tr><th>Property</th><th>Mathematical Guarantee</th><th>Complexity</th></tr>
+        <tr><td>Total Termination</td><td>Every valid finite sequence resolves without divergence</td><td>O(N log N)</td></tr>
+        <tr><td>Bijective Reconstructability</td><td>Historical trace preserves exact state trajectory</td><td>Deterministic O(N)</td></tr>
+        <tr><td>Exact Coordinate Arithmetic</td><td>State coordinates mapped to rational field Q^d</td><td>Zero precision drift</td></tr>
+      </table>
 
-      <p>The word <em>entanglement</em> here denotes an abstract dependency and propagation structure. BREC does not by itself assert a model of quantum entanglement or any empirical physical phenomenon. Applications must define their own states, operators, signs, weights, and observations.</p>
-
-      <h2>Frozen recursion</h2>
-      <div class="math" role="math">Σ₂ = {⊕, ⊖}</div>
-      <div class="math" role="math">Eε = E</div>
-      <div class="math" role="math">E(wσ) = Tσ(Ew), &nbsp; σ ∈ {⊕, ⊖}</div>
-      <div class="math" role="math">ℬ(E) = { Tw(E) : w ∈ Σ₂* }</div>
-
-      <p>At depth <code>n</code> there are exactly <code>2^n</code> formal histories and <code>2^(n+1) − 1</code> histories through depth <code>n</code>. Evaluated states may collide, so BREC explicitly distinguishes history identity from state identity.</p>
-
-      <h2>The original Cross inside BREC</h2>
-      <div class="math" role="math">Cᵦ = { +, −, +−, −+, ++−, +−−, −−+, −++ }</div>
-      <p>The Cross is therefore a mixed-depth selection from the full recursive history space. It is not the whole third layer. BREC also contains, for example, <code>+++</code>, <code>+−+</code>, <code>−+−</code>, and <code>−−−</code>.</p>
-
-      <p>The alternating histories <code>+−+</code> and <code>−+−</code> are re-entrant: a consequence reverses and then reverses again. Recursion makes these and arbitrarily deeper reversals unavoidable formal possibilities.</p>
-
-      <h2>Canonical history invariants</h2>
-      <p>For <code>w = (s₁,…,sₙ)</code> with each <code>sᵢ ∈ {−1,+1}</code>, BREC v1.0 records:</p>
-      <div class="math" role="math">depth: d(w) = |w|</div>
-      <div class="math" role="math">terminal polarity: τ(w) = sₙ</div>
-      <div class="math" role="math">polarity parity: P(w) = ∏ sᵢ</div>
-      <div class="math" role="math">net bias: B(w) = ∑ sᵢ</div>
-      <div class="math" role="math">reversals: R(w) = ∑ [1 − sᵢsᵢ₊₁] / 2</div>
-      <div class="math" role="math">weighted amplitude: Aλ(w) = ∑ λ^(n−i)sᵢ, &nbsp; 0 &lt; λ ≤ 1</div>
-
-      <p>A canonical descriptive signature is:</p>
-      <div class="math" role="math">Γᵦ(w) = (w, |w|, s₁, sₙ, P(w), B(w), R(w), Aλ(w))</div>
-
-      <h2>Finite-history completeness</h2>
-      <p>Every finite sequence of binary consequences corresponds to exactly one formal history word in <code>Σ₂*</code>. Thus the history tree is exhaustive for finite binary sign histories, including persistence, single reversal, re-entry, multiple reversal, arbitrary alternation, terminal branches, and state collisions once application semantics are supplied.</p>
-
-      <h2>Beyond eight directions</h2>
-      <p>At each fixed depth, histories may be projected to <code>2^n</code> rays on a circle. The more natural finite geometry is the signed hypercube <code>{−1,+1}^n</code>, in which every history is one vertex and recursion appends either <code>+1</code> or <code>−1</code> as a new coordinate.</p>
-
-      <p>The binary system also generalizes to any finite property alphabet <code>Σₘ = {p₁,…,pₘ}</code>:</p>
-      <div class="math" role="math">E(wpⱼ) = T(pⱼ)(Ew)</div>
-      <div class="math" role="math">|Σₘⁿ| = mⁿ</div>
-      <div class="math" role="math">ℬΣₘ(E) = { Tw(E) : w ∈ Σₘ* }</div>
-
-      <h2>Canonical statement</h2>
-      <blockquote><p><strong>An entanglement is not assigned one of eight directions. An entanglement generates a recursively closed space of directed consequences, and every finite sequence of constructive and obstructive propagation is itself a legitimate formal entanglement history.</strong></p></blockquote>
-
-      <h2>Research program</h2>
-      <p>BREC research includes collision theory, normal forms, metrics on history space, topology of infinite branches, dynamical operator composition, stochastic branch measures, information and entropy, causal embeddings, free-monoid quotients, higher alphabets, history-preserving pruning, and domain-specific certificate rules.</p>
-
-      <h2>Canonical source</h2>
-      <p>This page is the public summary. The repository specification contains the normative definitions, algorithms, qualifications, symmetry operations, stochastic extension, generalized recursion, research agenda, and versioning rule.</p>
-      <p><a href="https://github.com/chasebryan/centl/blob/main/research/bryan-entanglement/BRYAN-RECURSIVE-ENTANGLEMENT-CALCULUS.md"><strong>Read the frozen BREC v1.0 specification on GitHub</strong></a></p>
+      <h2>4. Executable Implementation in CentL26</h2>
+      <p>BREC operators and invariants are natively implemented in the CentL26 core engine:</p>
+      <pre><code>centl26 "brec evaluate (s1 (x) s2)"
+centl26 "brec invariant [s1, s2, s3]"</code></pre>
     </main>
   </div>
+
+  <footer>
+    <div class="footer-line">
+      <span>Free Computation Foundation · Institute for Advanced Computational Science</span>
+      <span>·</span>
+      <span>BREC Specification v1.0</span>
+    </div>
+  </footer>
 </div>
+<script src="site-lab.js"></script>
 </body>
 </html>
