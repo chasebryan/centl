@@ -2620,7 +2620,7 @@ pub fn render_full_page(content_html: &str, title: &str, rel: &str) -> String {
     page.push_str("</head>\n<body>\n<div class=\"shell\" id=\"top\">\n");
     page.push_str("  <a class=\"skip\" href=\"#content\">Skip to content</a>\n");
     page.push_str(&format!(
-        "  <header class=\"masthead home-masthead\" id=\"centl-hub\" tabindex=\"-1\" autofocus>\n    <div class=\"brand\"><a href=\"{}index.html#top\"><strong>FCF</strong><div class=\"brand-meta\"><span>Free Computation Foundation</span><small>Free for science · CentL26.10</small></div></a></div>\n    <nav class=\"masthead-nav\" aria-label=\"Quick Links\"><a href=\"/hub#centl-console\" class=\"nav-btn-highlight\">⚡ Live Terminal</a><a href=\"{}software.html\">Desktop Apps</a><a href=\"{}docs.html\">Docs</a><a href=\"{}research.html\">Research</a><a href=\"{}mirrors.html\">The Bazaar</a><a href=\"https://github.com/chasebryan/centl\" target=\"_blank\" rel=\"noopener\">GitHub</a><a href=\"https://github.com/sponsors/chasebryan\" class=\"nav-btn-sponsor\" target=\"_blank\" rel=\"noopener\">♥ Sponsor</a></nav>\n  </header>\n",
+        "  <header class=\"masthead home-masthead\" id=\"centl-hub\" tabindex=\"-1\" autofocus>\n    <div class=\"brand\"><a href=\"{}index.html#top\"><strong>FCF</strong><div class=\"brand-meta\"><span>Free Computation Foundation</span><small>Advanced Computational Science · CentL26.10</small></div></a></div>\n    <nav class=\"masthead-nav\" aria-label=\"Quick Links\"><a href=\"/hub#centl-console\" class=\"nav-btn-highlight\">[EXEC] LIVE TERMINAL</a><a href=\"{}software.html\">Desktop Apps</a><a href=\"{}docs.html\">Docs</a><a href=\"{}research.html\">Research</a><a href=\"{}mirrors.html\">The Bazaar</a><a href=\"https://github.com/chasebryan/centl\" target=\"_blank\" rel=\"noopener\">GitHub</a><a href=\"https://github.com/sponsors/chasebryan\" class=\"nav-btn-sponsor\" target=\"_blank\" rel=\"noopener\">Sponsor FCF</a></nav>\n  </header>\n",
         rel, rel, rel, rel, rel
     ));
     page.push_str("  <div class=\"layout\">\n");
@@ -2696,12 +2696,12 @@ pub fn render_full_page(content_html: &str, title: &str, rel: &str) -> String {
     page.push_str("      </ul>\n");
     page.push_str("    </nav>\n");
     page.push_str("    <main id=\"content\">\n");
-    page.push_str(&format!("      <img class=\"banner\" src=\"{}assets/fcf-centl-banner.png\" alt=\"Free Computation Foundation and CENTL camel banner\">\n", rel));
+    page.push_str(&format!("      <img class=\"banner\" src=\"{}assets/fcf-centl-banner.png\" alt=\"Free Computation Foundation and CENTL banner\">\n", rel));
     page.push_str(content_html);
     page.push_str("\n    </main>\n");
     page.push_str("  </div>\n");
-    page.push_str("  <footer>Free Computation Foundation · Free for science. · Server-rendered HTML/CSS · Zero JavaScript</footer>\n");
-    page.push_str("</div>\n</body>\n</html>\n");
+    page.push_str("  <footer>Free Computation Foundation · Institute for Advanced Computational Science · Apache-2.0 License</footer>\n");
+    page.push_str(&format!("</div>\n<script src=\"{}site-lab.js\"></script>\n</body>\n</html>\n", rel));
     page
 }
 
