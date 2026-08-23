@@ -309,7 +309,7 @@ pub fn handle_single_command(
 
     if cmd == ":release" || cmd == ":version" || cmd == ":releases" {
         let res = ExecutionResult {
-            text: "=== CentL26.11-ES Release (Erdős–Straus Multi-Engine Observatory & Certified Letter Vault) ===\nVersion: 26.11.0 (CentL26.11-ES)\nCapabilities:\n• Erdős–Straus Multi-Engine Algorithmic Hunt Studio & Observatory: live endless multi-engine execution across CC.kernel, CBAP.kernel, CBIS.kernel, CBX.kernel, and bb.kernel.\n• Central Authoritative Letter Admission Gate: strict fail-closed mathematical predicate requiring prime status, Mordell-hard residue class (840k + {1, 121, 169, 289, 361, 529}), preclearance survival, corridor depth threshold, and exact rational identity proof.\n• Isolated Dual Vault System: genuine admitted letters archived to letters/ with cryptographic SHA-256 certificates; non-letter corridor discoveries archived to escapes/.\n• Historical Vault Migration & Integrity Suite: non-destructive re-audit engine (:es audit / :es migrate / /api/es/audit) verifying legacy discoveries.\n• High-Performance Overflow-Free Arithmetic: u128 intermediate products preventing arithmetic overflow across deep coordinate horizons (4.1 × 10^20).\n• Jupyter-Grade Interactive Notebook Workflows & LaTeX Typography Engine.\n• Multi-Platform Native Distribution for macOS (Apple Silicon & Intel), Windows 11 (x86_64), and Linux (Debian/Fedora/Arch).".to_string(),
+            text: "=== CentL26.12-GL Release (God's Letter Watchdog & Corrected CC Identities) ===\nVersion: 26.12.0 (CentL26.12-GL)\nCapabilities:\n• God's Letter (Ω) hunt: a God's Letter is a Mordell-hard prime that survives CC + corridor + bb with no exact 4/p witness. Solved identities are not God's Letters.\n• Corrected CC.kernel identities (even, 4p+3, 3p+2, 8p+5) verified in BigInt; live CC share 87.5%.\n• Erdős–Straus Multi-Engine Algorithmic Hunt Studio & Observatory: live endless multi-engine execution across CC.kernel, CBAP.kernel, CBIS.kernel, CBX.kernel, and bb.kernel.\n• Central Authoritative Letter Admission Gate: strict fail-closed mathematical predicate requiring prime status, Mordell-hard residue class (840k + {1, 121, 169, 289, 361, 529}), preclearance survival, corridor depth threshold, and exact rational identity proof. Unsolved Mordell primes are not letters.\n• Isolated Dual Vault System: genuine admitted letters archived to letters/; remnants to remnants/; corridor discoveries to escapes/; unsolved God's Letters to gods-letter/.\n• Historical Vault Migration & Integrity Suite: non-destructive re-audit engine (:es audit / :es migrate / /api/es/audit) verifying legacy discoveries.\n• High-Performance Overflow-Free Arithmetic: u128 / BigInt intermediate products preventing arithmetic overflow across deep coordinate horizons.\n• Jupyter-Grade Interactive Notebook Workflows & LaTeX Typography Engine.\n• Multi-Platform Native Distribution for macOS (Apple Silicon & Intel), Windows 11 (x86_64), and Linux (Debian/Fedora/Arch).".to_string(),
             exact_rational: None,
             approximate: None,
             symbolic_expr: None,
@@ -479,7 +479,7 @@ fn is_auto_detected_es(cmd: &str) -> bool {
     if parts.len() >= 2 && (parts[0] == "probe" || parts[0] == "hunt") {
         return true;
     }
-    false
+    !parts.is_empty() && matches!(parts[0], "gods-letter" | "gods_letter" | "gl")
 }
 
 fn is_auto_detected_cps(cmd: &str) -> bool {
@@ -604,11 +604,13 @@ fn handle_es_command(
                         symbolic_expr: None,
                         execution_micros: res.execution_micros,
                     };
-                    if res.admission_status.is_admitted() {
+                    if res.letter_admitted {
                         crate::erdos_straus::hunt::persist_letter_to_disk(&res);
-                    } else if res.classification == crate::erdos_straus::solver::CandidateClassification::CbxSurvivor {
+                    }
+                    if res.remnant_admitted {
                         crate::erdos_straus::hunt::persist_remnant_to_disk(&res);
-                    } else if res.classification == crate::erdos_straus::solver::CandidateClassification::CbisEscape {
+                    }
+                    if res.escape_admitted {
                         crate::erdos_straus::hunt::persist_escape_to_disk(&res);
                     }
                     record_solve_history(raw_cmd, &execution, &res, state);
@@ -623,12 +625,15 @@ fn handle_es_command(
             let mut max_primes = 50usize;
             let mut letter_threshold = 10u64;
             let mut mordell_only = false;
+            let mut gods_letter_only = false;
             let mut engine_mode = "auto".to_string();
             let mut positional_count = 0;
 
             for &part in parts.iter().skip(1) {
                 if part == "--mordell" || part == "-m" || part == "--hard" {
                     mordell_only = true;
+                } else if part == "--gods-letter" || part == "--gods_letter" || part == "--gl" {
+                    gods_letter_only = true;
                 } else if part == "--letters" || part == "-l" {
                     letter_threshold = 10;
                 } else if part == "--deep" {
@@ -680,11 +685,102 @@ fn handle_es_command(
                 max_primes,
                 letter_threshold,
                 mordell_only,
+                gods_letter_only,
                 engine_mode,
             };
             let summary = crate::erdos_straus::run_configured_hunt_window(&config);
             record_hunt_history(raw_cmd, &summary, state);
             (None, None, None, Some(summary))
+        }
+        "gods-letter" | "gods_letter" | "gl" => {
+            use crate::erdos_straus::gods_letter::{
+                discover_corpus_candidates, evaluate_gods_letter_domain,
+                format_explain_tree, format_human_summary, ingest_gods_letters_from_corpus,
+                persist_domain_evaluation_report, persist_gods_letter_artifact,
+                verify_stored_gods_letter, GodsLetterDomain, GodsLetterSpec,
+            };
+
+            let mut domain_min: u128 = 2;
+            let mut domain_max: u128 = 100_000;
+            let mut do_scan = false;
+            let mut do_verify = false;
+            let mut do_explain = false;
+            let mut do_json = false;
+
+            for i in 1..parts.len() {
+                match parts[i] {
+                    "--scan" => do_scan = true,
+                    "--verify" => do_verify = true,
+                    "--explain" => do_explain = true,
+                    "--json" => do_json = true,
+                    s if s.starts_with("--domain-min=") => {
+                        if let Ok(v) = s.trim_start_matches("--domain-min=").parse::<u128>() {
+                            domain_min = v;
+                        }
+                    }
+                    s if s.starts_with("--domain-max=") => {
+                        if let Ok(v) = s.trim_start_matches("--domain-max=").parse::<u128>() {
+                            domain_max = v;
+                        }
+                    }
+                    _ => {}
+                }
+            }
+
+            // Default to scan if no action specified
+            if !do_scan && !do_verify && !do_explain && !do_json {
+                do_scan = true;
+            }
+
+            let domain = GodsLetterDomain::new(domain_min, domain_max, true);
+            let spec = GodsLetterSpec::v1();
+
+            // Corpus supplies witnesses; uniqueness is still evaluated over the full domain.
+            let corpus = discover_corpus_candidates(&domain);
+            let discovered = if corpus.is_empty() { None } else { Some(corpus.as_slice()) };
+
+            let eval = evaluate_gods_letter_domain(&domain, discovered, &spec);
+
+            if do_scan {
+                let _ = persist_gods_letter_artifact(&eval);
+                let _ = ingest_gods_letters_from_corpus();
+            } else {
+                let _ = persist_domain_evaluation_report(&eval);
+            }
+
+            let mut text = if do_explain {
+                format_explain_tree(&eval)
+            } else if do_json {
+                serde_json::to_string_pretty(&eval.to_json()).unwrap_or_default()
+            } else {
+                format_human_summary(&eval)
+            };
+
+            if do_verify {
+                let verification = verify_stored_gods_letter(&eval);
+                if do_json {
+                    let mut wrapped = eval.to_json();
+                    wrapped["stored_verification"] = verification;
+                    text = serde_json::to_string_pretty(&wrapped).unwrap_or(text);
+                } else {
+                    let verified = verification.get("verified").and_then(|v| v.as_bool()).unwrap_or(false);
+                    text = format!(
+                        "{}\n\nSTORED CERTIFICATE RE-VERIFICATION: {}\n{}\n",
+                        text,
+                        if verified { "PASS" } else { "FAIL / NO STORED ARTIFACT" },
+                        serde_json::to_string_pretty(&verification).unwrap_or_default()
+                    );
+                }
+            }
+
+            let result = ExecutionResult {
+                text,
+                exact_rational: None,
+                approximate: None,
+                symbolic_expr: None,
+                execution_micros: 0,
+            };
+            (Some(result), None, None, None)
         }
         "audit" | "migrate" => {
             let report = crate::erdos_straus::hunt::audit_and_migrate_vault();
@@ -708,7 +804,7 @@ fn handle_es_command(
             record_hunt_history(raw_cmd, &summary, state);
             (None, None, None, Some(summary))
         }
-        _ => (None, Some("Usage: es solve <p> | es hunt [from] [--mordell] [--letters] [--depth=N] | es audit | es status".to_string()), None, None)
+        _ => (None, Some("Usage: es solve <p> | es hunt [from] [--mordell] [--gods-letter] [--letters] [--depth=N] | es gods-letter [--scan|--verify|--explain|--json] | es audit | es status".to_string()), None, None)
     }
 }
 
@@ -2309,16 +2405,39 @@ fn solve_result_evidence(solve: &SolveResult) -> Value {
             "kind": witness.kind,
             "engine_name": witness.engine_name,
             "depth": witness.depth,
+            "discovery_depth": witness.discovery_depth,
+            "descent_depth": witness.descent_depth,
             "residue_840": witness.residue_840,
             "is_mordell_hard": witness.is_mordell_hard,
             "provider_verified": witness.verified,
             "broker_verified": witness.verify(),
+            "certificate": format!("SHA256: {}", witness.certificate_sha256()),
         })
     });
     let rejection_reason = solve.admission_status.rejection_reason().map(|r| r.description());
+    let certificate = match solve.witness.as_ref() {
+        Some(w) => format!("SHA256: {}", w.certificate_sha256()),
+        None => format!(
+            "SHA256: {}",
+            crate::erdos_straus::certificate::compute_unsolved_certificate(solve.n)
+        ),
+    };
+    let (x, y, z, equation) = match solve.witness.as_ref() {
+        Some(w) => (
+            Some(w.x.to_string()),
+            Some(w.y.to_string()),
+            Some(w.z.to_string()),
+            Some(w.equation()),
+        ),
+        None => (None, None, None, None),
+    };
     serde_json::json!({
         "solved": solve.solved,
         "n": solve.n.to_string(),
+        "x": x,
+        "y": y,
+        "z": z,
+        "equation": equation,
         "residue_840": solve.residue_840,
         "is_mordell_hard": solve.is_mordell_hard,
         "classification": solve.classification.as_str(),
@@ -2328,7 +2447,13 @@ fn solve_result_evidence(solve: &SolveResult) -> Value {
         "grade": solve.grade,
         "letter_number": solve.letter_number,
         "discovered_by": solve.discovered_by,
+        "discovery_depth": solve.discovery_depth,
+        "descent_depth": solve.descent_depth,
+        "letter_admitted": solve.letter_admitted,
+        "remnant_admitted": solve.remnant_admitted,
+        "escape_admitted": solve.escape_admitted,
         "execution_micros": solve.execution_micros.to_string(),
+        "certificate": certificate,
         "witness": witness,
     })
 }
@@ -2339,6 +2464,7 @@ pub fn handle_es_hunt_api_request(body_or_query: &str) -> serde_json::Value {
     let mut max_primes = 100usize;
     let mut letter_threshold = 10u64;
     let mut mordell_only = false;
+    let mut gods_letter_only = false;
     let mut engine_mode = "auto".to_string();
 
     if let Ok(json) = serde_json::from_str::<serde_json::Value>(body_or_query) {
@@ -2357,6 +2483,14 @@ pub fn handle_es_hunt_api_request(body_or_query: &str) -> serde_json::Value {
         if let Some(mo) = json.get("mordell_only").and_then(|v| v.as_bool().or_else(|| v.as_str().map(|s| s == "true" || s == "1"))) {
             mordell_only = mo;
         }
+        if let Some(gl) = json.get("gods_letter_only").and_then(|v| v.as_bool().or_else(|| v.as_str().map(|s| s == "true" || s == "1"))) {
+            if gl {
+                gods_letter_only = true;
+            }
+        }
+        if json.get("filter_mode").and_then(|v| v.as_str()) == Some("gods_letter") {
+            gods_letter_only = true;
+        }
         if let Some(e) = json.get("engine_mode").and_then(|v| v.as_str()) {
             engine_mode = e.to_string();
         }
@@ -2369,6 +2503,9 @@ pub fn handle_es_hunt_api_request(body_or_query: &str) -> serde_json::Value {
                     "max_primes" => if let Ok(val) = v.parse() { max_primes = val; },
                     "letter_threshold" => if let Ok(val) = v.parse() { letter_threshold = val; },
                     "mordell_only" => mordell_only = v == "true" || v == "1",
+                    "gods_letter_only" | "filter_mode" if v == "gods_letter" || v == "true" || v == "1" => {
+                        gods_letter_only = true;
+                    }
                     "engine_mode" => engine_mode = v.to_string(),
                     _ => {}
                 }
@@ -2382,6 +2519,7 @@ pub fn handle_es_hunt_api_request(body_or_query: &str) -> serde_json::Value {
         max_primes,
         letter_threshold,
         mordell_only,
+        gods_letter_only,
         engine_mode,
     };
     let summary = crate::erdos_straus::run_configured_hunt_window(&config);
@@ -2424,7 +2562,22 @@ pub fn handle_es_hunt_api_request(body_or_query: &str) -> serde_json::Value {
         }))
     }).collect();
 
-    let findings_evidence: Vec<serde_json::Value> = summary.findings.iter().map(solve_result_evidence).collect();
+    let findings_evidence: Vec<serde_json::Value> = summary.findings.iter().map(|res| {
+        let mut evidence = solve_result_evidence(res);
+        if gods_letter_only {
+            evidence["gods_letter_candidate"] = serde_json::json!(true);
+            evidence["grade"] = serde_json::json!("gods_letter");
+            evidence["classification"] = serde_json::json!("gods_letter");
+            evidence["classification_label"] = serde_json::json!("God's Letter Candidate");
+            evidence["letter_id"] = serde_json::json!(format!("GL-{}", res.n));
+        }
+        evidence["letter_admitted"] = serde_json::json!(res.letter_admitted);
+        evidence["remnant_admitted"] = serde_json::json!(res.remnant_admitted);
+        evidence["escape_admitted"] = serde_json::json!(res.escape_admitted);
+        evidence["discovery_depth"] = serde_json::json!(res.discovery_depth);
+        evidence["descent_depth"] = serde_json::json!(res.descent_depth);
+        evidence
+    }).collect();
 
     serde_json::json!({
         "status": "ok",
@@ -2440,6 +2593,7 @@ pub fn handle_es_hunt_api_request(body_or_query: &str) -> serde_json::Value {
         "letter_candidates_evaluated": summary.letter_candidates_evaluated,
         "verified_letters_count": summary.verified_letters_count,
         "letter_count": summary.verified_letters_count, // backward compatibility
+        "gods_letter_count": summary.gods_letter_count,
         "rejected_admissions": summary.rejected_admissions,
         "unsolved_count": summary.unsolved_count,
         "active_engine": summary.active_engine,
@@ -2486,8 +2640,99 @@ pub fn handle_es_hunt_api_request(body_or_query: &str) -> serde_json::Value {
             }
         },
         "letters": letters,
-        "findings": findings_evidence
+        "findings": findings_evidence,
+        "gods_letter_only": gods_letter_only
     })
+}
+
+pub fn handle_gods_letter_api_request(body_or_query: &str) -> serde_json::Value {
+    use crate::erdos_straus::gods_letter::{
+        discover_corpus_candidates, evaluate_gods_letter_domain, persist_gods_letter_artifact,
+        verify_stored_gods_letter, GodsLetterDomain, GodsLetterSpec,
+    };
+
+    let mut domain_min: u128 = 2;
+    let mut domain_max: u128 = 100_000;
+    let mut do_scan = true;
+    let mut do_verify = false;
+
+    if let Ok(json) = serde_json::from_str::<serde_json::Value>(body_or_query) {
+        if let Some(v) = json.get("domain_min").and_then(|v| v.as_u64().or_else(|| v.as_str().and_then(|s| s.parse().ok()))) {
+            domain_min = v as u128;
+        }
+        if let Some(v) = json.get("domain_max").and_then(|v| v.as_u64().or_else(|| v.as_str().and_then(|s| s.parse().ok()))) {
+            domain_max = v as u128;
+        }
+        if json.get("verify").and_then(|v| v.as_bool()).unwrap_or(false) {
+            do_verify = true;
+        }
+        if json.get("scan").and_then(|v| v.as_bool()) == Some(false) {
+            do_scan = false;
+        }
+    } else {
+        for pair in body_or_query.split('&') {
+            if let Some((k, v)) = pair.split_once('=') {
+                match k {
+                    "domain_min" | "domain-min" => if let Ok(val) = v.parse::<u128>() { domain_min = val; },
+                    "domain_max" | "domain-max" => if let Ok(val) = v.parse::<u128>() { domain_max = val; },
+                    "verify" => do_verify = v == "true" || v == "1",
+                    "scan" => do_scan = v == "true" || v == "1",
+                    _ => {}
+                }
+            }
+        }
+    }
+
+    let domain = GodsLetterDomain::new(domain_min, domain_max, true);
+    let spec = GodsLetterSpec::v1();
+    let corpus = discover_corpus_candidates(&domain);
+    let discovered = if corpus.is_empty() { None } else { Some(corpus.as_slice()) };
+    let eval = evaluate_gods_letter_domain(&domain, discovered, &spec);
+    if do_scan {
+        let _ = persist_gods_letter_artifact(&eval);
+    }
+    let mut payload = eval.to_json();
+    payload["status"] = serde_json::json!("ok");
+    payload["human_summary"] = serde_json::json!(crate::erdos_straus::gods_letter::format_human_summary(&eval));
+    payload["explain"] = serde_json::json!(crate::erdos_straus::gods_letter::format_explain_tree(&eval));
+    if do_verify {
+        payload["stored_verification"] = verify_stored_gods_letter(&eval);
+    }
+    payload
+}
+
+pub fn export_gods_letter_json() -> String {
+    let dir = crate::erdos_straus::gods_letter::resolve_gods_letter_dir();
+    let mut letters = Vec::new();
+    if let Ok(entries) = std::fs::read_dir(&dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let name = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
+            if name.starts_with("GL-") && path.extension().and_then(|s| s.to_str()) == Some("json") {
+                if let Ok(content) = std::fs::read_to_string(&path) {
+                    if let Ok(val) = serde_json::from_str::<serde_json::Value>(&content) {
+                        letters.push(val);
+                    }
+                }
+            }
+        }
+    }
+    letters.sort_by(|a, b| {
+        let na = a.get("n").and_then(|v| v.as_u64().or_else(|| v.as_str().and_then(|s| s.parse().ok()))).unwrap_or(0);
+        let nb = b.get("n").and_then(|v| v.as_u64().or_else(|| v.as_str().and_then(|s| s.parse().ok()))).unwrap_or(0);
+        na.cmp(&nb)
+    });
+    let current = std::fs::read_to_string(dir.join("current.json"))
+        .ok()
+        .and_then(|s| serde_json::from_str::<serde_json::Value>(&s).ok());
+    serde_json::json!({
+        "schema": "centl26.erdos-straus.gods-letter-export/1",
+        "status": if letters.is_empty() { "no_gods_letter" } else { "ok" },
+        "vault_directory": dir.to_string_lossy(),
+        "total": letters.len(),
+        "current": current,
+        "letters": letters
+    }).to_string()
 }
 
 fn named_f64(parts: &[&str], name: &str) -> Option<f64> {
@@ -3786,6 +4031,21 @@ mod tests {
         assert_eq!(h.start_bound, 20000);
         assert_eq!(h.end_bound, 21000);
     }
+
+    #[test]
+    fn test_es_gods_letter_command_unique_subdomain() {
+        let mut state = AppState::new();
+        let (res, err, _, hunt) = handle_es_command(
+            "es gods-letter --json --domain-min=2000 --domain-max=3000",
+            &mut state,
+        );
+        assert!(err.is_none());
+        assert!(hunt.is_none());
+        let text = res.expect("gods-letter returns ExecutionResult").text;
+        let val: serde_json::Value = serde_json::from_str(&text).expect("json evaluation");
+        assert_eq!(val["uniqueness_status"]["status"], "no_gods_letter");
+        assert_eq!(val["surviving_candidates"].as_array().map(|a| a.len()).unwrap_or(0), 0);
+    }
 }
 
 pub const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -4381,7 +4641,12 @@ pub fn export_remnants_json() -> String {
             {
                 if let Ok(content) = std::fs::read_to_string(&path) {
                     if let Ok(json_val) = serde_json::from_str::<serde_json::Value>(&content) {
-                        remnant_list.push(json_val);
+                        let descent_depth = json_val.get("descent_depth").and_then(|v| v.as_u64()).unwrap_or_else(|| {
+                            json_val.get("depth").and_then(|v| v.as_u64()).unwrap_or(0)
+                        });
+                        if descent_depth > 50 {
+                            remnant_list.push(json_val);
+                        }
                     }
                 }
             }

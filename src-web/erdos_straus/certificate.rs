@@ -111,6 +111,31 @@ impl Sha256 {
     }
 }
 
+pub fn sha256_hex(payload: &str) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(payload.as_bytes());
+    hasher.finalize().iter().map(|b| format!("{:02x}", b)).collect()
+}
+
+pub fn compute_witness_certificate(
+    n: u64,
+    x: &str,
+    y: &str,
+    z: &str,
+    method: &str,
+    engine: &str,
+    depth: u64,
+) -> String {
+    sha256_hex(&format!(
+        "ES-WITNESS-v1\nn={}\nx={}\ny={}\nz={}\nmethod={}\nengine={}\ndepth={}\n",
+        n, x, y, z, method, engine, depth
+    ))
+}
+
+pub fn compute_unsolved_certificate(n: u64) -> String {
+    sha256_hex(&format!("ES-UNSOLVED-v1\nn={}\n", n))
+}
+
 // Generates the official 128-bit hex letter number for ES-LETTER-v1
 pub fn compute_letter_number(prime: u64, tags: &[&str]) -> String {
     let rule = if tags.contains(&"unsolved_after_search") || tags.contains(&"hard_unsolved") {
@@ -121,9 +146,6 @@ pub fn compute_letter_number(prime: u64, tags: &[&str]) -> String {
         "window_broken"
     };
     let payload = format!("ES-LETTER-v1\nrule={}\nn={}\nextra=\n", rule, prime);
-    let mut hasher = Sha256::new();
-    hasher.update(payload.as_bytes());
-    let digest = hasher.finalize();
-    // First 128 bits (16 bytes) formatted as 32 hex characters
-    digest[..16].iter().map(|b| format!("{:02x}", b)).collect()
+    let hex = sha256_hex(&payload);
+    hex[..32].to_string()
 }

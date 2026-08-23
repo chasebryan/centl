@@ -2160,7 +2160,7 @@
     // Search State
     horizon: 20000,
     windowSize: 5000,
-    letterFilter: "standard", // "standard" (>=10), "deep" (>=50), "extreme" (>=100), "mordell", "all"
+    letterFilter: "standard", // "standard" (>=10), "deep" (>=50), "extreme" (>=100), "mordell", "all", "gods_letter"
     engineMode: "auto",
     speed: "turbo", // "turbo", "fast", "smooth", "step"
     autoAdvance: true,
@@ -2173,7 +2173,10 @@
     cbisEscapes: 0,
     cbxSurvivors: 0,
     verifiedLetters: 0,
+    godsLetterCount: 0,
+    seenGodsLetters: {},
     rejectedAdmissions: 0,
+    unsolvedCount: 0,
     lastThroughput: 0,
     lastMillis: 0,
 
@@ -2220,6 +2223,10 @@
           const filterSub = document.querySelector('[data-es-hud="letters-active-filter"]');
           if (filterSub) {
             filterSub.textContent = e.target.options[e.target.selectedIndex].text;
+          }
+          const glCard = document.querySelector("[data-gl-card]");
+          if (e.target.value !== "gods_letter" && glCard) {
+            glCard.remove();
           }
         });
       }
@@ -2306,6 +2313,10 @@
             EsHuntStudio.letterFilter = "extreme";
             const sel = document.querySelector('[data-es-config="filter"]');
             if (sel) sel.value = "extreme";
+          } else if (arg === "--gods-letter" || arg === "--gods_letter" || arg === "--gl") {
+            EsHuntStudio.letterFilter = "gods_letter";
+            const sel = document.querySelector('[data-es-config="filter"]');
+            if (sel) sel.value = "gods_letter";
           } else if (arg === "--letters" || arg === "-l") {
             EsHuntStudio.letterFilter = "standard";
             const sel = document.querySelector('[data-es-config="filter"]');
@@ -2326,13 +2337,21 @@
 
       EsHuntStudio.updateHudValues();
       EsHuntStudio.resizeCanvas();
-      
+
       EsHuntStudio.anim.lastFrame = performance.now();
       cancelAnimationFrame(EsHuntStudio.animId);
       EsHuntStudio.animId = requestAnimationFrame(EsHuntStudio.renderFrame);
 
-      // Auto start endless hunt
-      EsHuntStudio.start();
+      EsHuntStudio.isRunning = false;
+      if (EsHuntStudio.tickTimer) {
+        clearTimeout(EsHuntStudio.tickTimer);
+        EsHuntStudio.tickTimer = null;
+      }
+      EsHuntStudio.updateStatusPill("READY — SET FILTER, THEN START", "is-paused");
+      const playIcon = document.querySelector("[data-es-play-icon]");
+      const playText = document.querySelector("[data-es-play-text]");
+      if (playIcon) playIcon.textContent = "▶";
+      if (playText) playText.textContent = "Start Hunt";
     },
 
     close: function() {
@@ -2379,7 +2398,7 @@
       const playIcon = document.querySelector("[data-es-play-icon]");
       const playText = document.querySelector("[data-es-play-text]");
       if (playIcon) playIcon.textContent = "▶";
-      if (playText) playText.textContent = "Resume Endless Hunt";
+      if (playText) playText.textContent = EsHuntStudio.primesScanned > 0 ? "Resume Hunt" : "Start Hunt";
       if (EsHuntStudio.tickTimer) {
         clearTimeout(EsHuntStudio.tickTimer);
         EsHuntStudio.tickTimer = null;
@@ -2392,11 +2411,63 @@
     },
 
     resetHorizon: function() {
+      EsHuntStudio.softReset();
+    },
+
+    softReset: function() {
+      EsHuntStudio.pause();
+      EsHuntStudio.isBusy = false;
+
       const startInp = document.querySelector('[data-es-config="start"]');
       const val = startInp ? parseInt(startInp.value, 10) : 20000;
       EsHuntStudio.horizon = isNaN(val) ? 20000 : val;
+
+      EsHuntStudio.primesScanned = 0;
+      EsHuntStudio.mordellCount = 0;
+      EsHuntStudio.theoremClearances = 0;
+      EsHuntStudio.corridorClearances = 0;
+      EsHuntStudio.cbisEscapes = 0;
+      EsHuntStudio.cbxSurvivors = 0;
+      EsHuntStudio.verifiedLetters = 0;
+      EsHuntStudio.godsLetterCount = 0;
+      EsHuntStudio.seenGodsLetters = {};
+      EsHuntStudio.rejectedAdmissions = 0;
+      EsHuntStudio.unsolvedCount = 0;
+      EsHuntStudio.lastThroughput = 0;
+      EsHuntStudio.lastMillis = 0;
+      EsHuntStudio.glScanCount = 0;
+      EsHuntStudio.engineStats = { cc: 0, cbap: 0, cbis: 0, cbx: 0, bb: 0 };
+      EsHuntStudio.findings = [];
+      EsHuntStudio.letters = [];
+      EsHuntStudio.pinnedLetter = null;
+
+      EsHuntStudio.anim.time = 0;
       EsHuntStudio.anim.particles = [];
+      EsHuntStudio.anim.pulses = [0, 0, 0, 0, 0, 0];
+      EsHuntStudio.anim.mordellAngle = 0;
+      EsHuntStudio.anim.oscilloscope = new Array(50).fill(0);
+      EsHuntStudio.anim.burstAlpha = 0;
+
+      const tbody = document.querySelector("[data-es-ledger-tbody]");
+      if (tbody) tbody.replaceChildren();
+
+      const glCard = document.querySelector("[data-gl-card]");
+      if (glCard) glCard.remove();
+
+      const emptyCard = document.querySelector("[data-es-pinned-empty]");
+      const contentCard = document.querySelector("[data-es-pinned-content]");
+      if (emptyCard) emptyCard.hidden = false;
+      if (contentCard) contentCard.hidden = true;
+
+      const badge = document.querySelector("[data-es-vault-badge]");
+      if (badge) badge.textContent = "0 Admitted";
+
       EsHuntStudio.updateHudValues();
+      EsHuntStudio.updateStatusPill("READY — SET FILTER, THEN START", "is-paused");
+      const playIcon = document.querySelector("[data-es-play-icon]");
+      const playText = document.querySelector("[data-es-play-text]");
+      if (playIcon) playIcon.textContent = "▶";
+      if (playText) playText.textContent = "Start Hunt";
     },
 
     randomSeed: function() {
@@ -2421,6 +2492,146 @@
         EsHuntStudio.updateStatusPill("AUDIT FAILED", "is-paused");
       }
     },
+
+    glCardHost: function() {
+      return document.querySelector("[data-es-pinned-card]")
+        || document.querySelector(".es-vault-panel")
+        || document.querySelector(".es-letter-ledger-container");
+    },
+
+    runGodsLetterScan: async function() {
+      EsHuntStudio.updateStatusPill("GOD'S LETTER SCAN", "is-running");
+      EsHuntStudio.glScanCount = (EsHuntStudio.glScanCount || 0) + 1;
+      const runNum = EsHuntStudio.glScanCount;
+      const host = EsHuntStudio.glCardHost();
+      if (!host) return;
+
+      // Reuse a single persistent pinned card (create once, update in-place)
+      let scanCard = document.querySelector("[data-gl-card]");
+      if (!scanCard) {
+        scanCard = document.createElement("div");
+        scanCard.className = "es-ledger-entry";
+        scanCard.setAttribute("data-gl-card", "1");
+        scanCard.style.cssText = "border-left: 3px solid #f59e0b; padding: 10px 14px; margin-bottom: 8px; position:sticky; top:0; z-index:2;";
+        host.insertBefore(scanCard, host.firstChild);
+      }
+
+      const ts = new Date().toLocaleTimeString();
+      scanCard.style.cssText = "border-left: 3px solid #f59e0b; padding: 10px 14px; margin-bottom: 8px; position:sticky; top:0; z-index:2;";
+      scanCard.innerHTML = `
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:15px; animation: spin 1s linear infinite; display:inline-block;">✦</span>
+          <strong style="color:#f59e0b;">God's Letter Scan Running…</strong>
+          <span style="font-size:10px; color:#666; margin-left:auto;">Run #${runNum} · ${ts}</span>
+        </div>
+        <small style="color:#888; display:block; margin-top:4px;">Certified domain [2, 100000] · GodsLetterSpecV1 · all 6 independent predicates</small>`;
+
+      try {
+        const params = new URLSearchParams({
+          scan: "true",
+          domain_min: "2",
+          domain_max: "100000"
+        });
+        const res = await fetch("/api/es/gods-letter", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+          body: params
+        });
+        const data = await res.json().catch(() => null);
+        const text = data
+          ? (data.human_summary || JSON.stringify(data))
+          : await res.text();
+
+        const status = (data && data.uniqueness && data.uniqueness.status) || "";
+        const isUnique = status === "unique_within_certified_domain" || text.includes("UNIQUE WITHIN CERTIFIED DOMAIN");
+        const isNone = status === "no_gods_letter" || text.includes("NO SURVIVORS") || text.includes("NO GOD") || text.includes("NO_GODS_LETTER");
+        const isNonUnique = status === "gods_letter_non_unique" || text.includes("NON-UNIQUE") || text.includes("SINGLETON HYPOTHESIS FAILED");
+
+        const winner = data && data.surviving_candidates && data.surviving_candidates[0];
+        const primeMatch = winner ? [null, String(winner.p)] : text.match(/Prime:\s+(\d+)/);
+        const certHash = data && data.certificate && data.certificate.certificate;
+        const certMatch = certHash ? [null, certHash] : text.match(/Certificate:\s+([a-f0-9]{32,64})/);
+        const artifactMatch = winner ? [null, `GL-${winner.p}`] : text.match(/Artifact:\s+(GL-\d+)/);
+        const eqFromWinner = winner && winner.witness && winner.witness.equation;
+        const eqMatch = eqFromWinner ? [eqFromWinner] : text.match(/(4\/\d+ = 1\/\d+ \+ 1\/\d+ \+ 1\/\d+)/);
+        const ts2 = new Date().toLocaleTimeString();
+
+        if (isUnique && primeMatch) {
+          const p = primeMatch[1];
+          const artifact = artifactMatch ? artifactMatch[1] : `GL-${p}`;
+          const cert = certMatch ? certMatch[1].substring(0, 16) + "…" : "—";
+          const eq = eqMatch ? eqMatch[0] || eqMatch[1] : `4/${p} = …`;
+          scanCard.style.cssText = "border-left: 3px solid #10b981; padding: 10px 14px; margin-bottom: 8px; background: rgba(16,185,129,0.06); position:sticky; top:0; z-index:2;";
+          scanCard.innerHTML = `
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+              <span style="font-size:18px;">✦</span>
+              <strong style="color:#10b981; font-size:13px;">GOD'S LETTER · ${artifact}</strong>
+              <span style="font-size:10px; background:#10b981; color:#000; border-radius:3px; padding:1px 6px; font-weight:700;">UNIQUE WITHIN CERTIFIED DOMAIN</span>
+              <span style="font-size:10px; color:#666; margin-left:auto;">Run #${runNum} · ${ts2}</span>
+            </div>
+            <div style="font-family:monospace; font-size:12px; color:#ccc; margin-bottom:6px;">${eq}</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:4px; font-size:11px; color:#888;">
+              <span>Prime (p): <strong style="color:#fff;">${p}</strong></span>
+              <span>Letter: <strong style="color:#10b981;">✓</strong></span>
+              <span>Remnant: <strong style="color:#10b981;">✓</strong></span>
+              <span>Hardness: <strong style="color:#10b981;">✓ ALL</strong></span>
+            </div>
+            <div style="margin-top:6px; font-size:10px; color:#555;">SHA-256: ${cert} · Verified continuously</div>`;
+          EsHuntStudio.godsLetterCount = 1;
+          EsHuntStudio.updateHudValues();
+          EsHuntStudio.updateStatusPill("GOD'S LETTER FOUND", "is-ready");
+        } else if (isNone) {
+          scanCard.style.cssText = "border-left: 3px solid #6b7280; padding: 10px 14px; margin-bottom: 8px; position:sticky; top:0; z-index:2;";
+          scanCard.innerHTML = `
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:16px;">✦</span>
+              <strong style="color:#6b7280;">NO GOD'S LETTER</strong>
+              <span style="font-size:10px; background:#374151; color:#9ca3af; border-radius:3px; padding:1px 6px;">NO_GODS_LETTER</span>
+              <span style="font-size:10px; color:#666; margin-left:auto;">Run #${runNum} · ${ts2}</span>
+            </div>
+            <small style="color:#888; display:block; margin-top:4px;">No candidate survived all predicates in the certified domain.</small>`;
+          EsHuntStudio.godsLetterCount = 0;
+          EsHuntStudio.updateHudValues();
+          EsHuntStudio.updateStatusPill("NO GOD'S LETTER", "is-paused");
+        } else if (isNonUnique) {
+          const nSurvivors = (data && data.uniqueness && data.uniqueness.candidate_count)
+            || (data && data.surviving_candidates && data.surviving_candidates.length)
+            || "?";
+          const survivorList = (data && data.surviving_candidates)
+            ? data.surviving_candidates.slice(0, 12).map(c => c.p).join(", ")
+            : "";
+          scanCard.style.cssText = "border-left: 3px solid #ef4444; padding: 10px 14px; margin-bottom: 8px; position:sticky; top:0; z-index:2;";
+          scanCard.innerHTML = `
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:16px;">✦</span>
+              <strong style="color:#ef4444;">GOD'S LETTER NON-UNIQUE</strong>
+              <span style="font-size:10px; background:#450a0a; color:#fca5a5; border-radius:3px; padding:1px 6px;">SINGLETON FAILURE · ${nSurvivors}</span>
+              <span style="font-size:10px; color:#666; margin-left:auto;">Run #${runNum} · ${ts2}</span>
+            </div>
+            <small style="color:#888; display:block; margin-top:4px;">${nSurvivors} candidates survived P∧V∧L∧R∧H∧E. No artifact emitted.${survivorList ? " Survivors: " + survivorList : ""}</small>`;
+          EsHuntStudio.godsLetterCount = typeof nSurvivors === "number" ? nSurvivors : parseInt(nSurvivors, 10) || 0;
+          EsHuntStudio.updateHudValues();
+          EsHuntStudio.updateStatusPill("GL NON-UNIQUE", "is-paused");
+        } else {
+          // Raw text fallback
+          scanCard.style.cssText = "border-left: 3px solid #6366f1; padding: 10px 14px; margin-bottom: 8px; position:sticky; top:0; z-index:2;";
+          scanCard.innerHTML = `
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+              <span style="font-size:16px;">✦</span>
+              <strong style="color:#818cf8;">God's Letter Scan Result</strong>
+              <span style="font-size:10px; color:#666; margin-left:auto;">Run #${runNum} · ${ts2}</span>
+            </div>
+            <pre style="font-size:11px; white-space:pre-wrap; color:#ccc; margin:0;">${text.substring(0, 600)}</pre>`;
+          EsHuntStudio.updateStatusPill("SCAN COMPLETE", "is-ready");
+        }
+      } catch (err) {
+        scanCard.style.cssText = "border-left: 3px solid #ef4444; padding: 10px 14px; margin-bottom: 8px; position:sticky; top:0; z-index:2;";
+        scanCard.innerHTML = `<strong style="color:#ef4444;">God's Letter Scan Error</strong><small style="display:block; color:#888;">${err.message}</small>`;
+        EsHuntStudio.updateStatusPill("SCAN ERROR", "is-paused");
+      }
+    },
+
+
 
     exportLetters: function() {
       const letters = EsHuntStudio.letters || [];
@@ -2467,6 +2678,11 @@
       showHostNotice("Exporting Corridor Escapes from disk vault (/escapes/)...");
     },
 
+    exportGodsLetter: function() {
+      triggerSafeDownload("/download/gods-letter.json", `centl26-es-gods-letter-${Date.now()}.json`);
+      showHostNotice("Exporting God's Letter certificate from disk vault (/gods-letter/)...");
+    },
+
     updateStatusPill: function(label, cls) {
       const pill = document.querySelector("[data-es-status-pill]");
       const lbl = document.querySelector("[data-es-status-label]");
@@ -2505,6 +2721,15 @@
       const lettersEl = document.querySelector('[data-es-hud="letters-count"]');
       if (lettersEl) lettersEl.textContent = EsHuntStudio.verifiedLetters.toLocaleString();
 
+      const glEl = document.querySelector('[data-es-hud="gods-letter-count"]');
+      if (glEl) glEl.textContent = EsHuntStudio.godsLetterCount.toLocaleString();
+      const glStatus = document.querySelector('[data-es-hud="gods-letter-status"]');
+      if (glStatus) {
+        if (EsHuntStudio.godsLetterCount === 1) glStatus.textContent = "UNIQUE · origin generator 840ℤ+1";
+        else if (EsHuntStudio.godsLetterCount === 0) glStatus.textContent = "None in scanned windows";
+        else glStatus.textContent = `${EsHuntStudio.godsLetterCount} letters · astronomical event`;
+      }
+
       // Engine status cards
       const ccCleared = document.querySelector('[data-engine-stat="cc-cleared"]');
       if (ccCleared) ccCleared.textContent = EsHuntStudio.engineStats.cc.toLocaleString();
@@ -2515,7 +2740,23 @@
       const cbxCleared = document.querySelector('[data-engine-stat="cbx-cleared"]');
       if (cbxCleared) cbxCleared.textContent = EsHuntStudio.engineStats.cbx.toLocaleString();
       const bbVerified = document.querySelector('[data-engine-stat="bb-verified"]');
-      if (bbVerified) bbVerified.textContent = EsHuntStudio.primesScanned.toLocaleString();
+      const verifiedCount = Math.max(0, EsHuntStudio.primesScanned - EsHuntStudio.unsolvedCount);
+      if (bbVerified) bbVerified.textContent = verifiedCount.toLocaleString();
+
+      const total = EsHuntStudio.primesScanned;
+      const share = (n) => (total > 0 ? (n / total) * 100 : 0);
+      const setEngineShare = (key, n) => {
+        const pct = share(n);
+        const pctEl = document.querySelector(`[data-engine-stat="${key}-pct"]`);
+        if (pctEl) pctEl.textContent = `${pct.toFixed(1)}%`;
+        const barEl = document.querySelector(`[data-engine-bar="${key}"]`);
+        if (barEl) barEl.style.width = `${Math.min(100, pct).toFixed(1)}%`;
+      };
+      setEngineShare("cc", EsHuntStudio.engineStats.cc);
+      setEngineShare("cbap", EsHuntStudio.engineStats.cbap);
+      setEngineShare("cbis", EsHuntStudio.engineStats.cbis);
+      setEngineShare("cbx", EsHuntStudio.engineStats.cbx);
+      setEngineShare("bb", verifiedCount);
     },
 
     scheduleTick: function() {
@@ -2540,7 +2781,12 @@
       // Determine letter depth threshold from filter
       let depthThreshold = 10;
       let mordellOnly = false;
-      if (EsHuntStudio.letterFilter === "deep") depthThreshold = 50;
+      let godsLetterOnly = false;
+      if (EsHuntStudio.letterFilter === "gods_letter") {
+        godsLetterOnly = true;
+        mordellOnly = false;
+        depthThreshold = 10;
+      } else if (EsHuntStudio.letterFilter === "deep") depthThreshold = 50;
       else if (EsHuntStudio.letterFilter === "extreme") depthThreshold = 100;
       else if (EsHuntStudio.letterFilter === "mordell") mordellOnly = true;
       else if (EsHuntStudio.letterFilter === "all") depthThreshold = 0;
@@ -2548,9 +2794,11 @@
       const params = new URLSearchParams({
         from: String(EsHuntStudio.horizon),
         window_size: String(EsHuntStudio.windowSize),
-        max_primes: "120",
+        max_primes: EsHuntStudio.letterFilter === "gods_letter" ? "2000" : "120",
         letter_threshold: String(depthThreshold),
         mordell_only: String(mordellOnly),
+        gods_letter_only: String(godsLetterOnly),
+        filter_mode: EsHuntStudio.letterFilter,
         engine_mode: EsHuntStudio.engineMode
       });
 
@@ -2572,14 +2820,26 @@
         EsHuntStudio.cbisEscapes += data.cbis_escapes || 0;
         EsHuntStudio.cbxSurvivors += data.cbx_survivors || 0;
         EsHuntStudio.verifiedLetters += data.verified_letters_count || 0;
+        if (Array.isArray(data.findings)) {
+          for (const f of data.findings) {
+            const isGL = f && (f.gods_letter_candidate === true || f.grade === "gods_letter" || f.classification === "gods_letter");
+            const id = f && f.n;
+            if (isGL && id != null && !EsHuntStudio.seenGodsLetters[id]) {
+              EsHuntStudio.seenGodsLetters[id] = true;
+              EsHuntStudio.godsLetterCount += 1;
+            }
+          }
+        }
         EsHuntStudio.rejectedAdmissions += data.rejected_admissions || 0;
+        EsHuntStudio.unsolvedCount += data.unsolved_count || 0;
         EsHuntStudio.lastThroughput = data.rate_primes_per_sec || 0;
         EsHuntStudio.lastMillis = data.execution_millis || 0;
 
         EsHuntStudio.engineStats.cc += data.theorem_clearances || 0;
-        EsHuntStudio.engineStats.cbap += data.corridor_clearances || 0;
+        EsHuntStudio.engineStats.cbap += (data.corridor_clearances || 0) + (data.ordinary_decompositions || 0);
         EsHuntStudio.engineStats.cbis += data.cbis_escapes || 0;
         EsHuntStudio.engineStats.cbx += data.cbx_survivors || 0;
+        EsHuntStudio.engineStats.bb += Math.max(0, (data.primes_checked || 0) - (data.unsolved_count || 0));
 
         // Pulse nodes
         EsHuntStudio.anim.pulses[0] = 1.0; // Prime sieve
@@ -2659,20 +2919,27 @@
       if (emptyCard) emptyCard.hidden = true;
       if (contentCard) contentCard.hidden = false;
 
+      const isGodsLetter = letter.grade === "gods_letter" || letter.classification === "gods_letter" || letter.gods_letter_candidate === true;
       const isAdmitted = letter.admission_status === "admitted";
-      const isRemnant = letter.classification === "cbx_survivor" || letter.grade === "remnant" || (letter.discovered_by && letter.discovered_by.includes("CBX"));
+      const isRemnant = !isGodsLetter && (letter.classification === "cbx_survivor" || letter.grade === "remnant" || (letter.discovered_by && letter.discovered_by.includes("CBX")));
 
       const idEl = document.querySelector('[data-es-pin="id"]');
       if (idEl) {
         let prefix = "ESC-";
-        if (isAdmitted) prefix = "L-";
+        if (isGodsLetter) prefix = "GL-";
+        else if (isAdmitted) prefix = "L-";
         else if (isRemnant) prefix = "REM-";
         idEl.textContent = `#${letter.letter_id || letter.remnant_id || prefix + letter.n}`;
       }
 
       const badgeEl = document.querySelector('[data-es-pin="classification-badge"]');
       if (badgeEl) {
-        if (isAdmitted) {
+        if (isGodsLetter) {
+          badgeEl.textContent = "GOD'S LETTER";
+          badgeEl.style.background = "rgba(251, 191, 36, 0.22)";
+          badgeEl.style.color = "#fbbf24";
+          badgeEl.style.borderColor = "rgba(251, 191, 36, 0.5)";
+        } else if (isAdmitted) {
           badgeEl.textContent = (letter.classification_label || letter.classification || "Letter").toUpperCase();
           badgeEl.style.background = "rgba(245, 158, 11, 0.2)";
           badgeEl.style.color = "#f59e0b";
@@ -2707,13 +2974,20 @@
         resEl.textContent = `${letter.residue_840} ${letter.is_mordell_hard ? "(Mordell-Hard Candidate)" : "(Non-Mordell Residue)"}`;
       }
 
-      const depthEl = document.querySelector('[data-es-pin="depth"]');
-      const depthVal = (letter.witness && letter.witness.depth !== undefined) ? letter.witness.depth : (letter.depth || 0);
-      if (depthEl) depthEl.textContent = String(depthVal);
+      const descentDepthEl = document.querySelector('[data-es-pin="descent-depth"]');
+      const descentVal = (letter.witness && letter.witness.descent_depth !== undefined) ? letter.witness.descent_depth : (letter.descent_depth || 0);
+      if (descentDepthEl) descentDepthEl.textContent = String(descentVal);
+
+      const discoveryDepthEl = document.querySelector('[data-es-pin="discovery-depth"]');
+      const discoveryVal = (letter.witness && letter.witness.discovery_depth !== undefined) ? letter.witness.discovery_depth : ((letter.witness && letter.witness.depth !== undefined) ? letter.witness.depth : (letter.discovery_depth || letter.depth || 0));
+      if (discoveryDepthEl) discoveryDepthEl.textContent = String(discoveryVal);
 
       const statusEl = document.querySelector('[data-es-pin="admission-status"]');
       if (statusEl) {
-        if (isAdmitted) {
+        if (isGodsLetter) {
+          statusEl.textContent = "GOD'S LETTER CANDIDATE (P∧V∧L∧R∧H∧E)";
+          statusEl.style.color = "#fbbf24";
+        } else if (isAdmitted) {
           statusEl.textContent = "ADMITTED (Authoritative Central Gate)";
           statusEl.style.color = "#10b981";
         } else if (isRemnant) {
@@ -2740,18 +3014,29 @@
 
       const classLabel = document.querySelector('[data-es-pin="classification-label"]');
       if (classLabel) {
-        classLabel.textContent = isRemnant ? "CBX Remnant (Dual Descent)" : (letter.classification_label || letter.classification || "Corridor Escape");
+        classLabel.textContent = isGodsLetter ? "God's Letter Candidate" : (isRemnant ? "CBX Dual Descent Deep Survivor" : (letter.classification_label || letter.classification || "Corridor Escape"));
       }
 
       const proofEl = document.querySelector('[data-es-pin="proof"]');
-      if (proofEl) proofEl.textContent = "4xyz == n(yz+xz+xy) ✓ Verified Exact ℚ in ℤ";
+      if (proofEl) {
+        if (letter.solved === false) {
+          proofEl.textContent = "Unsolved in certified engine menu — no 3-Egyptian witness";
+        } else {
+          proofEl.textContent = "4xyz == n(yz+xz+xy) ✓ Verified Exact ℚ in ℤ";
+        }
+      }
 
       const certEl = document.querySelector('[data-es-pin="cert"]');
-      if (certEl) certEl.textContent = letter.certificate || "SHA256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+      if (certEl) {
+        const cert = letter.certificate || (letter.witness && letter.witness.certificate) || "";
+        certEl.textContent = cert || "SHA256: (pending witness)";
+      }
 
       const fileEl = document.querySelector('[data-es-pin="file"]');
       if (fileEl) {
-        if (isAdmitted) {
+        if (isGodsLetter) {
+          fileEl.textContent = `gods-letter/GL-${letter.n}.md`;
+        } else if (isAdmitted) {
           fileEl.textContent = `letters/L-${letter.n}.md`;
         } else if (isRemnant) {
           fileEl.textContent = `remnants/REM-${letter.n}.md`;
@@ -2768,12 +3053,16 @@
       tr.dataset.findingIndex = String(index);
       if (index === 0) tr.classList.add("is-selected");
 
-      const isAdmitted = finding.admission_status === "admitted";
-      const isRemnant = finding.classification === "cbx_survivor" || finding.grade === "remnant" || (finding.discovered_by && finding.discovered_by.includes("CBX"));
+      const isGodsLetter = finding.grade === "gods_letter" || finding.classification === "gods_letter" || finding.gods_letter_candidate === true;
+      const isAdmitted = finding.admission_status === "admitted" || finding.letter_admitted;
+      const isRemnant = !isGodsLetter && (finding.remnant_admitted || finding.classification === "dual_descent_deep_survivor" || finding.classification === "cbx_survivor" || finding.grade === "remnant");
 
       let idPrefix = "ESC-";
       let idColor = "#06b6d4";
-      if (isAdmitted) {
+      if (isGodsLetter) {
+        idPrefix = "GL-";
+        idColor = "#fbbf24";
+      } else if (isAdmitted) {
         idPrefix = "L-";
         idColor = "#f59e0b";
       } else if (isRemnant) {
@@ -2797,12 +3086,16 @@
       }
 
       const tdClass = document.createElement("td");
-      tdClass.textContent = isRemnant ? "CBX Remnant" : (finding.classification_label || finding.classification || "Corridor");
+      tdClass.textContent = isGodsLetter ? "God's Letter" : (isRemnant ? "CBX Remnant" : (finding.classification_label || finding.classification || "Corridor"));
       tdClass.style.fontSize = "11px";
 
       const tdStatus = document.createElement("td");
       const statusPill = document.createElement("span");
-      if (isAdmitted) {
+      if (isGodsLetter) {
+        statusPill.textContent = "GOD'S LETTER";
+        statusPill.style.background = "rgba(251, 191, 36, 0.2)";
+        statusPill.style.color = "#fbbf24";
+      } else if (isAdmitted) {
         statusPill.textContent = "ADMITTED";
         statusPill.style.background = "rgba(16, 185, 129, 0.2)";
         statusPill.style.color = "#10b981";
@@ -2821,9 +3114,13 @@
       statusPill.style.fontWeight = "700";
       tdStatus.appendChild(statusPill);
 
-      const depthVal = (finding.witness && finding.witness.depth !== undefined) ? finding.witness.depth : (finding.depth || 0);
-      const tdDepth = document.createElement("td");
-      tdDepth.textContent = `δ=${depthVal}`;
+      const descentVal = (finding.witness && finding.witness.descent_depth !== undefined) ? finding.witness.descent_depth : (finding.descent_depth || 0);
+      const tdDescentDepth = document.createElement("td");
+      tdDescentDepth.textContent = `δ=${descentVal}`;
+
+      const discoveryVal = (finding.witness && finding.witness.discovery_depth !== undefined) ? finding.witness.discovery_depth : ((finding.witness && finding.witness.depth !== undefined) ? finding.witness.depth : (finding.discovery_depth || finding.depth || 0));
+      const tdDiscoveryDepth = document.createElement("td");
+      tdDiscoveryDepth.textContent = `δ=${discoveryVal}`;
 
       const tdEngine = document.createElement("td");
       tdEngine.textContent = (finding.discovered_by || "CC").replace(/\.kernel.*$/, "");
@@ -2833,7 +3130,8 @@
       tr.appendChild(tdRes);
       tr.appendChild(tdClass);
       tr.appendChild(tdStatus);
-      tr.appendChild(tdDepth);
+      tr.appendChild(tdDescentDepth);
+      tr.appendChild(tdDiscoveryDepth);
       tr.appendChild(tdEngine);
 
       tbody.insertBefore(tr, tbody.firstChild);
@@ -3815,8 +4113,8 @@
         EsHuntStudio.toggleHunt();
       } else if (act === "step-hunt") {
         EsHuntStudio.step();
-      } else if (act === "reset-horizon") {
-        EsHuntStudio.resetHorizon();
+      } else if (act === "reset-horizon" || act === "reset-hunt") {
+        EsHuntStudio.softReset();
       } else if (act === "random-seed") {
         EsHuntStudio.randomSeed();
       } else if (act === "audit-vault") {
@@ -3827,6 +4125,8 @@
         EsHuntStudio.exportRemnants();
       } else if (act === "export-escapes") {
         EsHuntStudio.exportEscapes();
+      } else if (act === "export-gods-letter") {
+        EsHuntStudio.exportGodsLetter();
       }
       return;
     }

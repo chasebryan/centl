@@ -29,7 +29,7 @@ pub fn render_lab_page(workbench: &str) -> String {
       <a class="product-lockup" href="/" aria-label="CentL26 home">
         <div class="product-brand">
           <strong>CentL26</strong>
-          <small>Free Computation Foundation · v26.11.0</small>
+          <small>Free Computation Foundation · v26.12.0</small>
         </div>
       </a>
       <div class="workspace-path"><button type="button" data-toggle-explorer title="Toggle workspace explorer">Workspace</button><span>/</span><input type="text" class="notebook-rename-input" data-rename-notebook value="Notebook 01" aria-label="Rename active notebook" spellcheck="false" title="Click to rename active notebook"></div>
@@ -144,7 +144,7 @@ pub fn render_lab_page(workbench: &str) -> String {
         <a href="https://freecomputation.org/" target="_blank" rel="noopener">🔗 freecomputation.org</a>
         <a href="https://github.com/sponsors/chasebryan" target="_blank" rel="noopener">💝 Sponsor on GitHub</a>
       </div>
-      <footer><span>v26.11.0 · Apache-2.0</span><button type="button" data-close-fcf-about>Close</button></footer>
+      <footer><span>v26.12.0 · Apache-2.0</span><button type="button" data-close-fcf-about>Close</button></footer>
     </div>
   </div>
 
@@ -179,7 +179,7 @@ pub fn render_lab_page(workbench: &str) -> String {
         </div>
         <div>
           <h2>CentL26 Software Update</h2>
-          <small class="update-current-version">Installed: CentL26 v26.11.0 (CentL26.11-ES)</small>
+          <small class="update-current-version">Installed: CentL26 v26.12.0 (CentL26.12-GL)</small>
         </div>
       </div>
       <div class="update-body">
@@ -526,11 +526,12 @@ pub fn render_lab_page(workbench: &str) -> String {
             <span data-es-play-icon>▶</span> <span data-es-play-text>Start Endless Hunt</span>
           </button>
           <button type="button" class="es-btn" data-es-action="step-hunt" title="Advance search horizon by one window">⏭ Step</button>
-          <button type="button" class="es-btn" data-es-action="reset-horizon" title="Reset search horizon">🔄 Reset</button>
+          <button type="button" class="es-btn" data-es-action="reset-hunt" title="Soft reset: clear this session's counters, ledger, and pin. Does not delete vault files on disk.">🔄 Reset Hunt</button>
           <button type="button" class="es-btn" data-es-action="audit-vault" title="Re-audit historical vault and verify central admission">🛡️ Audit Vault</button>
           <button type="button" class="es-btn" data-es-action="export-letters" title="Export discovered Letters as JSON">📥 Letters</button>
           <button type="button" class="es-btn" data-es-action="export-remnants" title="Export CBX Remnants as JSON">💾 Remnants</button>
           <button type="button" class="es-btn" data-es-action="export-escapes" title="Export Corridor Escapes as JSON">📤 Escapes</button>
+          <button type="button" class="es-btn" data-es-action="export-gods-letter" title="Export God's Letter certificate as JSON">✦ God's Letter</button>
           <button type="button" class="es-btn doc-close-btn" data-es-hunt-close aria-label="Close observatory">✕</button>
         </div>
       </header>
@@ -567,6 +568,11 @@ pub fn render_lab_page(workbench: &str) -> String {
           <strong data-es-hud="letters-count">0</strong>
           <span class="es-hud-sub" data-es-hud="letters-active-filter">Admitted &amp; Exact Verified</span>
         </div>
+        <div class="es-hud-card is-gods-letter-highlight">
+          <small>God's Letter (Ω)</small>
+          <strong data-es-hud="gods-letter-count">0</strong>
+          <span class="es-hud-sub" data-es-hud="gods-letter-status">Singleton apex · expected 0 or 1</span>
+        </div>
       </div>
 
       <!-- Configuration Strip for Searching Letters -->
@@ -579,6 +585,7 @@ pub fn render_lab_page(workbench: &str) -> String {
             <option value="extreme">Extreme Letters (Depth ≥ 100)</option>
             <option value="mordell">Mordell-Hard Survivors Only (840k + r)</option>
             <option value="all">All Solved Primes</option>
+            <option value="gods_letter">✦ God's Letter Hunt (Certified Singleton Scan)</option>
           </select>
         </div>
 
@@ -656,9 +663,9 @@ pub fn render_lab_page(workbench: &str) -> String {
               <p class="es-engine-rule">4p+3 · 3p+2 · 8p+5 Congruences</p>
               <div class="es-engine-metrics">
                 <span>Theorems: <strong data-engine-stat="cc-cleared">0</strong></span>
-                <span class="es-engine-pct" data-engine-stat="cc-pct">95.2%</span>
+                <span class="es-engine-pct" data-engine-stat="cc-pct">0.0%</span>
               </div>
-              <div class="es-engine-bar"><div class="es-engine-bar-fill" style="width: 95%;"></div></div>
+              <div class="es-engine-bar"><div class="es-engine-bar-fill" data-engine-bar="cc" style="width: 0%;"></div></div>
             </div>
 
             <div class="es-engine-card" data-engine-card="cbap">
@@ -670,9 +677,9 @@ pub fn render_lab_page(workbench: &str) -> String {
               <p class="es-engine-rule">Two-Target Signed Box Corridor (Depth ≤ 10)</p>
               <div class="es-engine-metrics">
                 <span>Corridors: <strong data-engine-stat="cbap-cleared">0</strong></span>
-                <span class="es-engine-pct" data-engine-stat="cbap-pct">4.2%</span>
+                <span class="es-engine-pct" data-engine-stat="cbap-pct">0.0%</span>
               </div>
-              <div class="es-engine-bar"><div class="es-engine-bar-fill" style="width: 70%; background: #06b6d4;"></div></div>
+              <div class="es-engine-bar"><div class="es-engine-bar-fill" data-engine-bar="cbap" style="width: 0%; background: #06b6d4;"></div></div>
             </div>
 
             <div class="es-engine-card" data-engine-card="cbis">
@@ -684,9 +691,9 @@ pub fn render_lab_page(workbench: &str) -> String {
               <p class="es-engine-rule">Phase Contraction &amp; Trapped Fiber Sieve (Depth &gt; 10)</p>
               <div class="es-engine-metrics">
                 <span>Escapes: <strong data-engine-stat="cbis-cleared">0</strong></span>
-                <span class="es-engine-pct" data-engine-stat="cbis-pct">0.6%</span>
+                <span class="es-engine-pct" data-engine-stat="cbis-pct">0.0%</span>
               </div>
-              <div class="es-engine-bar"><div class="es-engine-bar-fill" style="width: 40%; background: #f59e0b;"></div></div>
+              <div class="es-engine-bar"><div class="es-engine-bar-fill" data-engine-bar="cbis" style="width: 0%; background: #f59e0b;"></div></div>
             </div>
 
             <div class="es-engine-card" data-engine-card="cbx">
@@ -698,9 +705,9 @@ pub fn render_lab_page(workbench: &str) -> String {
               <p class="es-engine-rule">Lane-I Dual Descent &amp; Kneser Defect Edge (Depth &gt; 50)</p>
               <div class="es-engine-metrics">
                 <span>Remnants: <strong data-engine-stat="cbx-cleared">0</strong></span>
-                <span class="es-engine-pct">Lane-I</span>
+                <span class="es-engine-pct" data-engine-stat="cbx-pct">0.0%</span>
               </div>
-              <div class="es-engine-bar"><div class="es-engine-bar-fill" style="width: 25%; background: #ec4899;"></div></div>
+              <div class="es-engine-bar"><div class="es-engine-bar-fill" data-engine-bar="cbx" style="width: 0%; background: #ec4899;"></div></div>
             </div>
 
             <div class="es-engine-card" data-engine-card="bb">
@@ -712,9 +719,9 @@ pub fn render_lab_page(workbench: &str) -> String {
               <p class="es-engine-rule">4xyz = n(yz+xz+xy) Rational Identity in ℤ</p>
               <div class="es-engine-metrics">
                 <span>Verified: <strong data-engine-stat="bb-verified">0</strong></span>
-                <span class="es-engine-pct" style="color:#10b981;">100% ℚ</span>
+                <span class="es-engine-pct" data-engine-stat="bb-pct" style="color:#10b981;">0.0%</span>
               </div>
-              <div class="es-engine-bar"><div class="es-engine-bar-fill" style="width: 100%; background: #10b981;"></div></div>
+              <div class="es-engine-bar"><div class="es-engine-bar-fill" data-engine-bar="bb" style="width: 0%; background: #10b981;"></div></div>
             </div>
           </div>
         </div>
@@ -746,7 +753,8 @@ pub fn render_lab_page(workbench: &str) -> String {
               <div class="es-pinned-meta-grid">
                 <div><span>Prime p:</span> <strong data-es-pin="p">2521</strong></div>
                 <div><span>Residue (mod 840):</span> <strong data-es-pin="res">1 (Mordell-Hard)</strong></div>
-                <div><span>Search Depth δ:</span> <strong data-es-pin="depth">17</strong></div>
+                <div><span>Dual Descent Depth (δ):</span> <strong data-es-pin="descent-depth">0</strong></div>
+                <div><span>Discovery Depth (δ):</span> <strong data-es-pin="discovery-depth">17</strong></div>
                 <div><span>Admission Status:</span> <strong data-es-pin="admission-status" style="color:#10b981;">ADMITTED</strong></div>
                 <div style="grid-column: 1 / -1;"><span data-es-pin="rejection-label" hidden>Rejection Reason:</span> <strong data-es-pin="rejection-reason" style="color:#ef4444;" hidden>None</strong></div>
                 <div><span>Arithmetic Proof:</span> <strong style="color:#10b981;" data-es-pin="proof">4xyz == n(...) ✓ Exact</strong></div>
@@ -773,7 +781,8 @@ pub fn render_lab_page(workbench: &str) -> String {
                   <th>Residue</th>
                   <th>Classification</th>
                   <th>Status</th>
-                  <th>Depth</th>
+                  <th>Descent δ</th>
+                  <th>Discovery δ</th>
                   <th>Engine</th>
                 </tr>
               </thead>
@@ -987,7 +996,7 @@ fn render_explorer(html: &mut String, session: &Session) {
         "org.fcf.centl.research.erdos_straus",
         "Erdős–Straus kernel",
     );
-    html.push_str(r#"</div><section class="tree-group"><h2>Observatory &amp; Commands</h2><button class="tree-row" type="button" data-open-es-hunt><span class="tree-icon research">⚡</span><span>Open ES Hunt Observatory</span><em class="visualizer-tree-badge">Endless</em></button><button class="tree-row" type="button" data-select-area="work" data-fill="es solve 1009" data-interaction-mode="Research"><span class="tree-icon receipt">p</span><span>Probe prime 1009</span></button><button class="tree-row" type="button" data-select-area="work" data-fill="es hunt 20000" data-interaction-mode="Research"><span class="tree-icon receipt">p</span><span>Hunt from 20000</span></button></section></section>"#);
+    html.push_str(r#"</div><section class="tree-group"><h2>Observatory &amp; Commands</h2><button class="tree-row" type="button" data-open-es-hunt><span class="tree-icon research">⚡</span><span>Open ES Hunt Observatory</span><em class="visualizer-tree-badge">Endless</em></button><button class="tree-row" type="button" data-select-area="work" data-fill="es solve 1009" data-interaction-mode="Research"><span class="tree-icon receipt">p</span><span>Probe prime 1009</span></button><button class="tree-row" type="button" data-select-area="work" data-fill="es hunt 20000" data-interaction-mode="Research"><span class="tree-icon receipt">p</span><span>Hunt from 20000</span></button><button class="tree-row" type="button" data-select-area="work" data-fill="es gods-letter --scan" data-interaction-mode="Research"><span class="tree-icon research">✦</span><span>God's Letter — full scan</span><em class="visualizer-tree-badge">Terminal</em></button><button class="tree-row" type="button" data-select-area="work" data-fill="es gods-letter --explain" data-interaction-mode="Research"><span class="tree-icon receipt">✦</span><span>God's Letter — elimination tree</span></button></section></section>"#);
 
     html.push_str(r#"<section class="explorer-area" id="explorer-area-build" data-area-panel="build" data-area-title="Build" data-area-subtitle="Extension workbench" hidden><div class="area-metrics"><span><strong data-workspace-field="counts.extensions">0</strong>extensions</span></div><p class="area-summary">In-app programmability is active. Users can define custom formulas, constants, units, and macros with deterministic execution.</p><div class="capability-list">"#);
     render_capability_row(html, "org.fcf.centl.build.extend", "In-app programmability");
@@ -1874,19 +1883,30 @@ mod tests {
         assert!(html.contains(r#"data-es-config="engine""#));
         assert!(html.contains(r#"data-es-action="toggle-hunt""#));
         assert!(html.contains(r#"data-es-action="step-hunt""#));
-        assert!(html.contains(r#"data-es-action="reset-horizon""#));
+        assert!(html.contains(r#"data-es-action="reset-hunt""#));
+        assert!(LAB_JS.contains("softReset:"));
+        assert!(LAB_JS.contains("READY — SET FILTER, THEN START"));
         assert!(html.contains(r#"data-es-action="export-letters""#));
+        assert!(html.contains(r#"value="gods_letter""#));
+        assert!(html.contains(r#"data-es-hud="gods-letter-count""#));
+        assert!(html.contains(r#"data-es-action="export-gods-letter""#));
         assert!(html.contains(r#"data-engine-card="cc""#));
         assert!(html.contains(r#"data-engine-card="cbap""#));
         assert!(html.contains(r#"data-engine-card="cbis""#));
         assert!(html.contains(r#"data-engine-card="cbx""#));
         assert!(html.contains(r#"data-engine-card="bb""#));
+        assert!(html.contains(r#"data-engine-bar="cc""#));
+        assert!(html.contains(r#"data-engine-stat="cc-pct">0.0%"#));
         assert!(html.contains(r#"data-es-pinned-card"#));
+        assert!(LAB_JS.contains("setEngineShare"));
+        assert!(LAB_JS.contains("depthThreshold = 10"));
         assert!(html.contains(r#"data-es-ledger-tbody"#));
 
         assert!(LAB_JS.contains("const EsHuntStudio"));
         assert!(LAB_JS.contains("huntTick:"));
         assert!(LAB_JS.contains("/api/es-hunt"));
+        assert!(LAB_JS.contains("/api/es/gods-letter"));
+        assert!(LAB_JS.contains("gods_letter_only"));
         assert!(LAB_JS.contains("pinLetter:"));
         assert!(LAB_JS.contains("renderFrame:"));
         assert!(LAB_JS.contains("data-open-es-hunt"));

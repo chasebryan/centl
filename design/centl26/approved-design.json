@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "approval": {
-    "change_note": "Update release CentL26.11-ES for all platforms and synchronize documentation",
+    "change_note": "Update release CentL26.12-GL for all platforms and synchronize documentation",
     "release": "CentL26",
     "reviewed_viewports": [
       "1366x768",

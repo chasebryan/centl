@@ -1,5 +1,13 @@
 ## Unreleased
 
+### CentL26.12-GL (v26.12.0) — God's Letter Watchdog & Corrected CC Identities (2026-08-23)
+
+- **God's Letter (Ω) hunt**: Unsolved-only filter. A God's Letter is a Mordell-hard prime that survives CC + corridor + bb with no exact \(4/p\) witness. Solved identities are not God's Letters. Hunt does not auto-start; soft reset clears session HUD without deleting vaults.
+- **Corrected CC.kernel identities**: even, \(4p+3\), \(3p+2\), and \(8p+5\) now satisfy \(4xyz = n(yz+xz+xy)\) in `BigInt`. Regression: \(p = 9341077\) is theorem clearance, not CBIS. Live CC share is \(87.5\%\).
+- **Live engine HUD**: engine cards track live shares of primes scanned; pin SHA-256 is the witness certificate.
+- **Origin census**: \(0 \to 18.14 \times 10^6\), \(1{,}159{,}667\) primes, \(100\%\) verified, **0** God's Letters. Erdős–Straus remains open.
+- **Release identity**: synchronized `v26.12.0` / `CentL26.12-GL` across `Cargo.toml`, `Cargo.lock`, `README.md`, desktop metadata, capabilities, and `docs/releases/26.12.0.md`.
+
 ### CentL26.11-ES (v26.11.0) — Erdős–Straus Multi-Engine Observatory & Authoritative Letter Vault (2026-08-22)
 
 - **Erdős–Straus Endless Multi-Engine Algorithmic Hunt Studio & Observatory**:

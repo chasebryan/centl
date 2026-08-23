@@ -1,9 +1,12 @@
 // Public Erdős–Straus Infinite Hunt Runner & Vault Authority
 // Free Computation Foundation - Apache-2.0
 
+use super::gods_letter::{
+    evaluate_gods_letter_candidate, persist_gods_letter_candidate, EsWitness, GodsLetterSpec,
+};
 use super::solver::{
     is_mordell_hard, is_prime, solve_es_with_config, CandidateClassification,
-    LetterAdmissionStatus, SolveResult,
+    DualDescentCertificate, LetterAdmissionStatus, SolveResult, Witness, REMNANT_THRESHOLD,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -15,6 +18,7 @@ pub struct HuntConfig {
     pub max_primes: usize,
     pub letter_threshold: u64,
     pub mordell_only: bool,
+    pub gods_letter_only: bool,
     pub engine_mode: String,
 }
 
@@ -26,6 +30,7 @@ impl Default for HuntConfig {
             max_primes: 50,
             letter_threshold: 10,
             mordell_only: false,
+            gods_letter_only: false,
             engine_mode: "auto".to_string(),
         }
     }
@@ -44,6 +49,7 @@ pub struct HuntSummary {
     pub ordinary_decompositions: usize,
     pub letter_candidates_evaluated: usize,
     pub verified_letters_count: usize,
+    pub gods_letter_count: usize,
     pub rejected_admissions: usize,
     pub unsolved_count: usize,
     pub active_engine: String,
@@ -94,10 +100,142 @@ pub fn resolve_escapes_dir() -> PathBuf {
     default_dir
 }
 
+/// Strict Hard Invariant Validator for Erdős–Straus artifacts.
+/// Validates mathematical, schema, and certification invariants across LETTER, REMNANT, and ESCAPE artifacts.
+pub fn validate_artifact_invariants(
+    grade: &str,
+    n: u64,
+    residue_840: u64,
+    descent_depth: u64,
+    discovery_depth: u64,
+    artifact_id: &str,
+    is_mordell_hard_flag: bool,
+    admission_status: &LetterAdmissionStatus,
+    witness: Option<&Witness>,
+    dual_descent_cert: Option<&DualDescentCertificate>,
+) -> Result<(), String> {
+    let _ = discovery_depth; // validated contextually
+
+    // Invariant 1: n must match ID prefix
+    let expected_prefix = match grade {
+        "letter" => format!("L-{}", n),
+        "remnant" => format!("REM-{}", n),
+        "escape" => format!("ESC-{}", n),
+        _ => return Err(format!("Invalid artifact grade '{}'", grade)),
+    };
+    if artifact_id != expected_prefix {
+        return Err(format!(
+            "Artifact ID '{}' does not match expected '{}' for prime {}",
+            artifact_id, expected_prefix, n
+        ));
+    }
+
+    // Invariant 2: Residue 840 correctness
+    if residue_840 != (n % 840) {
+        return Err(format!(
+            "Malformed residue: reported {} != actual {} mod 840",
+            residue_840,
+            n % 840
+        ));
+    }
+
+    // Invariant 3: Mordell-hard correctness
+    if is_mordell_hard_flag != is_mordell_hard(n) {
+        return Err(format!(
+            "Malformed Mordell-hard flag: reported {} != actual {}",
+            is_mordell_hard_flag,
+            is_mordell_hard(n)
+        ));
+    }
+
+    // Invariant 4: Witness rational equation verification (if witness exists)
+    if let Some(w) = witness {
+        if !w.verify() {
+            return Err(format!(
+                "Exact 3-Egyptian fraction decomposition verification failed for prime {}",
+                n
+            ));
+        }
+        if w.n != n {
+            return Err(format!(
+                "Witness n ({}) does not match target candidate {}",
+                w.n, n
+            ));
+        }
+    }
+
+    // Invariant 5: Grade-specific invariants
+    match grade {
+        "letter" => {
+            if !admission_status.is_admitted() {
+                return Err(format!(
+                    "Cannot assign grade 'letter': Central Gate admission status is Rejected ({:?})",
+                    admission_status
+                ));
+            }
+            if !is_mordell_hard(n) {
+                return Err(format!(
+                    "Cannot assign grade 'letter': prime {} mod 840 = {} is not Mordell-hard",
+                    n, residue_840
+                ));
+            }
+            if witness.is_none() {
+                return Err(format!(
+                    "Cannot assign grade 'letter': missing decomposition witness for prime {}",
+                    n
+                ));
+            }
+        }
+        "remnant" => {
+            if descent_depth <= REMNANT_THRESHOLD {
+                return Err(format!(
+                    "Cannot assign grade 'remnant': descent_depth ({}) <= Remnant threshold ({})",
+                    descent_depth, REMNANT_THRESHOLD
+                ));
+            }
+            let cert = dual_descent_cert.ok_or_else(|| {
+                format!(
+                    "Cannot assign grade 'remnant': missing Dual Descent survival certificate for prime {}",
+                    n
+                )
+            })?;
+            if !cert.verified || cert.descent_depth <= REMNANT_THRESHOLD {
+                return Err(format!(
+                    "Cannot assign grade 'remnant': Dual Descent survival certificate unverified or depth ({}) <= {}",
+                    cert.descent_depth, REMNANT_THRESHOLD
+                ));
+            }
+        }
+        "escape" => {
+            if witness.is_none() {
+                return Err(format!(
+                    "Cannot assign grade 'escape': missing decomposition witness for prime {}",
+                    n
+                ));
+            }
+        }
+        _ => return Err(format!("Unknown artifact grade '{}'", grade)),
+    }
+
+    Ok(())
+}
+
 /// Persist ONLY genuine, centrally admitted letters to `letters/` vault.
 pub fn persist_letter_to_disk(res: &SolveResult) {
-    // FAIL-CLOSED INVARIANT: Letter admission must fail closed unless is_mordell_hard == true and Admitted
-    if !res.admission_status.is_admitted() || !res.is_mordell_hard || !is_mordell_hard(res.n) || res.grade != "letter" {
+    let letter_id = format!("L-{}", res.n);
+    if let Err(err) = validate_artifact_invariants(
+        "letter",
+        res.n,
+        res.residue_840,
+        res.descent_depth,
+        res.discovery_depth,
+        &letter_id,
+        res.is_mordell_hard,
+        &res.admission_status,
+        res.witness.as_ref(),
+        res.dual_descent_certificate.as_ref(),
+    ) {
+        eprintln!("[ES Letter Vault Invariant Error] {}", err);
         return;
     }
 
@@ -107,7 +245,6 @@ pub fn persist_letter_to_disk(res: &SolveResult) {
     };
 
     let dir = resolve_letters_dir();
-    let letter_id = format!("L-{}", res.n);
     let md_path = dir.join(format!("{}.md", letter_id));
     let json_path = dir.join(format!("{}.json", letter_id));
 
@@ -125,7 +262,8 @@ pub fn persist_letter_to_disk(res: &SolveResult) {
         ## Executive Verification Summary\n\
         - **Target Prime (p)**: `{p}`\n\
         - **Residue Modulo 840**: `{res_840}` (Mordell-Hard Survivor)\n\
-        - **Search Depth (δ)**: `{depth}`\n\
+        - **Discovery Depth (δ)**: `{discovery_depth}`\n\
+        - **Dual Descent Depth**: `{descent_depth}`\n\
         - **Discovering Engine**: `{engine}`\n\
         - **Arithmetic Grade**: `LETTER`\n\
         - **Admission Status**: `ADMITTED (Authoritative Central Gate)`\n\
@@ -144,12 +282,13 @@ pub fn persist_letter_to_disk(res: &SolveResult) {
         ## Engine Provenance\n\
         - **Method**: `{method}`\n\
         - **Corridor Layer**: `{layer}`\n\
-        - **Classification**: `{classification}`\n\
+        - **Classification**: `Central Gate Admitted Letter`\n\
         - **Engine Name**: `{engine}`\n",
         letter_id = letter_id,
         p = res.n,
         res_840 = res.residue_840,
-        depth = witness.depth,
+        discovery_depth = witness.discovery_depth,
+        descent_depth = witness.descent_depth,
         engine = witness.engine_name,
         cert = cert,
         x = witness.x,
@@ -158,7 +297,6 @@ pub fn persist_letter_to_disk(res: &SolveResult) {
         equation = witness.equation(),
         method = witness.method,
         layer = witness.layer,
-        classification = res.classification.display_label(),
     );
 
     let _ = fs::write(&md_path, md_content);
@@ -169,13 +307,15 @@ pub fn persist_letter_to_disk(res: &SolveResult) {
         "n": res.n,
         "residue_840": res.residue_840,
         "is_mordell_hard": res.is_mordell_hard,
-        "depth": witness.depth,
+        "discovery_depth": witness.discovery_depth,
+        "descent_depth": witness.descent_depth,
+        "depth": witness.discovery_depth, // Deprecated legacy alias
         "discovered_by": witness.engine_name,
         "method": witness.method,
         "layer": witness.layer,
-        "classification": res.classification.as_str(),
+        "classification": "central_gate_admitted",
         "admission_status": "admitted",
-        "grade": res.grade,
+        "grade": "letter",
         "equation": witness.equation(),
         "witness": {
             "x": witness.x.to_string(),
@@ -189,15 +329,31 @@ pub fn persist_letter_to_disk(res: &SolveResult) {
     let _ = fs::write(&json_path, json_content.to_string());
 }
 
-/// Persist CBIS corridor escapes / intermediate discoveries to `escapes/` directory
+/// Persist corridor escapes / intermediate decompositions to `escapes/` directory.
 pub fn persist_escape_to_disk(res: &SolveResult) {
+    let escape_id = format!("ESC-{}", res.n);
+    if let Err(err) = validate_artifact_invariants(
+        "escape",
+        res.n,
+        res.residue_840,
+        res.descent_depth,
+        res.discovery_depth,
+        &escape_id,
+        res.is_mordell_hard,
+        &res.admission_status,
+        res.witness.as_ref(),
+        res.dual_descent_certificate.as_ref(),
+    ) {
+        eprintln!("[ES Escape Vault Invariant Error] {}", err);
+        return;
+    }
+
     let witness = match &res.witness {
         Some(w) => w,
         None => return,
     };
 
     let dir = resolve_escapes_dir();
-    let escape_id = format!("ESC-{}", res.n);
     let md_path = dir.join(format!("{}.md", escape_id));
     let json_path = dir.join(format!("{}.json", escape_id));
 
@@ -211,7 +367,8 @@ pub fn persist_escape_to_disk(res: &SolveResult) {
         ## Executive Summary\n\
         - **Target Prime (p)**: `{p}`\n\
         - **Residue Modulo 840**: `{res_840}` ({mordell_status})\n\
-        - **Search Depth (δ)**: `{depth}`\n\
+        - **Discovery Depth (δ)**: `{discovery_depth}`\n\
+        - **Dual Descent Depth**: `{descent_depth}`\n\
         - **Classification**: `{classification}`\n\
         - **Letter Admission**: `REJECTED ({rejection_desc})`\n\
         - **Discovering Engine**: `{engine}`\n\n\
@@ -229,7 +386,8 @@ pub fn persist_escape_to_disk(res: &SolveResult) {
         p = res.n,
         res_840 = res.residue_840,
         mordell_status = if res.is_mordell_hard { "Mordell-Hard Candidate" } else { "Non-Mordell Residue" },
-        depth = witness.depth,
+        discovery_depth = witness.discovery_depth,
+        descent_depth = witness.descent_depth,
         classification = res.classification.display_label(),
         rejection_desc = rejection_desc,
         engine = witness.engine_name,
@@ -247,11 +405,14 @@ pub fn persist_escape_to_disk(res: &SolveResult) {
         "n": res.n,
         "residue_840": res.residue_840,
         "is_mordell_hard": res.is_mordell_hard,
-        "depth": witness.depth,
-        "classification": res.classification.as_str(),
+        "discovery_depth": witness.discovery_depth,
+        "descent_depth": witness.descent_depth,
+        "depth": witness.discovery_depth, // Deprecated legacy alias
+        "classification": "corridor_escape",
         "admission_status": "rejected",
         "admission_rejection_reason": rejection_desc,
         "discovered_by": witness.engine_name,
+        "grade": "escape",
         "equation": witness.equation(),
         "witness": {
             "x": witness.x.to_string(),
@@ -287,34 +448,73 @@ pub fn resolve_remnants_dir() -> PathBuf {
 
 /// Persist CBX dual descent deep corridor survivors to `remnants/` directory.
 pub fn persist_remnant_to_disk(res: &SolveResult) {
-    let witness = match &res.witness {
-        Some(w) => w,
-        None => return,
-    };
+    let remnant_id = format!("REM-{}", res.n);
+    if let Err(err) = validate_artifact_invariants(
+        "remnant",
+        res.n,
+        res.residue_840,
+        res.descent_depth,
+        res.discovery_depth,
+        &remnant_id,
+        res.is_mordell_hard,
+        &res.admission_status,
+        res.witness.as_ref(),
+        res.dual_descent_certificate.as_ref(),
+    ) {
+        eprintln!("[ES Remnant Vault Invariant Error] {}", err);
+        return;
+    }
 
     let dir = resolve_remnants_dir();
-    let remnant_id = format!("REM-{}", res.n);
     let md_path = dir.join(format!("{}.md", remnant_id));
     let json_path = dir.join(format!("{}.json", remnant_id));
 
-    let cert = res.letter_number.clone().unwrap_or_else(|| {
+    let cert = res.dual_descent_certificate.as_ref().map(|c| c.certificate.clone()).unwrap_or_else(|| {
         use std::collections::hash_map::DefaultHasher;
         use std::hash::{Hash, Hasher};
         let mut hasher = DefaultHasher::new();
         res.n.hash(&mut hasher);
-        witness.x.to_string().hash(&mut hasher);
+        res.descent_depth.hash(&mut hasher);
         format!("REM-{:016x}", hasher.finish())
     });
+
+    let witness_opt = res.witness.as_ref();
+    let decomp_verified = witness_opt.map_or(false, |w| w.verified && w.verify());
+    let (equation_str, x_str, y_str, z_str, discovering_engine, method_str, layer_str) = match witness_opt {
+        Some(w) => (
+            w.equation(),
+            w.x.to_string(),
+            w.y.to_string(),
+            w.z.to_string(),
+            w.engine_name.clone(),
+            w.method.clone(),
+            w.layer.clone(),
+        ),
+        None => (
+            "Decomposition pending / unresolved in corridor search".to_string(),
+            "N/A".to_string(),
+            "N/A".to_string(),
+            "N/A".to_string(),
+            "Unsolved Candidate".to_string(),
+            "dual_descent_survival".to_string(),
+            "descent_ladder".to_string(),
+        ),
+    };
 
     let md_content = format!(
         "# Erdős–Straus Remnant Certificate: #{remnant_id}\n\n\
         ## Executive Verification Summary\n\
         - **Target Prime (p)**: `{p}`\n\
         - **Residue Modulo 840**: `{res_840}` ({mordell_status})\n\
-        - **Search Depth (δ)**: `{depth}` (Deep Dual Descent Survivor)\n\
-        - **Classification**: `{classification}`\n\
+        - **Dual Descent Survival Depth (δ)**: `{descent_depth}`\n\
+        - **Discovery Depth**: `{discovery_depth}`\n\
+        - **Remnant Threshold**: `δ > {remnant_threshold}`\n\
         - **Arithmetic Grade**: `REMNANT`\n\
-        - **Discovering Engine**: `{engine}`\n\
+        - **Classification**: `CBX Dual Descent Deep Survivor`\n\
+        - **Survival Verification**: `TRUE`\n\
+        - **Decomposition Verification**: `{decomp_status}`\n\
+        - **Survival Engine**: `{survival_engine}`\n\
+        - **Decomposition Discovering Engine**: `{discovering_engine}`\n\
         - **SHA-256 Certificate**: `{cert}`\n\n\
         ## Exact 3-Egyptian Fraction Decomposition\n\
         $$ \\frac{{4}}{{{p}}} = \\frac{{1}}{{{x}}} + \\frac{{1}}{{{y}}} + \\frac{{1}}{{{z}}} $$\n\n\
@@ -326,52 +526,57 @@ pub fn persist_remnant_to_disk(res: &SolveResult) {
         - **y**: `{y}`\n\
         - **z**: `{z}`\n\
         - **Verification Identity**: `4xyz == n(yz + xz + xy)`\n\
-        - **Verification Status**: `TRUE (100% ℚ Arbitrary-Precision Rational Proof)`\n\n\
-        ## Engine Provenance\n\
-        - **Method**: `{method}`\n\
-        - **Corridor Layer**: `{layer}`\n\
-        - **Engine Name**: `{engine}`\n",
+        - **Verification Status**: `{verif_status}`\n",
         remnant_id = remnant_id,
         p = res.n,
         res_840 = res.residue_840,
         mordell_status = if res.is_mordell_hard { "Mordell-Hard Candidate" } else { "Non-Mordell Residue" },
-        depth = witness.depth,
-        classification = res.classification.display_label(),
-        engine = witness.engine_name,
+        descent_depth = res.descent_depth,
+        discovery_depth = res.discovery_depth,
+        remnant_threshold = REMNANT_THRESHOLD,
+        decomp_status = if decomp_verified { "TRUE" } else { "FALSE (Unsolved Candidate)" },
+        survival_engine = res.survival_engine.as_deref().unwrap_or("CBX.kernel (Dual Descent)"),
+        discovering_engine = discovering_engine,
         cert = cert,
-        x = witness.x,
-        y = witness.y,
-        z = witness.z,
-        equation = witness.equation(),
-        method = witness.method,
-        layer = witness.layer,
+        equation = equation_str,
+        x = x_str,
+        y = y_str,
+        z = z_str,
+        verif_status = if decomp_verified { "TRUE (100% ℚ Arbitrary-Precision Rational Proof)" } else { "PENDING DECOMPOSITION" },
     );
 
     let _ = fs::write(&md_path, md_content);
 
-    let json_content = serde_json::json!({
+    let mut json_val = serde_json::json!({
         "schema": "centl26.erdos_straus.remnant/v1",
         "remnant_id": remnant_id,
         "n": res.n,
         "residue_840": res.residue_840,
-        "is_mordell_hard": res.is_mordell_hard,
-        "depth": witness.depth,
-        "classification": res.classification.as_str(),
         "grade": "remnant",
-        "discovered_by": witness.engine_name,
-        "method": witness.method,
-        "layer": witness.layer,
-        "equation": witness.equation(),
-        "witness": {
-            "x": witness.x.to_string(),
-            "y": witness.y.to_string(),
-            "z": witness.z.to_string(),
-        },
+        "classification": "dual_descent_deep_survivor",
+        "descent_depth": res.descent_depth,
+        "discovery_depth": res.discovery_depth,
+        "remnant_threshold": REMNANT_THRESHOLD,
+        "survival_engine": res.survival_engine.as_deref().unwrap_or("CBX.kernel (Dual Descent)"),
+        "discovered_by": discovering_engine,
+        "method": method_str,
+        "layer": layer_str,
+        "equation": equation_str,
+        "verified": decomp_verified,
+        "survival_verified": true,
+        "decomposition_verified": decomp_verified,
         "certificate": cert,
-        "verified": witness.verified && witness.verify(),
     });
 
-    let _ = fs::write(&json_path, json_content.to_string());
+    if let Some(w) = witness_opt {
+        json_val["witness"] = serde_json::json!({
+            "x": w.x.to_string(),
+            "y": w.y.to_string(),
+            "z": w.z.to_string(),
+        });
+    }
+
+    let _ = fs::write(&json_path, serde_json::to_string_pretty(&json_val).unwrap_or_default());
 }
 
 #[derive(Clone, Debug)]
@@ -443,20 +648,17 @@ pub fn audit_and_migrate_vault() -> VaultAuditReport {
                     if let Ok(json_val) = serde_json::from_str::<serde_json::Value>(&content) {
                         let n = json_val.get("n").and_then(|v| v.as_u64()).unwrap_or(0);
                         let res = solve_es_with_config(n, 10, "auto");
-                        if res.admission_status.is_admitted() {
+                        if res.letter_admitted {
                             legitimate_letters_retained += 1;
-                        } else if res.classification == CandidateClassification::CbxSurvivor {
+                        } else if res.remnant_admitted {
                             entries_migrated_to_remnants += 1;
                             let md_path = path.with_extension("md");
                             let new_json = remnants_dir.join(format!("REM-{}.json", n));
-                            let new_md = remnants_dir.join(format!("REM-{}.md", n));
-                            let reason = match res.admission_status {
-                                LetterAdmissionStatus::Rejected(ref r) => r.description(),
-                                _ => "Migrated to CBX Remnants".to_string(),
-                            };
-                            let _ = fs::rename(&path, &new_json);
+                            let reason = "Candidate survived Dual Descent beyond threshold (δ > 50) - migrated to Remnants".to_string();
+                            persist_remnant_to_disk(&res);
+                            let _ = fs::remove_file(&path);
                             if md_path.exists() {
-                                let _ = fs::rename(&md_path, &new_md);
+                                let _ = fs::remove_file(&md_path);
                             }
                             invalid_entries.push(AuditDetail {
                                 n,
@@ -471,14 +673,14 @@ pub fn audit_and_migrate_vault() -> VaultAuditReport {
                             let md_path = path.with_extension("md");
                             let file_stem = path.file_stem().unwrap_or_default().to_string_lossy().to_string();
                             let new_json = escapes_dir.join(format!("{}.json", file_stem));
-                            let new_md = escapes_dir.join(format!("{}.md", file_stem));
                             let reason = match res.admission_status {
                                 LetterAdmissionStatus::Rejected(ref r) => r.description(),
                                 _ => "Admission rejected".to_string(),
                             };
-                            let _ = fs::rename(&path, &new_json);
+                            persist_escape_to_disk(&res);
+                            let _ = fs::remove_file(&path);
                             if md_path.exists() {
-                                let _ = fs::rename(&md_path, &new_md);
+                                let _ = fs::remove_file(&md_path);
                             }
                             invalid_entries.push(AuditDetail {
                                 n,
@@ -495,7 +697,7 @@ pub fn audit_and_migrate_vault() -> VaultAuditReport {
         }
     }
 
-    // 2. Count retained remnants
+    // 2. Audit remnants vault: strictly demote any records with descent_depth <= 50 (e.g. REM-375017)
     if let Ok(entries) = fs::read_dir(&remnants_dir) {
         for entry in entries.flatten() {
             let path = entry.path();
@@ -503,7 +705,46 @@ pub fn audit_and_migrate_vault() -> VaultAuditReport {
                 && path.file_name().and_then(|s| s.to_str()) != Some("index.json")
             {
                 total_scanned += 1;
-                remnants_retained += 1;
+                if let Ok(content) = fs::read_to_string(&path) {
+                    if let Ok(json_val) = serde_json::from_str::<serde_json::Value>(&content) {
+                        let n = json_val.get("n").and_then(|v| v.as_u64()).unwrap_or(0);
+                        let descent_depth = json_val.get("descent_depth").and_then(|v| v.as_u64()).unwrap_or_else(|| {
+                            json_val.get("depth").and_then(|v| v.as_u64()).unwrap_or(0)
+                        });
+                        let survival_verified = json_val.get("survival_verified").and_then(|v| v.as_bool()).unwrap_or(false);
+
+                        // Hard Invariant Check: Remnant MUST have descent_depth > REMNANT_THRESHOLD and survival_verified
+                        if descent_depth > REMNANT_THRESHOLD && survival_verified {
+                            remnants_retained += 1;
+                        } else {
+                            entries_migrated_to_escapes += 1;
+                            let md_path = path.with_extension("md");
+                            let new_json = escapes_dir.join(format!("ESC-{}.json", n));
+                            let reason = format!(
+                                "Descent depth (δ={}) <= {}; candidate does not qualify as Remnant - demoted to Escape",
+                                descent_depth, REMNANT_THRESHOLD
+                            );
+                            
+                            // Re-save as Escape
+                            let res = solve_es_with_config(n, 10, "auto");
+                            persist_escape_to_disk(&res);
+
+                            let _ = fs::remove_file(&path);
+                            if md_path.exists() {
+                                let _ = fs::remove_file(&md_path);
+                            }
+
+                            invalid_entries.push(AuditDetail {
+                                n,
+                                residue_840: n % 840,
+                                is_mordell_hard: is_mordell_hard(n),
+                                previous_file: format!("remnants/{}", path.file_name().unwrap_or_default().to_string_lossy()),
+                                new_file: format!("escapes/{}", new_json.file_name().unwrap_or_default().to_string_lossy()),
+                                rejection_reason: reason,
+                            });
+                        }
+                    }
+                }
             }
         }
     }
@@ -537,6 +778,7 @@ pub fn run_hunt_window(from: u64, window_size: u64, max_primes: usize) -> HuntSu
         max_primes,
         letter_threshold: 10,
         mordell_only: false,
+        gods_letter_only: false,
         engine_mode: "auto".to_string(),
     };
     run_configured_hunt_window(&config)
@@ -547,7 +789,9 @@ pub fn run_configured_hunt_window(config: &HuntConfig) -> HuntSummary {
     let to = config.start_bound.saturating_add(config.window_size);
     let mut primes = sieve_primes(config.start_bound, to);
 
-    if config.mordell_only {
+    // God's Letter hunt runs the FULL engine stack (CC theorems included).
+    // Mordell-only would skip every prime CC can clear, so the HUD looks dead.
+    if config.mordell_only && !config.gods_letter_only {
         primes.retain(|&p| is_mordell_hard(p));
     }
 
@@ -558,12 +802,17 @@ pub fn run_configured_hunt_window(config: &HuntConfig) -> HuntSummary {
     let mut ordinary_decompositions = 0;
     let mut letter_candidates_evaluated = 0;
     let mut verified_letters_count = 0;
+    let mut gods_letter_count = 0;
     let mut rejected_admissions = 0;
     let mut unsolved_count = 0;
     let mut mordell_hard_count = 0;
     let mut findings = Vec::new();
 
-    let evaluated_primes: Vec<u64> = primes.into_iter().take(config.max_primes).collect();
+    let evaluated_primes: Vec<u64> = if config.gods_letter_only {
+        primes
+    } else {
+        primes.into_iter().take(config.max_primes).collect()
+    };
 
     for &p in &evaluated_primes {
         if is_mordell_hard(p) {
@@ -580,17 +829,28 @@ pub fn run_configured_hunt_window(config: &HuntConfig) -> HuntSummary {
             }
             CandidateClassification::CbisEscape => {
                 cbis_escapes += 1;
-                persist_escape_to_disk(&res);
             }
-            CandidateClassification::CbxSurvivor => {
+            CandidateClassification::DualDescentDeepSurvivor | CandidateClassification::CbxSurvivor => {
                 cbx_survivors += 1;
-                persist_remnant_to_disk(&res);
             }
             CandidateClassification::OrdinaryDecomposition => {
                 ordinary_decompositions += 1;
             }
             CandidateClassification::UnsolvedCandidate => {
                 unsolved_count += 1;
+            }
+            CandidateClassification::CentralGateAdmitted => {
+                // Count the engine that actually found the witness, not the admission overlay.
+                if res.discovery_depth <= 10 {
+                    corridor_clearances += 1;
+                } else if res.discovery_depth <= 50 {
+                    cbis_escapes += 1;
+                } else {
+                    cbx_survivors += 1;
+                }
+            }
+            CandidateClassification::CorridorEscape => {
+                corridor_clearances += 1;
             }
             CandidateClassification::InvalidCandidate => {}
         }
@@ -599,15 +859,59 @@ pub fn run_configured_hunt_window(config: &HuntConfig) -> HuntSummary {
             letter_candidates_evaluated += 1;
         }
 
-        if res.admission_status.is_admitted() {
+        // Multi-Artifact Persistence: Preserve each earned artifact independently without mutual destruction
+        if res.letter_admitted {
             verified_letters_count += 1;
             persist_letter_to_disk(&res);
+        }
+        if res.remnant_admitted {
+            persist_remnant_to_disk(&res);
+        }
+        if res.escape_admitted {
+            persist_escape_to_disk(&res);
+        }
+
+        let gl_eval = if res.is_mordell_hard {
+            let spec = GodsLetterSpec::v1();
+            let raw = match &res.witness {
+                Some(w) => vec![EsWitness::new(
+                    res.n as u128,
+                    w.x.clone(),
+                    w.y.clone(),
+                    w.z.clone(),
+                    &w.method,
+                    &w.engine_name,
+                    w.discovery_depth,
+                )],
+                None => Vec::new(),
+            };
+            Some(evaluate_gods_letter_candidate(res.n as u128, &raw, &spec))
+        } else {
+            None
+        };
+        let gl_candidate = gl_eval.as_ref().map(|e| e.gods_letter_candidate).unwrap_or(false);
+        if gl_candidate {
+            gods_letter_count += 1;
+            if let Some(eval) = gl_eval.as_ref() {
+                let _ = persist_gods_letter_candidate(eval);
+            }
+        }
+
+        if config.gods_letter_only {
+            if gl_candidate {
+                findings.push(res);
+            } else {
+                rejected_admissions += 1;
+            }
+        } else if res.letter_admitted {
             findings.push(res);
         } else {
             rejected_admissions += 1;
-            // Record interesting non-letter corridor escapes and Mordell candidates in the findings inspector
+            // Record interesting non-letter corridor escapes, remnants, and Mordell candidates
             if res.is_mordell_hard
+                || res.remnant_admitted
                 || res.classification == CandidateClassification::CbisEscape
+                || res.classification == CandidateClassification::DualDescentDeepSurvivor
                 || res.classification == CandidateClassification::CbxSurvivor
             {
                 findings.push(res);
@@ -627,6 +931,7 @@ pub fn run_configured_hunt_window(config: &HuntConfig) -> HuntSummary {
         ordinary_decompositions,
         letter_candidates_evaluated,
         verified_letters_count,
+        gods_letter_count,
         rejected_admissions,
         unsolved_count,
         active_engine: if config.engine_mode == "auto" {
@@ -634,7 +939,9 @@ pub fn run_configured_hunt_window(config: &HuntConfig) -> HuntSummary {
         } else {
             config.engine_mode.clone()
         },
-        filter_mode: if config.mordell_only {
+        filter_mode: if config.gods_letter_only {
+            "God's Letter (unsolved Mordell-hard after full engine menu)".to_string()
+        } else if config.mordell_only {
             "Mordell-Hard Only (840k + r)".to_string()
         } else {
             format!("Letter Depth ≥ {}", config.letter_threshold)
@@ -647,6 +954,8 @@ pub fn run_configured_hunt_window(config: &HuntConfig) -> HuntSummary {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::erdos_straus::LetterRejectionReason;
+    use crate::engine::rational::BigInt;
 
     #[test]
     fn test_configured_hunt_window_standard() {
@@ -656,6 +965,7 @@ mod tests {
             max_primes: 50,
             letter_threshold: 10,
             mordell_only: false,
+            gods_letter_only: false,
             engine_mode: "auto".to_string(),
         };
 
@@ -679,6 +989,25 @@ mod tests {
     }
 
     #[test]
+    fn test_configured_hunt_window_gods_letter_filter() {
+        let config = HuntConfig {
+            start_bound: 1000,
+            window_size: 2000,
+            max_primes: 50,
+            letter_threshold: 10,
+            mordell_only: false,
+            gods_letter_only: true,
+            engine_mode: "auto".to_string(),
+        };
+        let summary = run_configured_hunt_window(&config);
+        assert_eq!(summary.filter_mode, "God's Letter (unsolved Mordell-hard after full engine menu)");
+        assert!(summary.theorem_clearances > 0, "CC.kernel must run on non-Mordell primes in a God's Letter hunt");
+        assert_eq!(summary.gods_letter_count, 0, "solved Mordell primes are not God's Letters");
+        assert!(!summary.findings.iter().any(|f| f.n == 2521));
+        assert!(!summary.findings.iter().any(|f| f.n == 1201));
+    }
+
+    #[test]
     fn test_configured_hunt_window_mordell_only() {
         let config = HuntConfig {
             start_bound: 20000,
@@ -686,6 +1015,7 @@ mod tests {
             max_primes: 50,
             letter_threshold: 10,
             mordell_only: true,
+            gods_letter_only: false,
             engine_mode: "auto".to_string(),
         };
 
@@ -727,12 +1057,23 @@ mod tests {
     }
 
     #[test]
-    fn test_persist_remnant_to_disk() {
+    fn test_persist_remnant_to_disk_qualified() {
         let _guard = VAULT_TEST_LOCK.lock().unwrap();
-        // Create synthetic CBX survivor result
+        // Create qualified CBX dual descent deep survivor
         let p = 375017;
         let mut res = solve_es_with_config(p, 10, "auto");
-        res.classification = CandidateClassification::CbxSurvivor;
+        res.descent_depth = 57;
+        res.discovery_depth = 0;
+        res.dual_descent_certificate = Some(DualDescentCertificate {
+            candidate: p,
+            descent_depth: 57,
+            threshold: 50,
+            survival_engine: "CBX.kernel (Dual Descent)".to_string(),
+            verified: true,
+            certificate: "REM-0000000000000001".to_string(),
+        });
+        res.remnant_admitted = true;
+        res.classification = CandidateClassification::DualDescentDeepSurvivor;
         persist_remnant_to_disk(&res);
 
         let remnants_dir = resolve_remnants_dir();
@@ -742,14 +1083,138 @@ mod tests {
         assert!(json_file.exists());
         let md_content = fs::read_to_string(&md_file).unwrap();
         assert!(md_content.contains("# Erdős–Straus Remnant Certificate: #REM-375017"));
-        assert!(md_content.contains("REMNANT"));
+        assert!(md_content.contains("Dual Descent Survival Depth (δ)"));
+        assert!(md_content.contains("`57`"));
+        assert!(md_content.contains("Discovery Depth"));
+        assert!(md_content.contains("`0`"));
+        assert!(md_content.contains("CBX Dual Descent Deep Survivor"));
+
+        let json_content = fs::read_to_string(&json_file).unwrap();
+        let val: serde_json::Value = serde_json::from_str(&json_content).unwrap();
+        assert_eq!(val["schema"], "centl26.erdos_straus.remnant/v1");
+        assert_eq!(val["remnant_id"], "REM-375017");
+        assert_eq!(val["descent_depth"], 57);
+        assert_eq!(val["discovery_depth"], 0);
+        assert_eq!(val["remnant_threshold"], 50);
+        assert_eq!(val["grade"], "remnant");
+        assert_eq!(val["classification"], "dual_descent_deep_survivor");
+        assert_eq!(val["survival_verified"], true);
+    }
+
+    #[test]
+    fn test_rem_375017_demoted_to_escape_on_descent_zero() {
+        let _guard = VAULT_TEST_LOCK.lock().unwrap();
+        let remnants_dir = resolve_remnants_dir();
+        let escapes_dir = resolve_escapes_dir();
+
+        // Write an old/invalid REM-375017 file with descent_depth = 0
+        let fake_rem_json = remnants_dir.join("REM-375017.json");
+        let fake_rem_md = remnants_dir.join("REM-375017.md");
+        let _ = fs::write(&fake_rem_json, r#"{"schema":"centl26.erdos_straus.remnant/v1","n":375017,"descent_depth":0,"depth":0,"survival_verified":false}"#);
+        let _ = fs::write(&fake_rem_md, "# Stale REM");
+
+        // Run audit & migration
+        let report = audit_and_migrate_vault();
+        assert!(report.entries_migrated_to_escapes >= 1);
+
+        // Stale remnant files must be removed
+        assert!(!fake_rem_json.exists());
+        assert!(!fake_rem_md.exists());
+
+        // Escape file must exist and be valid
+        let esc_json = escapes_dir.join("ESC-375017.json");
+        let esc_md = escapes_dir.join("ESC-375017.md");
+        assert!(esc_json.exists());
+        assert!(esc_md.exists());
+        let val: serde_json::Value = serde_json::from_str(&fs::read_to_string(&esc_json).unwrap()).unwrap();
+        assert_eq!(val["grade"], "escape");
+        assert_eq!(val["n"], 375017);
+    }
+
+    #[test]
+    fn test_hard_invariant_rejection_contradictions() {
+        // 1. Remnant with descent_depth <= 50 -> ERROR
+        let err1 = validate_artifact_invariants(
+            "remnant",
+            375017,
+            377,
+            0, // descent_depth <= 50
+            0,
+            "REM-375017",
+            false,
+            &LetterAdmissionStatus::Rejected(LetterRejectionReason::NonMordellResidue(377)),
+            None,
+            None,
+        );
+        assert!(err1.is_err());
+
+        // 2. Letter with unverified witness -> ERROR
+        let mut unverified_w = Witness {
+            n: 2521,
+            x: BigInt::from_u64(10), // Corrupted x
+            y: BigInt::from_u64(20),
+            z: BigInt::from_u64(30),
+            method: "test".to_string(),
+            layer: "test".to_string(),
+            kind: "test".to_string(),
+            engine_name: "test".to_string(),
+            discovery_depth: 10,
+            descent_depth: 0,
+            depth: 10,
+            residue_840: 1,
+            is_mordell_hard: true,
+            verified: false,
+        };
+        let err2 = validate_artifact_invariants(
+            "letter",
+            2521,
+            1,
+            0,
+            10,
+            "L-2521",
+            true,
+            &LetterAdmissionStatus::Admitted,
+            Some(&unverified_w),
+            None,
+        );
+        assert!(err2.is_err());
+
+        // 3. ID mismatch -> ERROR
+        unverified_w.verified = true;
+        let err3 = validate_artifact_invariants(
+            "letter",
+            2521,
+            1,
+            0,
+            10,
+            "L-9999", // Mismatch
+            true,
+            &LetterAdmissionStatus::Admitted,
+            Some(&unverified_w),
+            None,
+        );
+        assert!(err3.is_err());
+
+        // 4. Residue mismatch -> ERROR
+        let err4 = validate_artifact_invariants(
+            "letter",
+            2521,
+            999, // Mismatch (actual is 1)
+            0,
+            10,
+            "L-2521",
+            true,
+            &LetterAdmissionStatus::Admitted,
+            Some(&unverified_w),
+            None,
+        );
+        assert!(err4.is_err());
     }
 
     #[test]
     fn test_audit_and_migrate_vault() {
         let _guard = VAULT_TEST_LOCK.lock().unwrap();
         let report = audit_and_migrate_vault();
-        // The audit report must run and return without error
         assert!(report.total_scanned >= report.legitimate_letters_retained);
     }
 }

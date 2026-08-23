@@ -490,6 +490,14 @@ fn lab_api_response(
         }));
     }
 
+    if path == "/download/gods-letter.json" || path == "/api/export-gods-letter" || path == "/api/es/export-gods-letter" {
+        let json = handler::export_gods_letter_json();
+        return Ok(Some(LabApiResponse {
+            content_type: "application/json; charset=utf-8",
+            body: json.into_bytes(),
+        }));
+    }
+
     if path == "/api/es/audit" || path == "/api/es-audit" {
         let report = crate::erdos_straus::hunt::audit_and_migrate_vault();
         let json = report.to_json().to_string();
@@ -1409,6 +1417,25 @@ fn handle_lab_connection(mut stream: TcpStream, server_state: Arc<ServerState>) 
             &String::from_utf8_lossy(&request.body)
         };
         let res = handler::handle_es_hunt_api_request(input_str);
+        let body = serde_json::to_vec_pretty(&res).unwrap_or_default();
+        return write_response(
+            &mut stream,
+            200,
+            "OK",
+            "application/json; charset=utf-8",
+            &body,
+            &[("Cache-Control", "no-store".to_string())],
+            false,
+        );
+    }
+
+    if (method == "POST" || method == "GET") && (path == "/api/es/gods-letter" || path == "/api/es-gods-letter") {
+        let input_str = if method == "GET" {
+            request.target.split('?').nth(1).unwrap_or("")
+        } else {
+            &String::from_utf8_lossy(&request.body)
+        };
+        let res = handler::handle_gods_letter_api_request(input_str);
         let body = serde_json::to_vec_pretty(&res).unwrap_or_default();
         return write_response(
             &mut stream,

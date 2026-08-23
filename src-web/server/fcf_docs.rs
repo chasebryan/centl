@@ -463,6 +463,34 @@ The Bryan Recursive Entanglement Calculus (BREC) is a discrete, constructive cal
 "#,
     },
     FcfDoc {
+        id: "centl26-12-gl-release-notes",
+        title: "CentL26.12-GL Official Release Notes",
+        category: "manual",
+        summary: "God's Letter unsolved-only watchdog, corrected CC.kernel identities, live engine HUD.",
+        tags: &["release", "erdos-straus", "gods-letter", "observatory", "cc", "mordell", "update"],
+        content: r#"# CentL26.12-GL — Official Release Notes
+**Free Computation Foundation · CentL26 Special Research Release**
+
+## Executive Summary
+**CentL26.12-GL** ships the **God's Letter** hunt as an unsolved-only watchdog on the Erdős–Straus conjecture, with corrected CC.kernel linear identities and a fail-closed vault that refuses to file a solved \(4/p\) identity as a God's Letter.
+
+A **God's Letter** is a Mordell-hard prime (\(p \equiv 1, 121, 169, 289, 361, 529 \pmod{840}\)) that escapes \(4p+3\), \(3p+2\), \(8p+5\) and still has no exact witness after the full engine menu.
+
+This release does not claim a proof of Erdős–Straus. Origin census through \(18.1 \times 10^6\): \(1{,}159{,}667\) primes, \(100\%\) verified, **0** God's Letters.
+
+---
+
+## 1. God's Letter (Ω)
+- Hunt filter runs the full coordinated engine menu. Persistence writes `gods-letter/GL-<p>` only when Mordell-hard and unsolved.
+- Observatory does not auto-start. Soft reset clears session HUD without deleting vault files.
+
+---
+
+## 2. Corrected CC.kernel identities
+even, \(4p+3\), \(3p+2\), \(8p+5\) now satisfy \(4xyz = n(yz+xz+xy)\). Live CC share holds at \(87.5\%\).
+"#,
+    },
+    FcfDoc {
         id: "centl26-11-es-release-notes",
         title: "CentL26.11-ES Official Release Notes",
         category: "manual",

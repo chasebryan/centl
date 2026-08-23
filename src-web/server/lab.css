@@ -2845,7 +2845,7 @@ body.hide-console .trace-console { display: none; }
 /* Top Telemetry HUD */
 .es-hud-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 8px;
   padding: 8px 16px;
   background: var(--surface-muted);
@@ -2896,6 +2896,16 @@ body.hide-console .trace-console { display: none; }
   color: #d97706;
 }
 body.theme-dim .es-hud-card.is-letter-highlight strong {
+  color: #fbbf24;
+}
+.es-hud-card.is-gods-letter-highlight {
+  border-color: rgba(251, 191, 36, 0.65);
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.14), rgba(245, 158, 11, 0.08));
+}
+.es-hud-card.is-gods-letter-highlight strong {
+  color: #b45309;
+}
+body.theme-dim .es-hud-card.is-gods-letter-highlight strong {
   color: #fbbf24;
 }
 

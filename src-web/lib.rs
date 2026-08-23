@@ -19,6 +19,13 @@ pub fn print_help() {
     println!("  centl-web eval \"EXPRESSION\"   evaluate a mathematical expression");
     println!("  centl-web es solve <PRIME>    solve 4/p = 1/x + 1/y + 1/z");
     println!("  centl-web es hunt [FROM]      run public Erdős–Straus hunt window");
+    println!("  centl-web es gods-letter      scan certified domain for God's Letter");
+    println!("  centl-web es gods-letter --scan               full domain scan + persist artifact");
+    println!("  centl-web es gods-letter --verify             re-verify current GL certificate");
+    println!("  centl-web es gods-letter --explain            print elimination tree audit trail");
+    println!("  centl-web es gods-letter --json               machine-readable domain evaluation");
+    println!("  centl-web es gods-letter --domain-min=N       override certified domain lower bound");
+    println!("  centl-web es gods-letter --domain-max=N       override certified domain upper bound");
     println!("  centl-web physics convert V F T convert units");
     println!("  centl26 [PORT]                start the CentL26 local host (default: 2626)");
     println!("  centl-web --lab [PORT]        compatibility entry point for CentL26");
@@ -28,6 +35,7 @@ pub fn print_help() {
     println!("Server environment:");
     println!("  CENTL_BIND_HOST               bind address (default: 127.0.0.1)");
     println!("  CENTL_SITE_DIR                static site directory (default: ./site or ../site)");
+    println!("  CENTL_GODS_LETTER_DIR         override god's letter artifact directory");
     println!();
     println!("CentL26 always binds to 127.0.0.1 and embeds its application assets.");
 }

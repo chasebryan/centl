@@ -150,6 +150,10 @@ pub fn render_centl_work_area(
             hunt.verified_letters_count
         ));
         html.push_str(&format!(
+            r#"<span class="stat-pill stat-letter">GOD'S LETTER: {}</span>"#,
+            hunt.gods_letter_count
+        ));
+        html.push_str(&format!(
             r#"<span class="stat-pill stat-mordell">MORDELL-HARD: {}</span>"#,
             hunt.mordell_hard_count
         ));

@@ -5,7 +5,7 @@
 
 # CENTL / CentL26
 
-[![Version](https://img.shields.io/badge/version-26.11.0--ES-blue.svg)](https://github.com/chasebryan/centl)
+[![Version](https://img.shields.io/badge/version-26.12.0--GL-blue.svg)](https://github.com/chasebryan/centl)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-2021%20edition-orange.svg)](https://www.rust-lang.org/)
 [![Offline First](https://img.shields.io/badge/offline-100%25%20local-success.svg)](https://freecomputation.org/)
@@ -21,7 +21,7 @@
 > **CentL26 is the flagship standalone scientific computing environment of CENTL.**  
 > The "26" represents the 2026 flagship product line. CentL26 provides a calm, offline, deterministic scientific workbench that combines exact rational arithmetic, canonical polynomial algebra, physics kernels, chemical stoichiometry, in-app hackability, 2D function plotting, interactive STEM animated visualizer & theorem studio, academic search engine, and a comprehensive offline natural language problem solver.
 > 
-> **CentL26.10 is the official universal release across all supported desktop and web environments.**
+> **CentL26.12-GL is the official latest release across all supported desktop and web environments.**
 
 ---
 
@@ -162,11 +162,54 @@ The CENTL research program includes active exploration of **Erdős–Straus Diop
 ./target/release/centl26 "solve 2521"
 ```
 
----
+### Erdős–Straus Hunt Classification Hierarchy
+
+```
+                        GOD'S LETTER
+                            │
+             (Unique terminal apex — exactly one prime in
+              certified domain simultaneously satisfies
+              all six independent predicates)
+                            │
+              ┌─────────────┴─────────────┐
+              │                           │
+           LETTER                      REMNANT
+  (Mordell-hard residue,           (Dual Descent depth
+   exact witness verified)          > 50 stages survived)
+              │                           │
+           ESCAPE                      (dual descent
+  (CBIS/CC corridor                  deep survivor)
+   escape geometry)
+```
+
+| Classification | Artifact | Condition |
+|---|---|---|
+| `gods_letter` | `gods-letter/GL-<p>.json` | Unique prime satisfying $P \wedge V \wedge L \wedge R \wedge H \wedge E$ in a certified domain (singleton rule) |
+| `letter` | `letters/L-<p>.json` | Mordell-hard prime with exact ES witness |
+| `remnant` | `remnants/REM-<p>.json` | Deep dual-descent survival (depth > 50) |
+| `escape` | `escapes/ESC-<p>.json` | CBIS/CC preclearance corridor escape |
+
+**God's Letter commands:**
+
+```sh
+# Full certified domain scan (2 ≤ p ≤ 100,000) and persist artifact
+centl es gods-letter --scan
+
+# Print elimination tree
+centl es gods-letter --explain
+
+# Machine-readable evaluation
+centl es gods-letter --json
+```
+
+**Specification:** [`research/erdos-straus/GODS-LETTER.md`](research/erdos-straus/GODS-LETTER.md)  
+**Vault:** [`gods-letter/`](gods-letter/)
+
 
 ## Documentation & Manuals
 
 - [CentL26 Architecture Guide](docs/CENTL26-ARCHITECTURE.md)
+- [CentL26.12-GL Release Notes](docs/releases/26.12.0.md)
 - [CentL26.11-ES Release Notes](docs/releases/26.11.0.md)
 - [CentL26.10.2 Release Notes](docs/releases/26.10.2.md)
 - [CentL26.10.1 Orchid Release Notes](docs/releases/26.10.1.md)
