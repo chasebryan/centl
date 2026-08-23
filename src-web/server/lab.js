@@ -2177,6 +2177,11 @@
     seenGodsLetters: {},
     rejectedAdmissions: 0,
     unsolvedCount: 0,
+    classProofs: 0,
+    instanceProofs: 0,
+    counterexamples: 0,
+    incompleteResiduals: 0,
+    gameStatus: "OPEN",
     lastThroughput: 0,
     lastMillis: 0,
 
@@ -2433,6 +2438,11 @@
       EsHuntStudio.seenGodsLetters = {};
       EsHuntStudio.rejectedAdmissions = 0;
       EsHuntStudio.unsolvedCount = 0;
+      EsHuntStudio.classProofs = 0;
+      EsHuntStudio.instanceProofs = 0;
+      EsHuntStudio.counterexamples = 0;
+      EsHuntStudio.incompleteResiduals = 0;
+      EsHuntStudio.gameStatus = "OPEN";
       EsHuntStudio.lastThroughput = 0;
       EsHuntStudio.lastMillis = 0;
       EsHuntStudio.glScanCount = 0;
@@ -2757,6 +2767,23 @@
       setEngineShare("cbis", EsHuntStudio.engineStats.cbis);
       setEngineShare("cbx", EsHuntStudio.engineStats.cbx);
       setEngineShare("bb", verifiedCount);
+
+      const gameEl = document.querySelector('[data-es-hud="game-status"]');
+      if (gameEl) gameEl.textContent = EsHuntStudio.gameStatus || "OPEN";
+      const instEl = document.querySelector('[data-es-hud="instance-proofs"]');
+      if (instEl) instEl.textContent = EsHuntStudio.instanceProofs.toLocaleString();
+      const cxEl = document.querySelector('[data-es-hud="counterexamples"]');
+      if (cxEl) cxEl.textContent = EsHuntStudio.counterexamples.toLocaleString();
+      const incEl = document.querySelector('[data-es-hud="incomplete-residuals"]');
+      if (incEl) incEl.textContent = EsHuntStudio.incompleteResiduals.toLocaleString();
+      const weighEl = document.querySelector('[data-es-hud="weighing"]');
+      if (weighEl) {
+        if (EsHuntStudio.counterexamples > 0) {
+          weighEl.textContent = "DISPROOF TICKET: a complete finite region is empty. One counterexample outweighs every instance proof.";
+        } else {
+          weighEl.textContent = "Class theorems cover 7/8 of primes. Instance piles do not prove ES. Approximates never certify. Game OPEN.";
+        }
+      }
     },
 
     scheduleTick: function() {
@@ -2832,6 +2859,15 @@
         }
         EsHuntStudio.rejectedAdmissions += data.rejected_admissions || 0;
         EsHuntStudio.unsolvedCount += data.unsolved_count || 0;
+        EsHuntStudio.classProofs += data.class_proofs || 0;
+        EsHuntStudio.instanceProofs += data.instance_proofs || 0;
+        EsHuntStudio.counterexamples += data.counterexamples || 0;
+        EsHuntStudio.incompleteResiduals += data.incomplete_residuals || 0;
+        if (data.game_status === "DISPROVED" || EsHuntStudio.counterexamples > 0) {
+          EsHuntStudio.gameStatus = "DISPROVED";
+        } else {
+          EsHuntStudio.gameStatus = data.game_status || "OPEN";
+        }
         EsHuntStudio.lastThroughput = data.rate_primes_per_sec || 0;
         EsHuntStudio.lastMillis = data.execution_millis || 0;
 

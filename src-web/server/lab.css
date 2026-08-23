@@ -3009,6 +3009,40 @@ body.theme-dim .es-hud-card.is-gods-letter-highlight strong {
   display: block;
 }
 
+.es-dual-ledger {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1.3fr;
+  gap: 8px;
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+.es-dual-col {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+.es-dual-col small {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.es-dual-col strong {
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--ink);
+}
+.es-dual-proof strong { color: var(--exact); }
+.es-dual-disproof strong { color: var(--danger); }
+.es-dual-note span { color: var(--muted); line-height: 1.35; }
+
 /* Engine Cards Grid */
 .es-engine-cards-grid {
   display: grid;

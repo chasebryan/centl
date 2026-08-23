@@ -5,7 +5,7 @@
 
 # CENTL / CentL26
 
-[![Version](https://img.shields.io/badge/version-26.12.0--GL-blue.svg)](https://github.com/chasebryan/centl)
+[![Version](https://img.shields.io/badge/version-26.13.0--AG-blue.svg)](https://github.com/chasebryan/centl)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-2021%20edition-orange.svg)](https://www.rust-lang.org/)
 [![Offline First](https://img.shields.io/badge/offline-100%25%20local-success.svg)](https://freecomputation.org/)
@@ -21,7 +21,7 @@
 > **CentL26 is the flagship standalone scientific computing environment of CENTL.**  
 > The "26" represents the 2026 flagship product line. CentL26 provides a calm, offline, deterministic scientific workbench that combines exact rational arithmetic, canonical polynomial algebra, physics kernels, chemical stoichiometry, in-app hackability, 2D function plotting, interactive STEM animated visualizer & theorem studio, academic search engine, and a comprehensive offline natural language problem solver.
 > 
-> **CentL26.12-GL is the official latest release across all supported desktop and web environments.**
+> **CentL26.13-AG is the official latest release across all supported desktop and web environments.**
 
 ---
 
@@ -184,10 +184,17 @@ The CENTL research program includes active exploration of **Erdős–Straus Diop
 
 | Classification | Artifact | Condition |
 |---|---|---|
-| `gods_letter` | `gods-letter/GL-<p>.json` | Unique prime satisfying $P \wedge V \wedge L \wedge R \wedge H \wedge E$ in a certified domain (singleton rule) |
+| `class_proof` | dual ledger (proof) | Infinite residue identity (even, $4p+3$, $3p+2$, $8p+5$). Density $7/8$. |
+| `instance_proof` | dual ledger (proof) | One verified $4/p=1/x+1/y+1/z$. Does not prove ES. |
+| `certified_counterexample` | `tickets/DIS-<p>.json` | Complete finite region empty. One ticket disproves ES. |
+| `incomplete_residual` / `gods_letter` | `gods-letter/GL-<p>.json` | Menu miss; region not complete. Not a disproof. |
 | `letter` | `letters/L-<p>.json` | Mordell-hard prime with exact ES witness |
 | `remnant` | `remnants/REM-<p>.json` | Deep dual-descent survival (depth > 50) |
 | `escape` | `escapes/ESC-<p>.json` | CBIS/CC preclearance corridor escape |
+
+The observatory is **agnostic**: it files proof tickets and disproof tickets on separate ledgers. Approximates never certify. Game status is `OPEN` until a covering of the six Mordell classes or one certified counterexample.
+
+**Specification:** [`research/erdos-straus/DUAL-LEDGER.md`](research/erdos-straus/DUAL-LEDGER.md) · [`research/erdos-straus/GODS-LETTER.md`](research/erdos-straus/GODS-LETTER.md)
 
 **God's Letter commands:**
 
@@ -209,6 +216,7 @@ centl es gods-letter --json
 ## Documentation & Manuals
 
 - [CentL26 Architecture Guide](docs/CENTL26-ARCHITECTURE.md)
+- [CentL26.13-AG Release Notes](docs/releases/26.13.0.md)
 - [CentL26.12-GL Release Notes](docs/releases/26.12.0.md)
 - [CentL26.11-ES Release Notes](docs/releases/26.11.0.md)
 - [CentL26.10.2 Release Notes](docs/releases/26.10.2.md)

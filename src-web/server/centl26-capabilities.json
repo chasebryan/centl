@@ -3,7 +3,7 @@
   "product": {
     "name": "CentL26",
     "display_name": "CentL26 Scientific Computing Workbench",
-    "version": "26.12.0",
+    "version": "26.13.0",
     "organization": "Free Computation Foundation",
     "organization_abbreviation": "FCF",
     "runtime": "offline-local"

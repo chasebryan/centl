@@ -309,7 +309,7 @@ pub fn handle_single_command(
 
     if cmd == ":release" || cmd == ":version" || cmd == ":releases" {
         let res = ExecutionResult {
-            text: "=== CentL26.12-GL Release (God's Letter Watchdog & Corrected CC Identities) ===\nVersion: 26.12.0 (CentL26.12-GL)\nCapabilities:\n• God's Letter (Ω) hunt: a God's Letter is a Mordell-hard prime that survives CC + corridor + bb with no exact 4/p witness. Solved identities are not God's Letters.\n• Corrected CC.kernel identities (even, 4p+3, 3p+2, 8p+5) verified in BigInt; live CC share 87.5%.\n• Erdős–Straus Multi-Engine Algorithmic Hunt Studio & Observatory: live endless multi-engine execution across CC.kernel, CBAP.kernel, CBIS.kernel, CBX.kernel, and bb.kernel.\n• Central Authoritative Letter Admission Gate: strict fail-closed mathematical predicate requiring prime status, Mordell-hard residue class (840k + {1, 121, 169, 289, 361, 529}), preclearance survival, corridor depth threshold, and exact rational identity proof. Unsolved Mordell primes are not letters.\n• Isolated Dual Vault System: genuine admitted letters archived to letters/; remnants to remnants/; corridor discoveries to escapes/; unsolved God's Letters to gods-letter/.\n• Historical Vault Migration & Integrity Suite: non-destructive re-audit engine (:es audit / :es migrate / /api/es/audit) verifying legacy discoveries.\n• High-Performance Overflow-Free Arithmetic: u128 / BigInt intermediate products preventing arithmetic overflow across deep coordinate horizons.\n• Jupyter-Grade Interactive Notebook Workflows & LaTeX Typography Engine.\n• Multi-Platform Native Distribution for macOS (Apple Silicon & Intel), Windows 11 (x86_64), and Linux (Debian/Fedora/Arch).".to_string(),
+            text: "=== CentL26.13-AG Release (Agnostic Erdős–Straus Dual Ledger) ===\nVersion: 26.13.0 (CentL26.13-AG)\nCapabilities:\n• Agnostic proof ⊕ disproof ledger: class proofs (Dirichlet 7/8), instance proofs, certified counterexamples, incomplete residuals. Game OPEN until Mordell covering or one empty complete region.\n• Approximates never certify. Only 4xyz = n(xy+xz+yz) in BigInt.\n• Decision expansion: two-target k identities and divisor-complete search (n ≤ 10^4). Empty complete region files tickets/DIS-<p>.\n• God's Letter (Ω) hunt: a God's Letter is a Mordell-hard prime that survives CC + corridor + bb with no exact 4/p witness. Solved identities are not God's Letters. Menu misses are incomplete residuals, not disproofs.\n• Corrected CC.kernel identities (even, 4p+3, 3p+2, 8p+5) verified in BigInt; live CC share 87.5%.\n• Erdős–Straus Multi-Engine Algorithmic Hunt Studio & Observatory: CC.kernel, CBAP.kernel, CBIS.kernel, CBX.kernel, bb.kernel.\n• Isolated Dual Vault System: letters/, remnants/, escapes/, gods-letter/, tickets/.\n• Jupyter-Grade Interactive Notebook Workflows & LaTeX Typography Engine.\n• Multi-Platform Native Distribution for macOS (Apple Silicon & Intel), Windows 11 (x86_64), and Linux (Debian/Fedora/Arch).".to_string(),
             exact_rational: None,
             approximate: None,
             symbolic_expr: None,
@@ -2596,6 +2596,17 @@ pub fn handle_es_hunt_api_request(body_or_query: &str) -> serde_json::Value {
         "gods_letter_count": summary.gods_letter_count,
         "rejected_admissions": summary.rejected_admissions,
         "unsolved_count": summary.unsolved_count,
+        "class_proofs": summary.class_proofs,
+        "instance_proofs": summary.instance_proofs,
+        "counterexamples": summary.counterexamples,
+        "incomplete_residuals": summary.incomplete_residuals,
+        "game_status": summary.game_status,
+        "dual_ledger": crate::erdos_straus::decision::DualLedger::from_counts(
+            summary.class_proofs,
+            summary.instance_proofs,
+            summary.counterexamples,
+            summary.incomplete_residuals,
+        ).to_json(),
         "active_engine": summary.active_engine,
         "filter_mode": summary.filter_mode,
         "execution_millis": summary.execution_millis,

@@ -43,7 +43,8 @@ pub enum CandidateClassification {
     CbisEscape,             // CBIS phase contraction corridor escape (discovery_depth > 10)
     CbxSurvivor,            // Legacy alias for DualDescentDeepSurvivor
     OrdinaryDecomposition,  // Non-Mordell search hit
-    UnsolvedCandidate,      // Reached horizon without solution
+    UnsolvedCandidate,      // Reached horizon without solution (region incomplete)
+    CertifiedCounterexample,// Complete finite region empty — disproof ticket
     InvalidCandidate,       // Non-prime or n <= 1
 }
 
@@ -58,6 +59,7 @@ impl CandidateClassification {
             CandidateClassification::CbisEscape => "cbis_escape",
             CandidateClassification::OrdinaryDecomposition => "ordinary_decomposition",
             CandidateClassification::UnsolvedCandidate => "unsolved_candidate",
+            CandidateClassification::CertifiedCounterexample => "certified_counterexample",
             CandidateClassification::InvalidCandidate => "invalid_candidate",
         }
     }
@@ -72,6 +74,7 @@ impl CandidateClassification {
             CandidateClassification::CbisEscape => "CBIS Escape (Phase Contraction)",
             CandidateClassification::OrdinaryDecomposition => "Ordinary Decomposition",
             CandidateClassification::UnsolvedCandidate => "Unsolved Candidate",
+            CandidateClassification::CertifiedCounterexample => "Certified Counterexample (Complete Region Empty)",
             CandidateClassification::InvalidCandidate => "Invalid Candidate",
         }
     }
@@ -436,6 +439,161 @@ fn try_cc_theorem(n: u64, res_840: u64, is_mordell: bool) -> Option<Witness> {
     None
 }
 
+/// Type-I/II two-target: n ≡ 1 (mod 4), k ≡ 3 (mod 4), x = (n+k)/4,
+/// 4/n = 1/x + d/(n x) + (k-d)/(n x) when d | n x and (k-d) | n x.
+fn try_two_target_k(n: u64, res_840: u64, is_mordell: bool, k_max: u64) -> Option<Witness> {
+    if n % 4 != 1 {
+        return None;
+    }
+    let n_u = n as u128;
+    for k in (3..=k_max).step_by(4) {
+        if (n + k) % 4 != 0 {
+            continue;
+        }
+        let x = (n + k) / 4;
+        let nx = n_u * x as u128;
+        for d in 1..k {
+            let kd = k - d;
+            if kd == 0 {
+                continue;
+            }
+            if nx % d as u128 == 0 && nx % kd as u128 == 0 {
+                let y = nx / d as u128;
+                let z = nx / kd as u128;
+                if y == 0 || z == 0 || y > u64::MAX as u128 || z > u64::MAX as u128 {
+                    continue;
+                }
+                let w = make_witness(
+                    n,
+                    BigInt::from_u64(x),
+                    BigInt::from_u64(y as u64),
+                    BigInt::from_u64(z as u64),
+                    "two_target_k",
+                    "CC.kernel (Two-Target k)",
+                    "theorem",
+                    "two_target",
+                    res_840,
+                    is_mordell,
+                    x.saturating_sub((n / 4) + 1),
+                    0,
+                );
+                if w.verified {
+                    return Some(w);
+                }
+            }
+        }
+    }
+    None
+}
+
+fn u128_divisors(mut v: u128) -> Vec<u128> {
+    let mut factors: Vec<(u128, u32)> = Vec::new();
+    let mut p = 2u128;
+    while p * p <= v {
+        if v % p == 0 {
+            let mut e = 0u32;
+            while v % p == 0 {
+                v /= p;
+                e += 1;
+            }
+            factors.push((p, e));
+        }
+        p += if p == 2 { 1 } else { 2 };
+        if p > 1_000_003 && v > 1 {
+            break;
+        }
+    }
+    if v > 1 {
+        factors.push((v, 1));
+    }
+    let mut divs = vec![1u128];
+    for (p, e) in factors {
+        let mut next = Vec::new();
+        let mut pe = 1u128;
+        for _ in 0..=e {
+            for &d in &divs {
+                next.push(d * pe);
+            }
+            pe = pe.saturating_mul(p);
+        }
+        divs = next;
+    }
+    divs.sort_unstable();
+    divs.dedup();
+    divs
+}
+
+/// Complete finite search for x ≤ y ≤ z: (Ay − nx)(Az − nx) = n²x².
+/// Returns (witness, region_was_complete).
+fn try_divisor_complete(
+    n: u64,
+    res_840: u64,
+    is_mordell: bool,
+    max_x: u64,
+) -> (Option<Witness>, bool) {
+    if n < 2 {
+        return (None, true);
+    }
+    let x_lo = n / 4 + 1;
+    let x_hi_full = (3 * n) / 4;
+    if x_hi_full < x_lo {
+        return (None, true);
+    }
+    let x_hi = x_hi_full.min(x_lo.saturating_add(max_x.saturating_sub(1)));
+    let complete = x_hi >= x_hi_full;
+    let n_u = n as u128;
+    for x in x_lo..=x_hi {
+        let a = 4u128 * x as u128 - n_u;
+        if a == 0 {
+            continue;
+        }
+        let nx = n_u * x as u128;
+        let n2x2 = nx.saturating_mul(nx);
+        if n2x2 == 0 {
+            continue;
+        }
+        for d in u128_divisors(n2x2) {
+            if d == 0 {
+                continue;
+            }
+            let y_num = d + nx;
+            if y_num % a != 0 {
+                continue;
+            }
+            let y = y_num / a;
+            if y < x as u128 || y > u64::MAX as u128 {
+                continue;
+            }
+            let z_num = nx * y;
+            if z_num % d != 0 {
+                continue;
+            }
+            let z = z_num / d;
+            if z < y || z > u64::MAX as u128 {
+                continue;
+            }
+            let w = make_witness(
+                n,
+                BigInt::from_u64(x),
+                BigInt::from_u64(y as u64),
+                BigInt::from_u64(z as u64),
+                "divisor_complete",
+                "bb.kernel (Complete Finite Region)",
+                "decision",
+                "complete",
+                res_840,
+                is_mordell,
+                x.saturating_sub(x_lo),
+                0,
+            );
+            if w.verified {
+                return (Some(w), complete);
+            }
+        }
+    }
+    (None, complete)
+}
+
 fn theorem_clearance_result(
     n: u64,
     res_840: u64,
@@ -663,7 +821,76 @@ pub fn solve_es_with_config(n: u64, letter_depth_threshold: u64, engine_preferen
         }
     }
 
-    // 6. Unsolved Boundary
+    // 6. Decision expansion: two-target k identities, then a complete divisor region
+    //    when n is small enough. Approximates are never used to certify.
+    if allow_corridor {
+        if let Some(w) = try_two_target_k(n, res_840, is_mordell, 243) {
+            if w.verified {
+                let mut result = theorem_clearance_result(n, res_840, is_mordell, w, start);
+                result.classification = CandidateClassification::OrdinaryDecomposition;
+                result.grade = "instance_proof".to_string();
+                result.discovered_by = "CC.kernel (Two-Target k)".to_string();
+                let admission = evaluate_letter_admission(n, &result, letter_depth_threshold);
+                result.admission_status = admission.clone();
+                result.letter_admitted = admission.is_admitted();
+                if result.letter_admitted {
+                    result.grade = "letter".to_string();
+                    result.classification = CandidateClassification::CentralGateAdmitted;
+                    result.letter_number = Some(compute_letter_number(n, &["window_broken"]));
+                }
+                return result;
+            }
+        }
+        if n <= 10_000 {
+        let (found, complete) = try_divisor_complete(n, res_840, is_mordell, u64::MAX);
+        if let Some(w) = found {
+            if w.verified {
+                let mut result = theorem_clearance_result(n, res_840, is_mordell, w, start);
+                result.classification = if complete {
+                    CandidateClassification::OrdinaryDecomposition
+                } else {
+                    CandidateClassification::CbisEscape
+                };
+                result.grade = "instance_proof".to_string();
+                result.discovered_by = "bb.kernel (Complete Finite Region)".to_string();
+                let admission = evaluate_letter_admission(n, &result, letter_depth_threshold);
+                result.admission_status = admission.clone();
+                result.letter_admitted = admission.is_admitted();
+                if result.letter_admitted {
+                    result.grade = "letter".to_string();
+                    result.classification = CandidateClassification::CentralGateAdmitted;
+                    result.letter_number = Some(compute_letter_number(n, &["window_broken"]));
+                }
+                return result;
+            }
+        }
+        if complete {
+            let (descent_depth, _) = compute_dual_descent_survival(n);
+            return SolveResult {
+                solved: false,
+                n,
+                residue_840: res_840,
+                is_mordell_hard: is_mordell,
+                witness: None,
+                classification: CandidateClassification::CertifiedCounterexample,
+                admission_status: LetterAdmissionStatus::Rejected(LetterRejectionReason::MissingWitness),
+                grade: "certified_counterexample".to_string(),
+                letter_number: None,
+                discovered_by: "bb.kernel (Complete Finite Region)".to_string(),
+                discovery_depth: 0,
+                descent_depth,
+                survival_engine: None,
+                dual_descent_certificate: None,
+                letter_admitted: false,
+                remnant_admitted: false,
+                escape_admitted: false,
+                execution_micros: start.elapsed().as_micros(),
+            };
+        }
+        } // n <= 10_000
+    }
+
+    // 7. Unsolved Boundary (region incomplete — watchdog residual, not a disproof)
     let (descent_depth, survival_ok) = compute_dual_descent_survival(n);
     let dual_descent_certificate = if descent_depth > REMNANT_THRESHOLD && survival_ok {
         use std::collections::hash_map::DefaultHasher;
@@ -1103,5 +1330,20 @@ mod tests {
         );
         assert_ne!(res.grade, "letter");
         assert_eq!(res.letter_number, None);
+    }
+
+    #[test]
+    fn test_two_target_k_and_complete_are_exact() {
+        let res = solve_es_with_config(1009, 10, "auto");
+        assert!(res.solved, "Mordell origin-class 1009 must still be solved exactly");
+        assert!(res.witness.as_ref().unwrap().verify());
+        assert_ne!(res.classification, CandidateClassification::CertifiedCounterexample);
+    }
+
+    #[test]
+    fn test_divisor_complete_small_prime() {
+        let (w, complete) = try_divisor_complete(13, 13 % 840, false, u64::MAX);
+        assert!(complete);
+        assert!(w.unwrap().verify());
     }
 }

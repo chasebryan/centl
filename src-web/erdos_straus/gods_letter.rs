@@ -1091,7 +1091,7 @@ pub fn evaluate_gods_letter_domain(
     let corpus_digest = corpus_hasher.finalize();
     let corpus_sha256: String = corpus_digest.iter().map(|b| format!("{:02x}", b)).collect();
 
-    let source_commit = "26.12.0-release".to_string();
+    let source_commit = "26.13.0-release".to_string();
 
     // Certificate for the founding origin if present, else the least certified survivor with a witness.
     // Multiple astronomical letters are allowed; they do not void the origin certificate.

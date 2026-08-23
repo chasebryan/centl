@@ -1,5 +1,13 @@
 ## Unreleased
 
+### CentL26.13-AG (v26.13.0) — Agnostic Erdős–Straus Dual Ledger (2026-08-23)
+
+- **Agnostic dual ledger**: every prime is a class proof, instance proof, certified counterexample, or incomplete residual. Proof and disproof are separate; the hunt does not vote ES true.
+- **Decision expansion**: two-target $k$ identities after corridor miss; divisor-complete search for $n\le 10^4$. Empty complete region files `tickets/DIS-<p>`.
+- **Approximates never certify**. Only $4xyz=n(xy+xz+yz)$ in `BigInt`.
+- **Weighing**: class cover Dirichlet $7/8$; one counterexample outweighs every instance pile; game `OPEN` until Mordell covering or a certified empty region.
+- **Release identity**: synchronized `v26.13.0` / `CentL26.13-AG`. Spec: `research/erdos-straus/DUAL-LEDGER.md`.
+
 ### CentL26.12-GL (v26.12.0) — God's Letter Watchdog & Corrected CC Identities (2026-08-23)
 
 - **God's Letter (Ω) hunt**: Unsolved-only filter. A God's Letter is a Mordell-hard prime that survives CC + corridor + bb with no exact \(4/p\) witness. Solved identities are not God's Letters. Hunt does not auto-start; soft reset clears session HUD without deleting vaults.

@@ -29,7 +29,7 @@ pub fn render_lab_page(workbench: &str) -> String {
       <a class="product-lockup" href="/" aria-label="CentL26 home">
         <div class="product-brand">
           <strong>CentL26</strong>
-          <small>Free Computation Foundation · v26.12.0</small>
+          <small>Free Computation Foundation · v26.13.0</small>
         </div>
       </a>
       <div class="workspace-path"><button type="button" data-toggle-explorer title="Toggle workspace explorer">Workspace</button><span>/</span><input type="text" class="notebook-rename-input" data-rename-notebook value="Notebook 01" aria-label="Rename active notebook" spellcheck="false" title="Click to rename active notebook"></div>
@@ -144,7 +144,7 @@ pub fn render_lab_page(workbench: &str) -> String {
         <a href="https://freecomputation.org/" target="_blank" rel="noopener">🔗 freecomputation.org</a>
         <a href="https://github.com/sponsors/chasebryan" target="_blank" rel="noopener">💝 Sponsor on GitHub</a>
       </div>
-      <footer><span>v26.12.0 · Apache-2.0</span><button type="button" data-close-fcf-about>Close</button></footer>
+      <footer><span>v26.13.0 · Apache-2.0</span><button type="button" data-close-fcf-about>Close</button></footer>
     </div>
   </div>
 
@@ -179,7 +179,7 @@ pub fn render_lab_page(workbench: &str) -> String {
         </div>
         <div>
           <h2>CentL26 Software Update</h2>
-          <small class="update-current-version">Installed: CentL26 v26.12.0 (CentL26.12-GL)</small>
+          <small class="update-current-version">Installed: CentL26 v26.13.0 (CentL26.13-AG)</small>
         </div>
       </div>
       <div class="update-body">
@@ -722,6 +722,22 @@ pub fn render_lab_page(workbench: &str) -> String {
                 <span class="es-engine-pct" data-engine-stat="bb-pct" style="color:#10b981;">0.0%</span>
               </div>
               <div class="es-engine-bar"><div class="es-engine-bar-fill" data-engine-bar="bb" style="width: 0%; background: #10b981;"></div></div>
+            </div>
+          </div>
+          <div class="es-dual-ledger" data-es-dual-ledger>
+            <div class="es-dual-col es-dual-proof">
+              <small>Proof ledger</small>
+              <strong data-es-hud="game-status">OPEN</strong>
+              <span>Class cover <b data-es-hud="class-cover">87.5%</b> · instance proofs <b data-es-hud="instance-proofs">0</b></span>
+            </div>
+            <div class="es-dual-col es-dual-disproof">
+              <small>Disproof ledger</small>
+              <strong data-es-hud="counterexamples">0</strong>
+              <span>Certified complete-region empties · residual <b data-es-hud="incomplete-residuals">0</b></span>
+            </div>
+            <div class="es-dual-col es-dual-note">
+              <small>Weighing</small>
+              <span data-es-hud="weighing">Class theorems cover 7/8 of primes. Instance piles do not prove ES. Approximates never certify.</span>
             </div>
           </div>
         </div>
@@ -1896,6 +1912,9 @@ mod tests {
         assert!(html.contains(r#"data-engine-card="cbx""#));
         assert!(html.contains(r#"data-engine-card="bb""#));
         assert!(html.contains(r#"data-engine-bar="cc""#));
+        assert!(html.contains(r#"data-es-dual-ledger"#));
+        assert!(html.contains(r#"data-es-hud="game-status""#));
+        assert!(LAB_JS.contains("classProofs"));
         assert!(html.contains(r#"data-engine-stat="cc-pct">0.0%"#));
         assert!(html.contains(r#"data-es-pinned-card"#));
         assert!(LAB_JS.contains("setEngineShare"));

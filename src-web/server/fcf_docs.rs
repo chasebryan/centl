@@ -463,6 +463,27 @@ The Bryan Recursive Entanglement Calculus (BREC) is a discrete, constructive cal
 "#,
     },
     FcfDoc {
+        id: "centl26-13-ag-release-notes",
+        title: "CentL26.13-AG Official Release Notes",
+        category: "manual",
+        summary: "Agnostic Erdős–Straus dual ledger: proof ⊕ disproof tickets, approximates never certify.",
+        tags: &["release", "erdos-straus", "dual-ledger", "agnostic", "gods-letter", "observatory", "update"],
+        content: r#"# CentL26.13-AG — Official Release Notes
+**Free Computation Foundation · CentL26 Agnostic Search Release**
+
+## Executive Summary
+**CentL26.13-AG** files every prime on a **proof ledger** or a **disproof ledger**. Class theorems cover $7/8$ of the primes. Instance witnesses do not prove the conjecture. A certified empty complete region would disprove it. Approximates never certify. Game status is OPEN.
+
+---
+
+## Tickets
+- **Class proof** — infinite residue identity.
+- **Instance proof** — one verified $4/p$.
+- **Certified counterexample** — complete finite region empty.
+- **Incomplete residual / God's Letter** — menu miss, not a disproof.
+"#,
+    },
+    FcfDoc {
         id: "centl26-12-gl-release-notes",
         title: "CentL26.12-GL Official Release Notes",
         category: "manual",

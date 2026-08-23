@@ -1,6 +1,7 @@
 // Public Erdős–Straus Infinite Hunt Runner & Vault Authority
 // Free Computation Foundation - Apache-2.0
 
+use super::decision::{ticket_kind_of, DualLedger, TicketKind};
 use super::gods_letter::{
     evaluate_gods_letter_candidate, persist_gods_letter_candidate, EsWitness, GodsLetterSpec,
 };
@@ -52,6 +53,11 @@ pub struct HuntSummary {
     pub gods_letter_count: usize,
     pub rejected_admissions: usize,
     pub unsolved_count: usize,
+    pub class_proofs: usize,
+    pub instance_proofs: usize,
+    pub counterexamples: usize,
+    pub incomplete_residuals: usize,
+    pub game_status: String,
     pub active_engine: String,
     pub filter_mode: String,
     pub findings: Vec<SolveResult>,
@@ -98,6 +104,26 @@ pub fn resolve_escapes_dir() -> PathBuf {
     let default_dir = PathBuf::from("escapes");
     let _ = fs::create_dir_all(&default_dir);
     default_dir
+}
+
+pub fn persist_counterexample_to_disk(res: &SolveResult) {
+    let dir = PathBuf::from("tickets");
+    let _ = fs::create_dir_all(&dir);
+    let body = format!(
+        "# DISPROOF TICKET DIS-{}\n\nCertified complete finite region for 4/{} has no positive integer solution x ≤ y ≤ z.\nThis is a candidate counterexample to Erdős–Straus, issued only when the divisor-complete search exhausts x ∈ [⌊n/4⌋+1, ⌊3n/4⌋].\nApproximates were not used.\n",
+        res.n, res.n
+    );
+    let _ = fs::write(dir.join(format!("DIS-{}.md", res.n)), body);
+    let json = serde_json::json!({
+        "schema": "centl26.erdos_straus.disproof/v1",
+        "n": res.n,
+        "ticket": "certified_counterexample",
+        "approximates_certify": false
+    });
+    let _ = fs::write(
+        dir.join(format!("DIS-{}.json", res.n)),
+        serde_json::to_string_pretty(&json).unwrap_or_default(),
+    );
 }
 
 /// Strict Hard Invariant Validator for Erdős–Straus artifacts.
@@ -805,6 +831,10 @@ pub fn run_configured_hunt_window(config: &HuntConfig) -> HuntSummary {
     let mut gods_letter_count = 0;
     let mut rejected_admissions = 0;
     let mut unsolved_count = 0;
+    let mut class_proofs = 0;
+    let mut instance_proofs = 0;
+    let mut counterexamples = 0;
+    let mut incomplete_residuals = 0;
     let mut mordell_hard_count = 0;
     let mut findings = Vec::new();
 
@@ -819,6 +849,13 @@ pub fn run_configured_hunt_window(config: &HuntConfig) -> HuntSummary {
             mordell_hard_count += 1;
         }
         let res = solve_es_with_config(p, config.letter_threshold, &config.engine_mode);
+        match ticket_kind_of(&res) {
+            TicketKind::ClassProof => class_proofs += 1,
+            TicketKind::InstanceProof => instance_proofs += 1,
+            TicketKind::CertifiedCounterexample => counterexamples += 1,
+            TicketKind::IncompleteResidual => incomplete_residuals += 1,
+            TicketKind::Invalid => {}
+        }
 
         match res.classification {
             CandidateClassification::TheoremClearance => {
@@ -837,6 +874,9 @@ pub fn run_configured_hunt_window(config: &HuntConfig) -> HuntSummary {
                 ordinary_decompositions += 1;
             }
             CandidateClassification::UnsolvedCandidate => {
+                unsolved_count += 1;
+            }
+            CandidateClassification::CertifiedCounterexample => {
                 unsolved_count += 1;
             }
             CandidateClassification::CentralGateAdmitted => {
@@ -896,8 +936,13 @@ pub fn run_configured_hunt_window(config: &HuntConfig) -> HuntSummary {
                 let _ = persist_gods_letter_candidate(eval);
             }
         }
+        if res.classification == CandidateClassification::CertifiedCounterexample {
+            persist_counterexample_to_disk(&res);
+        }
 
-        if config.gods_letter_only {
+        if res.classification == CandidateClassification::CertifiedCounterexample {
+            findings.push(res);
+        } else if config.gods_letter_only {
             if gl_candidate {
                 findings.push(res);
             } else {
@@ -934,6 +979,17 @@ pub fn run_configured_hunt_window(config: &HuntConfig) -> HuntSummary {
         gods_letter_count,
         rejected_admissions,
         unsolved_count,
+        class_proofs,
+        instance_proofs,
+        counterexamples,
+        incomplete_residuals,
+        game_status: DualLedger::from_counts(
+            class_proofs,
+            instance_proofs,
+            counterexamples,
+            incomplete_residuals,
+        )
+        .game_status,
         active_engine: if config.engine_mode == "auto" {
             "Coordinated Ensemble (CC/CBAP/CBIS/CBX/BB)".to_string()
         } else {
