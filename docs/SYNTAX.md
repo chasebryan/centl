@@ -57,6 +57,17 @@ enclosure.
 `sequence(expression, variable = lower, upper)`
 `recurrence(initial, previous = step, index = lower, upper)`
 
+### Erdős–Straus Diophantine Hunt & Research Commands
+
+`solve n` `es n` `es solve n [threshold] [engine]`
+`es hunt start_bound window_size [mordell]`
+`:es audit` `:es migrate`
+
+- `solve 2521`: exact 3-fraction decomposition $4/n = 1/x + 1/y + 1/z$.
+- `es hunt 25000 5000`: execute live multi-engine search (`CC`, `CBAP`, `CBIS`, `CBX`, `bb`).
+- `es hunt 25000 5000 mordell`: scan only Mordell-hard residue classes modulo 840.
+- `:es audit`: re-audit existing letter discoveries against the authoritative central admission gate.
+
 ### Scripts
 
 `assert(left relation right)` `# comment`

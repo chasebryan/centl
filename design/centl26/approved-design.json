@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "approval": {
-    "change_note": "CentL26: Jupyter-grade notebook mechanics, clean vector symbols, and command-driven Gemini integration",
+    "change_note": "Update release CentL26.11-ES for all platforms and synchronize documentation",
     "release": "CentL26",
     "reviewed_viewports": [
       "1366x768",
@@ -12,9 +12,9 @@
   "files": {
     "desktop/centl26/macos/Assets/CentL26Icon.png": "395921be0d09a1336f20be41b651a83ae7bcc56434e6ada49b2b202287029d66",
     "desktop/centl26/macos/Assets/CentL26Icon.svg": "8256916929b9e3b6f69879b5502ad2d16dd5a46cac50bed81b7b857658b79e02",
-    "src-web/server/lab.css": "4e72a4b0903784702baf707237f21a0ba47c0440586e92b46ce8daf3616d210c",
-    "src-web/server/lab.js": "4607673f8fa18623f8cc3baf128762efd6b7a74d9b6b6c959f7358b64bb45b8c",
-    "src-web/server/lab_template.rs": "16a9194b0a2a82f0a3804e49c56332c543b26578f616add398c48ea74a59f362"
+    "src-web/server/lab.css": "490d20ead20ad90366abf35723fd3730dff5d2eb9d77baf243d1c660cb4f9a70",
+    "src-web/server/lab.js": "9adf777bcd2155f222bb9f13b6a9e0c6ae76b3b37e894c618fb7cb8e74e3fdc7",
+    "src-web/server/lab_template.rs": "f652679a779b058d0979c0679581fb40122cb35e92f64b0995394e6d1840f983"
   },
   "schema": 1,
   "semantic_contract": {

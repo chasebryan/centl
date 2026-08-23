@@ -381,6 +381,11 @@
 
   function runCommand(command, { interactionMode = selectedMode } = {}) {
     closePalette({ restoreFocus: false });
+    if (/^\s*(:es-hunt|:hunt|es\s+hunt|erdos\s+hunt)\b/i.test(command)) {
+      const rest = command.replace(/^\s*(:es-hunt|:hunt|es\s+hunt|erdos\s+hunt)\s*/i, "").trim();
+      EsHuntStudio.open({ rawArgs: rest });
+      return;
+    }
     if (/^\s*(:visualize|:visualizer|:viz|visualize|visualizer|theorems?)\b/i.test(command)) {
       const rest = command.replace(/^\s*(:visualize|:visualizer|:viz|visualize|visualizer|theorems?)\s*/i, "").trim();
       StemVisualizer.open(rest || null);
@@ -2138,6 +2143,862 @@
     }
   };
 
+  const EsHuntStudio = {
+    isOpen: false,
+    isRunning: false,
+    isBusy: false,
+    modal: null,
+    canvas: null,
+    ctx: null,
+    animId: null,
+    tickTimer: null,
+    initialized: false,
+    
+    // Search State
+    horizon: 20000,
+    windowSize: 5000,
+    // Search State
+    horizon: 20000,
+    windowSize: 5000,
+    letterFilter: "standard", // "standard" (>=10), "deep" (>=50), "extreme" (>=100), "mordell", "all"
+    engineMode: "auto",
+    speed: "turbo", // "turbo", "fast", "smooth", "step"
+    autoAdvance: true,
+
+    // Cumulative Stats
+    primesScanned: 0,
+    mordellCount: 0,
+    theoremClearances: 0,
+    corridorClearances: 0,
+    cbisEscapes: 0,
+    cbxSurvivors: 0,
+    verifiedLetters: 0,
+    rejectedAdmissions: 0,
+    lastThroughput: 0,
+    lastMillis: 0,
+
+    // Engine Cleared Counters
+    engineStats: {
+      cc: 0,
+      cbap: 0,
+      cbis: 0,
+      cbx: 0,
+      bb: 0
+    },
+
+    // Findings & Letters Collection
+    findings: [],
+    letters: [],
+    pinnedLetter: null,
+
+    // Animation & Canvas Particles
+    anim: {
+      time: 0,
+      lastFrame: 0,
+      particles: [],
+      pulses: [0, 0, 0, 0, 0, 0], // Activity pulse for 6 pipeline nodes
+      mordellAngle: 0,
+      oscilloscope: new Array(50).fill(0),
+      burstAlpha: 0,
+      burstX: 0,
+      burstY: 0
+    },
+
+    init: function() {
+      if (EsHuntStudio.initialized) return;
+      EsHuntStudio.modal = document.querySelector("[data-es-hunt-modal]");
+      EsHuntStudio.canvas = document.getElementById("es-pipeline-canvas");
+      if (!EsHuntStudio.canvas || !EsHuntStudio.modal) return;
+      EsHuntStudio.ctx = EsHuntStudio.canvas.getContext("2d");
+      EsHuntStudio.initialized = true;
+
+      // Handle config changes
+      const filterSelect = document.querySelector('[data-es-config="filter"]');
+      if (filterSelect) {
+        filterSelect.addEventListener("change", (e) => {
+          EsHuntStudio.letterFilter = e.target.value;
+          const filterSub = document.querySelector('[data-es-hud="letters-active-filter"]');
+          if (filterSub) {
+            filterSub.textContent = e.target.options[e.target.selectedIndex].text;
+          }
+        });
+      }
+
+      const engineSelect = document.querySelector('[data-es-config="engine"]');
+      if (engineSelect) {
+        engineSelect.addEventListener("change", (e) => {
+          EsHuntStudio.engineMode = e.target.value;
+        });
+      }
+
+      const startInput = document.querySelector('[data-es-config="start"]');
+      if (startInput) {
+        startInput.addEventListener("change", (e) => {
+          const val = parseInt(e.target.value, 10);
+          if (!isNaN(val) && val >= 0) {
+            EsHuntStudio.horizon = val;
+            EsHuntStudio.updateHudValues();
+          }
+        });
+      }
+
+      const windowSelect = document.querySelector('[data-es-config="window"]');
+      if (windowSelect) {
+        windowSelect.addEventListener("change", (e) => {
+          EsHuntStudio.windowSize = parseInt(e.target.value, 10) || 5000;
+          const winSub = document.querySelector('[data-es-hud="window-size"]');
+          if (winSub) winSub.textContent = `Window: Δ = ${EsHuntStudio.windowSize.toLocaleString()}`;
+          EsHuntStudio.updateHudValues();
+        });
+      }
+
+      const speedSelect = document.querySelector('[data-es-config="speed"]');
+      if (speedSelect) {
+        speedSelect.addEventListener("change", (e) => {
+          EsHuntStudio.speed = e.target.value;
+        });
+      }
+
+      const autoCheckbox = document.querySelector('[data-es-config="auto-advance"]');
+      if (autoCheckbox) {
+        autoCheckbox.addEventListener("change", (e) => {
+          EsHuntStudio.autoAdvance = e.target.checked;
+        });
+      }
+
+      // Ledger row inspection click
+      const ledgerTbody = document.querySelector("[data-es-ledger-tbody]");
+      if (ledgerTbody) {
+        ledgerTbody.addEventListener("click", (e) => {
+          const row = e.target.closest("tr[data-finding-index]");
+          if (row) {
+            const idx = parseInt(row.dataset.findingIndex, 10);
+            if (EsHuntStudio.findings[idx]) {
+              EsHuntStudio.pinLetter(EsHuntStudio.findings[idx]);
+              ledgerTbody.querySelectorAll("tr").forEach(r => r.classList.remove("is-selected"));
+              row.classList.add("is-selected");
+            }
+          }
+        });
+      }
+    },
+
+    open: function(options = {}) {
+      const modal = document.querySelector("[data-es-hunt-modal]");
+      if (!modal) return;
+      modal.hidden = false;
+      EsHuntStudio.isOpen = true;
+      EsHuntStudio.init();
+
+      // Parse options if provided
+      if (options.rawArgs) {
+        const args = options.rawArgs.trim().split(/\s+/);
+        for (const arg of args) {
+          if (arg === "--mordell" || arg === "-m") {
+            EsHuntStudio.letterFilter = "mordell";
+            const sel = document.querySelector('[data-es-config="filter"]');
+            if (sel) sel.value = "mordell";
+          } else if (arg === "--deep") {
+            EsHuntStudio.letterFilter = "deep";
+            const sel = document.querySelector('[data-es-config="filter"]');
+            if (sel) sel.value = "deep";
+          } else if (arg === "--extreme") {
+            EsHuntStudio.letterFilter = "extreme";
+            const sel = document.querySelector('[data-es-config="filter"]');
+            if (sel) sel.value = "extreme";
+          } else if (arg === "--letters" || arg === "-l") {
+            EsHuntStudio.letterFilter = "standard";
+            const sel = document.querySelector('[data-es-config="filter"]');
+            if (sel) sel.value = "standard";
+          } else if (arg === "--random" || arg === "-r") {
+            EsHuntStudio.randomSeed();
+          } else if (arg === "0" || arg === "--origin") {
+            EsHuntStudio.horizon = 0;
+            const startInp = document.querySelector('[data-es-config="start"]');
+            if (startInp) startInp.value = "0";
+          } else if (!isNaN(parseInt(arg, 10)) && parseInt(arg, 10) >= 0) {
+            EsHuntStudio.horizon = parseInt(arg, 10);
+            const startInp = document.querySelector('[data-es-config="start"]');
+            if (startInp) startInp.value = String(EsHuntStudio.horizon);
+          }
+        }
+      }
+
+      EsHuntStudio.updateHudValues();
+      EsHuntStudio.resizeCanvas();
+      
+      EsHuntStudio.anim.lastFrame = performance.now();
+      cancelAnimationFrame(EsHuntStudio.animId);
+      EsHuntStudio.animId = requestAnimationFrame(EsHuntStudio.renderFrame);
+
+      // Auto start endless hunt
+      EsHuntStudio.start();
+    },
+
+    close: function() {
+      const modal = document.querySelector("[data-es-hunt-modal]");
+      if (modal) modal.hidden = true;
+      EsHuntStudio.isOpen = false;
+      EsHuntStudio.pause();
+      cancelAnimationFrame(EsHuntStudio.animId);
+    },
+
+    resizeCanvas: function() {
+      if (!EsHuntStudio.canvas) return;
+      const rect = EsHuntStudio.canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const w = Math.floor(rect.width || 760);
+      const h = Math.floor(rect.height || 230);
+      if (EsHuntStudio.canvas.width !== w * dpr || EsHuntStudio.canvas.height !== h * dpr) {
+        EsHuntStudio.canvas.width = w * dpr;
+        EsHuntStudio.canvas.height = h * dpr;
+      }
+    },
+
+    toggleHunt: function() {
+      if (EsHuntStudio.isRunning) {
+        EsHuntStudio.pause();
+      } else {
+        EsHuntStudio.start();
+      }
+    },
+
+    start: function() {
+      EsHuntStudio.isRunning = true;
+      EsHuntStudio.updateStatusPill("RUNNING (ENDLESS)", "is-running");
+      const playIcon = document.querySelector("[data-es-play-icon]");
+      const playText = document.querySelector("[data-es-play-text]");
+      if (playIcon) playIcon.textContent = "⏸";
+      if (playText) playText.textContent = "Pause Hunt";
+      EsHuntStudio.scheduleTick();
+    },
+
+    pause: function() {
+      EsHuntStudio.isRunning = false;
+      EsHuntStudio.updateStatusPill("PAUSED", "is-paused");
+      const playIcon = document.querySelector("[data-es-play-icon]");
+      const playText = document.querySelector("[data-es-play-text]");
+      if (playIcon) playIcon.textContent = "▶";
+      if (playText) playText.textContent = "Resume Endless Hunt";
+      if (EsHuntStudio.tickTimer) {
+        clearTimeout(EsHuntStudio.tickTimer);
+        EsHuntStudio.tickTimer = null;
+      }
+    },
+
+    step: function() {
+      EsHuntStudio.pause();
+      EsHuntStudio.huntTick();
+    },
+
+    resetHorizon: function() {
+      const startInp = document.querySelector('[data-es-config="start"]');
+      const val = startInp ? parseInt(startInp.value, 10) : 20000;
+      EsHuntStudio.horizon = isNaN(val) ? 20000 : val;
+      EsHuntStudio.anim.particles = [];
+      EsHuntStudio.updateHudValues();
+    },
+
+    randomSeed: function() {
+      const rand = Math.floor(1000000 + Math.random() * 9000000);
+      EsHuntStudio.horizon = rand;
+      const startInp = document.querySelector('[data-es-config="start"]');
+      if (startInp) startInp.value = String(rand);
+      EsHuntStudio.updateHudValues();
+    },
+
+    auditVault: async function() {
+      EsHuntStudio.updateStatusPill("AUDITING VAULT", "is-running");
+      try {
+        const res = await fetch("/api/es/audit");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const report = await res.json();
+        showHostNotice(`Vault Audit: ${report.total_scanned} scanned, ${report.legitimate_letters_retained} genuine letters, ${report.entries_migrated_to_escapes} non-letters migrated to escapes/.`);
+        EsHuntStudio.updateStatusPill("AUDIT COMPLETE", "is-ready");
+      } catch (err) {
+        console.error("Audit error:", err);
+        showHostNotice("Vault audit failed: " + err.message);
+        EsHuntStudio.updateStatusPill("AUDIT FAILED", "is-paused");
+      }
+    },
+
+    exportLetters: function() {
+      const letters = EsHuntStudio.letters || [];
+      if (letters.length > 0) {
+        const payload = {
+          schema: "centl26.erdos-straus-letters-export/1",
+          exported_at: new Date().toISOString(),
+          total_letters: letters.length,
+          search_horizon: EsHuntStudio.horizon,
+          letters: letters
+        };
+        const jsonStr = JSON.stringify(payload, null, 2);
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(jsonStr).catch(() => {});
+        }
+
+        const blob = new Blob([jsonStr], { type: "application/json" });
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.style.display = "none";
+        a.href = blobUrl;
+        a.download = `centl26-es-letters-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          if (a.parentNode) document.body.removeChild(a);
+          URL.revokeObjectURL(blobUrl);
+        }, 1000);
+        showHostNotice(`Exported ${letters.length} Genuine Letters (.json) — also copied to clipboard.`);
+      } else {
+        triggerSafeDownload("/download/letters.json", `centl26-es-vault-letters-${Date.now()}.json`);
+        showHostNotice("Exporting genuine letters from disk vault (/letters/)...");
+      }
+    },
+
+    updateStatusPill: function(label, cls) {
+      const pill = document.querySelector("[data-es-status-pill]");
+      const lbl = document.querySelector("[data-es-status-label]");
+      if (pill && lbl) {
+        pill.className = `es-status-pill ${cls}`;
+        lbl.textContent = label;
+      }
+    },
+
+    updateHudValues: function() {
+      const horizonEl = document.querySelector('[data-es-hud="horizon"]');
+      if (horizonEl) {
+        horizonEl.textContent = `${EsHuntStudio.horizon.toLocaleString()} → ${(EsHuntStudio.horizon + EsHuntStudio.windowSize).toLocaleString()}`;
+      }
+      const primesEl = document.querySelector('[data-es-hud="primes-scanned"]');
+      if (primesEl) primesEl.textContent = EsHuntStudio.primesScanned.toLocaleString();
+
+      const rateEl = document.querySelector('[data-es-hud="throughput"]');
+      if (rateEl) rateEl.textContent = `Rate: ${EsHuntStudio.lastThroughput.toLocaleString()} primes/s`;
+
+      const mordellEl = document.querySelector('[data-es-hud="mordell-count"]');
+      if (mordellEl) mordellEl.textContent = EsHuntStudio.mordellCount.toLocaleString();
+
+      const greatEl = document.querySelector('[data-es-hud="great-count"]');
+      if (greatEl) greatEl.textContent = EsHuntStudio.theoremClearances.toLocaleString();
+
+      const greatPct = document.querySelector('[data-es-hud="great-pct"]');
+      if (greatPct) {
+        const pct = EsHuntStudio.primesScanned > 0 ? ((EsHuntStudio.theoremClearances / EsHuntStudio.primesScanned) * 100).toFixed(1) : "0.0";
+        greatPct.textContent = `${pct}% · Linear congruences`;
+      }
+
+      const cbisEl = document.querySelector('[data-es-hud="cbis-count"]');
+      if (cbisEl) cbisEl.textContent = EsHuntStudio.cbisEscapes.toLocaleString();
+
+      const lettersEl = document.querySelector('[data-es-hud="letters-count"]');
+      if (lettersEl) lettersEl.textContent = EsHuntStudio.verifiedLetters.toLocaleString();
+
+      // Engine status cards
+      const ccCleared = document.querySelector('[data-engine-stat="cc-cleared"]');
+      if (ccCleared) ccCleared.textContent = EsHuntStudio.engineStats.cc.toLocaleString();
+      const cbapCleared = document.querySelector('[data-engine-stat="cbap-cleared"]');
+      if (cbapCleared) cbapCleared.textContent = EsHuntStudio.engineStats.cbap.toLocaleString();
+      const cbisCleared = document.querySelector('[data-engine-stat="cbis-cleared"]');
+      if (cbisCleared) cbisCleared.textContent = EsHuntStudio.engineStats.cbis.toLocaleString();
+      const cbxCleared = document.querySelector('[data-engine-stat="cbx-cleared"]');
+      if (cbxCleared) cbxCleared.textContent = EsHuntStudio.engineStats.cbx.toLocaleString();
+      const bbVerified = document.querySelector('[data-engine-stat="bb-verified"]');
+      if (bbVerified) bbVerified.textContent = EsHuntStudio.primesScanned.toLocaleString();
+    },
+
+    scheduleTick: function() {
+      if (!EsHuntStudio.isRunning || !EsHuntStudio.isOpen) return;
+      let delay = 35;
+      if (EsHuntStudio.speed === "fast") delay = 140;
+      else if (EsHuntStudio.speed === "smooth") delay = 320;
+      else if (EsHuntStudio.speed === "step") return;
+
+      EsHuntStudio.tickTimer = setTimeout(() => {
+        EsHuntStudio.huntTick();
+      }, delay);
+    },
+
+    huntTick: async function() {
+      if (EsHuntStudio.isBusy) {
+        EsHuntStudio.scheduleTick();
+        return;
+      }
+      EsHuntStudio.isBusy = true;
+
+      // Determine letter depth threshold from filter
+      let depthThreshold = 10;
+      let mordellOnly = false;
+      if (EsHuntStudio.letterFilter === "deep") depthThreshold = 50;
+      else if (EsHuntStudio.letterFilter === "extreme") depthThreshold = 100;
+      else if (EsHuntStudio.letterFilter === "mordell") mordellOnly = true;
+      else if (EsHuntStudio.letterFilter === "all") depthThreshold = 0;
+
+      const params = new URLSearchParams({
+        from: String(EsHuntStudio.horizon),
+        window_size: String(EsHuntStudio.windowSize),
+        max_primes: "120",
+        letter_threshold: String(depthThreshold),
+        mordell_only: String(mordellOnly),
+        engine_mode: EsHuntStudio.engineMode
+      });
+
+      try {
+        const res = await fetch("/api/es-hunt", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+          body: params
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        // Increment stats
+        EsHuntStudio.primesScanned += data.primes_checked || 0;
+        EsHuntStudio.mordellCount += data.mordell_hard_count || 0;
+        EsHuntStudio.theoremClearances += data.theorem_clearances || 0;
+        EsHuntStudio.corridorClearances += data.corridor_clearances || 0;
+        EsHuntStudio.cbisEscapes += data.cbis_escapes || 0;
+        EsHuntStudio.cbxSurvivors += data.cbx_survivors || 0;
+        EsHuntStudio.verifiedLetters += data.verified_letters_count || 0;
+        EsHuntStudio.rejectedAdmissions += data.rejected_admissions || 0;
+        EsHuntStudio.lastThroughput = data.rate_primes_per_sec || 0;
+        EsHuntStudio.lastMillis = data.execution_millis || 0;
+
+        EsHuntStudio.engineStats.cc += data.theorem_clearances || 0;
+        EsHuntStudio.engineStats.cbap += data.corridor_clearances || 0;
+        EsHuntStudio.engineStats.cbis += data.cbis_escapes || 0;
+        EsHuntStudio.engineStats.cbx += data.cbx_survivors || 0;
+
+        // Pulse nodes
+        EsHuntStudio.anim.pulses[0] = 1.0; // Prime sieve
+        EsHuntStudio.anim.pulses[1] = 0.9; // CC
+        if (data.mordell_hard_count > 0) EsHuntStudio.anim.pulses[2] = 1.0; // Mordell
+        if (data.corridor_clearances > 0) EsHuntStudio.anim.pulses[3] = 1.0; // CBAP
+        if (data.cbis_escapes > 0 || data.verified_letters_count > 0) {
+          EsHuntStudio.anim.pulses[4] = 1.0; // CBIS
+          EsHuntStudio.anim.burstAlpha = 1.0;
+        }
+        EsHuntStudio.anim.pulses[5] = 0.8; // BB
+
+        // Oscilloscope sample
+        EsHuntStudio.anim.oscilloscope.shift();
+        EsHuntStudio.anim.oscilloscope.push(Math.min(1.0, (data.rate_primes_per_sec || 50000) / 100000));
+
+        // Spawn particles in pipeline
+        for (let i = 0; i < Math.min(8, data.primes_checked); i++) {
+          EsHuntStudio.anim.particles.push({
+            stage: 0,
+            x: 50,
+            y: 115 + (Math.random() - 0.5) * 30,
+            speed: 2.5 + Math.random() * 2,
+            isLetter: false,
+            color: "#06b6d4"
+          });
+        }
+
+        // Process genuine admitted letters
+        if (Array.isArray(data.letters) && data.letters.length > 0) {
+          const admittedLetters = data.letters.filter(l => l && l.admission_status === "admitted" && l.is_mordell_hard === true);
+          for (const l of admittedLetters) {
+            EsHuntStudio.letters.unshift(l);
+            // Spawn special golden particle
+            EsHuntStudio.anim.particles.push({
+              stage: 3,
+              x: 420,
+              y: 115,
+              speed: 4,
+              isLetter: true,
+              color: "#f59e0b"
+            });
+          }
+          const badge = document.querySelector("[data-es-vault-badge]");
+          if (badge) badge.textContent = `${EsHuntStudio.letters.length} Admitted`;
+        }
+
+        // Process all interesting findings in ledger table
+        if (Array.isArray(data.findings) && data.findings.length > 0) {
+          for (const f of data.findings) {
+            EsHuntStudio.findings.unshift(f);
+            EsHuntStudio.appendLedgerRow(f, EsHuntStudio.findings.length - 1);
+          }
+          // Pin newest finding
+          EsHuntStudio.pinLetter(data.findings[0]);
+        }
+
+        // Advance horizon
+        if (EsHuntStudio.autoAdvance) {
+          EsHuntStudio.horizon = data.end_bound;
+        }
+
+        EsHuntStudio.updateHudValues();
+      } catch (err) {
+        console.warn("ES hunt backend polling error:", err);
+        EsHuntStudio.updateStatusPill("PAUSED (BACKEND ERROR)", "is-paused");
+      } finally {
+        EsHuntStudio.isBusy = false;
+        EsHuntStudio.scheduleTick();
+      }
+    },
+
+    pinLetter: function(letter) {
+      EsHuntStudio.pinnedLetter = letter;
+      const emptyCard = document.querySelector("[data-es-pinned-empty]");
+      const contentCard = document.querySelector("[data-es-pinned-content]");
+      if (emptyCard) emptyCard.hidden = true;
+      if (contentCard) contentCard.hidden = false;
+
+      const idEl = document.querySelector('[data-es-pin="id"]');
+      if (idEl) idEl.textContent = `#${letter.letter_id || (letter.admission_status === "admitted" ? "L-" : "ESC-") + letter.n}`;
+
+      const badgeEl = document.querySelector('[data-es-pin="classification-badge"]');
+      if (badgeEl) {
+        badgeEl.textContent = (letter.classification_label || letter.classification || "Corridor Escape").toUpperCase();
+        if (letter.admission_status === "admitted") {
+          badgeEl.style.background = "rgba(245, 158, 11, 0.2)";
+          badgeEl.style.color = "#f59e0b";
+          badgeEl.style.borderColor = "rgba(245, 158, 11, 0.4)";
+        } else {
+          badgeEl.style.background = "rgba(6, 182, 212, 0.15)";
+          badgeEl.style.color = "#06b6d4";
+          badgeEl.style.borderColor = "rgba(6, 182, 212, 0.3)";
+        }
+      }
+
+      const engineEl = document.querySelector('[data-es-pin="engine"]');
+      if (engineEl) engineEl.textContent = letter.discovered_by || "CC / Two-Target Corridor";
+
+      const eqEl = document.querySelector('[data-es-pin="equation"]');
+      if (eqEl) {
+        const wit = letter.witness || {};
+        eqEl.textContent = letter.equation || wit.equation || `4/${letter.n} = 1/${letter.x || wit.x} + 1/${letter.y || wit.y} + 1/${letter.z || wit.z}`;
+      }
+
+      const pEl = document.querySelector('[data-es-pin="p"]');
+      if (pEl) pEl.textContent = String(letter.n);
+
+      const resEl = document.querySelector('[data-es-pin="res"]');
+      if (resEl) {
+        resEl.textContent = `${letter.residue_840} ${letter.is_mordell_hard ? "(Mordell-Hard Candidate)" : "(Non-Mordell Residue)"}`;
+      }
+
+      const depthEl = document.querySelector('[data-es-pin="depth"]');
+      const depthVal = (letter.witness && letter.witness.depth !== undefined) ? letter.witness.depth : (letter.depth || 0);
+      if (depthEl) depthEl.textContent = String(depthVal);
+
+      const statusEl = document.querySelector('[data-es-pin="admission-status"]');
+      if (statusEl) {
+        if (letter.admission_status === "admitted") {
+          statusEl.textContent = "ADMITTED (Authoritative Central Gate)";
+          statusEl.style.color = "#10b981";
+        } else {
+          statusEl.textContent = "REJECTED (Candidate does not meet Letter criteria)";
+          statusEl.style.color = "#f59e0b";
+        }
+      }
+
+      const rejLbl = document.querySelector('[data-es-pin="rejection-label"]');
+      const rejReason = document.querySelector('[data-es-pin="rejection-reason"]');
+      if (rejReason && rejLbl) {
+        if (letter.admission_status !== "admitted" && letter.admission_rejection_reason) {
+          rejLbl.hidden = false;
+          rejReason.hidden = false;
+          rejReason.textContent = letter.admission_rejection_reason;
+        } else {
+          rejLbl.hidden = true;
+          rejReason.hidden = true;
+        }
+      }
+
+      const classLabel = document.querySelector('[data-es-pin="classification-label"]');
+      if (classLabel) {
+        classLabel.textContent = letter.classification_label || letter.classification || "Corridor Escape";
+      }
+
+      const proofEl = document.querySelector('[data-es-pin="proof"]');
+      if (proofEl) proofEl.textContent = "4xyz == n(yz+xz+xy) ✓ Verified Exact ℚ in ℤ";
+
+      const certEl = document.querySelector('[data-es-pin="cert"]');
+      if (certEl) certEl.textContent = letter.certificate || "SHA256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+
+      const fileEl = document.querySelector('[data-es-pin="file"]');
+      if (fileEl) {
+        if (letter.admission_status === "admitted") {
+          fileEl.textContent = `letters/L-${letter.n}.md`;
+        } else {
+          fileEl.textContent = `escapes/ESC-${letter.n}.md`;
+        }
+      }
+    },
+
+    appendLedgerRow: function(finding, index) {
+      const tbody = document.querySelector("[data-es-ledger-tbody]");
+      if (!tbody) return;
+      const tr = document.createElement("tr");
+      tr.dataset.findingIndex = String(index);
+      if (index === 0) tr.classList.add("is-selected");
+
+      const isAdmitted = finding.admission_status === "admitted";
+
+      const tdId = document.createElement("td");
+      tdId.textContent = `#${finding.letter_id || (isAdmitted ? "L-" : "ESC-") + finding.n}`;
+      tdId.style.fontWeight = "700";
+      tdId.style.color = isAdmitted ? "#f59e0b" : "#06b6d4";
+
+      const tdP = document.createElement("td");
+      tdP.textContent = String(finding.n);
+
+      const tdRes = document.createElement("td");
+      tdRes.textContent = `${finding.residue_840}`;
+      if (finding.is_mordell_hard) {
+        tdRes.style.color = "#f59e0b";
+        tdRes.style.fontWeight = "600";
+      }
+
+      const tdClass = document.createElement("td");
+      tdClass.textContent = finding.classification_label || finding.classification || "Corridor";
+      tdClass.style.fontSize = "11px";
+
+      const tdStatus = document.createElement("td");
+      const statusPill = document.createElement("span");
+      statusPill.textContent = isAdmitted ? "ADMITTED" : "REJECTED";
+      statusPill.style.fontSize = "10px";
+      statusPill.style.padding = "1px 6px";
+      statusPill.style.borderRadius = "3px";
+      statusPill.style.fontWeight = "700";
+      if (isAdmitted) {
+        statusPill.style.background = "rgba(16, 185, 129, 0.2)";
+        statusPill.style.color = "#10b981";
+      } else {
+        statusPill.style.background = "rgba(100, 116, 139, 0.2)";
+        statusPill.style.color = "var(--text-dim, #94a3b8)";
+      }
+      tdStatus.appendChild(statusPill);
+
+      const depthVal = (finding.witness && finding.witness.depth !== undefined) ? finding.witness.depth : (finding.depth || 0);
+      const tdDepth = document.createElement("td");
+      tdDepth.textContent = `δ=${depthVal}`;
+
+      const tdEngine = document.createElement("td");
+      tdEngine.textContent = (finding.discovered_by || "CC").replace(/\.kernel.*$/, "");
+
+      tr.appendChild(tdId);
+      tr.appendChild(tdP);
+      tr.appendChild(tdRes);
+      tr.appendChild(tdClass);
+      tr.appendChild(tdStatus);
+      tr.appendChild(tdDepth);
+      tr.appendChild(tdEngine);
+
+      tbody.insertBefore(tr, tbody.firstChild);
+
+      // Keep table capped to 200 rows without DOM bloat
+      while (tbody.children.length > 200) {
+        tbody.removeChild(tbody.lastChild);
+      }
+    },
+
+    renderFrame: function(now) {
+      if (!EsHuntStudio.isOpen) return;
+
+      const canvas = EsHuntStudio.canvas;
+      const ctx = EsHuntStudio.ctx;
+      if (!canvas || !ctx) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.width / dpr;
+      const h = canvas.height / dpr;
+
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, w, h);
+
+      // 1. Dark lattice background grid
+      ctx.fillStyle = "#090d16";
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
+      ctx.lineWidth = 1;
+      const gridSize = 20;
+      for (let x = 0; x < w; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (let y = 0; y < h; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      // 2. Multi-Engine Pipeline Layout Nodes
+      const nodeX = [60, 190, 320, 450, 580, 700];
+      const nodeY = h / 2 - 15;
+      const nodeNames = ["Prime Stream", "CC Sieve", "Mordell Radar", "Signed Box", "CBIS Escape", "BB Verifier"];
+      const nodeIcons = ["ℙ", "4p+3", "840k", "4ab", "Q23", "ℚ"];
+
+      // Connecting energy bus line
+      ctx.strokeStyle = "rgba(6, 182, 212, 0.25)";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(nodeX[0], nodeY);
+      ctx.lineTo(nodeX[nodeX.length - 1], nodeY);
+      ctx.stroke();
+
+      // Pulsing energy waves along bus
+      const wavePhase = (now / 300) % 1;
+      for (let i = 0; i < nodeX.length - 1; i++) {
+        const x1 = nodeX[i];
+        const x2 = nodeX[i + 1];
+        const pulseX = x1 + (x2 - x1) * wavePhase;
+        const grad = ctx.createRadialGradient(pulseX, nodeY, 0, pulseX, nodeY, 15);
+        grad.addColorStop(0, "rgba(6, 182, 212, 0.8)");
+        grad.addColorStop(1, "rgba(6, 182, 212, 0)");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(pulseX, nodeY, 15, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 3. Draw Engine Nodes
+      for (let i = 0; i < nodeX.length; i++) {
+        const nx = nodeX[i];
+        const ny = nodeY;
+        const pulse = EsHuntStudio.anim.pulses[i];
+        EsHuntStudio.anim.pulses[i] = Math.max(0, pulse - 0.03);
+
+        // Node Glow Ring
+        if (pulse > 0.05) {
+          ctx.strokeStyle = `rgba(6, 182, 212, ${pulse * 0.8})`;
+          ctx.lineWidth = 2 + pulse * 4;
+          ctx.beginPath();
+          ctx.arc(nx, ny, 24 + pulse * 6, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        // Node Circle Body
+        const nodeGrad = ctx.createRadialGradient(nx, ny, 2, nx, ny, 22);
+        if (i === 2) {
+          // Mordell radar
+          nodeGrad.addColorStop(0, "#1e1b4b");
+          nodeGrad.addColorStop(1, "#0f172a");
+        } else if (i === 3 || i === 4) {
+          // Letter searchers
+          nodeGrad.addColorStop(0, "#1e293b");
+          nodeGrad.addColorStop(1, "#0f172a");
+        } else if (i === 5) {
+          // BB exact
+          nodeGrad.addColorStop(0, "#064e3b");
+          nodeGrad.addColorStop(1, "#022c22");
+        } else {
+          nodeGrad.addColorStop(0, "#0c4a6e");
+          nodeGrad.addColorStop(1, "#082f49");
+        }
+
+        ctx.fillStyle = nodeGrad;
+        ctx.beginPath();
+        ctx.arc(nx, ny, 22, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = i === 5 ? "#10b981" : (i === 3 || i === 4 ? "#f59e0b" : "#06b6d4");
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Node Icon & Label
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 11px SFMono-Regular, monospace";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(nodeIcons[i], nx, ny);
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+        ctx.font = "10px -apple-system, sans-serif";
+        ctx.fillText(nodeNames[i], nx, ny + 32);
+
+        // Special: Revolving Mordell Radar Beam on Node 2
+        if (i === 2) {
+          EsHuntStudio.anim.mordellAngle += 0.04;
+          const beamX = nx + Math.cos(EsHuntStudio.anim.mordellAngle) * 18;
+          const beamY = ny + Math.sin(EsHuntStudio.anim.mordellAngle) * 18;
+          ctx.strokeStyle = "rgba(168, 85, 247, 0.9)";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(nx, ny);
+          ctx.lineTo(beamX, beamY);
+          ctx.stroke();
+        }
+      }
+
+      // 4. Moving Particles along the Pipeline
+      for (let i = EsHuntStudio.anim.particles.length - 1; i >= 0; i--) {
+        const p = EsHuntStudio.anim.particles[i];
+        p.x += p.speed;
+
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.isLetter ? 4.5 : 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (p.isLetter) {
+          ctx.strokeStyle = "rgba(245, 158, 11, 0.8)";
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+
+        if (p.x > nodeX[nodeX.length - 1] + 20) {
+          EsHuntStudio.anim.particles.splice(i, 1);
+        }
+      }
+
+      // 5. Letter Burst Radiator
+      if (EsHuntStudio.anim.burstAlpha > 0.01) {
+        const bx = nodeX[3];
+        const by = nodeY;
+        const bRad = (1.0 - EsHuntStudio.anim.burstAlpha) * 80 + 20;
+        ctx.strokeStyle = `rgba(245, 158, 11, ${EsHuntStudio.anim.burstAlpha})`;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(bx, by, bRad, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = `rgba(245, 158, 11, ${EsHuntStudio.anim.burstAlpha * 0.9})`;
+        ctx.font = "bold 11px SFMono-Regular, monospace";
+        ctx.textAlign = "center";
+        ctx.fillText("★ LETTER DISCOVERED", bx, by - bRad - 5);
+
+        EsHuntStudio.anim.burstAlpha -= 0.015;
+      }
+
+      // 6. Mini Throughput Oscilloscope at bottom
+      const oscY = h - 25;
+      const oscW = w - 40;
+      const oscStartX = 20;
+      ctx.strokeStyle = "rgba(6, 182, 212, 0.4)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let i = 0; i < EsHuntStudio.anim.oscilloscope.length; i++) {
+        const ox = oscStartX + (i / (EsHuntStudio.anim.oscilloscope.length - 1)) * oscW;
+        const val = EsHuntStudio.anim.oscilloscope[i];
+        const oy = oscY - val * 16;
+        if (i === 0) ctx.moveTo(ox, oy);
+        else ctx.lineTo(ox, oy);
+      }
+      ctx.stroke();
+
+      ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
+      ctx.font = "9px SFMono-Regular, monospace";
+      ctx.textAlign = "left";
+      ctx.fillText(`Throughput Oscilloscope · ${EsHuntStudio.lastThroughput.toLocaleString()} primes/s · Window Δ = ${EsHuntStudio.windowSize}`, 20, h - 8);
+
+      ctx.restore();
+
+      EsHuntStudio.animId = requestAnimationFrame(EsHuntStudio.renderFrame);
+    }
+  };
+
   function focusOmnibar() {
     const input = omnibarInput();
     const dropdown = omnibarDropdown();
@@ -2736,6 +3597,15 @@
       triggerSafeDownload("/download/project.json", "project.json");
     }
 
+    const downloadLink = target.closest('a[href^="/download/"], a[download]');
+    if (downloadLink && !downloadLink.hasAttribute("data-no-safe-download")) {
+      e.preventDefault();
+      const href = downloadLink.getAttribute("href");
+      const filename = downloadLink.getAttribute("download") || href.split("/").pop();
+      triggerSafeDownload(href, filename);
+      return;
+    }
+
     if (target.dataset.paletteAction === "run-all-cells") {
       closePalette({ restoreFocus: false });
       void runAllCells();
@@ -2876,6 +3746,38 @@
         if (noteWrap) noteWrap.hidden = true;
         const comp = startWrap.querySelector("#active-command");
         comp?.focus({ preventScroll: true });
+      }
+      return;
+    }
+
+    // Erdős–Straus Infinite Hunt Studio & Multi-Engine Observatory Controls
+    if (target.matches("[data-open-es-hunt]") || target.closest("[data-open-es-hunt]")) {
+      closeOmnibar();
+      closePalette({ restoreFocus: false });
+      EsHuntStudio.open();
+      return;
+    }
+
+    if (target.matches("[data-es-hunt-close]") || target.closest("[data-es-hunt-close]") || (target.matches(".stem-es-hunt-modal") && !target.closest(".stem-es-hunt-dialog"))) {
+      EsHuntStudio.close();
+      return;
+    }
+
+    const esAction = target.closest("[data-es-action]");
+    if (esAction) {
+      const act = esAction.dataset.esAction;
+      if (act === "toggle-hunt") {
+        EsHuntStudio.toggleHunt();
+      } else if (act === "step-hunt") {
+        EsHuntStudio.step();
+      } else if (act === "reset-horizon") {
+        EsHuntStudio.resetHorizon();
+      } else if (act === "random-seed") {
+        EsHuntStudio.randomSeed();
+      } else if (act === "audit-vault") {
+        EsHuntStudio.auditVault();
+      } else if (act === "export-letters") {
+        EsHuntStudio.exportLetters();
       }
       return;
     }
@@ -3032,6 +3934,8 @@
     const omnibarIsOpen = omnibarDropdownEl && !omnibarDropdownEl.hidden;
     const docModal = document.querySelector("[data-fcf-doc-modal]");
     const docModalIsOpen = docModal && !docModal.hidden;
+    const esHuntModal = document.querySelector("[data-es-hunt-modal]");
+    const esHuntModalIsOpen = esHuntModal && !esHuntModal.hidden;
     const vizModal = document.querySelector("[data-visualizer-modal]");
     const vizModalIsOpen = vizModal && !vizModal.hidden;
     const settingsModal = document.querySelector("[data-settings-modal]");
@@ -3042,6 +3946,12 @@
     if (isCloseTab) {
       event.preventDefault();
       closeActiveNotebookTab();
+      return;
+    }
+
+    if (esHuntModalIsOpen && event.key === "Escape") {
+      event.preventDefault();
+      EsHuntStudio.close();
       return;
     }
 

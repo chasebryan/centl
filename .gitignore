@@ -5,6 +5,8 @@ compile_commands.json
 *.checked
 *.hints
 lab/sci-contributions/private/
+.DS_Store
+*/.DS_Store
 
 # Python generated files
 .venv/

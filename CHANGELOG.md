@@ -1,5 +1,29 @@
 ## Unreleased
 
+### CentL26.11-ES (v26.11.0) — Erdős–Straus Multi-Engine Observatory & Authoritative Letter Vault (2026-08-22)
+
+- **Erdős–Straus Endless Multi-Engine Algorithmic Hunt Studio & Observatory**:
+  - Engineered continuous real-time multi-engine search horizon scanning with dynamic execution across 5 specialized mathematical kernels (`CC.kernel`, `CBAP.kernel`, `CBIS.kernel`, `CBX.kernel`, and `bb.kernel`).
+  - Added zero-flash vector pipeline canvas visualization, dynamic oscilloscope, and real-time engine telemetry cards.
+  - Provided honest non-terminal metric tracking: Primes Scanned, Mordell Radar (Hard Candidates), Theorem Clearances (CC Sieve), Corridor Clearances (CBAP), CBIS Escapes (Phase Contraction), and Verified Letters.
+- **Central Authoritative Mathematical Letter Admission Gate**:
+  - Implemented centralized admission gate `evaluate_letter_admission` enforcing the authoritative mathematical letter predicate.
+  - Decoupled discovery from admission: downstream search kernels (`CBIS`, `CBAP`, `CBX`) emit their structural classification (`TheoremClearance`, `CorridorHit`, `CbisEscape`, `CbxSurvivor`, `OrdinaryDecomposition`); only the centralized gate evaluates and elevates candidate solutions.
+  - Letter admission strictly fails closed unless $p \pmod{840} \in \{1, 121, 169, 289, 361, 529\}$, surviving all preclearance congruences, meeting search depth thresholds, and passing exact rational verification.
+  - Added regression test fixtures for $p = 375017 \equiv 377 \pmod{840}$ and $p = 265873 \equiv 433 \pmod{840}$ ensuring valid non-hard decompositions are correctly classified as escapes rather than genuine letters.
+- **Isolated Dual Vault System & Historical Migration Suite**:
+  - Established `letters/` vault for genuine admitted letters with cryptographic `ES-LETTER-v1` SHA-256 certificates and full mathematical provenance.
+  - Established `escapes/` vault for non-letter corridor discoveries with explicit rejection reasons.
+  - Implemented automated re-audit and migration tool (`:es audit` / `:es migrate` / `/api/es/audit` / `🛡️ Audit Vault` UI button) verifying historical records without deletion.
+- **High-Performance Overflow-Free Arithmetic**:
+  - Upgraded intermediate polynomial and signed box calculations to `u128` arithmetic, eliminating integer overflow across deep coordinate horizons ($> 4.1 \times 10^{20}$).
+- **Examination Lens & Discovery Ledger UI**:
+  - Added Pinned Candidate Inspector detailing Prime $p$, Residue mod 840, Discovering Engine, Search Depth $\delta$, Admission Status, Rejection Rationale, Exact Proof, SHA-256 Certificate, and Vault Location.
+  - Added dedicated JSON exporters for genuine letters (`/download/letters.json`) and corridor escapes (`/download/escapes.json`).
+- **Multi-Platform Release Standardization**:
+  - Synchronized `v26.11.0` across `Cargo.toml`, `Cargo.lock`, `README.md`, `desktop/centl26/macos/Info.plist`, `CentL26Updater.swift`, Windows build scripts, and capabilities metadata.
+  - Published official `docs/releases/26.11.0.md` release notes.
+
 ### CentL26.10.2 — Interactive Notebooks, LaTeX Typography Engine & Definitive Operator Reference (2026-08-22)
 
 - **Continuous Jupyter-Grade Interactive Notebook Workflows**:

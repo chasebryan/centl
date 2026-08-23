@@ -466,6 +466,31 @@ fn lab_api_response(
         }));
     }
 
+    if path == "/download/letters.json" || path == "/api/export-letters" || path == "/api/es/export-letters" {
+        let json = handler::export_letters_json();
+        return Ok(Some(LabApiResponse {
+            content_type: "application/json; charset=utf-8",
+            body: json.into_bytes(),
+        }));
+    }
+
+    if path == "/download/escapes.json" || path == "/api/export-escapes" || path == "/api/es/export-escapes" {
+        let json = handler::export_escapes_json();
+        return Ok(Some(LabApiResponse {
+            content_type: "application/json; charset=utf-8",
+            body: json.into_bytes(),
+        }));
+    }
+
+    if path == "/api/es/audit" || path == "/api/es-audit" {
+        let report = crate::erdos_straus::hunt::audit_and_migrate_vault();
+        let json = report.to_json().to_string();
+        return Ok(Some(LabApiResponse {
+            content_type: "application/json; charset=utf-8",
+            body: json.into_bytes(),
+        }));
+    }
+
     if path == "/api/examples" {
         let examples_list: Vec<serde_json::Value> = examples_data::STEM_EXAMPLES
             .iter()
@@ -1357,6 +1382,25 @@ fn handle_lab_connection(mut stream: TcpStream, server_state: Arc<ServerState>) 
             "url": target_url,
             "message": if opened { "Launched Google Chrome successfully." } else { "Could not launch Google Chrome automatically." }
         });
+        let body = serde_json::to_vec_pretty(&res).unwrap_or_default();
+        return write_response(
+            &mut stream,
+            200,
+            "OK",
+            "application/json; charset=utf-8",
+            &body,
+            &[("Cache-Control", "no-store".to_string())],
+            false,
+        );
+    }
+
+    if (method == "POST" || method == "GET") && (path == "/api/es-hunt" || path == "/api/es/hunt") {
+        let input_str = if method == "GET" {
+            request.target.split('?').nth(1).unwrap_or("")
+        } else {
+            &String::from_utf8_lossy(&request.body)
+        };
+        let res = handler::handle_es_hunt_api_request(input_str);
         let body = serde_json::to_vec_pretty(&res).unwrap_or_default();
         return write_response(
             &mut stream,

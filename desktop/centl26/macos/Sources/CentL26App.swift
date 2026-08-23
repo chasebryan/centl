@@ -944,6 +944,7 @@ private final class WorkspaceNavigationDelegate: NSObject, WKNavigationDelegate,
     private func permits(_ url: URL?) -> Bool {
         guard let url else { return false }
         if url.absoluteString == "about:blank" { return true }
+        if url.scheme == "blob" || url.scheme == "data" { return true }
         return url.scheme == "http"
             && url.host == "127.0.0.1"
             && (url.port ?? 80) == Int(port)
@@ -954,12 +955,29 @@ private final class WorkspaceNavigationDelegate: NSObject, WKNavigationDelegate,
         decidePolicyFor navigationAction: WKNavigationAction,
         decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
     ) {
-        if permits(navigationAction.request.url) {
+        let url = navigationAction.request.url
+        if let path = url?.path, path.hasPrefix("/download/") {
+            if #available(macOS 11.3, *) {
+                decisionHandler(.download)
+                return
+            }
+        }
+        if permits(url) {
             decisionHandler(.allow)
         } else {
             NSSound.beep()
             decisionHandler(.cancel)
         }
+    }
+
+    @available(macOS 11.3, *)
+    func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
+        download.delegate = self
+    }
+
+    @available(macOS 11.3, *)
+    func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) {
+        download.delegate = self
     }
 
     func webView(
@@ -1007,6 +1025,16 @@ private final class WorkspaceNavigationDelegate: NSObject, WKNavigationDelegate,
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         onLoadFailure?(error)
+    }
+}
+
+@available(macOS 11.3, *)
+extension WorkspaceNavigationDelegate: WKDownloadDelegate {
+    func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String, completionHandler: @escaping (URL?) -> Void) {
+        let downloadsDirectory = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first
+            ?? URL(fileURLWithPath: NSHomeDirectory())
+        let destinationURL = downloadsDirectory.appendingPathComponent(suggestedFilename)
+        completionHandler(destinationURL)
     }
 }
 
@@ -1070,6 +1098,14 @@ private final class WorkspaceController {
     func runActiveCell() {
         webView.evaluateJavaScript("document.querySelector('.composer-run, form button[type=submit]')?.click()")
     }
+
+    func openEsHunt() {
+        webView.evaluateJavaScript("if (typeof EsHuntStudio !== 'undefined') EsHuntStudio.open();", completionHandler: nil)
+    }
+
+    func openVisualizer() {
+        webView.evaluateJavaScript("if (typeof StemVisualizer !== 'undefined') StemVisualizer.open();", completionHandler: nil)
+    }
 }
 
 private final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
@@ -1115,6 +1151,14 @@ private final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
 
     @objc func runActiveCell(_ sender: Any?) {
         workspaceController?.runActiveCell()
+    }
+
+    @objc func openEsHunt(_ sender: Any?) {
+        workspaceController?.openEsHunt()
+    }
+
+    @objc func openVisualizer(_ sender: Any?) {
+        workspaceController?.openVisualizer()
     }
 
     @objc func checkForUpdates(_ sender: Any?) {
@@ -1351,6 +1395,13 @@ private enum MainMenu {
         let runActive = run.addItem(withTitle: "Run Active Cell", action: #selector(AppDelegate.runActiveCell(_:)), keyEquivalent: "\r")
         runActive.keyEquivalentModifierMask = [.command]
         runActive.target = delegate
+        run.addItem(.separator())
+        let esHunt = run.addItem(withTitle: "Erdős–Straus Infinite Hunt…", action: #selector(AppDelegate.openEsHunt(_:)), keyEquivalent: "e")
+        esHunt.keyEquivalentModifierMask = [.command, .shift]
+        esHunt.target = delegate
+        let stemViz = run.addItem(withTitle: "STEM Theorem Visualizer…", action: #selector(AppDelegate.openVisualizer(_:)), keyEquivalent: "v")
+        stemViz.keyEquivalentModifierMask = [.command, .shift]
+        stemViz.target = delegate
 
         let windowItem = NSMenuItem()
         main.addItem(windowItem)

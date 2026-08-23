@@ -463,6 +463,38 @@ The Bryan Recursive Entanglement Calculus (BREC) is a discrete, constructive cal
 "#,
     },
     FcfDoc {
+        id: "centl26-11-es-release-notes",
+        title: "CentL26.11-ES Official Release Notes",
+        category: "manual",
+        summary: "Erdős–Straus Multi-Engine Observatory, Authoritative Central Letter Admission Gate, isolated vaults, and overflow-free arithmetic.",
+        tags: &["release", "erdos-straus", "letters", "observatory", "cbis", "cbap", "cbx", "mordell", "vault", "update"],
+        content: r#"# CentL26.11-ES — Official Release Notes
+**Free Computation Foundation · CentL26 Special Research Release**
+
+## Executive Summary
+**CentL26.11-ES** introduces the **Erdős–Straus Endless Multi-Engine Hunt Studio & Observatory**, an authoritative **Centralized Letter Admission Gate** enforcing strict fail-closed mathematical validation, an isolated dual-vault storage architecture separating certified letters from corridor escapes, and high-precision `u128` arithmetic preventing overflow in deep search factor horizons.
+
+---
+
+## 1. Endless Multi-Engine Algorithmic Hunt Studio
+- **Dynamic Cyclic Execution**: Coordinated live search across 5 specialized mathematical kernels: `CC.kernel`, `CBAP.kernel`, `CBIS.kernel`, `CBX.kernel`, and `bb.kernel`.
+- **Honest Dashboard Telemetry**: Independent non-terminal counters for Primes Scanned, Mordell Radar (Hard Candidates), Theorem Clearances, Corridor Clearances, CBIS Escapes, and Verified Letters.
+
+---
+
+## 2. Central Authoritative Mathematical Letter Admission Gate
+- **Decoupled Architecture**: Individual search engines no longer independently stamp arithmetic grade `LETTER`.
+- **Fail-Closed Predicate**: Letter admission strictly fails closed unless $p$ is prime, $p \pmod{840} \in \{1, 121, 169, 289, 361, 529\}$, survives preclearance congruences, meets search depth threshold $\delta$, and passes exact rational verification.
+
+---
+
+## 3. Isolated Dual Vault System & Historical Migration Suite
+- **`letters/` Genuine Vault**: Cryptographic `ES-LETTER-v1` SHA-256 certificates with full mathematical provenance.
+- **`escapes/` Corridor Escape Vault**: Preserves non-letter corridor discoveries with explicit rejection reasons.
+- **Migration Engine**: Non-destructive re-audit (`:es audit` / `:es migrate` / `/api/es/audit`).
+"#,
+    },
+    FcfDoc {
         id: "centl26-10-2-release-notes",
         title: "CentL26.10.2 Official Release Notes",
         category: "manual",

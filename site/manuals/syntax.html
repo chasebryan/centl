@@ -83,6 +83,9 @@
 <p><code>gcd(a, b)</code> <code>lcm(a, b)</code> <code>factorial(n)</code> <code>choose(n, k)</code> <code>permutations(n, k)</code> <code>fibonacci(n)</code></p>
 <h3>Finite iteration and sequences</h3>
 <p><code>sum(expression, variable = lower, upper)</code> <code>product(expression, variable = lower, upper)</code> <code>sequence(expression, variable = lower, upper)</code> <code>recurrence(initial, previous = step, index = lower, upper)</code></p>
+<h3>Erdős–Straus Diophantine Hunt &amp; Research Commands</h3>
+<p><code>solve n</code> <code>es n</code> <code>es solve n [threshold] [engine]</code> <code>es hunt start_bound window_size [mordell]</code> <code>:es audit</code> <code>:es migrate</code></p>
+<ul><li><code>solve 2521</code>: exact 3-fraction decomposition $4/n = 1/x + 1/y + 1/z$.</li><li><code>es hunt 25000 5000</code>: execute live multi-engine search (<code>CC</code>, <code>CBAP</code>, <code>CBIS</code>, <code>CBX</code>, <code>bb</code>).</li><li><code>es hunt 25000 5000 mordell</code>: scan only Mordell-hard residue classes modulo 840.</li><li><code>:es audit</code>: re-audit existing letter discoveries against the authoritative central admission gate.</li></ul>
 <h3>Scripts</h3>
 <p><code>assert(left relation right)</code> <code># comment</code></p>
 <p><code>assert(...)</code> checks a claim without adding a session definition. It exits successfully only for a <code>verified</code> verdict; <code>refuted</code>, <code>unknown</code>, and <code>invalid</code> claims are unsuccessful. A quantified rational form is also accepted: <code>assert(left relation right, for_all = x, domain = rational)</code>.</p>

@@ -113,7 +113,14 @@ impl Sha256 {
 
 // Generates the official 128-bit hex letter number for ES-LETTER-v1
 pub fn compute_letter_number(prime: u64, tags: &[&str]) -> String {
-    let payload = format!("ES-LETTER-v1:p={}:tags={}", prime, tags.join(","));
+    let rule = if tags.contains(&"unsolved_after_search") || tags.contains(&"hard_unsolved") {
+        "unsolved_after_search"
+    } else if tags.contains(&"universal_strike") {
+        "universal_strike"
+    } else {
+        "window_broken"
+    };
+    let payload = format!("ES-LETTER-v1\nrule={}\nn={}\nextra=\n", rule, prime);
     let mut hasher = Sha256::new();
     hasher.update(payload.as_bytes());
     let digest = hasher.finalize();

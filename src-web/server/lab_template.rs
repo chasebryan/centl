@@ -29,7 +29,7 @@ pub fn render_lab_page(workbench: &str) -> String {
       <a class="product-lockup" href="/" aria-label="CentL26 home">
         <div class="product-brand">
           <strong>CentL26</strong>
-          <small>Free Computation Foundation · v26.10.2</small>
+          <small>Free Computation Foundation · v26.11.0</small>
         </div>
       </a>
       <div class="workspace-path"><button type="button" data-toggle-explorer title="Toggle workspace explorer">Workspace</button><span>/</span><input type="text" class="notebook-rename-input" data-rename-notebook value="Notebook 01" aria-label="Rename active notebook" spellcheck="false" title="Click to rename active notebook"></div>
@@ -106,6 +106,7 @@ pub fn render_lab_page(workbench: &str) -> String {
       <div class="palette-search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"></circle><path d="m13 13 4 4"></path></svg><input id="palette-search" role="combobox" aria-label="Search CentL26 commands" aria-autocomplete="list" aria-controls="palette-results" aria-expanded="true" placeholder="Search supported tools and commands…" autocomplete="off"><kbd>esc</kbd></div>
       <div class="palette-results" id="palette-results" role="listbox" aria-label="Available commands">
         <p>Interactive Studios</p>
+        <button type="button" role="option" tabindex="-1" data-open-es-hunt data-modes="all"><span class="palette-icon research">⚡</span><span><strong>Erdős–Straus Infinite Hunt Studio</strong><small>Multi-engine endless hunt, algorithm observatory, &amp; letter vault</small></span><kbd>es hunt</kbd></button>
         <button type="button" role="option" tabindex="-1" data-open-visualizer data-modes="all"><span class="palette-icon exact">📊</span><span><strong>STEM Visualizer &amp; Animated Theorem Lab</strong><small>Interactive 2D animated graphing grid, proofs, and simulations</small></span><kbd>Visualizer</kbd></button>
         <p>Suggested tools</p>
         <button type="button" role="option" tabindex="-1" data-command="1/3 + 5/7" data-modes="math" data-requires-capability="org.fcf.centl.math.evaluate"><span class="palette-icon exact">ℚ</span><span><strong>Exact calculation</strong><small>Arbitrary-precision mathematics</small></span><kbd>Math</kbd></button>
@@ -143,7 +144,7 @@ pub fn render_lab_page(workbench: &str) -> String {
         <a href="https://freecomputation.org/" target="_blank" rel="noopener">🔗 freecomputation.org</a>
         <a href="https://github.com/sponsors/chasebryan" target="_blank" rel="noopener">💝 Sponsor on GitHub</a>
       </div>
-      <footer><span>v26.10.2 · Apache-2.0</span><button type="button" data-close-fcf-about>Close</button></footer>
+      <footer><span>v26.11.0 · Apache-2.0</span><button type="button" data-close-fcf-about>Close</button></footer>
     </div>
   </div>
 
@@ -178,7 +179,7 @@ pub fn render_lab_page(workbench: &str) -> String {
         </div>
         <div>
           <h2>CentL26 Software Update</h2>
-          <small class="update-current-version">Installed: CentL26 v26.10.2</small>
+          <small class="update-current-version">Installed: CentL26 v26.11.0 (CentL26.11-ES)</small>
         </div>
       </div>
       <div class="update-body">
@@ -505,6 +506,284 @@ pub fn render_lab_page(workbench: &str) -> String {
       </footer>
     </div>
   </div>
+
+  <div class="stem-es-hunt-modal" data-es-hunt-modal hidden>
+    <div class="stem-es-hunt-dialog" role="dialog" aria-modal="true" aria-labelledby="es-hunt-modal-title">
+      <!-- Header -->
+      <header class="es-hunt-header">
+        <div class="es-hunt-brand">
+          <span class="es-hunt-badge">ERDŐS–STRAUS MULTI-ENGINE OBSERVATORY</span>
+          <h2 id="es-hunt-modal-title">Endless Algorithmic Hunt Studio</h2>
+        </div>
+        <div class="es-hunt-header-status">
+          <span class="es-status-pill is-ready" data-es-status-pill>
+            <span class="es-status-dot"></span>
+            <strong data-es-status-label>READY</strong>
+          </span>
+        </div>
+        <div class="es-hunt-header-actions">
+          <button type="button" class="es-btn es-btn-primary" data-es-action="toggle-hunt">
+            <span data-es-play-icon>▶</span> <span data-es-play-text>Start Endless Hunt</span>
+          </button>
+          <button type="button" class="es-btn" data-es-action="step-hunt" title="Advance search horizon by one window">⏭ Step</button>
+          <button type="button" class="es-btn" data-es-action="reset-horizon" title="Reset search horizon">🔄 Reset</button>
+          <button type="button" class="es-btn" data-es-action="audit-vault" title="Re-audit historical vault and verify central admission">🛡️ Audit Vault</button>
+          <button type="button" class="es-btn" data-es-action="export-letters" title="Export discovered Letters as JSON">📥 Export</button>
+          <button type="button" class="es-btn doc-close-btn" data-es-hunt-close aria-label="Close observatory">✕</button>
+        </div>
+      </header>
+
+      <!-- Top Telemetry HUD (6 Dedicated Honest Pipeline Cards) -->
+      <div class="es-hud-grid">
+        <div class="es-hud-card">
+          <small>Search Horizon [s, s+Δ]</small>
+          <strong data-es-hud="horizon">20,000 → 25,000</strong>
+          <span class="es-hud-sub" data-es-hud="window-size">Window: Δ = 5,000</span>
+        </div>
+        <div class="es-hud-card">
+          <small>Primes Scanned</small>
+          <strong data-es-hud="primes-scanned">0</strong>
+          <span class="es-hud-sub" data-es-hud="throughput">Rate: 0 primes/sec</span>
+        </div>
+        <div class="es-hud-card">
+          <small>Mordell Radar (Hard Candidates)</small>
+          <strong data-es-hud="mordell-count">0</strong>
+          <span class="es-hud-sub">840k + {{1, 121, 169, 289, 361, 529}}</span>
+        </div>
+        <div class="es-hud-card">
+          <small>Theorem Clearances (CC)</small>
+          <strong data-es-hud="great-count">0</strong>
+          <span class="es-hud-sub" data-es-hud="great-pct">0% · Linear congruences</span>
+        </div>
+        <div class="es-hud-card">
+          <small>CBIS Escapes (Phase Contraction)</small>
+          <strong data-es-hud="cbis-count">0</strong>
+          <span class="es-hud-sub">Model Escape · Depth &gt; 10</span>
+        </div>
+        <div class="es-hud-card is-letter-highlight">
+          <small>Verified Letters (Central Gate)</small>
+          <strong data-es-hud="letters-count">0</strong>
+          <span class="es-hud-sub" data-es-hud="letters-active-filter">Admitted &amp; Exact Verified</span>
+        </div>
+      </div>
+
+      <!-- Configuration Strip for Searching Letters -->
+      <div class="es-config-strip">
+        <div class="es-config-group">
+          <label for="es-config-filter">Letter Target Filter:</label>
+          <select id="es-config-filter" data-es-config="filter">
+            <option value="standard" selected>Standard Letters (Depth ≥ 10)</option>
+            <option value="deep">Deep Letters (Depth ≥ 50)</option>
+            <option value="extreme">Extreme Letters (Depth ≥ 100)</option>
+            <option value="mordell">Mordell-Hard Survivors Only (840k + r)</option>
+            <option value="all">All Solved Primes</option>
+          </select>
+        </div>
+
+        <div class="es-config-group">
+          <label for="es-config-engine">Engine Set:</label>
+          <select id="es-config-engine" data-es-config="engine">
+            <option value="auto" selected>Coordinated Multi-Engine (CC + BB + CBAP + CBIS + CBX + Rust)</option>
+            <option value="cc">CC.kernel (Attack Theorem Core)</option>
+            <option value="cbap">CBAP.kernel (Signed Box Harvester)</option>
+            <option value="cbis">CBIS.kernel (Model Escape / Phase Sieve)</option>
+            <option value="cbx">CBX.kernel (Dual Descent Lane-I)</option>
+            <option value="bb">bb.kernel (Exact Reference Verifier)</option>
+          </select>
+        </div>
+
+        <div class="es-config-group">
+          <label for="es-config-start">Start Factor (s):</label>
+          <div class="es-input-with-button">
+            <input type="number" id="es-config-start" data-es-config="start" value="20000" min="0" step="1000">
+            <button type="button" class="es-btn-mini" data-es-action="random-seed" title="Jump to random deep factor">🎲 Random</button>
+          </div>
+        </div>
+
+        <div class="es-config-group">
+          <label for="es-config-window">Window (Δ):</label>
+          <select id="es-config-window" data-es-config="window">
+            <option value="1000">1,000</option>
+            <option value="5000" selected>5,000</option>
+            <option value="20000">20,000</option>
+            <option value="50000">50,000</option>
+            <option value="100000">100,000</option>
+          </select>
+        </div>
+
+        <div class="es-config-group">
+          <label for="es-config-speed">Throttle Speed:</label>
+          <select id="es-config-speed" data-es-config="speed">
+            <option value="turbo" selected>Turbo (Continuous Stream)</option>
+            <option value="fast">Fast (150ms interval)</option>
+            <option value="smooth">Smooth (350ms interval)</option>
+            <option value="step">Step-by-Step</option>
+          </select>
+        </div>
+
+        <div class="es-config-group es-config-checkbox">
+          <label>
+            <input type="checkbox" data-es-config="auto-advance" checked>
+            <span>Endless Loop</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Main Workspace Split: Static/Dynamic Pipeline on Left/Center, Letter Vault on Right -->
+      <div class="es-workspace-grid">
+        <!-- Left/Center: Visual Reoccurring Algorithm Pipeline & Engine Telemetry -->
+        <div class="es-pipeline-panel">
+          <div class="es-panel-header">
+            <span>REOCCURRING MULTI-ENGINE ALGORITHM PIPELINE</span>
+            <small>Dynamic cyclic execution · Zero-flash vector graphics</small>
+          </div>
+          
+          <!-- Live Visual Canvas (Pipeline Signal Flow, Wheel, Oscilloscope) -->
+          <div class="es-canvas-container">
+            <canvas id="es-pipeline-canvas" class="es-pipeline-canvas" width="760" height="230"></canvas>
+          </div>
+
+          <!-- 5 Active Engine Stage Cards with Dynamic Status Gauges -->
+          <div class="es-engine-cards-grid">
+            <div class="es-engine-card" data-engine-card="cc">
+              <div class="es-engine-header">
+                <span class="es-engine-dot is-active"></span>
+                <strong>CC.kernel</strong>
+                <span class="es-engine-badge">Theorem Core</span>
+              </div>
+              <p class="es-engine-rule">4p+3 · 3p+2 · 8p+5 Congruences</p>
+              <div class="es-engine-metrics">
+                <span>Theorems: <strong data-engine-stat="cc-cleared">0</strong></span>
+                <span class="es-engine-pct" data-engine-stat="cc-pct">95.2%</span>
+              </div>
+              <div class="es-engine-bar"><div class="es-engine-bar-fill" style="width: 95%;"></div></div>
+            </div>
+
+            <div class="es-engine-card" data-engine-card="cbap">
+              <div class="es-engine-header">
+                <span class="es-engine-dot is-active"></span>
+                <strong>CBAP.kernel</strong>
+                <span class="es-engine-badge">Signed Box</span>
+              </div>
+              <p class="es-engine-rule">Two-Target Signed Box Corridor (Depth ≤ 10)</p>
+              <div class="es-engine-metrics">
+                <span>Corridors: <strong data-engine-stat="cbap-cleared">0</strong></span>
+                <span class="es-engine-pct" data-engine-stat="cbap-pct">4.2%</span>
+              </div>
+              <div class="es-engine-bar"><div class="es-engine-bar-fill" style="width: 70%; background: #06b6d4;"></div></div>
+            </div>
+
+            <div class="es-engine-card" data-engine-card="cbis">
+              <div class="es-engine-header">
+                <span class="es-engine-dot is-active"></span>
+                <strong>CBIS.kernel</strong>
+                <span class="es-engine-badge">Phase Contraction</span>
+              </div>
+              <p class="es-engine-rule">Phase Contraction &amp; Trapped Fiber Sieve (Depth &gt; 10)</p>
+              <div class="es-engine-metrics">
+                <span>Escapes: <strong data-engine-stat="cbis-cleared">0</strong></span>
+                <span class="es-engine-pct" data-engine-stat="cbis-pct">0.6%</span>
+              </div>
+              <div class="es-engine-bar"><div class="es-engine-bar-fill" style="width: 40%; background: #f59e0b;"></div></div>
+            </div>
+
+            <div class="es-engine-card" data-engine-card="cbx">
+              <div class="es-engine-header">
+                <span class="es-engine-dot is-active"></span>
+                <strong>CBX.kernel</strong>
+                <span class="es-engine-badge">Dual Descent</span>
+              </div>
+              <p class="es-engine-rule">Lane-I Dual Descent &amp; Kneser Defect Edge (Depth &gt; 50)</p>
+              <div class="es-engine-metrics">
+                <span>Survivors: <strong data-engine-stat="cbx-cleared">0</strong></span>
+                <span class="es-engine-pct">Lane-I</span>
+              </div>
+              <div class="es-engine-bar"><div class="es-engine-bar-fill" style="width: 25%; background: #ec4899;"></div></div>
+            </div>
+
+            <div class="es-engine-card" data-engine-card="bb">
+              <div class="es-engine-header">
+                <span class="es-engine-dot is-active"></span>
+                <strong>bb.kernel</strong>
+                <span class="es-engine-badge">Exact Verifier</span>
+              </div>
+              <p class="es-engine-rule">4xyz = n(yz+xz+xy) Rational Identity in ℤ</p>
+              <div class="es-engine-metrics">
+                <span>Verified: <strong data-engine-stat="bb-verified">0</strong></span>
+                <span class="es-engine-pct" style="color:#10b981;">100% ℚ</span>
+              </div>
+              <div class="es-engine-bar"><div class="es-engine-bar-fill" style="width: 100%; background: #10b981;"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Pinned Candidate Lens & Scroll-Contained Letter Ledger Vault -->
+        <div class="es-vault-panel">
+          <div class="es-panel-header">
+            <span>EXAMINATION LENS &amp; LETTER LEDGER</span>
+            <span class="es-vault-count-badge" data-es-vault-badge>0 Admitted</span>
+          </div>
+
+          <!-- Pinned Letter Inspector Card -->
+          <div class="es-pinned-letter-card" data-es-pinned-card>
+            <div class="es-pinned-empty" data-es-pinned-empty>
+              <span class="es-pinned-empty-icon">📜</span>
+              <strong>Initiate ES Hunt to Examine Discoveries</strong>
+              <small>Primes requiring deep two-target searches, CBIS phase contraction, or Mordell-hard lifts will be pinned here with full mathematical provenance.</small>
+            </div>
+            <div class="es-pinned-content" data-es-pinned-content hidden>
+              <div class="es-pinned-header">
+                <span class="es-letter-id" data-es-pin="id">#L-2521</span>
+                <span class="es-letter-tag" data-es-pin="classification-badge">CBIS ESCAPE</span>
+                <span class="es-letter-engine" data-es-pin="engine">CBIS.kernel / Phase Contraction</span>
+              </div>
+              <div class="es-pinned-equation-wrap">
+                <small>Exact 3-Egyptian Fraction Decomposition:</small>
+                <div class="es-pinned-equation" data-es-pin="equation">4/2521 = 1/631 + 1/3181482 + 1/3181482</div>
+              </div>
+              <div class="es-pinned-meta-grid">
+                <div><span>Prime p:</span> <strong data-es-pin="p">2521</strong></div>
+                <div><span>Residue (mod 840):</span> <strong data-es-pin="res">1 (Mordell-Hard)</strong></div>
+                <div><span>Search Depth δ:</span> <strong data-es-pin="depth">17</strong></div>
+                <div><span>Admission Status:</span> <strong data-es-pin="admission-status" style="color:#10b981;">ADMITTED</strong></div>
+                <div style="grid-column: 1 / -1;"><span data-es-pin="rejection-label" hidden>Rejection Reason:</span> <strong data-es-pin="rejection-reason" style="color:#ef4444;" hidden>None</strong></div>
+                <div><span>Arithmetic Proof:</span> <strong style="color:#10b981;" data-es-pin="proof">4xyz == n(...) ✓ Exact</strong></div>
+                <div><span>Classification:</span> <strong data-es-pin="classification-label">CBIS Escape</strong></div>
+              </div>
+              <div class="es-pinned-cert">
+                <span>SHA-256 Certificate:</span>
+                <code data-es-pin="cert">a8f3b14e92c017d8349275ab2041e97d</code>
+              </div>
+              <div class="es-pinned-disk-save" style="margin-top:8px; font-size:11px; color:#10b981; display:flex; align-items:center; gap:6px;">
+                <span>📁 Vault Path:</span>
+                <code data-es-pin="file" style="color:#059669; font-weight:600;">letters/L-2521.md</code>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scroll-Contained Letter Vault Table -->
+          <div class="es-letter-ledger-container">
+            <table class="es-letter-ledger-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Prime (p)</th>
+                  <th>Residue</th>
+                  <th>Classification</th>
+                  <th>Status</th>
+                  <th>Depth</th>
+                  <th>Engine</th>
+                </tr>
+              </thead>
+              <tbody data-es-ledger-tbody>
+                <!-- Rows added dynamically in-place without flashing or moving parent window -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>"##
     )
@@ -601,7 +880,7 @@ pub(crate) fn render_lab_workbench_with_transient_result(
     }
     html.push_str(r#"</div><button class="strip-action add-tab" type="button" data-new-notebook data-new-computation title="Start a blank computation without clearing notebook history" aria-label="Create new notebook tab"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"></path></svg></button><span class="strip-spacer"></span><button class="strip-action" type="button" data-toggle-explorer title="Toggle workspace" aria-label="Toggle workspace"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"></rect><path d="M8 3v14"></path></svg></button><button class="strip-action" type="button" data-toggle-inspector title="Toggle inspector" aria-label="Toggle inspector"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"></rect><path d="M12 3v14"></path></svg></button></div>"#);
 
-    html.push_str(r#"<div class="workspace-toolbar"><div><button class="toolbar-button" type="button" data-open-welcome title="Open Welcome Screen"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 9.5 10 4l7 5.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z"></path><path d="M9 18v-6h2v6"></path></svg>Welcome</button><button class="toolbar-button" type="button" data-add-code-cell title="Add Code Cell (B)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6.5 6-4 4 4 4m7-8 4 4-4 4m-2-9.5-3 11"></path></svg>Code</button><button class="toolbar-button" type="button" data-add-md-cell title="Add Markdown Note Cell (M)"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="4" width="15" height="12" rx="2"></rect><path d="M5.5 13.5V6.5l2.5 3 2.5-3v7m4-4.5 2 2.5 2-2.5m-2 2V6.5"></path></svg>Markdown</button><button class="toolbar-button" type="button" data-run-all-cells title="Run All Cells in Notebook"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 4 6 6-6 6M11 4l6 6-6 6"></path></svg>Run All</button><button class="toolbar-button" type="button" data-restart-kernel title="Restart Kernel &amp; Reset Workspace State"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10a7 7 0 1 0 7-7 7.6 7.6 0 0 0-5.2 2.1L3 6.5"></path><path d="M3 2.5v4h4"></path></svg>Restart</button><button class="toolbar-button" type="button" data-open-visualizer title="Open Interactive STEM Animated Visualizer &amp; Theorem Studio"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17V3m0 14h14M3 12c3-4 6 2 9-5 2-4 3-1 5 1"></path></svg>Visualizer</button><button class="toolbar-button" type="button" data-open-palette title="Search Tools &amp; Commands (⌘P)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M4 10h12M4 15h8"></path></svg>Tools</button><button class="toolbar-button" type="button" data-save-project title="Save workspace (Ctrl / ⌘ S)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h9l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm2 0v4h6V4M6 13h8v4H6v-4Z"></path></svg>Save</button><button class="toolbar-button" type="button" data-open-settings title="Open Preferences and Settings"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"></circle><circle cx="10" cy="10" r="2.8"></circle></svg>Settings</button><button class="toolbar-button" type="button" data-open-help title="Open help and guide"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"></circle><path d="M7.5 8a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3.5M10 15h.01"></path></svg>Help</button></div><div><button class="toolbar-icon theme-toggle" type="button" data-toggle-theme title="Toggle dimmed theme" aria-label="Toggle dimmed theme"><svg class="theme-icon-sun" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3"></circle><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M15.7 4.3l-1.4 1.4M5.7 14.3l-1.4 1.4"></path></svg><svg class="theme-icon-moon" viewBox="0 0 20 20" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg></button></div></div>"#);
+    html.push_str(r#"<div class="workspace-toolbar"><div><button class="toolbar-button" type="button" data-open-welcome title="Open Welcome Screen"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 9.5 10 4l7 5.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z"></path><path d="M9 18v-6h2v6"></path></svg>Welcome</button><button class="toolbar-button" type="button" data-add-code-cell title="Add Code Cell (B)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6.5 6-4 4 4 4m7-8 4 4-4 4m-2-9.5-3 11"></path></svg>Code</button><button class="toolbar-button" type="button" data-add-md-cell title="Add Markdown Note Cell (M)"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="4" width="15" height="12" rx="2"></rect><path d="M5.5 13.5V6.5l2.5 3 2.5-3v7m4-4.5 2 2.5 2-2.5m-2 2V6.5"></path></svg>Markdown</button><button class="toolbar-button" type="button" data-run-all-cells title="Run All Cells in Notebook"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 4 6 6-6 6M11 4l6 6-6 6"></path></svg>Run All</button><button class="toolbar-button" type="button" data-restart-kernel title="Restart Kernel &amp; Reset Workspace State"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10a7 7 0 1 0 7-7 7.6 7.6 0 0 0-5.2 2.1L3 6.5"></path><path d="M3 2.5v4h4"></path></svg>Restart</button><button class="toolbar-button" type="button" data-open-es-hunt title="Open Erdős–Straus Endless Hunt &amp; Multi-Engine Observatory"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 2 4 11h5l-2 7 9-10h-5l3-6z"></path></svg>ES Hunt</button><button class="toolbar-button" type="button" data-open-visualizer title="Open Interactive STEM Animated Visualizer &amp; Theorem Studio"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17V3m0 14h14M3 12c3-4 6 2 9-5 2-4 3-1 5 1"></path></svg>Visualizer</button><button class="toolbar-button" type="button" data-open-palette title="Search Tools &amp; Commands (⌘P)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M4 10h12M4 15h8"></path></svg>Tools</button><button class="toolbar-button" type="button" data-save-project title="Save workspace (Ctrl / ⌘ S)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h9l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm2 0v4h6V4M6 13h8v4H6v-4Z"></path></svg>Save</button><button class="toolbar-button" type="button" data-open-settings title="Open Preferences and Settings"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"></circle><circle cx="10" cy="10" r="2.8"></circle></svg>Settings</button><button class="toolbar-button" type="button" data-open-help title="Open help and guide"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"></circle><path d="M7.5 8a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3.5M10 15h.01"></path></svg>Help</button></div><div><button class="toolbar-icon theme-toggle" type="button" data-toggle-theme title="Toggle dimmed theme" aria-label="Toggle dimmed theme"><svg class="theme-icon-sun" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3"></circle><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M15.7 4.3l-1.4 1.4M5.7 14.3l-1.4 1.4"></path></svg><svg class="theme-icon-moon" viewBox="0 0 20 20" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg></button></div></div>"#);
 
     let show_welcome_surface = current_input.is_empty()
         && last_result.is_none()
@@ -668,7 +947,7 @@ fn render_explorer(html: &mut String, session: &Session) {
     html.push_str(&authored_symbols.to_string());
     html.push_str(&format!(r#"</strong>symbols</span></div><section class="tree-group"><h2>Current work</h2><button class="tree-row is-selected" type="button" data-focus-cell><span class="tree-icon notebook">N</span><span>{}</span><em>"#, escape_html(active_name)));
     html.push_str(&run_count.to_string());
-    html.push_str(r#"</em></button><button class="tree-row" type="button" data-open-visualizer><span class="tree-icon exact">📊</span><span>STEM Visualizer</span><em class="visualizer-tree-badge">Theorems</em></button><button class="tree-row" type="button" data-select-area="data"><span class="tree-icon dataset">D</span><span>Datasets</span><em data-workspace-field="counts.datasets">4</em></button><button class="tree-row" type="button" data-select-area="models"><span class="tree-icon model">M</span><span>Models</span><em data-workspace-field="counts.models">1</em></button><button class="tree-row" type="button" data-select-area="build"><span class="tree-icon build">B</span><span>Extensions</span><em data-workspace-field="counts.extensions">0</em></button><button class="tree-row" type="button" data-open-evidence><span class="tree-icon receipt">R</span><span>Receipts</span><em data-workspace-field="counts.receipts">"#);
+    html.push_str(r#"</em></button><button class="tree-row" type="button" data-open-es-hunt><span class="tree-icon research">⚡</span><span>ES Hunt Studio</span><em class="visualizer-tree-badge">Engines</em></button><button class="tree-row" type="button" data-open-visualizer><span class="tree-icon exact">📊</span><span>STEM Visualizer</span><em class="visualizer-tree-badge">Theorems</em></button><button class="tree-row" type="button" data-select-area="data"><span class="tree-icon dataset">D</span><span>Datasets</span><em data-workspace-field="counts.datasets">4</em></button><button class="tree-row" type="button" data-select-area="models"><span class="tree-icon model">M</span><span>Models</span><em data-workspace-field="counts.models">1</em></button><button class="tree-row" type="button" data-select-area="build"><span class="tree-icon build">B</span><span>Extensions</span><em data-workspace-field="counts.extensions">0</em></button><button class="tree-row" type="button" data-open-evidence><span class="tree-icon receipt">R</span><span>Receipts</span><em data-workspace-field="counts.receipts">"#);
     html.push_str(&run_count.to_string());
     html.push_str(r#"</em></button></section></section>"#);
 
@@ -700,13 +979,13 @@ fn render_explorer(html: &mut String, session: &Session) {
 
     html.push_str(r#"<section class="explorer-area" id="explorer-area-research" data-area-panel="research" data-area-title="Research" data-area-subtitle="Bounded kernels" hidden><div class="area-metrics"><span><strong>"#);
     html.push_str(&research_runs.to_string());
-    html.push_str(r#"</strong>research runs</span></div><p class="area-summary">The registered Erdős–Straus kernel performs bounded, deterministic probes.</p><div class="capability-list">"#);
+    html.push_str(r#"</strong>research runs</span></div><p class="area-summary">The registered Erdős–Straus kernel performs bounded, deterministic probes across specialized multi-engine attack corridors.</p><div class="capability-list">"#);
     render_capability_row(
         html,
         "org.fcf.centl.research.erdos_straus",
         "Erdős–Straus kernel",
     );
-    html.push_str(r#"</div><section class="tree-group"><h2>Start from a supported command</h2><button class="tree-row" type="button" data-select-area="work" data-fill="es solve 1009" data-interaction-mode="Research"><span class="tree-icon receipt">p</span><span>Probe prime 1009</span></button><button class="tree-row" type="button" data-select-area="work" data-fill="es hunt 20000" data-interaction-mode="Research"><span class="tree-icon receipt">p</span><span>Hunt from 20000</span></button></section></section>"#);
+    html.push_str(r#"</div><section class="tree-group"><h2>Observatory &amp; Commands</h2><button class="tree-row" type="button" data-open-es-hunt><span class="tree-icon research">⚡</span><span>Open ES Hunt Observatory</span><em class="visualizer-tree-badge">Endless</em></button><button class="tree-row" type="button" data-select-area="work" data-fill="es solve 1009" data-interaction-mode="Research"><span class="tree-icon receipt">p</span><span>Probe prime 1009</span></button><button class="tree-row" type="button" data-select-area="work" data-fill="es hunt 20000" data-interaction-mode="Research"><span class="tree-icon receipt">p</span><span>Hunt from 20000</span></button></section></section>"#);
 
     html.push_str(r#"<section class="explorer-area" id="explorer-area-build" data-area-panel="build" data-area-title="Build" data-area-subtitle="Extension workbench" hidden><div class="area-metrics"><span><strong data-workspace-field="counts.extensions">0</strong>extensions</span></div><p class="area-summary">In-app programmability is active. Users can define custom formulas, constants, units, and macros with deterministic execution.</p><div class="capability-list">"#);
     render_capability_row(html, "org.fcf.centl.build.extend", "In-app programmability");
@@ -971,7 +1250,20 @@ fn render_notebook_results(
             escape_html(&physics.summary)
         ));
     } else if let Some(hunt) = last_hunt {
-        html.push_str(&format!(r#"<article class="system-result research-result"><span class="system-icon">p</span><div><small>Research kernel</small><h3>Window ({}, {}]</h3><div class="metric-row"><span><strong>{}</strong>primes</span><span><strong>{}</strong>great</span><span><strong>{}</strong>good</span><span><strong>{}</strong>letters</span><span><strong>{}</strong>unsolved</span></div></div></article>"#, hunt.start_bound, hunt.end_bound, hunt.primes_checked, hunt.great_count, hunt.good_count, hunt.letter_count, hunt.unsolved_count));
+        html.push_str(&format!(
+            r#"<article class="system-result research-result"><span class="system-icon">⚡</span><div><div style="display:flex; justify-content:space-between; align-items:center;"><small>Erdős–Straus Multi-Engine Hunt · {}</small><button type="button" class="btn-micro" data-open-es-hunt style="padding:2px 8px; font-size:11px; background:rgba(6,182,212,0.15); border:1px solid rgba(6,182,212,0.3); border-radius:4px; color:inherit; cursor:pointer;">⚡ Open Endless Observatory</button></div><h3>Window [{}, {}] · {}</h3><div class="metric-row"><span><strong>{}</strong>primes</span><span><strong>{}</strong>theorems</span><span><strong>{}</strong>corridors</span><span><strong>{}</strong>cbis escapes</span><span><strong>{}</strong>verified letters</span><span><strong>{}</strong>mordell-hard</span><span><strong>{}</strong>ms</span></div></div></article>"#,
+            escape_html(&hunt.active_engine),
+            hunt.start_bound,
+            hunt.end_bound,
+            escape_html(&hunt.filter_mode),
+            hunt.primes_checked,
+            hunt.theorem_clearances,
+            hunt.corridor_clearances,
+            hunt.cbis_escapes,
+            hunt.verified_letters_count,
+            hunt.mordell_hard_count,
+            hunt.execution_millis
+        ));
     } else if (show_transient_result || session.history.is_empty()) && last_result.is_some() {
         if let Some(result) = last_result {
             let (label, disposition) = if show_transient_result {
@@ -1284,6 +1576,8 @@ mod tests {
             "data-open-visualizer",
             "data-visualizer-",
             "data-viz-",
+            "data-open-es-hunt",
+            "data-es-",
             "data-load-theorem",
             "data-fn-",
             "data-open-settings",
@@ -1562,5 +1856,37 @@ mod tests {
         assert!(LAB_JS.contains("drawMathCurve"));
         assert!(LAB_JS.contains("drawGrid"));
         assert!(LAB_JS.contains("theorems:"));
+    }
+
+    #[test]
+    fn test_erdos_straus_endless_hunt_observatory() {
+        let session = Session::new();
+        let workbench = render_lab_workbench("", None, None, None, None, &session);
+        let html = render_lab_page(&workbench);
+
+        assert!(html.contains(r#"data-open-es-hunt"#));
+        assert!(html.contains(r#"data-es-hunt-modal"#));
+        assert!(html.contains(r#"data-es-hunt-close"#));
+        assert!(html.contains(r#"id="es-pipeline-canvas""#));
+        assert!(html.contains(r#"data-es-config="filter""#));
+        assert!(html.contains(r#"data-es-config="engine""#));
+        assert!(html.contains(r#"data-es-action="toggle-hunt""#));
+        assert!(html.contains(r#"data-es-action="step-hunt""#));
+        assert!(html.contains(r#"data-es-action="reset-horizon""#));
+        assert!(html.contains(r#"data-es-action="export-letters""#));
+        assert!(html.contains(r#"data-engine-card="cc""#));
+        assert!(html.contains(r#"data-engine-card="cbap""#));
+        assert!(html.contains(r#"data-engine-card="cbis""#));
+        assert!(html.contains(r#"data-engine-card="cbx""#));
+        assert!(html.contains(r#"data-engine-card="bb""#));
+        assert!(html.contains(r#"data-es-pinned-card"#));
+        assert!(html.contains(r#"data-es-ledger-tbody"#));
+
+        assert!(LAB_JS.contains("const EsHuntStudio"));
+        assert!(LAB_JS.contains("huntTick:"));
+        assert!(LAB_JS.contains("/api/es-hunt"));
+        assert!(LAB_JS.contains("pinLetter:"));
+        assert!(LAB_JS.contains("renderFrame:"));
+        assert!(LAB_JS.contains("data-open-es-hunt"));
     }
 }

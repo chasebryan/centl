@@ -134,16 +134,24 @@ pub fn render_centl_work_area(
         html.push_str(&format!(r#"<p>Scanned interval: <strong>({}, {}]</strong> · Primes checked: <strong>{}</strong></p>"#, hunt.start_bound, hunt.end_bound, hunt.primes_checked));
         html.push_str(r#"<div class="hunt-stats">"#);
         html.push_str(&format!(
-            r#"<span class="stat-pill stat-great">GREAT: {}</span>"#,
-            hunt.great_count
+            r#"<span class="stat-pill stat-great">THEOREMS: {}</span>"#,
+            hunt.theorem_clearances
         ));
         html.push_str(&format!(
-            r#"<span class="stat-pill stat-good">GOOD: {}</span>"#,
-            hunt.good_count
+            r#"<span class="stat-pill stat-good">CORRIDORS: {}</span>"#,
+            hunt.corridor_clearances
         ));
         html.push_str(&format!(
-            r#"<span class="stat-pill stat-letter">LETTER: {}</span>"#,
-            hunt.letter_count
+            r#"<span class="stat-pill stat-cbis">CBIS ESCAPES: {}</span>"#,
+            hunt.cbis_escapes
+        ));
+        html.push_str(&format!(
+            r#"<span class="stat-pill stat-letter">VERIFIED LETTERS: {}</span>"#,
+            hunt.verified_letters_count
+        ));
+        html.push_str(&format!(
+            r#"<span class="stat-pill stat-mordell">MORDELL-HARD: {}</span>"#,
+            hunt.mordell_hard_count
         ));
         html.push_str(&format!(
             r#"<span class="stat-pill stat-unsolved">UNSOLVED: {}</span>"#,
