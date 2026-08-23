@@ -528,7 +528,9 @@ pub fn render_lab_page(workbench: &str) -> String {
           <button type="button" class="es-btn" data-es-action="step-hunt" title="Advance search horizon by one window">⏭ Step</button>
           <button type="button" class="es-btn" data-es-action="reset-horizon" title="Reset search horizon">🔄 Reset</button>
           <button type="button" class="es-btn" data-es-action="audit-vault" title="Re-audit historical vault and verify central admission">🛡️ Audit Vault</button>
-          <button type="button" class="es-btn" data-es-action="export-letters" title="Export discovered Letters as JSON">📥 Export</button>
+          <button type="button" class="es-btn" data-es-action="export-letters" title="Export discovered Letters as JSON">📥 Letters</button>
+          <button type="button" class="es-btn" data-es-action="export-remnants" title="Export CBX Remnants as JSON">💾 Remnants</button>
+          <button type="button" class="es-btn" data-es-action="export-escapes" title="Export Corridor Escapes as JSON">📤 Escapes</button>
           <button type="button" class="es-btn doc-close-btn" data-es-hunt-close aria-label="Close observatory">✕</button>
         </div>
       </header>
@@ -695,7 +697,7 @@ pub fn render_lab_page(workbench: &str) -> String {
               </div>
               <p class="es-engine-rule">Lane-I Dual Descent &amp; Kneser Defect Edge (Depth &gt; 50)</p>
               <div class="es-engine-metrics">
-                <span>Survivors: <strong data-engine-stat="cbx-cleared">0</strong></span>
+                <span>Remnants: <strong data-engine-stat="cbx-cleared">0</strong></span>
                 <span class="es-engine-pct">Lane-I</span>
               </div>
               <div class="es-engine-bar"><div class="es-engine-bar-fill" style="width: 25%; background: #ec4899;"></div></div>

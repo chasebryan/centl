@@ -2457,6 +2457,16 @@
       }
     },
 
+    exportRemnants: function() {
+      triggerSafeDownload("/download/remnants.json", `centl26-es-vault-remnants-${Date.now()}.json`);
+      showHostNotice("Exporting CBX Remnants from disk vault (/remnants/)...");
+    },
+
+    exportEscapes: function() {
+      triggerSafeDownload("/download/escapes.json", `centl26-es-vault-escapes-${Date.now()}.json`);
+      showHostNotice("Exporting Corridor Escapes from disk vault (/escapes/)...");
+    },
+
     updateStatusPill: function(label, cls) {
       const pill = document.querySelector("[data-es-status-pill]");
       const lbl = document.querySelector("[data-es-status-label]");
@@ -2649,17 +2659,31 @@
       if (emptyCard) emptyCard.hidden = true;
       if (contentCard) contentCard.hidden = false;
 
+      const isAdmitted = letter.admission_status === "admitted";
+      const isRemnant = letter.classification === "cbx_survivor" || letter.grade === "remnant" || (letter.discovered_by && letter.discovered_by.includes("CBX"));
+
       const idEl = document.querySelector('[data-es-pin="id"]');
-      if (idEl) idEl.textContent = `#${letter.letter_id || (letter.admission_status === "admitted" ? "L-" : "ESC-") + letter.n}`;
+      if (idEl) {
+        let prefix = "ESC-";
+        if (isAdmitted) prefix = "L-";
+        else if (isRemnant) prefix = "REM-";
+        idEl.textContent = `#${letter.letter_id || letter.remnant_id || prefix + letter.n}`;
+      }
 
       const badgeEl = document.querySelector('[data-es-pin="classification-badge"]');
       if (badgeEl) {
-        badgeEl.textContent = (letter.classification_label || letter.classification || "Corridor Escape").toUpperCase();
-        if (letter.admission_status === "admitted") {
+        if (isAdmitted) {
+          badgeEl.textContent = (letter.classification_label || letter.classification || "Letter").toUpperCase();
           badgeEl.style.background = "rgba(245, 158, 11, 0.2)";
           badgeEl.style.color = "#f59e0b";
           badgeEl.style.borderColor = "rgba(245, 158, 11, 0.4)";
+        } else if (isRemnant) {
+          badgeEl.textContent = "CBX REMNANT";
+          badgeEl.style.background = "rgba(236, 72, 153, 0.18)";
+          badgeEl.style.color = "#ec4899";
+          badgeEl.style.borderColor = "rgba(236, 72, 153, 0.4)";
         } else {
+          badgeEl.textContent = (letter.classification_label || letter.classification || "Corridor Escape").toUpperCase();
           badgeEl.style.background = "rgba(6, 182, 212, 0.15)";
           badgeEl.style.color = "#06b6d4";
           badgeEl.style.borderColor = "rgba(6, 182, 212, 0.3)";
@@ -2689,9 +2713,12 @@
 
       const statusEl = document.querySelector('[data-es-pin="admission-status"]');
       if (statusEl) {
-        if (letter.admission_status === "admitted") {
+        if (isAdmitted) {
           statusEl.textContent = "ADMITTED (Authoritative Central Gate)";
           statusEl.style.color = "#10b981";
+        } else if (isRemnant) {
+          statusEl.textContent = "REMNANT (CBX Dual Descent Survivor)";
+          statusEl.style.color = "#ec4899";
         } else {
           statusEl.textContent = "REJECTED (Candidate does not meet Letter criteria)";
           statusEl.style.color = "#f59e0b";
@@ -2701,7 +2728,7 @@
       const rejLbl = document.querySelector('[data-es-pin="rejection-label"]');
       const rejReason = document.querySelector('[data-es-pin="rejection-reason"]');
       if (rejReason && rejLbl) {
-        if (letter.admission_status !== "admitted" && letter.admission_rejection_reason) {
+        if (!isAdmitted && letter.admission_rejection_reason && !isRemnant) {
           rejLbl.hidden = false;
           rejReason.hidden = false;
           rejReason.textContent = letter.admission_rejection_reason;
@@ -2713,7 +2740,7 @@
 
       const classLabel = document.querySelector('[data-es-pin="classification-label"]');
       if (classLabel) {
-        classLabel.textContent = letter.classification_label || letter.classification || "Corridor Escape";
+        classLabel.textContent = isRemnant ? "CBX Remnant (Dual Descent)" : (letter.classification_label || letter.classification || "Corridor Escape");
       }
 
       const proofEl = document.querySelector('[data-es-pin="proof"]');
@@ -2724,8 +2751,10 @@
 
       const fileEl = document.querySelector('[data-es-pin="file"]');
       if (fileEl) {
-        if (letter.admission_status === "admitted") {
+        if (isAdmitted) {
           fileEl.textContent = `letters/L-${letter.n}.md`;
+        } else if (isRemnant) {
+          fileEl.textContent = `remnants/REM-${letter.n}.md`;
         } else {
           fileEl.textContent = `escapes/ESC-${letter.n}.md`;
         }
@@ -2740,11 +2769,22 @@
       if (index === 0) tr.classList.add("is-selected");
 
       const isAdmitted = finding.admission_status === "admitted";
+      const isRemnant = finding.classification === "cbx_survivor" || finding.grade === "remnant" || (finding.discovered_by && finding.discovered_by.includes("CBX"));
+
+      let idPrefix = "ESC-";
+      let idColor = "#06b6d4";
+      if (isAdmitted) {
+        idPrefix = "L-";
+        idColor = "#f59e0b";
+      } else if (isRemnant) {
+        idPrefix = "REM-";
+        idColor = "#ec4899";
+      }
 
       const tdId = document.createElement("td");
-      tdId.textContent = `#${finding.letter_id || (isAdmitted ? "L-" : "ESC-") + finding.n}`;
+      tdId.textContent = `#${finding.letter_id || finding.remnant_id || idPrefix + finding.n}`;
       tdId.style.fontWeight = "700";
-      tdId.style.color = isAdmitted ? "#f59e0b" : "#06b6d4";
+      tdId.style.color = idColor;
 
       const tdP = document.createElement("td");
       tdP.textContent = String(finding.n);
@@ -2757,23 +2797,28 @@
       }
 
       const tdClass = document.createElement("td");
-      tdClass.textContent = finding.classification_label || finding.classification || "Corridor";
+      tdClass.textContent = isRemnant ? "CBX Remnant" : (finding.classification_label || finding.classification || "Corridor");
       tdClass.style.fontSize = "11px";
 
       const tdStatus = document.createElement("td");
       const statusPill = document.createElement("span");
-      statusPill.textContent = isAdmitted ? "ADMITTED" : "REJECTED";
+      if (isAdmitted) {
+        statusPill.textContent = "ADMITTED";
+        statusPill.style.background = "rgba(16, 185, 129, 0.2)";
+        statusPill.style.color = "#10b981";
+      } else if (isRemnant) {
+        statusPill.textContent = "REMNANT";
+        statusPill.style.background = "rgba(236, 72, 153, 0.2)";
+        statusPill.style.color = "#ec4899";
+      } else {
+        statusPill.textContent = "REJECTED";
+        statusPill.style.background = "rgba(100, 116, 139, 0.2)";
+        statusPill.style.color = "var(--text-dim, #94a3b8)";
+      }
       statusPill.style.fontSize = "10px";
       statusPill.style.padding = "1px 6px";
       statusPill.style.borderRadius = "3px";
       statusPill.style.fontWeight = "700";
-      if (isAdmitted) {
-        statusPill.style.background = "rgba(16, 185, 129, 0.2)";
-        statusPill.style.color = "#10b981";
-      } else {
-        statusPill.style.background = "rgba(100, 116, 139, 0.2)";
-        statusPill.style.color = "var(--text-dim, #94a3b8)";
-      }
       tdStatus.appendChild(statusPill);
 
       const depthVal = (finding.witness && finding.witness.depth !== undefined) ? finding.witness.depth : (finding.depth || 0);
@@ -3778,6 +3823,10 @@
         EsHuntStudio.auditVault();
       } else if (act === "export-letters") {
         EsHuntStudio.exportLetters();
+      } else if (act === "export-remnants") {
+        EsHuntStudio.exportRemnants();
+      } else if (act === "export-escapes") {
+        EsHuntStudio.exportEscapes();
       }
       return;
     }

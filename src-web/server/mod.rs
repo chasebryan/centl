@@ -482,6 +482,14 @@ fn lab_api_response(
         }));
     }
 
+    if path == "/download/remnants.json" || path == "/api/export-remnants" || path == "/api/es/export-remnants" {
+        let json = handler::export_remnants_json();
+        return Ok(Some(LabApiResponse {
+            content_type: "application/json; charset=utf-8",
+            body: json.into_bytes(),
+        }));
+    }
+
     if path == "/api/es/audit" || path == "/api/es-audit" {
         let report = crate::erdos_straus::hunt::audit_and_migrate_vault();
         let json = report.to_json().to_string();

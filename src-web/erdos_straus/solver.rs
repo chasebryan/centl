@@ -60,7 +60,7 @@ impl CandidateClassification {
             CandidateClassification::TheoremClearance => "Theorem Clearance (CC Sieve)",
             CandidateClassification::CorridorHit => "Corridor Hit (CBAP Signed Box)",
             CandidateClassification::CbisEscape => "CBIS Escape (Phase Contraction)",
-            CandidateClassification::CbxSurvivor => "CBX Survivor (Dual Descent)",
+            CandidateClassification::CbxSurvivor => "CBX Remnant (Dual Descent)",
             CandidateClassification::OrdinaryDecomposition => "Ordinary Decomposition",
             CandidateClassification::UnsolvedCandidate => "Unsolved Candidate",
             CandidateClassification::InvalidCandidate => "Invalid Candidate",

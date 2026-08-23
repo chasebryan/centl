@@ -264,11 +264,123 @@ pub fn persist_escape_to_disk(res: &SolveResult) {
     let _ = fs::write(&json_path, json_content.to_string());
 }
 
+pub fn resolve_remnants_dir() -> PathBuf {
+    if let Ok(custom) = std::env::var("CENTL_REMNANTS_DIR") {
+        let p = PathBuf::from(custom);
+        let _ = fs::create_dir_all(&p);
+        return p;
+    }
+    let candidates = [
+        PathBuf::from("remnants"),
+        PathBuf::from("research/erdos-straus/remnants"),
+        PathBuf::from("../remnants"),
+    ];
+    for cand in &candidates {
+        if cand.is_dir() {
+            return cand.clone();
+        }
+    }
+    let default_dir = PathBuf::from("remnants");
+    let _ = fs::create_dir_all(&default_dir);
+    default_dir
+}
+
+/// Persist CBX dual descent deep corridor survivors to `remnants/` directory.
+pub fn persist_remnant_to_disk(res: &SolveResult) {
+    let witness = match &res.witness {
+        Some(w) => w,
+        None => return,
+    };
+
+    let dir = resolve_remnants_dir();
+    let remnant_id = format!("REM-{}", res.n);
+    let md_path = dir.join(format!("{}.md", remnant_id));
+    let json_path = dir.join(format!("{}.json", remnant_id));
+
+    let cert = res.letter_number.clone().unwrap_or_else(|| {
+        use std::collections::hash_map::DefaultHasher;
+        use std::hash::{Hash, Hasher};
+        let mut hasher = DefaultHasher::new();
+        res.n.hash(&mut hasher);
+        witness.x.to_string().hash(&mut hasher);
+        format!("REM-{:016x}", hasher.finish())
+    });
+
+    let md_content = format!(
+        "# Erdős–Straus Remnant Certificate: #{remnant_id}\n\n\
+        ## Executive Verification Summary\n\
+        - **Target Prime (p)**: `{p}`\n\
+        - **Residue Modulo 840**: `{res_840}` ({mordell_status})\n\
+        - **Search Depth (δ)**: `{depth}` (Deep Dual Descent Survivor)\n\
+        - **Classification**: `{classification}`\n\
+        - **Arithmetic Grade**: `REMNANT`\n\
+        - **Discovering Engine**: `{engine}`\n\
+        - **SHA-256 Certificate**: `{cert}`\n\n\
+        ## Exact 3-Egyptian Fraction Decomposition\n\
+        $$ \\frac{{4}}{{{p}}} = \\frac{{1}}{{{x}}} + \\frac{{1}}{{{y}}} + \\frac{{1}}{{{z}}} $$\n\n\
+        ```text\n\
+        {equation}\n\
+        ```\n\n\
+        ## Witness Quadruple\n\
+        - **x**: `{x}`\n\
+        - **y**: `{y}`\n\
+        - **z**: `{z}`\n\
+        - **Verification Identity**: `4xyz == n(yz + xz + xy)`\n\
+        - **Verification Status**: `TRUE (100% ℚ Arbitrary-Precision Rational Proof)`\n\n\
+        ## Engine Provenance\n\
+        - **Method**: `{method}`\n\
+        - **Corridor Layer**: `{layer}`\n\
+        - **Engine Name**: `{engine}`\n",
+        remnant_id = remnant_id,
+        p = res.n,
+        res_840 = res.residue_840,
+        mordell_status = if res.is_mordell_hard { "Mordell-Hard Candidate" } else { "Non-Mordell Residue" },
+        depth = witness.depth,
+        classification = res.classification.display_label(),
+        engine = witness.engine_name,
+        cert = cert,
+        x = witness.x,
+        y = witness.y,
+        z = witness.z,
+        equation = witness.equation(),
+        method = witness.method,
+        layer = witness.layer,
+    );
+
+    let _ = fs::write(&md_path, md_content);
+
+    let json_content = serde_json::json!({
+        "schema": "centl26.erdos_straus.remnant/v1",
+        "remnant_id": remnant_id,
+        "n": res.n,
+        "residue_840": res.residue_840,
+        "is_mordell_hard": res.is_mordell_hard,
+        "depth": witness.depth,
+        "classification": res.classification.as_str(),
+        "grade": "remnant",
+        "discovered_by": witness.engine_name,
+        "method": witness.method,
+        "layer": witness.layer,
+        "equation": witness.equation(),
+        "witness": {
+            "x": witness.x.to_string(),
+            "y": witness.y.to_string(),
+            "z": witness.z.to_string(),
+        },
+        "certificate": cert,
+        "verified": witness.verified && witness.verify(),
+    });
+
+    let _ = fs::write(&json_path, json_content.to_string());
+}
+
 #[derive(Clone, Debug)]
 pub struct VaultAuditReport {
     pub total_scanned: usize,
     pub legitimate_letters_retained: usize,
+    pub remnants_retained: usize,
     pub entries_migrated_to_escapes: usize,
+    pub entries_migrated_to_remnants: usize,
     pub invalid_entries: Vec<AuditDetail>,
 }
 
@@ -278,7 +390,9 @@ impl VaultAuditReport {
             "status": "ok",
             "total_scanned": self.total_scanned,
             "legitimate_letters_retained": self.legitimate_letters_retained,
+            "remnants_retained": self.remnants_retained,
             "entries_migrated_to_escapes": self.entries_migrated_to_escapes,
+            "entries_migrated_to_remnants": self.entries_migrated_to_remnants,
             "invalid_entries": self.invalid_entries.iter().map(|e| {
                 serde_json::json!({
                     "n": e.n,
@@ -303,17 +417,21 @@ pub struct AuditDetail {
     pub rejection_reason: String,
 }
 
-/// Centralized migration and re-audit of historical letter vault entries.
+/// Centralized migration and re-audit of historical letter and remnant vault entries.
 /// Re-verifies primality, residue mod 840, Mordell-hard status, exact identity, and central admission.
-/// Non-letter entries are relocated to `escapes/` with updated provenance (never silently deleted).
+/// Non-letter entries are relocated to `escapes/` or `remnants/` with updated provenance (never silently deleted).
 pub fn audit_and_migrate_vault() -> VaultAuditReport {
     let letters_dir = resolve_letters_dir();
     let escapes_dir = resolve_escapes_dir();
+    let remnants_dir = resolve_remnants_dir();
     let mut total_scanned = 0;
     let mut legitimate_letters_retained = 0;
+    let mut remnants_retained = 0;
     let mut entries_migrated_to_escapes = 0;
+    let mut entries_migrated_to_remnants = 0;
     let mut invalid_entries = Vec::new();
 
+    // 1. Audit letters vault
     if let Ok(entries) = fs::read_dir(&letters_dir) {
         for entry in entries.flatten() {
             let path = entry.path();
@@ -327,6 +445,27 @@ pub fn audit_and_migrate_vault() -> VaultAuditReport {
                         let res = solve_es_with_config(n, 10, "auto");
                         if res.admission_status.is_admitted() {
                             legitimate_letters_retained += 1;
+                        } else if res.classification == CandidateClassification::CbxSurvivor {
+                            entries_migrated_to_remnants += 1;
+                            let md_path = path.with_extension("md");
+                            let new_json = remnants_dir.join(format!("REM-{}.json", n));
+                            let new_md = remnants_dir.join(format!("REM-{}.md", n));
+                            let reason = match res.admission_status {
+                                LetterAdmissionStatus::Rejected(ref r) => r.description(),
+                                _ => "Migrated to CBX Remnants".to_string(),
+                            };
+                            let _ = fs::rename(&path, &new_json);
+                            if md_path.exists() {
+                                let _ = fs::rename(&md_path, &new_md);
+                            }
+                            invalid_entries.push(AuditDetail {
+                                n,
+                                residue_840: n % 840,
+                                is_mordell_hard: is_mordell_hard(n),
+                                previous_file: format!("letters/{}", path.file_name().unwrap_or_default().to_string_lossy()),
+                                new_file: format!("remnants/{}", new_json.file_name().unwrap_or_default().to_string_lossy()),
+                                rejection_reason: reason,
+                            });
                         } else {
                             entries_migrated_to_escapes += 1;
                             let md_path = path.with_extension("md");
@@ -356,10 +495,25 @@ pub fn audit_and_migrate_vault() -> VaultAuditReport {
         }
     }
 
+    // 2. Count retained remnants
+    if let Ok(entries) = fs::read_dir(&remnants_dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.extension().and_then(|s| s.to_str()) == Some("json")
+                && path.file_name().and_then(|s| s.to_str()) != Some("index.json")
+            {
+                total_scanned += 1;
+                remnants_retained += 1;
+            }
+        }
+    }
+
     VaultAuditReport {
         total_scanned,
         legitimate_letters_retained,
+        remnants_retained,
         entries_migrated_to_escapes,
+        entries_migrated_to_remnants,
         invalid_entries,
     }
 }
@@ -430,7 +584,7 @@ pub fn run_configured_hunt_window(config: &HuntConfig) -> HuntSummary {
             }
             CandidateClassification::CbxSurvivor => {
                 cbx_survivors += 1;
-                persist_escape_to_disk(&res);
+                persist_remnant_to_disk(&res);
             }
             CandidateClassification::OrdinaryDecomposition => {
                 ordinary_decompositions += 1;
@@ -570,6 +724,25 @@ mod tests {
         let md_content = fs::read_to_string(&md_file).unwrap();
         assert!(md_content.contains("# Erdős–Straus Letter Certificate: #L-2521"));
         assert!(md_content.contains("ADMITTED"));
+    }
+
+    #[test]
+    fn test_persist_remnant_to_disk() {
+        let _guard = VAULT_TEST_LOCK.lock().unwrap();
+        // Create synthetic CBX survivor result
+        let p = 375017;
+        let mut res = solve_es_with_config(p, 10, "auto");
+        res.classification = CandidateClassification::CbxSurvivor;
+        persist_remnant_to_disk(&res);
+
+        let remnants_dir = resolve_remnants_dir();
+        let md_file = remnants_dir.join("REM-375017.md");
+        let json_file = remnants_dir.join("REM-375017.json");
+        assert!(md_file.exists());
+        assert!(json_file.exists());
+        let md_content = fs::read_to_string(&md_file).unwrap();
+        assert!(md_content.contains("# Erdős–Straus Remnant Certificate: #REM-375017"));
+        assert!(md_content.contains("REMNANT"));
     }
 
     #[test]

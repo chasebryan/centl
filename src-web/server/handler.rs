@@ -606,9 +606,9 @@ fn handle_es_command(
                     };
                     if res.admission_status.is_admitted() {
                         crate::erdos_straus::hunt::persist_letter_to_disk(&res);
-                    } else if res.classification == crate::erdos_straus::solver::CandidateClassification::CbisEscape
-                        || res.classification == crate::erdos_straus::solver::CandidateClassification::CbxSurvivor
-                    {
+                    } else if res.classification == crate::erdos_straus::solver::CandidateClassification::CbxSurvivor {
+                        crate::erdos_straus::hunt::persist_remnant_to_disk(&res);
+                    } else if res.classification == crate::erdos_straus::solver::CandidateClassification::CbisEscape {
                         crate::erdos_straus::hunt::persist_escape_to_disk(&res);
                     }
                     record_solve_history(raw_cmd, &execution, &res, state);
@@ -4365,6 +4365,45 @@ pub fn export_escapes_json() -> String {
         "total_escapes": escape_list.len(),
         "vault_directory": escapes_dir.to_string_lossy(),
         "escapes": escape_list
+    });
+
+    serde_json::to_string_pretty(&export_payload).unwrap_or_else(|_| "{}".to_string())
+}
+
+pub fn export_remnants_json() -> String {
+    let remnants_dir = crate::erdos_straus::hunt::resolve_remnants_dir();
+    let mut remnant_list = Vec::new();
+    if let Ok(entries) = std::fs::read_dir(&remnants_dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.extension().and_then(|s| s.to_str()) == Some("json")
+                && path.file_name().and_then(|s| s.to_str()) != Some("index.json")
+            {
+                if let Ok(content) = std::fs::read_to_string(&path) {
+                    if let Ok(json_val) = serde_json::from_str::<serde_json::Value>(&content) {
+                        remnant_list.push(json_val);
+                    }
+                }
+            }
+        }
+    }
+    remnant_list.sort_by(|a, b| {
+        let na = a.get("n").and_then(|v| v.as_u64()).unwrap_or(0);
+        let nb = b.get("n").and_then(|v| v.as_u64()).unwrap_or(0);
+        na.cmp(&nb)
+    });
+
+    let now_secs = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+
+    let export_payload = serde_json::json!({
+        "schema": "centl26.erdos-straus-remnants-export/1",
+        "exported_timestamp": now_secs,
+        "total_remnants": remnant_list.len(),
+        "vault_directory": remnants_dir.to_string_lossy(),
+        "remnants": remnant_list
     });
 
     serde_json::to_string_pretty(&export_payload).unwrap_or_else(|_| "{}".to_string())
