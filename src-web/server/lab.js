@@ -2177,7 +2177,8 @@
     seenGodsLetters: {},
     rejectedAdmissions: 0,
     unsolvedCount: 0,
-    classProofs: 0,
+    classProofs: 4,
+    classCoveredInstances: 0,
     instanceProofs: 0,
     counterexamples: 0,
     incompleteResiduals: 0,
@@ -2438,7 +2439,8 @@
       EsHuntStudio.seenGodsLetters = {};
       EsHuntStudio.rejectedAdmissions = 0;
       EsHuntStudio.unsolvedCount = 0;
-      EsHuntStudio.classProofs = 0;
+      EsHuntStudio.classProofs = 4;
+      EsHuntStudio.classCoveredInstances = 0;
       EsHuntStudio.instanceProofs = 0;
       EsHuntStudio.counterexamples = 0;
       EsHuntStudio.incompleteResiduals = 0;
@@ -2770,6 +2772,8 @@
 
       const gameEl = document.querySelector('[data-es-hud="game-status"]');
       if (gameEl) gameEl.textContent = EsHuntStudio.gameStatus || "OPEN";
+      const coveredEl = document.querySelector('[data-es-hud="class-covered"]');
+      if (coveredEl) coveredEl.textContent = EsHuntStudio.classCoveredInstances.toLocaleString();
       const instEl = document.querySelector('[data-es-hud="instance-proofs"]');
       if (instEl) instEl.textContent = EsHuntStudio.instanceProofs.toLocaleString();
       const cxEl = document.querySelector('[data-es-hud="counterexamples"]');
@@ -2781,7 +2785,7 @@
         if (EsHuntStudio.counterexamples > 0) {
           weighEl.textContent = "DISPROOF TICKET: a complete finite region is empty. One counterexample outweighs every instance proof.";
         } else {
-          weighEl.textContent = "Class theorems cover 7/8 of primes. Instance piles do not prove ES. Approximates never certify. Game OPEN.";
+          weighEl.textContent = "Elementary CC = 7/8. Intermediate modular = 3/32. Mordell hard core = 1/32 (not complementary to 7/8). Class-covered instances apply theorems; they are not new class proofs. Constructive instances do not prove ES. Hardness is not a certificate. Game OPEN.";
         }
       }
     },
@@ -2859,7 +2863,8 @@
         }
         EsHuntStudio.rejectedAdmissions += data.rejected_admissions || 0;
         EsHuntStudio.unsolvedCount += data.unsolved_count || 0;
-        EsHuntStudio.classProofs += data.class_proofs || 0;
+        EsHuntStudio.classProofs = 4;
+        EsHuntStudio.classCoveredInstances += data.class_covered_instances || 0;
         EsHuntStudio.instanceProofs += data.instance_proofs || 0;
         EsHuntStudio.counterexamples += data.counterexamples || 0;
         EsHuntStudio.incompleteResiduals += data.incomplete_residuals || 0;

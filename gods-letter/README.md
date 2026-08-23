@@ -1,8 +1,8 @@
 # God's Letter Vault
 
-God's Letters are **unsolved Mordell-hard primes** after the full engine menu (CC theorems + two-target corridor + BB).
+God's Letter is the UI nickname for an **unresolved incomplete residual**.
 
-A verified identity \(4/p = 1/x+1/y+1/z\) is a **Letter**, **Remnant**, or **Escape** — never a God's Letter.
+A verified identity \(4/p = 1/x+1/y+1/z\) is a **Letter**, **Remnant**, or **Escape** — never a God's Letter. Dual descent is a hardness proxy, not a proof.
 
 Solved Mordell census files that were previously misfiled here live in `archive/solved-mordell-census/`.
 

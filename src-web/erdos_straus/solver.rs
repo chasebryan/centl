@@ -212,8 +212,9 @@ pub struct SolveResult {
     pub execution_micros: u128,
 }
 
-/// Certifies the number of Dual Descent stages survived by candidate `n` in CBX.kernel machinery.
-/// Evaluates iterative (b, q) dual factorization and Kneser defect boundaries.
+/// Bounded hardness proxy, not a theorem of nonexistence.
+/// Counts staged modular hits on (2k+3) and (4k+1) through 200 stages.
+/// Use this to decide where to look. Do not use it as a certificate of what is true.
 pub fn compute_dual_descent_survival(n: u64) -> (u64, bool) {
     if !is_prime(n) || n <= 2 {
         return (0, false);

@@ -1,11 +1,10 @@
 # Dual-ledger tickets
 
-Major Erdős–Straus tickets only.
-
 | File | Side |
 |---|---|
-| `DIS-<p>.json` / `.md` | Certified counterexample (complete finite region empty) |
+| `DIS-<p>.json` / `.md` | Certified counterexample. Schema `centl26.erdos_straus.disproof/v2`. Must carry \(x_{\min},x_{\max}\), \(x\)-count, completeness theorem, factorization algorithm, commit, primality, replay hash, content hash. |
+| `VICTORY` | Uniform covering of the six Mordell classes. **None yet.** |
 
-Class proofs are infinite identities and are not stored per prime. Instance proofs stay in `letters/`, `escapes/`, and `remnants/`. Incomplete residuals / God's Letters stay in `gods-letter/`.
+The four elementary identities are permanent class theorems, not per-prime files. Class-covered instances and constructive instances live in the hunt ledger plus `letters/`, `escapes/`, `remnants/`. God's Letters are incomplete residuals in `gods-letter/`.
 
-Approximates never certify.
+Approximates never certify. Hardness is not a certificate.

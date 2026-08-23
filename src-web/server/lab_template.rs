@@ -728,7 +728,7 @@ pub fn render_lab_page(workbench: &str) -> String {
             <div class="es-dual-col es-dual-proof">
               <small>Proof ledger</small>
               <strong data-es-hud="game-status">OPEN</strong>
-              <span>Class cover <b data-es-hud="class-cover">87.5%</b> · instance proofs <b data-es-hud="instance-proofs">0</b></span>
+              <span>Elementary CC <b>7/8</b> · 4 theorems · class-covered <b data-es-hud="class-covered">0</b> · constructive <b data-es-hud="instance-proofs">0</b></span>
             </div>
             <div class="es-dual-col es-dual-disproof">
               <small>Disproof ledger</small>
@@ -737,7 +737,7 @@ pub fn render_lab_page(workbench: &str) -> String {
             </div>
             <div class="es-dual-col es-dual-note">
               <small>Weighing</small>
-              <span data-es-hud="weighing">Class theorems cover 7/8 of primes. Instance piles do not prove ES. Approximates never certify.</span>
+              <span data-es-hud="weighing">Elementary CC = 7/8. Intermediate modular = 3/32. Mordell hard core = 1/32. Those are staged densities, not a partition of 7/8+1/32. Approximates never certify. Hardness is not a certificate.</span>
             </div>
           </div>
         </div>
@@ -1915,6 +1915,8 @@ mod tests {
         assert!(html.contains(r#"data-es-dual-ledger"#));
         assert!(html.contains(r#"data-es-hud="game-status""#));
         assert!(LAB_JS.contains("classProofs"));
+        assert!(LAB_JS.contains("classCoveredInstances"));
+        assert!(html.contains("Elementary CC"));
         assert!(html.contains(r#"data-engine-stat="cc-pct">0.0%"#));
         assert!(html.contains(r#"data-es-pinned-card"#));
         assert!(LAB_JS.contains("setEngineShare"));

@@ -164,35 +164,35 @@ The CENTL research program includes active exploration of **Erdős–Straus Diop
 
 ### Erdős–Straus Hunt Classification Hierarchy
 
+Hardness measures tell us where to look. Certificates tell us what is true.
+
 ```
-                        GOD'S LETTER
-                            │
-             (Unique terminal apex — exactly one prime in
-              certified domain simultaneously satisfies
-              all six independent predicates)
-                            │
-              ┌─────────────┴─────────────┐
-              │                           │
-           LETTER                      REMNANT
-  (Mordell-hard residue,           (Dual Descent depth
-   exact witness verified)          > 50 stages survived)
-              │                           │
-           ESCAPE                      (dual descent
-  (CBIS/CC corridor                  deep survivor)
-   escape geometry)
+interesting solved → unusually hard solved → unresolved → certified impossible
+
+  LETTER          REMNANT           GOD'S LETTER        DIS TICKET
+  (solved         (solved,          (incomplete         (complete
+   hard prime)     hardness          residual —          finite region
+                   proxy only)       not a disproof)     empty)
+                                                              │
+                                                    Victory certificate
+                                                    (six Mordell classes)
 ```
+
+Densities are **staged**, not complementary: elementary CC cover **7/8**, intermediate modular **3/32**, Mordell hard core **1/32**.
 
 | Classification | Artifact | Condition |
 |---|---|---|
-| `class_proof` | dual ledger (proof) | Infinite residue identity (even, $4p+3$, $3p+2$, $8p+5$). Density $7/8$. |
-| `instance_proof` | dual ledger (proof) | One verified $4/p=1/x+1/y+1/z$. Does not prove ES. |
+| `class_theorem` | 4 permanent identities | even, $4p+3$, $3p+2$, $8p+5$. Not counted per prime. |
+| `class_covered_instance` | dual ledger (proof) | Prime cleared by applying a class theorem. Not a new class proof. |
+| `instance_proof` | dual ledger (proof) | Constructive witness. Does not prove ES. |
 | `certified_counterexample` | `tickets/DIS-<p>.json` | Complete finite region empty. One ticket disproves ES. |
-| `incomplete_residual` / `gods_letter` | `gods-letter/GL-<p>.json` | Menu miss; region not complete. Not a disproof. |
-| `letter` | `letters/L-<p>.json` | Mordell-hard prime with exact ES witness |
-| `remnant` | `remnants/REM-<p>.json` | Deep dual-descent survival (depth > 50) |
-| `escape` | `escapes/ESC-<p>.json` | CBIS/CC preclearance corridor escape |
+| `incomplete_residual` / `gods_letter` | `gods-letter/GL-<p>.json` | Unresolved menu miss. Not a disproof. |
+| `letter` | `letters/L-<p>.json` | Notable solved hard-prime decomposition |
+| `remnant` | `remnants/REM-<p>.json` | Solved, with independent descent-hardness proxy |
+| `escape` | `escapes/ESC-<p>.json` | Solved outside Letter admission |
+| `victory_certificate` | none yet | Uniform covering of $\{1,121,169,289,361,529\}\pmod{840}$ |
 
-The observatory is **agnostic**: it files proof tickets and disproof tickets on separate ledgers. Approximates never certify. Game status is `OPEN` until a covering of the six Mordell classes or one certified counterexample.
+The observatory is **agnostic**. Approximates never certify. Dual descent is a bounded hardness proxy, not a proof engine. Game status is `OPEN` until a Mordell covering or one DIS ticket. The census is not a verification record (Salez 2014: $10^{17}$).
 
 **Specification:** [`research/erdos-straus/DUAL-LEDGER.md`](research/erdos-straus/DUAL-LEDGER.md) · [`research/erdos-straus/GODS-LETTER.md`](research/erdos-straus/GODS-LETTER.md)
 

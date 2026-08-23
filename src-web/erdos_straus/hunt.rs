@@ -1,7 +1,9 @@
 // Public Erdős–Straus Infinite Hunt Runner & Vault Authority
 // Free Computation Foundation - Apache-2.0
 
-use super::decision::{ticket_kind_of, DualLedger, TicketKind};
+use super::decision::{
+    disproof_certificate_json, ticket_kind_of, DualLedger, TicketKind, ELEMENTARY_THEOREM_COUNT,
+};
 use super::gods_letter::{
     evaluate_gods_letter_candidate, persist_gods_letter_candidate, EsWitness, GodsLetterSpec,
 };
@@ -54,6 +56,7 @@ pub struct HuntSummary {
     pub rejected_admissions: usize,
     pub unsolved_count: usize,
     pub class_proofs: usize,
+    pub class_covered_instances: usize,
     pub instance_proofs: usize,
     pub counterexamples: usize,
     pub incomplete_residuals: usize,
@@ -109,17 +112,39 @@ pub fn resolve_escapes_dir() -> PathBuf {
 pub fn persist_counterexample_to_disk(res: &SolveResult) {
     let dir = PathBuf::from("tickets");
     let _ = fs::create_dir_all(&dir);
+    let json = disproof_certificate_json(res.n);
+    let x_min = json["x_min"].as_u64().unwrap_or(0);
+    let x_max = json["x_max"].as_u64().unwrap_or(0);
+    let x_count = json["x_count"].as_u64().unwrap_or(0);
+    let hash = json["content_hash"].as_str().unwrap_or("");
     let body = format!(
-        "# DISPROOF TICKET DIS-{}\n\nCertified complete finite region for 4/{} has no positive integer solution x ≤ y ≤ z.\nThis is a candidate counterexample to Erdős–Straus, issued only when the divisor-complete search exhausts x ∈ [⌊n/4⌋+1, ⌊3n/4⌋].\nApproximates were not used.\n",
-        res.n, res.n
+        "# DISPROOF TICKET DIS-{n}\n\n\
+        This is the most paranoid artifact in the vault. It is issued only when the\n\
+        divisor-complete engine exhausts the finite region required by x ≤ y ≤ z.\n\n\
+        - **n**: `{n}`\n\
+        - **prime**: `{prime}`\n\
+        - **x_min**: `{x_min}` (= ⌊n/4⌋+1)\n\
+        - **x_max**: `{x_max}` (= ⌊3n/4⌋)\n\
+        - **x_count**: `{x_count}`\n\
+        - **completeness**: `{thm}`\n\
+        - **engine**: `{eng}`\n\
+        - **factorization**: `{fac}`\n\
+        - **content_hash**: `{hash}`\n\
+        - **approximates_certify**: `false`\n\
+        - **hardness_is_not_a_certificate**: `true`\n\n\
+        Hardness measures tell us where to look. This ticket claims nonexistence\n\
+        inside a complete finite region, not that a hunt window was empty.\n",
+        n = res.n,
+        prime = json["prime"],
+        x_min = x_min,
+        x_max = x_max,
+        x_count = x_count,
+        thm = json["completeness_version"].as_str().unwrap_or(""),
+        eng = json["completeness_version"].as_str().unwrap_or(""),
+        fac = json["factorization_algorithm"].as_str().unwrap_or(""),
+        hash = hash
     );
     let _ = fs::write(dir.join(format!("DIS-{}.md", res.n)), body);
-    let json = serde_json::json!({
-        "schema": "centl26.erdos_straus.disproof/v1",
-        "n": res.n,
-        "ticket": "certified_counterexample",
-        "approximates_certify": false
-    });
     let _ = fs::write(
         dir.join(format!("DIS-{}.json", res.n)),
         serde_json::to_string_pretty(&json).unwrap_or_default(),
@@ -532,11 +557,12 @@ pub fn persist_remnant_to_disk(res: &SolveResult) {
         ## Executive Verification Summary\n\
         - **Target Prime (p)**: `{p}`\n\
         - **Residue Modulo 840**: `{res_840}` ({mordell_status})\n\
-        - **Dual Descent Survival Depth (δ)**: `{descent_depth}`\n\
-        - **Discovery Depth**: `{discovery_depth}`\n\
-        - **Remnant Threshold**: `δ > {remnant_threshold}`\n\
+        - **Discovery depth (search axis, how the witness was found)**: `{discovery_depth}`\n\
+        - **Descent depth (hardness proxy, not a proof of nonexistence)**: `{descent_depth}`\n\
+        - **Remnant threshold**: descent depth > `{remnant_threshold}`\n\
         - **Arithmetic Grade**: `REMNANT`\n\
-        - **Classification**: `CBX Dual Descent Deep Survivor`\n\
+        - **Classification**: `solved prime with independent deep-hardness signature`\n\
+        - **Note**: Discovery engine and hardness engine may differ. CBAP can find a witness that still scores as CBX-hard on the descent proxy.\n\
         - **Survival Verification**: `TRUE`\n\
         - **Decomposition Verification**: `{decomp_status}`\n\
         - **Survival Engine**: `{survival_engine}`\n\
@@ -591,6 +617,8 @@ pub fn persist_remnant_to_disk(res: &SolveResult) {
         "verified": decomp_verified,
         "survival_verified": true,
         "decomposition_verified": decomp_verified,
+        "hardness_proxy": true,
+        "hardness_is_not_a_certificate": true,
         "certificate": cert,
     });
 
@@ -831,7 +859,7 @@ pub fn run_configured_hunt_window(config: &HuntConfig) -> HuntSummary {
     let mut gods_letter_count = 0;
     let mut rejected_admissions = 0;
     let mut unsolved_count = 0;
-    let mut class_proofs = 0;
+    let mut class_covered_instances = 0;
     let mut instance_proofs = 0;
     let mut counterexamples = 0;
     let mut incomplete_residuals = 0;
@@ -850,7 +878,8 @@ pub fn run_configured_hunt_window(config: &HuntConfig) -> HuntSummary {
         }
         let res = solve_es_with_config(p, config.letter_threshold, &config.engine_mode);
         match ticket_kind_of(&res) {
-            TicketKind::ClassProof => class_proofs += 1,
+            TicketKind::ClassTheorem => {}
+            TicketKind::ClassCoveredInstance => class_covered_instances += 1,
             TicketKind::InstanceProof => instance_proofs += 1,
             TicketKind::CertifiedCounterexample => counterexamples += 1,
             TicketKind::IncompleteResidual => incomplete_residuals += 1,
@@ -979,12 +1008,13 @@ pub fn run_configured_hunt_window(config: &HuntConfig) -> HuntSummary {
         gods_letter_count,
         rejected_admissions,
         unsolved_count,
-        class_proofs,
+        class_proofs: ELEMENTARY_THEOREM_COUNT,
+        class_covered_instances,
         instance_proofs,
         counterexamples,
         incomplete_residuals,
         game_status: DualLedger::from_counts(
-            class_proofs,
+            class_covered_instances,
             instance_proofs,
             counterexamples,
             incomplete_residuals,
@@ -1139,11 +1169,11 @@ mod tests {
         assert!(json_file.exists());
         let md_content = fs::read_to_string(&md_file).unwrap();
         assert!(md_content.contains("# Erdős–Straus Remnant Certificate: #REM-375017"));
-        assert!(md_content.contains("Dual Descent Survival Depth (δ)"));
+        assert!(md_content.contains("hardness proxy, not a proof of nonexistence"));
         assert!(md_content.contains("`57`"));
-        assert!(md_content.contains("Discovery Depth"));
+        assert!(md_content.contains("Discovery depth"));
         assert!(md_content.contains("`0`"));
-        assert!(md_content.contains("CBX Dual Descent Deep Survivor"));
+        assert!(md_content.contains("Discovery engine and hardness engine may differ"));
 
         let json_content = fs::read_to_string(&json_file).unwrap();
         let val: serde_json::Value = serde_json::from_str(&json_content).unwrap();
@@ -1155,6 +1185,8 @@ mod tests {
         assert_eq!(val["grade"], "remnant");
         assert_eq!(val["classification"], "dual_descent_deep_survivor");
         assert_eq!(val["survival_verified"], true);
+        assert_eq!(val["hardness_proxy"], true);
+        assert_eq!(val["hardness_is_not_a_certificate"], true);
     }
 
     #[test]
