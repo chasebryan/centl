@@ -604,6 +604,13 @@ fn handle_es_command(
                         symbolic_expr: None,
                         execution_micros: res.execution_micros,
                     };
+                    if res.admission_status.is_admitted() {
+                        crate::erdos_straus::hunt::persist_letter_to_disk(&res);
+                    } else if res.classification == crate::erdos_straus::solver::CandidateClassification::CbisEscape
+                        || res.classification == crate::erdos_straus::solver::CandidateClassification::CbxSurvivor
+                    {
+                        crate::erdos_straus::hunt::persist_escape_to_disk(&res);
+                    }
                     record_solve_history(raw_cmd, &execution, &res, state);
                     return (Some(execution), None, None, None);
                 }
