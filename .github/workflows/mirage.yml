@@ -61,7 +61,7 @@ jobs:
             m4 pkg-config libgmp-dev libmpfr-dev libflint-dev
 
       - name: Set up pinned OCaml
-        uses: ocaml/setup-ocaml@15d660006c1d3110d77c34b7faa3bddefe8b82f0 # v3.7.0
+        uses: ocaml/setup-ocaml@e89b2ded52a6e13f50162220cf5fe47290162032 # v3.8.0
         with:
           ocaml-compiler: ocaml-base-compiler.4.14.1
           opam-pin: false
