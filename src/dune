@@ -71,6 +71,8 @@
   Centl_polynomial_extended_gcd_protocol
   Centl_polynomial_square_free
   Centl_polynomial_square_free_protocol
+  Centl_polynomial_factorization
+  Centl_polynomial_factorization_protocol
   Centl_real_algebraic
   Centl_real_algebraic_protocol
   Centl_math_gateway
