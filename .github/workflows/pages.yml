@@ -30,7 +30,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -57,7 +57,7 @@ jobs:
           set -eu
           tor_data="$RUNNER_TEMP/fcf-caravan-tor"
           mkdir -m 700 "$tor_data"
-          tor --RunAsDaemon 1 --SocksPort 19050 --DataDirectory "$tor_data" --ClientOnly 1 --Log "notice file $RUNNER_TEMP/fcf-caravan-tor.log"
+          tor -f /dev/null --RunAsDaemon 1 --SocksPort 19050 --DataDirectory "$tor_data" --ClientOnly 1 --Log "notice file $RUNNER_TEMP/fcf-caravan-tor.log"
           ready=0
           for attempt in $(seq 1 60); do
             if curl --silent --fail --max-time 2 --socks5-hostname 127.0.0.1:19050 --proxy "" --proto "=http" http://check.torproject.org/ >/dev/null 2>&1; then

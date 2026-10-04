@@ -1,0 +1,37 @@
+name: Pages source validation
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/*pages*.yml'
+      - 'scripts/caravan-lead-census'
+      - 'scripts/caravan-render-bazaar'
+      - 'tests/test_caravan_lead_census.py'
+      - 'tests/test_caravan_render_bazaar_strict.py'
+      - 'tests/test_pages_publisher.py'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/*pages*.yml'
+      - 'tests/test_pages_publisher.py'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install existing pinned CARAVAN test dependencies
+        run: |
+          python3 -m venv "$RUNNER_TEMP/pages-venv"
+          "$RUNNER_TEMP/pages-venv/bin/python" -m pip install --only-binary=:all: -r caravan/requirements-phase1.txt
+      - name: Validate publisher and census rendering
+        run: |
+          "$RUNNER_TEMP/pages-venv/bin/python" -m unittest discover -s tests -p test_pages_publisher.py
+          "$RUNNER_TEMP/pages-venv/bin/python" -m unittest discover -s tests -p test_caravan_lead_census.py
+          "$RUNNER_TEMP/pages-venv/bin/python" -m unittest discover -s tests -p test_caravan_render_bazaar_strict.py
