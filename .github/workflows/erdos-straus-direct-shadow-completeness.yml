@@ -43,7 +43,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends m4 pkg-config libgmp-dev libmpfr-dev libflint-dev
 
       - name: Set up pinned OCaml
-        uses: ocaml/setup-ocaml@15d660006c1d3110d77c34b7faa3bddefe8b82f0 # v3.7.0
+        uses: ocaml/setup-ocaml@93303b622b2522e4411e295f9e77411a24912ac7 # v3.9.0
         with:
           ocaml-compiler: ocaml-base-compiler.4.14.1
           opam-pin: false
